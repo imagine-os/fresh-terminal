@@ -1,0 +1,562 @@
+{
+  "$comment": "Development plan as data. Tasks are bound by dependencies, not dates. The in-app PM viewer (dev mode) reads this file. Append-only in spirit: change status, add tasks, do not delete history.",
+  "version": 1,
+  "updated": "2026-09-28",
+  "models": {
+    "Fable 5.1": "judgment, architecture, shell and shared code",
+    "Opus 5": "building modules and pages",
+    "Sonnet 5": "mechanical passes: screenshots, Spanish fill, QA matrices"
+  },
+  "tasks": [
+    {
+      "id": "repo-shape",
+      "title": "Repo shape: one folder + one instruction at root",
+      "status": "done",
+      "depends_on": [],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "verify-docs",
+      "title": "Verify SpacetimeDB and OpenRouter facts",
+      "status": "done",
+      "depends_on": [],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "name-constant",
+      "title": "Product name as one constant in shared/",
+      "status": "done",
+      "depends_on": [
+        "repo-shape"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "dialect-v0",
+      "title": "House dialect v0: schema + text parser + tests",
+      "status": "done",
+      "depends_on": [
+        "repo-shape"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "tagger-local",
+      "title": "Local chip tagger (regex/heuristics) + tests",
+      "status": "done",
+      "depends_on": [
+        "repo-shape"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "module-stdb",
+      "title": "SpacetimeDB TypeScript module (tables + reducers), type-checked",
+      "status": "done",
+      "depends_on": [
+        "verify-docs"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "router",
+      "title": "Router: Hono, route table, OpenRouter SSE, Node + Worker entries",
+      "status": "done",
+      "depends_on": [
+        "verify-docs",
+        "tagger-local"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "shell",
+      "title": "Five-region Shell driven by dialect spec, container queries, fluid type",
+      "status": "done",
+      "depends_on": [
+        "dialect-v0"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "store-local",
+      "title": "Local fallback store + SpacetimeDB store seam",
+      "status": "done",
+      "depends_on": [
+        "module-stdb"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "composer",
+      "title": "Typewriter composer: grows upward, Enter/Shift+Enter, speech-to-text",
+      "status": "done",
+      "depends_on": [
+        "shell"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "chips-ui",
+      "title": "Live chips inline in composer and transcript",
+      "status": "done",
+      "depends_on": [
+        "composer",
+        "tagger-local"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "suggestions",
+      "title": "Suggestion strip filtered by what exists",
+      "status": "done",
+      "depends_on": [
+        "composer"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "transcript-stream",
+      "title": "Transcript with token streaming from the router",
+      "status": "done",
+      "depends_on": [
+        "router",
+        "store-local"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "boxes",
+      "title": "Boxes per visitor: first visit creates one, sidebar lists, /box/:id",
+      "status": "done",
+      "depends_on": [
+        "store-local",
+        "shell"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "i18n",
+      "title": "EN/ES dictionary for all UI strings",
+      "status": "done",
+      "depends_on": [
+        "shell"
+      ],
+      "model": "Sonnet 5",
+      "pass": 1
+    },
+    {
+      "id": "actions-registry",
+      "title": "Actions registry at window.__actions",
+      "status": "done",
+      "depends_on": [
+        "shell"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "dev-panel",
+      "title": "Dev mode panel: dialect editor, size readout, PM viewer, not-wired list",
+      "status": "done",
+      "depends_on": [
+        "shell",
+        "dialect-v0"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "excalidraw-homepage",
+      "title": "Landing IS the product: land in a working box, no sign-up",
+      "status": "done",
+      "depends_on": [
+        "boxes",
+        "composer"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "shortcuts",
+      "title": "Icon tooltips with shortcuts; N [ D T L work",
+      "status": "done",
+      "depends_on": [
+        "actions-registry"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "doodles",
+      "title": "Empty-box doodle hints (inline SVG), fade on first line",
+      "status": "done",
+      "depends_on": [
+        "excalidraw-homepage"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "pages-hosting",
+      "title": "GitHub Pages via Actions, SPA fallback, VITE_BASE",
+      "status": "done",
+      "depends_on": [
+        "repo-shape"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "worker-router",
+      "title": "Router runs as Cloudflare Worker (wrangler.toml)",
+      "status": "done",
+      "depends_on": [
+        "router"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "auth-seam",
+      "title": "AuthProvider seam: AnonymousAuth now, ClerkAuth stub",
+      "status": "done",
+      "depends_on": [
+        "store-local"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "ledger",
+      "title": "Ledger: integer micro-dollars, hash chain, verify, tests",
+      "status": "done",
+      "depends_on": [
+        "repo-shape"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "billing-dialect",
+      "title": "Billing dialect: parser + schema + tests",
+      "status": "done",
+      "depends_on": [
+        "ledger",
+        "dialect-v0"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "pass-through",
+      "title": "Router emits one charge entry per model call (usage.include)",
+      "status": "done",
+      "depends_on": [
+        "router",
+        "ledger"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "balance-ui",
+      "title": "Balance readout in top bar; ledger + verify in dev panel",
+      "status": "done",
+      "depends_on": [
+        "ledger",
+        "dev-panel"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "themes-3",
+      "title": "Theme records + dialect; Void, Blank Page, Glass Window",
+      "status": "done",
+      "depends_on": [
+        "shell",
+        "dialect-v0"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "responsive-check",
+      "title": "pnpm check:responsive at 7 widths with screenshots",
+      "status": "done",
+      "depends_on": [
+        "excalidraw-homepage"
+      ],
+      "model": "Sonnet 5",
+      "pass": 1
+    },
+    {
+      "id": "starters",
+      "title": "Starter prompts as records (starters.json + shared/starters), suggestion strip reads them",
+      "status": "done",
+      "depends_on": [
+        "suggestions"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "reveal",
+      "title": "Reveal wrapper: CRT beam horizontal/radial/diagonal/typewriter, reduced-motion fade",
+      "status": "done",
+      "depends_on": [
+        "transcript-stream"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "demo-compositions",
+      "title": "Draw: demo dashboard + login (not wired to model), plan kanban (wired)",
+      "status": "done",
+      "depends_on": [
+        "starters",
+        "reveal",
+        "dev-panel"
+      ],
+      "model": "Opus 5",
+      "pass": 1
+    },
+    {
+      "id": "pages-ported",
+      "title": "Audit and themes pages ship under /pages/ with full-screen links to /box/new?theme=",
+      "status": "done",
+      "depends_on": [
+        "pages-hosting",
+        "themes-3"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "master-canvas",
+      "title": "Master canvas /canvas: pan/zoom, card records, thickness edge, seed cards, canvas:add",
+      "status": "done",
+      "depends_on": [
+        "shell",
+        "store-local"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "docs-pass-1",
+      "title": "Docs: plan, prompts, decisions, changelog, surfaces, pages",
+      "status": "done",
+      "depends_on": [
+        "repo-shape"
+      ],
+      "model": "Fable 5.1",
+      "pass": 1
+    },
+    {
+      "id": "stdb-publish",
+      "title": "Publish module, generate bindings, wire SpacetimeStore",
+      "status": "todo",
+      "depends_on": [
+        "module-stdb",
+        "store-local"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "clerk-wiring",
+      "title": "Wire Clerk (OIDC) into AuthProvider and SpacetimeDB identity",
+      "status": "todo",
+      "depends_on": [
+        "auth-seam",
+        "stdb-publish"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "stripe-settlement",
+      "title": "Stripe settlement for the ledger balance",
+      "status": "todo",
+      "depends_on": [
+        "ledger",
+        "clerk-wiring"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "shared-chain-publish",
+      "title": "Publish the shared chain from the module; server-side hash recompute",
+      "status": "todo",
+      "depends_on": [
+        "ledger",
+        "stdb-publish"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "jev-tagger",
+      "title": "Model-based chip tagger through the JEV tier",
+      "status": "todo",
+      "depends_on": [
+        "router",
+        "chips-ui"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "camera-reflection",
+      "title": "Theme: camera reflection (opt-in, never uploaded)",
+      "status": "todo",
+      "depends_on": [
+        "themes-3"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "tilt-window",
+      "title": "Theme: tilt window on phone (device orientation)",
+      "status": "todo",
+      "depends_on": [
+        "themes-3"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "themes-13",
+      "title": "13 more themes from the themes page",
+      "status": "todo",
+      "depends_on": [
+        "themes-3"
+      ],
+      "model": "Sonnet 5",
+      "pass": 2
+    },
+    {
+      "id": "motion-schema",
+      "title": "Motion: illustration record schema (SVG shapes + params + state machine in the dialect)",
+      "status": "todo",
+      "depends_on": [
+        "dialect-v0",
+        "themes-3"
+      ],
+      "model": "Fable 5.1",
+      "pass": 2
+    },
+    {
+      "id": "motion-runtime",
+      "title": "Motion: tiny runtime interpolating params and driving SVG; first uses doodles + Glass Window specular",
+      "status": "todo",
+      "depends_on": [
+        "motion-schema",
+        "doodles"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "canvas-document",
+      "title": "Canvas renders a live document model",
+      "status": "todo",
+      "depends_on": [
+        "transcript-stream",
+        "stdb-publish"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "presence-live",
+      "title": "Presence of other people in a box",
+      "status": "todo",
+      "depends_on": [
+        "stdb-publish"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "spanish-pass",
+      "title": "Spanish fill pass over new strings",
+      "status": "todo",
+      "depends_on": [
+        "i18n"
+      ],
+      "model": "Sonnet 5",
+      "pass": 2
+    },
+    {
+      "id": "qa-matrix",
+      "title": "QA matrix: inputs x sizes x themes",
+      "status": "todo",
+      "depends_on": [
+        "responsive-check",
+        "themes-3"
+      ],
+      "model": "Sonnet 5",
+      "pass": 2
+    },
+    {
+      "id": "voice-controller",
+      "title": "Voice controller over the actions registry",
+      "status": "todo",
+      "depends_on": [
+        "actions-registry"
+      ],
+      "model": "Opus 5",
+      "pass": 3
+    },
+    {
+      "id": "remote-dpad",
+      "title": "TV remote / gamepad d-pad navigation",
+      "status": "todo",
+      "depends_on": [
+        "shell"
+      ],
+      "model": "Opus 5",
+      "pass": 3
+    },
+    {
+      "id": "draw-model-compositions",
+      "title": "Model-generated compositions from Draw (router returns a component spec)",
+      "status": "todo",
+      "depends_on": [
+        "demo-compositions",
+        "router"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "canvas-layout-tools",
+      "title": "Canvas layout tools: grouping, long-paper scroll cards, image upload",
+      "status": "todo",
+      "depends_on": [
+        "master-canvas"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    }
+  ]
+}

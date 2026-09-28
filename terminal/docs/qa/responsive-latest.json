@@ -1,0 +1,173 @@
+{
+  "stamp": "2026-09-28T23:44:27.433Z",
+  "results": [
+    {
+      "page": "landing",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-360.png"
+    },
+    {
+      "page": "landing",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-390.png"
+    },
+    {
+      "page": "landing",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-768.png"
+    },
+    {
+      "page": "landing",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-1280.png"
+    },
+    {
+      "page": "landing",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-1920.png"
+    },
+    {
+      "page": "landing",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-2560.png"
+    },
+    {
+      "page": "landing",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "landing-3840.png"
+    },
+    {
+      "page": "box",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-360.png"
+    },
+    {
+      "page": "box",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-390.png"
+    },
+    {
+      "page": "box",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-768.png"
+    },
+    {
+      "page": "box",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-1280.png"
+    },
+    {
+      "page": "box",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-1920.png"
+    },
+    {
+      "page": "box",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-2560.png"
+    },
+    {
+      "page": "box",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "box-3840.png"
+    },
+    {
+      "page": "canvas",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-360.png"
+    },
+    {
+      "page": "canvas",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-390.png"
+    },
+    {
+      "page": "canvas",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-768.png"
+    },
+    {
+      "page": "canvas",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-1280.png"
+    },
+    {
+      "page": "canvas",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-1920.png"
+    },
+    {
+      "page": "canvas",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-2560.png"
+    },
+    {
+      "page": "canvas",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "canvas-3840.png"
+    }
+  ]
+}

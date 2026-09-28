@@ -1,0 +1,399 @@
+<title>Between Gigs → Playset OS</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~72ch), fluid type per size class, side notes fold into flow on phones. Forest-ink palette after the repo's own "mint-forest" token id. */
+:root{
+  --bg:#f4f6f3;
+  --surface:#fbfcfa;
+  --fg:#17201c;
+  --muted:#5a6660;
+  --line:#d3dad5;
+  --accent:#23694b;
+  --accent-ink:#ffffff;
+  --keep:#23694b;   --keep-bg:#e3f1e8;
+  --fragile:#9a6a10;--fragile-bg:#f8ecd2;
+  --drop:#a13d2f;   --drop-bg:#f7e2dd;
+  --code-bg:#e9ede9;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --step--1:clamp(0.9rem,0.85rem + 0.25vw,1.15rem);
+  --step-0:clamp(1.05rem,0.95rem + 0.45vw,1.45rem);
+  --step-1:clamp(1.25rem,1.1rem + 0.7vw,1.9rem);
+  --step-2:clamp(1.6rem,1.3rem + 1.2vw,2.6rem);
+  --step-3:clamp(2.2rem,1.6rem + 2.4vw,4.4rem);
+  --gutter:clamp(16px,4vw,48px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111614;--surface:#181e1b;--fg:#e6ebe7;--muted:#9aa8a0;--line:#2b3531;
+    --accent:#7fcba2;--accent-ink:#0f1a15;
+    --keep:#7fcba2;--keep-bg:#1a2f25;--fragile:#e0b25a;--fragile-bg:#31281a;--drop:#ee8a7a;--drop-bg:#36201d;
+    --code-bg:#202824;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111614;--surface:#181e1b;--fg:#e6ebe7;--muted:#9aa8a0;--line:#2b3531;
+  --accent:#7fcba2;--accent-ink:#0f1a15;
+  --keep:#7fcba2;--keep-bg:#1a2f25;--fragile:#e0b25a;--fragile-bg:#31281a;--drop:#ee8a7a;--drop-bg:#36201d;
+  --code-bg:#202824;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:var(--step-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:72ch;margin:0 auto;padding-inline:var(--gutter);padding-block:clamp(24px,4vw,72px)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:var(--step-3);font-weight:700;letter-spacing:-0.015em}
+h2{font-size:var(--step-2);font-weight:700;margin-block:clamp(48px,7vw,96px) 0.6em;padding-top:0.6em;border-top:2px solid var(--fg)}
+h3{font-size:var(--step-1);font-weight:600;margin-block:1.6em 0.4em}
+p,ul,ol,table{margin-block:0 1em}
+ul,ol{padding-inline-start:1.3em}
+li{margin-block:0.35em}
+li::marker{color:var(--accent)}
+a{color:var(--accent);text-underline-offset:0.15em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:3px}
+code{font-family:var(--mono);font-size:0.86em;background:var(--code-bg);padding:0.08em 0.35em;border-radius:4px;overflow-wrap:anywhere}
+strong{font-weight:600}
+.eyebrow{font-family:var(--mono);font-size:var(--step--1);text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-block:0 1em}
+.lede{font-size:var(--step-1);line-height:1.35;color:var(--fg);margin-block:0.8em 0}
+.meta{display:flex;flex-wrap:wrap;gap:0.4em 1.5em;font-family:var(--mono);font-size:var(--step--1);color:var(--muted);margin-block:1.4em 0;padding-top:1em;border-top:1px solid var(--line)}
+.toc{display:flex;flex-wrap:wrap;gap:0.5em;list-style:none;padding:0;margin-block:1.6em 0}
+.toc a{display:inline-block;padding:0.45em 0.8em;min-height:44px;line-height:1.3;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--fg);font-size:var(--step--1);display:inline-flex;align-items:center}
+.toc a:hover{border-color:var(--accent)}
+.verdict{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--accent);padding:clamp(18px,3vw,36px);margin-block:clamp(40px,6vw,72px) 0}
+.verdict h2{border:0;margin:0 0 0.6em;padding:0;font-size:var(--step-1)}
+.verdict ul{margin:0}
+.verdict li{margin-block:0.55em}
+.stat{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.table-wrap{overflow-x:auto;margin-block:0.6em 1.4em;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:var(--step--1);line-height:1.45;margin:0}
+th,td{text-align:left;vertical-align:top;padding:0.65em 0.8em;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--display);font-weight:600;background:var(--code-bg);white-space:nowrap}
+td:first-child{font-weight:600;white-space:nowrap}
+@media (max-width:520px){td:first-child{white-space:normal}}
+.finding{border-left:3px solid var(--line);padding-inline-start:1em;margin-block:1em}
+.finding .label{font-family:var(--mono);font-size:var(--step--1);text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);display:block;margin-bottom:0.2em}
+.finding.core{border-left-color:var(--drop)}
+.tri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px);margin-block:1em 0}
+@media (max-width:760px){.tri{grid-template-columns:1fr}}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1em 1.1em;min-width:0}
+.col h3{margin:0 0 0.6em;font-size:var(--step-0);display:flex;align-items:center;gap:0.5em}
+.col h3::before{content:"";width:0.7em;height:0.7em;border-radius:50%;background:var(--dot);flex:none}
+.col ul{padding-inline-start:1.1em;font-size:var(--step--1);margin:0}
+.col li::marker{color:var(--dot)}
+.col.keep{--dot:var(--keep)}.col.fragile{--dot:var(--fragile)}.col.drop{--dot:var(--drop)}
+.tag{display:inline-block;font-family:var(--mono);font-size:0.75em;letter-spacing:0.05em;text-transform:uppercase;padding:0.15em 0.5em;border-radius:4px;vertical-align:middle}
+.tag.keep{background:var(--keep-bg);color:var(--keep)}.tag.fragile{background:var(--fragile-bg);color:var(--fragile)}.tag.drop{background:var(--drop-bg);color:var(--drop)}
+.principle{font-size:var(--step-1);font-family:var(--display);font-weight:500;line-height:1.3;padding:0.6em 0 0.6em 1em;border-left:4px solid var(--accent);margin-block:0.6em 1.2em}
+.dialect{background:var(--code-bg);border-radius:6px;padding:1em 1.2em;font-family:var(--mono);font-size:var(--step--1);line-height:1.6;overflow-wrap:anywhere}
+ol.steps{counter-reset:s;list-style:none;padding:0}
+ol.steps li{counter-increment:s;position:relative;padding-left:2.6em;margin-block:0.6em}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:0.05em;width:1.9em;height:1.9em;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:700;display:grid;place-items:center;font-size:0.85em}
+.decision{border:1px solid var(--line);border-radius:6px;padding:0.9em 1.1em;background:var(--surface)}
+.decision + .decision{margin-top:0.7em}
+.decision .rec{font-family:var(--mono);font-size:var(--step--1);color:var(--accent);display:block;margin-top:0.4em}
+footer{margin-top:clamp(56px,8vw,120px);padding-top:1.2em;border-top:2px solid var(--fg);font-size:var(--step--1);color:var(--muted);line-height:1.6}
+footer p{margin-block:0 0.6em}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<main class="page">
+<header>
+  <p class="eyebrow">Audit and rebuild recommendation</p>
+  <h1>Between Gigs → Playset OS</h1>
+  <p class="lede">between-gigs is a single-tenant hub with a portfolio catalogue bolted on, not a multi-tenant template. The rebuild premise is right. Rebuild clean, one step at a time, and import from between-gigs rather than evolving it.</p>
+  <div class="meta">
+    <span>For Justin Massion</span>
+    <span>By Fable 5.1</span>
+    <span>Published 2026-09-28</span>
+    <span>Repo imagine-os/between-gigs @ a4b5a75</span>
+  </div>
+  <ul class="toc">
+    <li><a href="#verdict">Verdict</a></li>
+    <li><a href="#today">What it is today</a></li>
+    <li><a href="#triage">Keep / Fragile / Drop</a></li>
+    <li><a href="#companyos">Company OS</a></li>
+    <li><a href="#rec">Recommendation</a></li>
+    <li><a href="#shell">The shell</a></li>
+    <li><a href="#dialect">House dialect</a></li>
+    <li><a href="#order">Order of operations</a></li>
+    <li><a href="#open">Open decisions</a></li>
+  </ul>
+</header>
+
+<section class="verdict" id="verdict">
+  <h2>Verdict in 60 seconds</h2>
+  <ul>
+    <li><strong>It is one tenant, not a template.</strong> <code>lib/workspace-types.ts:4</code> sets <code>tenantId='between-gigs'</code> as a constant; the owner is a hard-coded email in <code>lib/companies/types.ts:8</code>; 7 tables have no <code>tenant_id</code>. The multi-tenant model exists only as types in <code>lib/platform/contracts.ts</code>, which nothing imports at runtime.</li>
+    <li><strong>The repo is green, and already an archive.</strong> <span class="stat">175/175</span> tests pass in <span class="stat">12.9 s</span>, <code>tsc</code> is clean, build takes <span class="stat">60 s</span>. But <code>ACTIVE_WORK.md</code> declared GitHub retired on 2026-09-27; the live source is the Sites repo, and this snapshot lags it (release 3.65 synced, 3.66–3.69 already reserved).</li>
+    <li><strong>Token governance is good; layout is fragile.</strong> One JSON token source with drift and contrast checks that fail the build. Against that: <span class="stat">30+</span> ad-hoc px breakpoints, <span class="stat">4,059</span> fixed px font sizes, <span class="stat">1,027</span> <code>!important</code>, a 7-file CSS patch stack, and nothing that targets 1920, 2560 or 3840.</li>
+    <li><strong>Missing against the org standard:</strong> no i18n at all, no per-page actions registry, no WebMCP, no responsive matrix, no <code>docs/README.md</code>, prompts not stored verbatim. Tests cover data rules, not UI.</li>
+    <li><strong>Worth carrying over as designs:</strong> the 12-capability actions contract in <code>lib/tool-system</code> (MCP + REST + CLI from one catalog), the module registry shape, the token pipeline, the relational <code>wm_*</code> schema, optimistic versions with append-only events, the auth pattern, and the fast test harness.</li>
+    <li><strong>Recommendation:</strong> rebuild clean on the Company OS spine. Fork the <code>Playset-LLC/company-os</code> integration branch (Postgres 16 + Drizzle + Fastify 5, query and policy engine), add a Vite + React 19 + TypeScript strict shell, SpacetimeDB as the live surface in front of Postgres (Electric SQL as fallback), Yjs for text, shadcn primitives under a shell we own, the product as source of truth, git as a nightly export. Convex is dropped.</li>
+    <li><strong>First steps:</strong> foundation on the company-os fork → shell geometry engine → document model, canvas and prompt box → component library and actions registry → hub bundle → import between-gigs, then Playset Company OS.</li>
+    <li><strong>Five decisions are open</strong> (bottom of page), including which live layer sits in front of Postgres.</li>
+  </ul>
+</section>
+
+<h2 id="today">What between-gigs is today</h2>
+<p>Everything here was read from the checkout at <code>/workspace/between-gigs</code>, HEAD <code>a4b5a75</code> ("Retire GitHub workflow by user request; move coordination to Sites", 2026-09-27), or produced by commands run in it.</p>
+
+<h3>Stack</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Layer</th><th>What is in the repo</th></tr></thead>
+<tbody>
+<tr><td>Framework</td><td>Next.js 16.3.4 App Router (<code>proxy.ts</code> replaces middleware), React 19.2.6, TypeScript 5.9.3 strict</td></tr>
+<tr><td>Build / runtime</td><td>vinext 1.0.0-beta.5 (Cloudflare's Next-on-Vite) + Vite 8.0.13 + <code>@cloudflare/vite-plugin</code> 1.37.1 + wrangler 4.92.0. <code>next.config.ts</code> is empty; <code>scripts/run-framework.mjs</code> picks vinext or Vite by "execution profile"</td></tr>
+<tr><td>Hosting</td><td>OpenAI Sites (ChatGPT) on Cloudflare Workers with D1 (<code>DB</code>) and R2 (<code>BUCKET</code>). Production <code>between-gigs.com</code>. No Vercel, no GitHub Pages</td></tr>
+<tr><td>Styling</td><td>Tailwind 4.2.1, vendored shadcn 4.17.0 (61 files in <code>components/ui</code>), radix-ui 1.6.7, <code>@base-ui/react</code> 1.7.0, lucide, cva, sonner, cmdk, vaul, next-themes</td></tr>
+<tr><td>Data</td><td>drizzle-orm 0.45.2 with 12 migrations, but used only to generate migrations: <code>getDb()</code> has 0 callers. Runtime access is 182 raw <code>prepare()</code> SQL statements against D1 via <code>lib/leads.ts leadsDb()</code></td></tr>
+<tr><td>Auth</td><td>Supabase (supabase-js 2.116.0, ssr 0.12.7). One table <code>hub_memberships</code>; its <code>role</code> CHECK allows only <code>'super_admin'</code></td></tr>
+<tr><td>Realtime</td><td>Liveblocks 3.24.1 + yjs 13.6, LiveKit client 2.22 / server 2.19. Used by 9 files (calls, shared board, remote pointer, screens). Rooms hard-coded to <code>between-gigs:hub:call:*</code>; reports unconfigured until env keys are set</td></tr>
+<tr><td>Heavy client libs</td><td>three 0.180, excalidraw 0.18 (pulls in mermaid), cytoscape 3.34, recharts 3.8, react-hook-form + zod, embla, react-day-picker, react-resizable-panels, html-to-image</td></tr>
+<tr><td>Email / forms</td><td>Resend, Google Sheets Apps Script connector, Supabase edge function <code>send-welcome</code></td></tr>
+<tr><td>Tooling</td><td>pnpm 11.25.0, Node ≥ 22.13, Python 3 for release scripts, <code>node:test</code>. MCP endpoints for Supabase and Resend in <code>.mcp.json</code></td></tr>
+</tbody></table></div>
+<p>Starter leftovers: <code>package.json</code> is still named <code>site-creator-vinext-starter</code> v0.1.0, <code>README.md</code> is the unmodified vinext-starter README, and <code>app/chatgpt-auth.ts</code> has 0 importers.</p>
+
+<h3>Size</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Measure</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Tracked files</td><td><span class="stat">2,183</span>; working tree 239 MB, shallow <code>.git</code> 213 MB</td></tr>
+<tr><td><code>public/</code></td><td><span class="stat">215 MB</span> (landing-pages 109, brand 20, prototypes 18, vendor 14, journal 12); 347 jpg, 237 woff2, 110 png, 41 webp, 5 mp4</td></tr>
+<tr><td>Source</td><td>503 .tsx = 2.35 MB, 291 .ts = 1.24 MB, 148 .css = 1.38 MB. Lines: tsx 16,412 / ts 10,207 / css 3,023. Bytes are the honest measure because the code is written in an ultra-dense one-line style (<code>app/test/layout.tsx</code> is one 400-character line)</td></tr>
+<tr><td>Largest files</td><td><code>lib/releases.ts</code> 2,045 lines (186 release entries); <code>lib/information-objects/catalogue.ts</code> 1,245</td></tr>
+<tr><td>Routes</td><td><span class="stat">198</span> <code>page.tsx</code> (69 under <code>app/builder/drafts/*</code>, 27 redirect-only shims), <span class="stat">66</span> <code>route.ts</code> handlers, 3 layouts, 253 <code>'use client'</code> files</td></tr>
+<tr><td>Registries</td><td><code>config/workspace-modules.ts</code> 101 modules in 10 sections (3 Working, 43 Preview explicit); <code>lib/version-catalog.ts</code> 152 records (67 Archived draft, 39 Experimental, 36 Active baseline); 24 project rules; 43 directory records</td></tr>
+<tr><td>Velocity</td><td>186 releases and 154 memory entries, all dated 2026-09-24 → 2026-09-27 (v2.x → 3.65 in four days). <code>ACTIVE_WORK.md</code> is 217 KB</td></tr>
+<tr><td>Build output</td><td><code>dist/</code> 259 MB; biggest client chunks 1.82 MB, 1.44 MB (mermaid via excalidraw), 706 KB, three 696 KB</td></tr>
+</tbody></table></div>
+
+<h3>Architecture</h3>
+<p><strong>Shell.</strong> <code>app/layout.tsx</code> hard-codes <code>lang="en"</code> and <code>data-theme="dark"</code>, restores theme from <code>localStorage</code>, links the generated <code>/design-system/system.css</code>. Public pages wrap in <code>components/published-design.tsx</code>, which injects a per-surface design-lock stylesheet where every token is <code>!important</code>. <code>components/workspace-shell/shell.tsx</code> is one client component that imports 14 CSS files and stacks roughly 12 nested providers (CompanyProvider, HubPointerProvider, SketchPadProvider, PromptDock, MaterialPalette, WidgetCabinet, InlineScreen, HubSidebar, SantaTabletop, FloatingTextToolbar, SlotPromptTray). Every protected page pays for it.</p>
+<p><strong>Routing.</strong> Public: <code>/</code>, <code>/professionals</code> (plus <code>/professionals2</code>, <code>/professionals3</code>), <code>/storyboard</code>, <code>/journal/*</code>, legal pages, <code>/login</code>. Protected: about 130 tools under <code>/builder/*</code> and <code>/test/*</code>. Access is enforced twice (<code>proxy.ts</code> and the layouts). Redirect rules are scattered across 27 page files instead of one map.</p>
+
+<div class="finding core">
+  <span class="label">Core finding: tenancy</span>
+  <p>The app is a single-tenant hub with a portfolio catalogue bolted on.</p>
+  <ul>
+    <li><code>lib/workspace-types.ts:4</code>: <code>export const tenantId='between-gigs';</code>. Every <code>workspace-store.ts</code> query binds it. <code>lib/journal/store.ts:4</code> repeats the constant.</li>
+    <li><code>lib/companies/types.ts:8</code>: <code>isPortfolioOwner()</code> requires <code>role==='super_admin'</code>, <code>personId==='person-justin-massion'</code> and <code>email==='jmassion@gmail.com'</code>. Line 9 hard-codes three companies (<code>between-gigs</code>, <code>bienestar</code>, <code>lawfirm</code>) to bespoke routes.</li>
+    <li>Company records live in the same <code>workspace_records</code> table under a second scope <code>'playset-portfolio'</code>, merged at read time with 30+ hard-coded seeds (WordPress, fal, Blender, WWE, Karol G, The White House). Seeds are research entries, not tenants.</li>
+    <li>Company-specific code paths: <code>components/bienestar/*</code>, <code>lib/bienestar/*</code>, <code>components/lawfirm/*</code>, <code>lib/lawfirm/*</code>, and <code>lib/hardware/hub-cards.ts</code> branching on <code>company.id</code>.</li>
+    <li><code>db/schema.ts</code>: <code>workspace_records</code>, <code>workspace_events</code> and the 26 <code>wm_*</code> tables carry <code>tenant_id</code>; <code>leads</code>, <code>form_responses</code>, <code>page_views</code>, <code>sketches</code>, <code>privacy_requests</code>, <code>welcome_email_outbox</code>, <code>sheets_connection</code> do not.</li>
+    <li>55 occurrences of <code>'between-gigs'</code> as an id outside drafts; 334 occurrences of "Between Gigs" across 155 files. <code>lib/tool-system/access.ts:10</code> grants tool permissions only when <code>workspaceId==='between-gigs'</code>.</li>
+    <li>The only template/tenant split is <code>scope:'Template'|'Between Gigs'</code> on module records, and the docs call it "navigation metadata, never an authorization policy".</li>
+  </ul>
+</div>
+
+<p><strong>Auth.</strong> Supabase email/password plus optional Google OAuth. Authorization is an active row in <code>hub_memberships</code> with the single role <code>super_admin</code>. Any super_admin sees the BG hub; only the hard-coded owner sees other companies. API and MCP accept a Supabase Bearer token with origin checks. The pattern is sound; the role model is one role.</p>
+<p><strong>Data.</strong> Two persistence models coexist: an EAV-style <code>workspace_records(id, tenant_id, kind, payload JSON, version)</code> plus append-only <code>workspace_events</code> with optimistic version checks, and a fully relational <code>wm_*</code> schema (projects, people, items, assignments, relations, messages, wiki revisions, time entries, shares, file versions, connections, external ids, delivery attempts, capacity, audit) added in migration 0011 with the comment "Additive; legacy workspace_records stay intact". Half-migrated by design.</p>
+<p><strong>State.</strong> React context per concern, heavy <code>localStorage</code> and <code>sessionStorage</code>, no global store library.</p>
+
+<h3>Design system and responsiveness</h3>
+<p><strong>Good.</strong> <code>config/design-system.json</code> is the single token source (id <code>mint-forest</code>). <code>scripts/sync-design-system.mjs</code> generates the CSS; <code>check-project-rules.mjs</code> fails the build on drift; <code>check-brand-contrast.mjs</code> enforces contrast. Design locks freeze 5 public surfaces and 55 assets with hash guards. Accessibility hygiene is real: 77 <code>prefers-reduced-motion</code> blocks, 11 <code>forced-colors</code>, 202 <code>focus-visible</code> rules, 191 declarations of 44px minimum size, only 10 hover-only reveal patterns.</p>
+<p><strong>Fragile.</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Finding</th><th>Measured</th></tr></thead>
+<tbody>
+<tr><td>Breakpoints</td><td>No shared tokens. <span class="stat">30+</span> distinct widths across 148 CSS files: 760px (71 blocks), 650 (40), 1100 (32), 1000 (20), 600 (18), then 700, 850, 800, 720, 480, 1050, 520, 740, 380, 1200 and more</td></tr>
+<tr><td>Large screens</td><td>Only <code>min-width:1500px</code> (14), 1600 (4), 1700 (1), 1800 (1). Nothing targets 1920, 2560 or 3840. No 10-foot or TV mode</td></tr>
+<tr><td>Typography</td><td><span class="stat">4,059</span> <code>font-size: Npx</code> declarations vs <span class="stat">209</span> fluid. Public pages capped at 1280px by <code>.wrap</code></td></tr>
+<tr><td>Tailwind responsive utilities</td><td>41 uses, all inside vendored <code>components/ui</code>; zero in app code</td></tr>
+<tr><td><code>!important</code></td><td><span class="stat">1,027</span> in app CSS, plus every design-lock token</td></tr>
+<tr><td>Hub CSS</td><td>Append-only patch layering: <code>hub.css</code> → <code>hub-refinements.css</code> → <code>hub-polish.css</code> → <code>hub-realism.css</code> → <code>hub-layout.css</code> → <code>hub-new-views.css</code> → <code>workbench-polish.css</code>; 195 KB across 15 files, all imported by <code>shell.tsx</code></td></tr>
+<tr><td>Container queries</td><td>21 files use <code>@container</code>. A start, not a system</td></tr>
+</tbody></table></div>
+<p>Resilient token governance, fragile layout. Meeting the 360 → 3840 bar means replacing per-page px media queries with a shared scale, not patching.</p>
+
+<h3>i18n</h3>
+<p>None. <code>lang="en"</code> is hard-coded, no i18n library, no locale routing, no string catalogs, no Spanish content. Spanish exists only as a target language in the Translator tool (MyMemory API / browser Translator API). All UI copy is inline English in TSX.</p>
+
+<h3>Actions, voice and MCP</h3>
+<p><strong>Real and tested.</strong> <code>lib/tool-system/catalog.ts</code> declares 12 capabilities (<code>session.inspect</code>, <code>workspace.list</code>, <code>tasks.list|create|update</code>, <code>feedback.list</code>, <code>finance.list</code>, <code>people.list</code>, <code>notes.list</code>, <code>responses.list</code>, <code>pages.list</code>, <code>releases.list</code>) with typed fields, examples, <code>dryRun</code> previews and idempotent <code>requestId</code>. Exposed through <code>/api/v1/tools</code> (OpenAPI at <code>/api/v1/openapi</code>), <code>/api/v1/actions/[name]</code>, and a JSON-RPC MCP server at <code>/api/mcp</code>. A CLI ships as static files (<code>public/tools/bg.mjs</code>, <code>command.mjs</code> with a safe tokenizer, <code>terminal.mjs</code>).</p>
+<p><strong>Gaps.</strong> No per-page action registry (id, intent phrase, permission); actions are workspace-level. No WebMCP anywhere. No <code>docs/reference/surfaces.md</code>. Voice is a Web Speech API prototype in <code>app/builder/voice/studio.tsx</code> with no grammar mapping speech to the 12 actions.</p>
+
+<h3>Tests and simulators</h3>
+<p>57 test files, <code>node:test</code> + <code>node:assert</code>, TS loaded via <code>ts.transpileModule</code> into <code>data:</code> URLs. <code>node --test tests/*.test.mjs</code>: <span class="stat">175 pass, 0 fail, 12.9 s</span>. Python <code>unittest</code>: 35 pass. Coverage is business rules and data stores (in-memory SQLite), not UI. No browser or e2e tests; visual QA is screenshots in <code>docs/qa/*.jpg</code>. Simulators exist (Component Lab with device-width presets, Screens and windows device model, Device Studio with three.js meshes, <code>/builder/tv</code>) but none is a page-by-page matrix at 360/390/768/1280/1920/2560/3840. Verified locally: install 22 s, <code>check:project</code> OK, <code>tsc --noEmit</code> OK, build OK in 60 s. Green at HEAD.</p>
+
+<h3>Deploy and CI</h3>
+<p>Deploy is agent-operated, not CI-driven: publish through Sites, mirror blobs to GitHub, run <code>release_receipt.py</code>, store the receipt in <code>.github/site-sync.json</code>. Last receipt: release 3.65, Sites version 184, <code>sourceEquality: true</code>, 2,160 source files. 13 GitHub Actions workflows: one real check (<code>project-checks.yml</code>), one sync, and 11 ops-as-workflow files running inline Python against the Supabase management API, one with a hard-coded member email. The pre-commit hook refuses any <code>app|components|lib|config|scripts</code> change that does not bump <code>lib/releases.ts</code> and add a memory entry. That rule explains 186 releases in four days.</p>
+
+<h3>Docs and memory</h3>
+<p><strong>Present:</strong> <code>AGENTS.md</code> generated from 24 project rules; changelog in <code>lib/releases.ts</code> (186 entries) rendered at <code>/builder/versions</code>; <code>docs/development-memory.json</code> (154 entries) at <code>/builder/memory</code>; <code>ACTIVE_WORK.md</code> reservation ledger; 90 files in <code>docs/</code> including <code>platform-foundation.md</code>, <code>refactoring-plan.md</code>, <code>workspace-architecture.md</code> with the multi-tenant intent.</p>
+<p><strong>Missing against the org standard:</strong> no <code>docs/README.md</code> start-here map; no <code>docs/reference/surfaces.md</code>; prompts not stored verbatim (only one-line <code>requestedBy</code> strings); no kanban or PM viewer for the project itself; decisions are JSON rows, not numbered append-only files; page docs are per feature, not per route.</p>
+
+<h2 id="triage">Keep / Fragile / Drop</h2>
+<p>From the audit's health assessment. "Keep" means carry the design over; none of these move as files.</p>
+<div class="tri">
+  <div class="col keep">
+    <h3>Keep</h3>
+    <ul>
+      <li><code>lib/tool-system/{catalog,access,core,mcp,server}.ts</code>: one tested contract for UI, CLI, MCP and API with dry-run and idempotency</li>
+      <li><code>config/workspace-modules.ts</code> registry shape and nav derived from it; <code>config/component-library.ts</code> shape</li>
+      <li><code>config/design-system.json</code> → generated CSS with drift and contrast checks. The design-lock concept, not its <code>!important</code> injection</li>
+      <li><code>db/schema.ts</code> <code>wm_*</code> relational model: tenant_id, revision, audit, shares with token hash, file versions with sha256, connections, delivery attempts with dedupe</li>
+      <li>Optimistic version + append-only events (<code>workspace-store.ts</code>, <code>companies/store.ts</code>)</li>
+      <li>Auth pattern: <code>proxy.ts</code> + <code>getHubUser</code> + membership RLS; Bearer path for agents</li>
+      <li>Form pipeline: <code>saveFormResponse</code>, <code>welcome_email_outbox</code> with lease/retry, <code>welcome-policy.ts</code></li>
+      <li>Governance scripts and the fast <code>node:test</code> approach</li>
+      <li><code>lib/platform/contracts.ts</code> and <code>docs/platform-foundation.md</code> as the design brief</li>
+      <li>Vendored <code>components/ui</code> and <code>lib/screens/model.ts</code> device model</li>
+    </ul>
+  </div>
+  <div class="col fragile">
+    <h3>Fragile or duplicated</h3>
+    <ul>
+      <li>69 archived draft routes (150 files, 1.6 MB) compiled into every build, including four full copies of the Terminal experience and 13 hub snapshots</li>
+      <li>Triplicated recruitment funnel: <code>app/professionals{,2,3}</code>, their APIs, libs and tests, differing only in the <code>source</code> string</li>
+      <li><code>lib/welcome-template.ts</code> + <code>-v2-40</code> + <code>-v2-58</code> + <code>-v2-59</code></li>
+      <li>Hub CSS patch stack (7 files, 195 KB), 1,027 <code>!important</code>, 30+ breakpoints, 4,059 px font sizes</li>
+      <li>Single hard-coded tenant, owner by email, company-name branches in shared helpers; 7 tables without <code>tenant_id</code></li>
+      <li>Two persistence models; drizzle installed but unused at runtime (182 raw SQL strings)</li>
+      <li>Ultra-dense one-line code style; the reservation ledger exists to cope with it</li>
+      <li>Repo/reality drift: starter README and package name, unused <code>chatgpt-auth.ts</code>, CI still assumes GitHub is canonical</li>
+      <li>215 MB of binary assets in git; 1.8 MB and 1.4 MB client chunks</li>
+      <li>27 redirect-only pages; ops workflows with hard-coded identities</li>
+    </ul>
+  </div>
+  <div class="col drop">
+    <h3>Drop or move out</h3>
+    <ul>
+      <li>All <code>app/builder/drafts/*</code> → git history or static snapshots in R2; <code>docs/archives/*.txt</code>, <code>public/archives</code>, <code>public/brand/archive-*</code></li>
+      <li><code>professionals2</code>, <code>professionals3</code> pages, APIs, libs and tests (keep the <code>source</code> ids for historical responses)</li>
+      <li>Legacy redirect shim pages → one map in <code>proxy.ts</code></li>
+      <li>Starter README text, <code>app/chatgpt-auth.ts</code>, <code>examples/d1/</code>, <code>.github/legacy-workflows/</code></li>
+      <li><code>welcome-template-v2-40|58</code> variants; <code>lib/color-preview.ts</code>, <code>brand-preview.ts</code>, <code>client-color-preview.ts</code> once <code>/test</code> experiments retire</li>
+      <li>Large media out of the repo into R2/CDN</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="companyos">Where Company OS stands</h2>
+<p>From Justin's session's read of <code>Playset-LLC/company-os</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Measure</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Shape</td><td>pnpm monorepo, Fastify 5 API, Drizzle + Postgres 16, Zod, Vitest</td></tr>
+<tr><td>Size</td><td>About <span class="stat">14.8k</span> lines of TypeScript; <span class="stat">120</span> tests including a Postgres integration suite; <span class="stat">18</span> ADRs</td></tr>
+<tr><td>Branches</td><td><code>main</code> is stale (Sept 22). The <code>integration</code> branch (Sept 27) is about <span class="stat">9.9k</span> lines ahead: batch writes, executing module rules, person/party model, object storage, new modules</td></tr>
+</tbody></table></div>
+<p><strong>Gaps:</strong> dev-stub auth; a shared platform key; audit exists as log lines only; the list route skips row policies; hand-written importers; a throwaway UI with no design system; no realtime, no presence, no page draft/publish versions.</p>
+
+<h2 id="rec">Recommendation</h2>
+<p class="principle">between-gigs is a single-tenant hub with a portfolio catalogue bolted on, not a multi-tenant template. The rebuild premise is right. Rebuild clean, one step at a time, and import from between-gigs rather than evolving it.</p>
+
+<h3>What to carry over (as designs, not files)</h3>
+<ul>
+  <li><span class="tag keep">Keep</span> The Company OS core (<code>Playset-LLC/company-os</code>, <strong>integration branch, not main</strong>): schema, query + policy engine with row policies AND-injected into every read, module manifests with install and additive field sync, atomic batch writes, and the 18 accepted ADRs. Start the rebuild from this branch.</li>
+  <li><span class="tag keep">Keep</span> The actions contract in <code>lib/tool-system</code>: typed capabilities, dry-run, idempotent <code>requestId</code>, MCP + REST + CLI from one catalog. This becomes the per-page actions registry, the WebMCP surface and the voice vocabulary.</li>
+  <li><span class="tag keep">Keep</span> The module registry shape in <code>config/workspace-modules.ts</code> (id, name, section, path, status, access, scope, dependencies), with nav derived from it.</li>
+  <li><span class="tag keep">Keep</span> Token pipeline: one JSON token source, generated CSS, drift and contrast checks that fail the build. Keep the design-lock idea (snapshot + hash guard), drop the <code>!important</code> injection.</li>
+  <li><span class="tag keep">Keep</span> The relational <code>wm_*</code> schema as the reference data model: tenant_id, revision, audit, shares with token hash, file versions with sha256, connections and external ids, delivery attempts with dedupe. That is the multiplayer-ready base.</li>
+  <li><span class="tag keep">Keep</span> Optimistic-version records plus append-only events.</li>
+  <li><span class="tag keep">Keep</span> Auth pattern: edge guard + server check + membership table, and Bearer tokens for agents. Replace the single <code>super_admin</code> role with real roles.</li>
+  <li><span class="tag keep">Keep</span> Fast tests: <code>node:test</code> with in-memory SQLite, 175 tests in 13 seconds. Keep that speed bar.</li>
+  <li><span class="tag keep">Keep</span> <code>lib/platform/contracts.ts</code> and <code>docs/platform-foundation.md</code> as the written brief for the tenant and release model.</li>
+</ul>
+
+<h3>What not to carry over</h3>
+<ul>
+  <li><span class="tag drop">Drop</span> Next.js file-based routing and the build-and-deploy loop. It is the structural reason "write directly onto the product" is impossible today.</li>
+  <li><span class="tag drop">Drop</span> The hub CSS patch stack (7 layered files, 1,027 <code>!important</code>), 30+ ad-hoc pixel breakpoints, 4,059 fixed px font sizes, nothing above 1800px.</li>
+  <li><span class="tag drop">Drop</span> Hard-coded tenant constant, owner-by-email checks, company-name branches in shared helpers.</li>
+  <li><span class="tag drop">Drop</span> 69 archived draft routes, triplicated professionals funnel, four copies of the Terminal experience, 215 MB of media in git.</li>
+  <li><span class="tag drop">Drop</span> The ultra-dense one-liner code style. It was agents saving tokens in source; it makes review and parallel editing painful and is why the <code>ACTIVE_WORK</code> reservation ledger had to exist.</li>
+  <li><span class="tag drop">Drop</span> The release-per-commit ritual (186 releases in four days). Provenance should be captured by the system on every write, not by a hook that blocks commits.</li>
+  <li><span class="tag drop">Drop</span> Company OS's throwaway React 18 dashboard and operator console, demo templates, per-client importers.</li>
+</ul>
+
+<h3>Stack recommendation</h3>
+<p class="principle">The product is the source of truth. Pages, components, actions, tokens, docs and data are records in a realtime database, rendered live. Git becomes a nightly export and disaster-recovery mirror, not the workflow.</p>
+<ol class="steps">
+  <li><strong>Runtime:</strong> React 19 + Vite + TypeScript, strict. No Next.js. Routes come from the module registry in the database, not from files.</li>
+  <li><strong>Realtime data:</strong> keep the Company OS spine. Postgres 16 + Drizzle + Fastify 5, with its metadata-driven tenant/entity/role/row-policy model and its query + policy engine (the strongest code in either repo). Realtime live surface (pages, components, presence, drafts, prompt box state): SpacetimeDB with TypeScript server modules and the React client SDK, in front of Company OS's Postgres, which stays the system of record for business data and row policies. Verified 2026-09-28: SpacetimeDB v2.10.1 (Sep 15, 2026), TypeScript/Rust/C# modules, React/Vue/Svelte/Next integrations. Not yet confirmed from its docs: row-level security for per-tenant reads and subscription query limits, which is why business data stays in Postgres for now. Electric SQL remains the fallback if SpacetimeDB disappoints. Yjs for collaborative text and code fields either way. Convex is dropped: it would mean rewriting a backend that already works.</li>
+  <li><strong>Auth:</strong> Company OS has a dev-stub auth with a clean seam for a real provider. Wire Clerk (its planned provider) or Supabase Auth through that seam in step 1. Roles per tenant: owner, admin, staff, customer, tester, viewer, plus dev mode as a flag.</li>
+  <li><strong>Components:</strong> shadcn primitives (Radix/Base UI) vendored as today, styled by our tokens. We do not use shadcn's dashboard blocks or its sidebar for the shell. The shell is ours.</li>
+  <li><strong>Styling:</strong> Tailwind 4 kept for utilities inside components, but no responsive utility classes in page markup. Layout responds through container queries and a shared size-class scale set by the shell.</li>
+  <li><strong>Collaboration:</strong> Yjs for text and code fields (already in the repo as Liveblocks/Yjs), Postgres records for everything else. Presence and cursors from day one.</li>
+  <li><strong>Code components:</strong> authored in the product, compiled in-browser with esbuild-wasm, stored as versioned records, sandboxed in an iframe until promoted. Custom code is the exception; most UI is composed from the library.</li>
+  <li><strong>Hosting:</strong> API on Fly.io or Railway (Fastify + Postgres, or managed Postgres such as Neon or Supabase), static shell on Cloudflare Pages. The ChatGPT Sites / Workers + D1 setup is retired with the old app.</li>
+  <li><strong>Models:</strong> a routing table, not prose. JEV for fast, cheap intents (screen control, tests, small edits, yes/no calls); Fable for judgment, architecture and shared code; Opus 5 for building modules and pages; Sonnet 5 for mechanical passes. The table is a record too, editable in the product.</li>
+</ol>
+
+<h2 id="shell">The shell that never breaks</h2>
+<p>The shell is a small geometry engine, not a page layout. Five regions: top bar, bottom bar, left sidebar, right sidebar, stage. Each region declares a behaviour (hidden, collapsed, rail, full) per size class of the container, and the stage always gets the remainder.</p>
+<ul>
+  <li>Size classes come from the container width and a viewing-distance mode, not the viewport: <strong>phone, tablet, laptop, desk, wall</strong> (wall = TV / 10-foot, larger type and targets). Desk on a 4K monitor is a real mode.</li>
+  <li>Type and spacing are one fluid scale (<code>clamp</code>) per size class. No per-page pixel breakpoints, ever.</li>
+  <li>Regions never overlap the stage and never scroll the page; only the stage and sidebars scroll internally.</li>
+  <li>Every interactive element is at least 44px, focusable, and works without hover or drag. The shell enforces this by construction: the component library only exposes compliant primitives.</li>
+  <li>Invariants are testable: no horizontal overflow, no clipped text, targets ≥ 44px, focus order matches visual order, contrast passes. That is what makes the responsive simulator smart. It renders the same shell spec at 360, 390, 768, 1280, 1920, 2560 and 3840 and asserts the invariants instead of eyeballing screenshots. JEV can run it on every write.</li>
+</ul>
+
+<h2 id="dialect">The house dialect</h2>
+<p><strong>Versus Finsweet Client-First and Tailwind.</strong> Client-First is a class-naming convention for Webflow (BEM-ish, utility prefixes, page-section wrappers). It is compatible with Tailwind in spirit but redundant in practice: Tailwind already is a dialect for CSS, and stacking naming conventions on it gives two vocabularies for one thing. Its real purpose is the part worth keeping: a shared, predictable vocabulary so any person or agent can read a layout and know what it does.</p>
+<p>Our dialect sits above CSS and Tailwind and compiles down to tokens, container-query classes and component props. It is a typed schema with a plain-language text form, so it can be validated, diffed, spoken and edited from the prompt box. Three vocabularies:</p>
+<ol>
+  <li><strong>Shell regions:</strong> top bar, bottom bar, left sidebar, right sidebar, stage. Behaviours: hidden, collapsed, rail, full, floating.</li>
+  <li><strong>Geometry and responsiveness:</strong> size classes (phone, tablet, laptop, desk, wall); fit words (fills, hugs, wraps, stacks, sits beside, pins to top/bottom); spacing words (tight, cozy, roomy, airy); type words (whisper, body, heading, headline, billboard).</li>
+  <li><strong>Materials:</strong> flat, paper, glass, metal, glow, and later shader materials. A material is a token bundle (surface, edge, shadow, motion) that responds to size class and theme.</li>
+</ol>
+<p>Example, plain form:</p>
+<div class="dialect">Left sidebar: rail on laptop, full on desk and wall, hidden on phone.<br>Stage: fills, roomy on wall.<br>Cards: paper, cozy.</div>
+<p>That line compiles to the shell spec. A 10-year-old and an 80-year-old can read it, and so can JEV.</p>
+
+<h3>Parallel building without stepping on each other</h3>
+<ul>
+  <li>Module boundaries are records with ids. An agent takes a lease on a module or page (visible as presence in the canvas), and its writes go to that agent's draft layer. Two agents editing the same text or code field merge via Yjs; two agents editing the same record resolve via optimistic version, with the router deciding. This replaces the <code>ACTIVE_WORK.md</code> ledger with something the database enforces.</li>
+  <li>Live build visibility: the canvas shows agent presence, a build feed of writes, and lets you watch a page assemble. That is the procedural feel.</li>
+  <li>Draft to publish per tenant: saved, preview, published, superseded, as in the <code>ReleaseManifest</code> type already sketched in <code>contracts.ts</code>. Publish is one action with permission.</li>
+  <li>Minimal safety: schema-validated writes, per-action permission, immutable history, and a publish gate. Nothing else stands between a prompt and the screen.</li>
+</ul>
+
+<h3>Docs and memory in the product</h3>
+<p>Prompts (verbatim), replies, decisions, changelog, kanban moves and page docs are records written in the same transaction as the work, and exported to the repo nightly as append-only numbered files. Memory is a first-class tenant resource (see the Caveman + Mem Palace note in the Slack thread): verbatim source plus summary, kind, tags, links, backlinks, embeddings, exposed over MCP.</p>
+
+<h3>Import path</h3>
+<p>Old repos and softwares become "sources" with an ingestion pipeline: pages → document model records with <code>source_ref</code>; data → tenant tables with <code>source_ref</code> and original ids; assets → object storage; docs, releases and memory → memory records. between-gigs is import number one: leads, form responses, <code>wm_*</code> work items, journal, releases and development-memory. The detailed import plan comes after the company-os read.</p>
+
+<h2 id="order">Order of operations</h2>
+<p>First steps only. The full dependency plan and the PM viewer come next.</p>
+<ol class="steps">
+  <li><strong>Foundation.</strong> Fork the company-os integration branch into the new repo, add the shell package (Vite + React 19 + TS strict), wire real auth through the existing seam, add a persisted audit/activity table, enforce row policies on the plain list route, add page versions (saved / preview / published).</li>
+  <li><strong>Shell geometry engine</strong> with the dialect schema, five regions, size classes, invariants test at seven widths.</li>
+  <li><strong>Document model + canvas + prompt box + router table.</strong> First live write to the product.</li>
+  <li><strong>Component library</strong> from shadcn primitives, materials, actions registry per page, WebMCP surface.</li>
+  <li><strong>Hub bundle:</strong> role switcher, dev mode, placeholders, EN/ES toggle, PM viewer (kanban, list, timeline).</li>
+  <li><strong>Import between-gigs data;</strong> then Playset Company OS.</li>
+</ol>
+
+<h2 id="open">Open decisions</h2>
+<div class="decision">
+  <strong>1. Leave Next.js and the Sites / Cloudflare Workers setup, and build the shell as a Vite + React app on the Company OS API?</strong>
+  <span class="rec">Recommended: yes.</span>
+</div>
+<div class="decision">
+  <strong>2. Live layer: SpacetimeDB (TypeScript modules + React) vs Electric SQL on Postgres.</strong>
+  <span class="rec">Recommended: SpacetimeDB. Going all-in on SpacetimeDB for business data is deferred until row-level security and subscription limits are confirmed.</span>
+</div>
+<div class="decision">
+  <strong>3. shadcn primitives with our own shell, versus another primitives library (Base UI direct, Ark UI).</strong>
+  <span class="rec">Recommended: shadcn primitives.</span>
+</div>
+<div class="decision">
+  <strong>4. Git as nightly export and mirror only, no PR workflow for product changes.</strong>
+  <span class="rec">Recommended: yes.</span>
+</div>
+<div class="decision">
+  <strong>5. Name and home of the new repo, and whether docs start there today or wait for the product to host them.</strong>
+  <span class="rec">Open.</span>
+</div>
+
+<footer>
+  <p>Playset Company OS (Playset-LLC/company-os) audit by Justin's session is summarized in the Slack thread; this page folds in its conclusions.</p>
+  <p>Audit and recommendation by Fable 5.1; write-up published 2026-09-28.</p>
+  <p>Updated 2026-09-28 22:56 UTC with the SpacetimeDB option.</p>
+</footer>
+</main>

@@ -1,0 +1,7 @@
+{
+  "name": "fresh-terminal-module",
+  "private": true,
+  "type": "module",
+  "description": "SpacetimeDB TypeScript module for Fresh Terminal. Depends on the spacetimedb package installed at terminal/.",
+  "main": "src/index.ts"
+}

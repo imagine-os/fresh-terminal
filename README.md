@@ -1,0 +1,43 @@
+# Fresh Terminal
+
+A prompt-first terminal. You land in a working box, type (or speak), and what you type is routed by a small table to a model. Cost passes through to a hash-linked ledger. Dark, sparse, one folder.
+
+**Everything lives in [`terminal/`](terminal/).** This file is the only instruction at the root. Docs live in [`terminal/docs`](terminal/docs/README.md), starting with [`terminal/docs/README.md`](terminal/docs/README.md).
+
+## Run
+
+```sh
+pnpm i && pnpm dev
+```
+
+- App: http://localhost:5173 (Vite; `/api/*` is proxied to the router)
+- Router: http://localhost:8787 (Hono on Node; `GET /health`, `GET /rules`, `POST /route`)
+
+Other commands: `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm check:responsive` (Playwright, seven widths, screenshots in `terminal/docs/qa/`), `pnpm -C terminal verify:chain [ledger.json]`.
+
+## Env
+
+Router (`terminal/router/.env`, copy from `.env.example`; never reaches the browser):
+
+| var | purpose |
+| --- | --- |
+| `OPENROUTER_API_KEY` | the one key. Without it, `POST /route` returns 503 and the app says so in a system line. |
+| `OPENROUTER_DEFAULT_MODEL` | optional; overrides `openrouter/auto` for the general tiers |
+| `OPENROUTER_JEV_MODEL` | optional; gives the JEV tier a real model id (none exists on OpenRouter today) |
+| `ROUTER_ALLOWED_ORIGIN` | optional CORS lock for production |
+
+App (build-time, optional): `VITE_ROUTER_URL` (default `/api`), `VITE_BASE` (`/fresh-terminal/` on GitHub Pages), `VITE_SPACETIMEDB_URI` / `VITE_SPACETIMEDB_NAME` (recognised, not used until the module is published).
+
+## Pages and the canvas
+
+Static deliverable pages live in `terminal/app/public/pages/` and ship on GitHub Pages under `/pages/` (today: `audit.html`, `themes.html`). Every deliverable appears as a card on the master canvas at `/canvas` (shortcut `C`); add one with `pnpm -C terminal canvas:add --title "Name" --href pages/x.html --kind page`. Paper cards are 1 mm thick, images 10 mm.
+
+## Hosting
+
+The static app deploys to GitHub Pages through `.github/workflows/pages.yml` on every push to `main`. Pages must be set to the "GitHub Actions" source once in the repository settings; this repo does not change settings through the API. `/box/:id` works on Pages through a `404.html` copy of `index.html`. The router runs as a Node process or as a Cloudflare Worker (`terminal/router/wrangler.toml`); moving out later is DNS plus one redeploy.
+
+## Not wired yet
+
+SpacetimeDB live store (module written and type-checked, not published), Clerk sign-in (seam exists, anonymous identity in use), Stripe settlement, model-generated compositions from "Draw" (demo compositions only), per-owner billing rules, model-based chip tagger (JEV tier), publishing the shared ledger chain outside the browser, presence of other people, canvas document rendering, voice/TV-remote input, camera and tilt theme responses. Every visible placeholder shows a "not wired yet" tooltip and toast; the full list is in the dev-mode panel (press `D`).
+
+Model used for this pass: Fable 5.1.

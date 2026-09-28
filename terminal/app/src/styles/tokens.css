@@ -1,0 +1,93 @@
+/*
+ * Design tokens. Dark is the default (SpacetimeDB-inspired: near-black, one
+ * mint accent, lots of air). Light is the same system with swapped surfaces.
+ * Type scale is fluid (clamp) and named after the dialect words.
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: #0b0d12;
+  --bg-elevated: #10131a;
+  --surface: #151923;
+  --surface-hover: #1b2030;
+  --border: #262c3a;
+  --border-strong: #38405260;
+  --fg: #e8ecf3;
+  --fg-muted: #9aa3b5;
+  --fg-faint: #5f687a;
+  --accent: #7cf0c4;
+  --accent-fg: #06110d;
+  --accent-soft: #7cf0c41f;
+  --danger: #ff7a7a;
+  --warn: #ffc76b;
+  --focus: #7cf0c4;
+  --shadow: 0 10px 40px #00000080;
+
+  --chip-date: #7cc4ff;
+  --chip-action: #7cf0c4;
+  --chip-list: #c9a7ff;
+  --chip-object: #ffd07c;
+  --chip-variable: #ff9ad5;
+  --chip-entity: #9be6ff;
+
+  --doodle: #7cf0c4b0;
+
+  /* fluid type scale: whisper, body, heading, headline, billboard */
+  --type-whisper: clamp(0.72rem, 0.68rem + 0.2vw, 0.9rem);
+  --type-body: clamp(0.95rem, 0.9rem + 0.25vw, 1.2rem);
+  --type-heading: clamp(1.15rem, 1rem + 0.6vw, 1.75rem);
+  --type-headline: clamp(1.6rem, 1.2rem + 1.6vw, 3.2rem);
+  --type-billboard: clamp(2.4rem, 1.6rem + 3.2vw, 6rem);
+
+  /* spacing words */
+  --space-tight: 0.25rem;
+  --space-cozy: 0.6rem;
+  --space-roomy: 1.25rem;
+  --space-airy: 2.5rem;
+
+  --radius: 0.7rem;
+  --radius-pill: 999px;
+  --target: 2.75rem; /* 44px at 16px root */
+
+  --left-rail-width: 3.75rem;
+  --left-full-width: clamp(13rem, 18cqi, 20rem);
+  --right-full-width: clamp(16rem, 24cqi, 26rem);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f7f8fa;
+  --bg-elevated: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #eef1f6;
+  --border: #d9dee8;
+  --border-strong: #b9c1d0;
+  --fg: #12161f;
+  --fg-muted: #4e586b;
+  --fg-faint: #8a94a8;
+  --accent: #0b8f66;
+  --accent-fg: #ffffff;
+  --accent-soft: #0b8f6618;
+  --danger: #c2322f;
+  --warn: #a56a00;
+  --focus: #0b8f66;
+  --shadow: 0 10px 40px #0000001f;
+
+  --chip-date: #1f6fd1;
+  --chip-action: #0b8f66;
+  --chip-list: #6e3fd6;
+  --chip-object: #a56a00;
+  --chip-variable: #c22e86;
+  --chip-entity: #0a7f9e;
+
+  --doodle: #0b8f66b0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']):not([data-theme='light']) {
+    color-scheme: light;
+  }
+}

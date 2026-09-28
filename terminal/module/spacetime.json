@@ -1,0 +1,11 @@
+{
+  "databases": [
+    {
+      "name": "fresh-terminal",
+      "modulePath": ".",
+      "generate": [
+        { "lang": "typescript", "outDir": "../app/src/module_bindings" }
+      ]
+    }
+  ]
+}

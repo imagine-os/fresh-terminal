@@ -1,0 +1,27 @@
+{
+  "$comment": "Route table: intent -> model -> permission. Seeded defaults; the SpacetimeDB route_rule table overrides these once connected. margin_bp is basis points over provider cost (0 = pass-through).",
+  "default": "chat",
+  "tiers": {
+    "fast": { "model": "openrouter/auto", "note": "OpenRouter picks a fast general model." },
+    "careful": { "model": "openrouter/auto", "note": "Same until per-model routing is tuned." },
+    "jev": {
+      "model": "jev/jev-1",
+      "status": "pending",
+      "note": "No model containing 'jev' exists on openrouter.ai/api/v1/models as of 2026-09-28. Model id is a placeholder; override with OPENROUTER_JEV_MODEL."
+    }
+  },
+  "rules": [
+    { "intent": "chat", "tier": "fast", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "make", "tier": "careful", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "build", "tier": "careful", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "show", "tier": "fast", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "list", "tier": "fast", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "add", "tier": "fast", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "remove", "tier": "fast", "permission": "owner", "margin_bp": 0 },
+    { "intent": "open", "tier": "fast", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "send", "tier": "careful", "permission": "owner", "margin_bp": 0 },
+    { "intent": "schedule", "tier": "careful", "permission": "owner", "margin_bp": 0 },
+    { "intent": "find", "tier": "fast", "permission": "anyone", "margin_bp": 0 },
+    { "intent": "tag", "tier": "jev", "permission": "anyone", "margin_bp": 0 }
+  ]
+}

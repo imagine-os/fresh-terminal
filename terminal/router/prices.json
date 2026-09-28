@@ -1,0 +1,7 @@
+{
+  "$comment": "Fallback prices in micro-dollars per 1,000,000 tokens (integers). Used only when OpenRouter does not return usage.cost. These are placeholders to be verified against openrouter.ai/models before real billing.",
+  "default": { "input_micro_per_million": 1000000, "output_micro_per_million": 3000000 },
+  "models": {
+    "openrouter/auto": { "input_micro_per_million": 1000000, "output_micro_per_million": 3000000 }
+  }
+}

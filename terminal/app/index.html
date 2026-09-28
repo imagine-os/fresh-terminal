@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A prompt-first terminal. Type, and it routes." />
+    <meta name="color-scheme" content="dark light" />
+    <title>Fresh Terminal</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0d12'/%3E%3Cpath d='M8 10l7 6-7 6' stroke='%237cf0c4' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M17 22h8' stroke='%237cf0c4' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script>
+      try {
+        var saved = localStorage.getItem('fresh-terminal.prefs');
+        if (saved) {
+          var prefs = JSON.parse(saved);
+          if (prefs.theme === 'light' || prefs.theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', prefs.theme);
+          }
+          if (prefs.lang === 'es') {
+            document.documentElement.setAttribute('lang', 'es');
+          }
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

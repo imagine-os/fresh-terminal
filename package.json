@@ -1,0 +1,19 @@
+{
+  "name": "fresh-terminal-root",
+  "private": true,
+  "description": "Root proxy. Everything lives in terminal/. See README.md.",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "pnpm -C terminal dev",
+    "build": "pnpm -C terminal build",
+    "typecheck": "pnpm -C terminal typecheck",
+    "test": "pnpm -C terminal test",
+    "check:responsive": "pnpm -C terminal check:responsive",
+    "check": "pnpm -C terminal check"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

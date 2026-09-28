@@ -1,0 +1,19 @@
+{
+  "$comment": "Sample starting prompts. Append-only: add new records at the end, never edit an id's meaning. Each verb here becomes an action in the vocabulary.",
+  "starters": [
+    { "id": "draw-dashboard", "text": "Draw a shadcn dashboard", "verb": "draw", "expects": "component", "reveal": "beam-horizontal", "tags": ["demo", "composition"] },
+    { "id": "draw-login", "text": "Draw a login screen", "verb": "draw", "expects": "component", "reveal": "beam-diagonal", "tags": ["demo", "composition"] },
+    { "id": "draw-plan-kanban", "text": "Draw a kanban of the plan", "verb": "draw", "expects": "component", "reveal": "beam-radial", "tags": ["plan", "composition", "wired"] },
+    { "id": "show-today", "text": "Show today", "verb": "show", "expects": "text", "reveal": "typewriter", "tags": ["local"] },
+    { "id": "make-page-notes", "text": "Make a page called \"Notes\"", "verb": "make", "expects": "page", "reveal": "typewriter", "tags": ["local", "box"] },
+    { "id": "list-boxes", "text": "List my boxes", "verb": "list", "expects": "text", "reveal": "typewriter", "tags": ["local", "box"] },
+    { "id": "switch-glass", "text": "Switch to Glass Window", "verb": "switch", "expects": "text", "reveal": "none", "tags": ["theme", "local"] },
+    { "id": "set-sidebar", "text": "Set left sidebar: rail on laptop, hidden on phone", "verb": "set", "expects": "text", "reveal": "none", "tags": ["dialect", "local"] },
+    { "id": "charge-nothing", "text": "Charge me nothing for the next 10 calls", "verb": "charge", "expects": "text", "reveal": "typewriter", "tags": ["billing", "not-wired"] },
+    { "id": "verify-chain", "text": "Verify the chain", "verb": "verify", "expects": "text", "reveal": "typewriter", "tags": ["ledger", "local"] },
+    { "id": "speak-help", "text": "Speak: what can I do here?", "verb": "speak", "expects": "text", "reveal": "typewriter", "tags": ["voice", "help"] },
+    { "id": "translate-es", "text": "Translate this box to Spanish", "verb": "translate", "expects": "text", "reveal": "none", "tags": ["i18n", "local"] },
+    { "id": "open-settings", "text": "Open settings", "verb": "open", "expects": "text", "reveal": "typewriter", "tags": ["local"] },
+    { "id": "schedule-call", "text": "Schedule a call tomorrow", "verb": "schedule", "expects": "text", "reveal": "typewriter", "tags": ["model"] }
+  ]
+}
