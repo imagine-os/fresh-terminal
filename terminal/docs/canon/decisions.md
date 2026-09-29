@@ -458,3 +458,9 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Decided: Ctrl/Cmd combinations are never shortcuts of ours (Ctrl/Cmd+Z on an empty composer stays the one exception). The themed cursor shows only while the caret is at the end; anywhere else the browser's caret shows. Spell-check is on in the writing pad. Each box row in the sidebar has a remove control (with a confirm); removing a box deletes its lines, sessions, menu, pages, edits and box UI, and keeps its ledger entries (the chain is append-only).
 - Queued from the same messages: a formatted page that grows above the writing pad as you type, editable from either side; a top-bar tools tray with the menu, tools and sign-in behind it, draggable back; multi-word phrase chips ("make sure"), tagging "learn" and "tagged"; a small timer and model line per reply (the structured header already shows model, seconds and cost for edit and schedule replies).
 - Status: fixes shipped 2026-09-29 (this commit). Queued items: in progress, Justin's session.
+
+**C-070 · 2026-09-29 03:10 · Cost estimates with a level of certainty, as a rule**
+- Justin: "include cost estimates and level of sureity for stuff." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651442483669?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: proposed work and anything that spends shows an estimate and how sure it is: `sure` (fixed or free), `fairly sure` (per-step costs measured on live runs), `rough guess` (not measured). After it runs, the actual cost is shown next to the estimate.
+- First use (pass 5): a skin run shows "Estimate ≈X¢ (low–high), certainty" as soon as Jev has picked the path, before any round, and "actual Y¢" when it stops. Per-variant costs and typical rounds live in `router/rules.json` → `refine`.
+- Status: current (a rule from Justin).

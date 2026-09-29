@@ -1981,6 +1981,12 @@ textarea.field-input {
   font-size: var(--type-whisper);
   color: var(--fg-faint);
 }
+.rf-estimate {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg);
+}
 .rf-stop {
   min-height: var(--target);
   margin-inline-start: auto;
