@@ -384,21 +384,44 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
 - Status: current.
 
+## Pass 5 additions (2026-09-29)
+
+**C-060 · 2026-09-29 02:46 · "Open terminal" in the library opens a new box that is already skinned**
+- Justin: "open terminal from the library should simply take us to a fresh terminal window thats arleady skinned." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649998972349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: each of the 17 library entries links to `box/new?theme=<built theme>&skin=<material>&from=<library id>` (relative, so it works under `/fresh-terminal/`). The new box opens with that theme and the material as the stage skin, with no toast and no screen in between. The mapping lives in `shared/src/skins/terminals.ts` and a test keeps the page in step with it.
+- Terminals whose look is not fully built open the closest built look with a line naming what is not wired yet: Bezel and Glass (moving bezel), You as the Camera (camera reflection), Tilt Window (phone tilt), Koi Pond (the live 3D pond inside a box; its own page stays linked), Night Sky (drifting stars).
+- Status: current. Built in pass 5.
+- Found then: the old links were `/box/new?...` from the site root, which on GitHub Pages leaves `/fresh-terminal/` and cannot open the app.
+
+**C-061 · 2026-09-29 02:47 · Ontology: one edge per relation, named both ways**
+- Asked: "ontology should be a big part of how you think. often 2 way connections have different meaning in each direction" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: each relation is stored once as an edge with a forward label and an inverse label ("Hoy employs Sergio" / "Sergio works at Hoy"). Some relations are symmetric ("partners with"). Every edge carries its source and date. Chips and Jev share one list of types.
+- Status: proposed.
+
+**C-062 · 2026-09-29 02:47 · Connectors: one managed OAuth layer that can also be self-hosted**
+- Asked: "How will we handle connectors for thingsl ike dropbox, google drive, email, whatsapp, sms, etc." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: one managed OAuth connector layer that can also be self-hosted (so it fits ours, your keys and self-host), chosen after verifying the options. First set: Google Drive, Dropbox and email over IMAP. WhatsApp and restricted Gmail scopes need vendor approval (Meta, Google) and come later.
+- Status: proposed. No connector layer chosen or verified yet.
+
+**C-063 · 2026-09-29 02:47 · Migration: originals kept, records mapped with source ids, duplicates flagged**
+- Asked: "migration is a huge ability we need to build out" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: raw originals go to storage untouched. Records are mapped onto the ontology (C-065) with their source ids, so an import can be re-run. Possible duplicates are flagged for review, never merged silently. First formats: Google Takeout, Dropbox, mbox email and WhatsApp chat export. Between Gigs and Company OS are the first real imports.
+- Status: proposed.
 ## Nesting and the logo set (2026-09-29)
 
-**C-060 · 2026-09-29 02:44 · FreshStack nests a piece under what it runs through**
+**C-064 · 2026-09-29 02:44 · FreshStack nests a piece under what it runs through**
 - Justin: "consider jev is a subset of open router if thats where its being used . think of organizing with nesting as appropraite." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
 - Decided: a stack piece may name a `parent`. A child is a subset of its parent's account, key and exit, and renders inside the parent's card under "Through <parent>". Today: Jev under OpenRouter; Gemini Live (the default voice, C-023 as updated 02:29) and OpenAI Realtime (optional) under LiveKit. Cards show the piece's registered mark.
 - Status: current (this commit). The ontology behind it (links with a name per direction) is the other session's proposal from the same message.
 
-**C-061 · 2026-09-29 02:44 · Every logo ships as a set of configurations; heavier layers are costed**
+**C-065 · 2026-09-29 02:44 · Every logo ships as a set of configurations; heavier layers are costed**
 - Justin: "we're going to need the Logo system to do lightmode and dark mode and transparent and more as well as each of the configurations of that logo like wide, icon only, etc. we might even consider using an inexpensive vectororizer tool as needed, and or 3D .... each step is a cost question" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
 - Decided: one colour source per mark generates six transparent SVG files (colour, mono, light, dark, wide, stacked) with `scripts/brand-variants.mjs`; `app/public/brand/index.json` is the manifest chips and cards read. Wide and stacked are our own icon + name lockups, never presented as the vendor's wordmark. Later layers in cost order: raster export (free, Playwright), vectorizing raster-only logos (free potrace/vtracer first, paid Vectorizer.AI when quality matters, cost on the ledger), 3D and motion for our own marks only (best-of-3, C-031), official wordmarks and brand kits.
 - Status: current. 43 marks × 6 files generated 2026-09-29; the later layers are not automated yet (skill §4b).
 
 ## Composer fixes (2026-09-29)
 
-**C-062 · 2026-09-29 02:54 · Modifier keys belong to the browser; the visible cursor follows the caret; a box can be removed**
+**C-066 · 2026-09-29 02:54 · Modifier keys belong to the browser; the visible cursor follows the caret; a box can be removed**
 - Justin: "command v is triggering the voice tool in terminal. the voice tool doesnt seem to work. ... Paste did not paste. There were issues moving the cursor around." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)) and "i cant seem to remove a box from the left side." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
 - Found: the shortcut handler let Ctrl/Cmd+key inside the composer fall through to the single-key shortcuts, so Cmd+V toggled voice and swallowed the paste. The themed block cursor was always drawn at the end of the text while the browser's caret was hidden, so moving the caret backwards was invisible.
 - Decided: Ctrl/Cmd combinations are never shortcuts of ours (Ctrl/Cmd+Z on an empty composer stays the one exception). The themed cursor shows only while the caret is at the end; anywhere else the browser's caret shows. Spell-check is on in the writing pad. Each box row in the sidebar has a remove control (with a confirm); removing a box deletes its lines, sessions, menu, pages, edits and box UI, and keeps its ledger entries (the chain is append-only).

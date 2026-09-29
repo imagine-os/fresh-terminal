@@ -26,14 +26,14 @@ const USER_AGENT = 'FreshTerminal/0.1 (+https://github.com/imagine-os/fresh-term
 
 export const PATH_CRITERIA: Record<SkinPath, string> = {
   library:
-    'A ready-made procedural material from our library fits: brass, paper, glass, wood, marble, concrete, felt, carbon fibre, neon, ocean, leather, slate. Free and instant.',
+    'A ready-made procedural material from our library fits: brass, paper, glass, wood, marble, concrete, felt, carbon fibre, neon, ocean, leather, slate, green phosphor, amber CRT, ledger lines, hardware panel, night sky, e-ink. Free and instant.',
   procedural_code:
     'Custom CSS gradients and colours: abstract, geometric or pattern looks, colour moods, anything without photographic detail. About a quarter of a cent per version.',
   css_tokens: 'Only a recolour: palette words like warmer, calmer, blue, high contrast; no texture at all. About a quarter of a cent per version.',
   image_search:
     'A real photographic texture from openly licensed images (Openverse): natural or real-world surfaces and photos, like rust, moss, denim, a beach. Nearly free; the licence is recorded.',
   image_generate:
-    'A generated picture: a specific scene or illustration that does not exist yet, or when the user asks to generate, draw or paint an image. About a cent per version, so few versions fit the budget.',
+    'A generated picture: a specific scene or illustration that does not exist yet, when the user asks to generate, draw or paint an image. About 4 cents per image, more than the whole budget, so it can only run when the budget is raised.',
 };
 
 const SCORE_RUNGS = [
@@ -343,7 +343,18 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
         entries.push(makeEntry(boxId, 'skin.plan', decision.model, cost, decision.id, now()));
       }
     }
-    return c.json({ target, material, path, source, confidence, probabilities, params, entries });
+    // Never plan a path the cap cannot afford even once; take the next best that fits and say so.
+    let note: string | null = null;
+    const estimate = (p: SkinPath) => params.estimate_micro[p] ?? 2500;
+    if (estimate(path) > params.cap_micro) {
+      const from = path;
+      const ranked = (Object.entries(probabilities) as Array<[SkinPath, number]>)
+        .filter(([candidate]) => (SKIN_PATHS as readonly string[]).includes(candidate) && estimate(candidate) <= params.cap_micro)
+        .sort((a, b) => b[1] - a[1]);
+      path = ranked[0]?.[0] ?? (from === 'image_generate' ? 'image_search' : 'procedural_code');
+      note = `${from === 'image_generate' ? 'Image generation' : from} costs about ${(estimate(from) / 10_000).toFixed(1)}¢ per version, over the ${(params.cap_micro / 10_000).toFixed(0)}¢ cap, so this run uses ${path.replace('_', ' ')} instead. Raise refine.cap_micro in the route table to allow it.`;
+    }
+    return c.json({ target, material, path, source, confidence, probabilities, params, entries, note });
   });
 
   app.post('/skin/variants', async (c) => {

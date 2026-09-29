@@ -128,4 +128,14 @@ describe('skins', () => {
     expect(text).toContain('"what":"skin.route"');
     expect(urls.every((url) => url.includes('/alpha/decisions'))).toBe(true);
   });
+
+  it('never plans a path the cap cannot afford: image generation falls back with a note', async () => {
+    const fakeFetch: typeof fetch = async () =>
+      json({ id: 'dec-2', model: 'typesafe/jev-1.13', answers: { path: { type: 'choice', choice: 'image_generate', confidence: 0.9, probabilities: { image_generate: 0.9, image_search: 0.06, procedural_code: 0.04 } } }, usage: { input_tokens: 300, output_tokens: 0, cost: 0.0000126 } });
+    const app = createApp({ bindings: () => ({ OPENROUTER_API_KEY: 'k' }), fetchImpl: fakeFetch });
+    const body = (await (await post(app, '/skin/plan', { boxId: 'b1', text: 'generate an image of a misty koi pond at dawn' })).json()) as { path: string; note: string; material: string };
+    expect(body.path).toBe('image_search');
+    expect(body.note).toContain('over the 3¢ cap');
+    expect(body.material).toBe('misty koi pond at dawn');
+  });
 });

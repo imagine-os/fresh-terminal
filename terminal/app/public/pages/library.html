@@ -723,7 +723,31 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
 
   function dots(n) { return n === 1 ? '●' : n === 2 ? '●●' : '●●●'; }
   function dotsSr(n) { return n === 1 ? '1 of 3, simplest' : n === 2 ? '2 of 3' : '3 of 3, richest'; }
-  function href(t) { return t.href || ('/box/new?theme=' + t.id); }
+  // What "Open terminal" opens: kept equal to shared/src/skins/terminals.ts (a test checks).
+  var OPEN = {
+    'blank-page': { theme: 'blank-page', skin: null },
+    'void': { theme: 'void', skin: null },
+    'phosphor': { theme: 'void', skin: 'phosphor' },
+    'amber': { theme: 'void', skin: 'amber' },
+    'bezel-and-glass': { theme: 'glass-window', skin: 'glass' },
+    'glass-window': { theme: 'glass-window', skin: null },
+    'you-as-the-camera': { theme: 'glass-window', skin: 'glass' },
+    'tilt-window': { theme: 'glass-window', skin: 'night-sky' },
+    'paper-and-typewriter': { theme: 'blank-page', skin: 'paper' },
+    'ledger-lines': { theme: 'blank-page', skin: 'ledger' },
+    'chalkboard': { theme: 'void', skin: 'slate' },
+    'frosted': { theme: 'glass-window', skin: 'glass' },
+    'hardware-panel': { theme: 'void', skin: 'hardware' },
+    'night-sky': { theme: 'void', skin: 'night-sky' },
+    'deep-water': { theme: 'void', skin: 'ocean' },
+    'e-ink': { theme: 'blank-page', skin: 'e-ink' },
+    'koi-pond': { theme: 'void', skin: 'ocean' }
+  };
+  // Straight into a new box that already has this terminal's theme and skin. Relative, so it works under /fresh-terminal/.
+  function href(t) {
+    var open = OPEN[t.id] || { theme: t.id, skin: null };
+    return '../box/new?theme=' + encodeURIComponent(open.theme) + (open.skin ? '&skin=' + encodeURIComponent(open.skin) : '') + '&from=' + encodeURIComponent(t.id);
+  }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pvHtml(t, extra) {

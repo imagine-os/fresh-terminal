@@ -9,7 +9,7 @@ const TARGET_WORDS: Array<{ target: SkinTarget; pattern: RegExp }> = [
 ];
 
 const FILLER =
-  /\b(please|skin|reskin|re-skin|make|use|give|apply|set|turn|paint|the|a|an|look|looks|like|as|in|with|material|texture|textured|on|to|it|of|my|this|that|for|me|into|style|styled|feel|made|out|and|so)\b/gi;
+  /\b(please|skin|reskin|re-skin|make|use|give|apply|set|turn|paint|the|a|an|look|looks|like|as|in|with|material|texture|textured|on|to|it|of|my|this|that|for|me|into|style|styled|feel|made|out|and|so|generate|generated|draw|paint|image|picture|photo|photograph|real|realistic|an|please)\b/gi;
 
 /** "skin the sidebar brass" → {target: sidebar, material: "brass"}. */
 export function parseSkinRequest(text: string): { target: SkinTarget; material: string } {
