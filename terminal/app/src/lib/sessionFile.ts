@@ -9,12 +9,16 @@ export const SITE_URL = 'https://imagine-os.github.io/fresh-terminal/';
 
 /** Our mark, in plain characters, for the top of every exported file. */
 export const ASCII_MARK = [
-  '  ____                _       _____                    _             _ ',
-  ' |  __|  __ ___  ___ | |__   |_   _|___  __ __ __ __ _(_)__   __ __ | |',
-  ' | |_   | _/ -_)(_-< | \\ \\     | | / -_)| _|| ` | | | | |  \\ | _ || |',
-  ' |_|    |_|\\___|/__/ |_|_|     |_| \\___||_| |_|_|_|_|_||_|_||_|_||_|',
-  '',
-  '  >_  Evolve as we grow.',
+  '┌──────────────────────────────────────────────┐',
+  '│                                              │',
+  '│   >_   F R E S H   T E R M I N A L           │',
+  '│        Evolve as we grow.                    │',
+  '│                                              │',
+  '│   ▄▄▄▄▄▄  the box that edits itself          │',
+  '│   █ >_ █  imagine-os.github.io/fresh-terminal│',
+  '│   ▀▀▀▀▀▀                                     │',
+  '│                                              │',
+  '└──────────────────────────────────────────────┘',
 ];
 
 export interface SessionFile {
