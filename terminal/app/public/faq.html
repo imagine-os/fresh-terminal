@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-size="desk">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -22,25 +22,63 @@
 <meta name="theme-color" content="#000000" />
 <!-- share:end -->
 <title data-i18n-title="faq.title">FAQ · Fresh Terminal</title>
-<meta name="description" content="Short answers about Fresh Terminal: what it is, what it costs, your own key, privacy, undo and what is coming next.">
-<meta name="color-scheme" content="dark">
+<meta name="description" content="Short answers about Fresh Terminal: who gets the $5, what it costs after, your own key, privacy, undo, offline and what is coming.">
+<meta name="color-scheme" content="dark light">
 <link rel="canonical" href="https://freshterminal.ai/faq">
 <link rel="alternate" hreflang="en" href="https://freshterminal.ai/faq">
 <link rel="alternate" hreflang="es" href="https://freshterminal.ai/faq?lang=es">
 <link rel="icon" href="brand/fresh-terminal/fresh-terminal-monogram-dark.svg" type="image/svg+xml">
+<script>
+(function () {
+  var d = document.documentElement;
+  function size() { var w = d.clientWidth || window.innerWidth; d.setAttribute('data-size', w < 640 ? 'phone' : w < 1024 ? 'tablet' : w < 2000 ? 'desk' : 'wall'); }
+  size(); window.addEventListener('resize', size);
+  try { var t = localStorage.getItem('ft-lib-theme'); if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t); } catch (e) {}
+})();
+</script>
 <link rel="stylesheet" href="sales/sales.css">
 <script type="application/json" id="page-actions">
 {
   "$comment": "Actions this page offers (WebMCP / voice vocabulary). Update with every UI change. Registry: docs/reference/surfaces.md (sales pages).",
   "page": "faq",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "actions": [
-    { "id": "sales.faq.open", "intent": "open or close an answer", "permission": "anyone", "target": ".faq summary" },
-    { "id": "sales.start", "intent": "open the terminal and start typing", "permission": "anyone", "target": "a[data-action='sales.start']" },
-    { "id": "sales.signin", "intent": "sign in for $5 of free usage", "permission": "anyone", "target": "a[data-action='sales.signin']" },
-    { "id": "sales.nav", "intent": "go to about, pricing or the FAQ", "permission": "anyone", "target": ".nav a" },
-    { "id": "sales.lang.toggle", "intent": "switch between English and Spanish", "permission": "anyone", "target": ".lang button" },
-    { "id": "sales.skip", "intent": "skip to the main content", "permission": "anyone", "target": ".skip" }
+    {
+      "id": "sales.start",
+      "intent": "open the terminal and start typing",
+      "permission": "anyone",
+      "target": "a[data-action='sales.start']"
+    },
+    {
+      "id": "sales.signin",
+      "intent": "get $5 free by creating an account (first sign-up only), or sign in",
+      "permission": "anyone",
+      "target": "a[data-action='sales.signin']"
+    },
+    {
+      "id": "sales.faq.open",
+      "intent": "open or close an answer",
+      "permission": "anyone",
+      "target": ".faq summary"
+    },
+    {
+      "id": "sales.nav",
+      "intent": "go to about, pricing or the FAQ",
+      "permission": "anyone",
+      "target": ".nav a"
+    },
+    {
+      "id": "sales.lang.toggle",
+      "intent": "switch between English and Spanish",
+      "permission": "anyone",
+      "target": ".lang button"
+    },
+    {
+      "id": "sales.skip",
+      "intent": "skip to the main content",
+      "permission": "anyone",
+      "target": ".skip"
+    }
   ]
 }
 </script>
@@ -49,16 +87,16 @@
 <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="about" aria-label="Fresh Terminal, about"><span class="brand-mark" aria-hidden="true">&gt;_</span>Fresh Terminal</a>
+    <a class="brand" href="about"><picture><source srcset="brand/fresh-terminal/fresh-terminal-monogram-light.svg" media="(prefers-color-scheme: light)"><img src="brand/fresh-terminal/fresh-terminal-monogram-dark.svg" alt="" width="29" height="29"></picture>Fresh Terminal</a>
     <nav class="nav" aria-label="Site" data-i18n-attr="aria-label:nav.label">
       <a href="about" data-i18n="nav.about">About</a>
       <a href="pricing" data-i18n="nav.pricing">Pricing</a>
       <a href="faq" aria-current="page" data-i18n="nav.faq">FAQ</a>
-      <span class="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label">
+      <span class="seg lang" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label">
         <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
         <button type="button" data-lang="es" aria-pressed="false" lang="es">ES</button>
       </span>
-      <a class="btn primary nav-cta" href="./" data-action="sales.start" data-i18n="cta.start.short">Start typing</a>
+      <a class="btn primary nav-cta" href="./" data-action="sales.start" data-i18n="cta.start">Start typing</a>
     </nav>
   </div>
 </header>
@@ -66,65 +104,62 @@
 <main id="main">
   <section aria-labelledby="faq-title">
     <div class="wrap">
-      <p class="kicker" data-i18n="nav.faq">FAQ</p>
-      <h1 id="faq-title" class="page-title" data-i18n="faq.h1">Short answers.</h1>
+      <div class="head"><p class="kicker" data-i18n="nav.faq">FAQ</p><h1 id="faq-title" data-i18n="faq.h1">Short answers</h1></div>
       <div class="faq">
         <details id="what" open>
           <summary data-i18n="q1">What is Fresh Terminal?</summary>
-          <div class="a" data-i18n="a1"><p>A terminal you talk to in plain words. It answers, and it changes its own menus, pages, layout, theme and skins to fit what you are doing. Every change can be undone.</p></div>
+          <div class="a" data-i18n="a1"><p>A terminal you type to in plain words. It answers, and it changes its own pages, menus, layout and look to fit what you do. Every change can be undone.</p></div>
         </details>
         <details id="signup">
           <summary data-i18n="q2">Do I need to sign up?</summary>
-          <div class="a" data-i18n="a2"><p>No. Open it and type. Your stages are saved in your browser. Sign in with GitHub, Google or email only if you want the $5 starter kit and cloud save.</p></div>
+          <div class="a" data-i18n="a2"><p>No. Open it and type; your stages are saved in this browser. Create an account to get $5 free and cloud save.</p></div>
+        </details>
+        <details id="five">
+          <summary data-i18n="q3">Who gets the $5?</summary>
+          <div class="a" data-i18n="a3"><p>First-time sign-ups, once per person.</p></div>
         </details>
         <details id="cost">
-          <summary data-i18n="q3">What does it cost?</summary>
-          <div class="a" data-i18n="a3"><p>A little free usage to try, with no sign-up, then $5 of usage on us when you sign in, with no daily cap. After that it is model cost + 10%, with no account fees: you buy credits first, as refill packs of $5, $10 or $25 that renew on their own. Those packs are coming soon; buying is not wired yet. Invite codes from friends add credit. With your own key we charge $0 for models: no markup.</p></div>
+          <summary data-i18n="q4">What does it cost after that?</summary>
+          <div class="a" data-i18n="a4"><p>Model cost plus your markup: 10% by default, and you can set it higher to support us. The minimum is 5%, so card fees are covered. No account fees.</p><p>You buy credits first, in packs of $5, $10 or $25 that refill on their own. Those are coming soon; buying is not wired yet.</p></div>
         </details>
         <details id="key">
-          <summary data-i18n="q4">What is “your key”?</summary>
-          <div class="a" data-i18n="a4"><p>Your own OpenRouter key. Press K in the terminal and paste it. It stays in your browser, calls go straight to OpenRouter, and the provider bills you. You are never blocked. Storage above 100 MB may be metered later, at about $0.05 per GB-month (not final, not billed yet).</p></div>
-        </details>
-        <details id="runout">
-          <summary data-i18n="q5">What happens when free usage runs out?</summary>
-          <div class="a" data-i18n="a5"><p>Sign in for the starter kit, or switch to your own key. Once the starter kit is spent, your key keeps working; pay as you go opens when payments are wired.</p></div>
+          <summary data-i18n="q5">What is “your key”?</summary>
+          <div class="a" data-i18n="a5"><p>Your own OpenRouter key. Paste it in Settings; it stays in your browser, calls go straight to OpenRouter, and there is no markup. You are never blocked.</p><p>Storage above 100 MB may be metered later, about $0.05 per GB-month (not final, not billed).</p></div>
         </details>
         <details id="privacy">
           <summary data-i18n="q6">Is my data private?</summary>
-          <div class="a" data-i18n="a6"><p>Private from us by default: signed out, your stages stay in your browser. On free usage, each prompt passes through our router in transit to the model provider (through OpenRouter); the router keeps the cost line, not your words. The provider's own terms apply to what it receives. With your own key, our router is not involved at all.</p><p>If you sign in, your stages (menus, pages and looks) are saved in our database so they reach your other devices; your conversation stays in your browser. “Share my data” in Settings is off by default, and our staff tools only show an account’s content if the person shares it or grants access (even for client accounts), which they can revoke. That is a rule our code keeps, not encryption: whoever runs the database could still read it. Encryption at rest with your own key is coming.</p></div>
-        </details>
-        <details id="undo">
-          <summary data-i18n="q7">Can I undo what it changes?</summary>
-          <div class="a" data-i18n="a7"><p>Yes. Every change shows as one line with Undo. Replay shows the whole session step by step, and you can export a session as a file and import it again.</p></div>
+          <div class="a" data-i18n="a6"><p>Yes, by default. Signed out, your stages stay in your browser. “Share my data” is off unless you turn it on, and we see an account only if you grant access.</p><p>On free usage, each prompt passes through our router on its way to the model; we keep the cost, not your words. Today this is a rule our code keeps, not encryption. Encryption with your own key is coming.</p></div>
         </details>
         <details id="words">
-          <summary data-i18n="q8">What are stages and tags?</summary>
-          <div class="a" data-i18n="a8"><p>A stage is one workspace: its menu, pages, look and conversation. Tags are the words the terminal recognises as you type (actions, dates, names, lists); tap one to change what it means, and the glossary remembers.</p></div>
+          <summary data-i18n="q7">What are stages and tags?</summary>
+          <div class="a" data-i18n="a7"><p>A stage is one workspace: its pages, menu, look and conversation. Click its name to rename it.</p><p>Tags are the words it recognises as you type: names, dates, actions. Tap one to change what it means.</p></div>
         </details>
-        <details id="models">
-          <summary data-i18n="q9">Which models does it use?</summary>
-          <div class="a" data-i18n="a9"><p>A small route table picks a model on OpenRouter for each request, and simple commands run locally for free. Every reply shows the model, the time and the cost.</p></div>
+        <details id="undo">
+          <summary data-i18n="q8">Can I undo what it changes?</summary>
+          <div class="a" data-i18n="a8"><p>Yes. Every change is one line with an Undo. Actions lists everything, and Replay (experimental) steps back through a session.</p></div>
+        </details>
+        <details id="offline">
+          <summary data-i18n="q9">What if I lose my connection?</summary>
+          <div class="a" data-i18n="a9"><p>A prompt you send offline waits on the stage. When you are back, send it, edit it or drop it. Nothing sends by itself.</p></div>
         </details>
         <details id="soon">
           <summary data-i18n="q10">What is not live yet?</summary>
-          <div class="a" data-i18n="a10"><p>Coming soon: realtime multiplayer, live sync across your devices, voice talk-back, connectors, migration, teams and self-host, and buying credits (refill packs). We mark these “coming soon” or “not wired yet” wherever they appear. Already live: a prompt typed while offline waits safely, and you choose to send, edit or discard it when the connection is back.</p></div>
+          <div class="a" data-i18n="a10"><p>Live sync across devices (the database is published; the app still saves in the browser), multiplayer, voice talk-back (Terminal-talk is an early switch), connectors, teams and self-host, and buying credits.</p></div>
         </details>
         <details id="open">
           <summary data-i18n="q11">Is it open?</summary>
-          <div class="a" data-i18n="a11"><p>The source is on GitHub, and FreshStack, the open starter kit, documents every piece of the stack underneath.</p></div>
+          <div class="a" data-i18n="a11"><p>The source is on GitHub, and FreshStack lists every piece underneath.</p></div>
         </details>
       </div>
-      <div class="ctas" style="margin-top:2.2rem">
-        <a class="btn primary" href="./" data-action="sales.start"><span data-i18n="cta.start">Start typing</span> <span class="arrow" aria-hidden="true">→</span></a>
-        <a class="btn" href="./?signin=1" data-action="sales.signin" data-i18n="cta.signin">Sign in for $5 free</a>
-      </div>
+      <div class="ctas" style="margin-top:2rem"><a class="btn primary" href="./?signin=1" data-action="sales.signin" data-signin-cta><span data-i18n="cta.getFree">Get $5 free</span></a><a class="btn" href="./" data-action="sales.start"><span data-i18n="cta.start">Start typing</span> <span aria-hidden="true">→</span></a></div>
+      <p class="offer" data-offer data-i18n="cta.offer">New accounts only. Sign in with GitHub, Google or email.</p>
     </div>
   </section>
 </main>
 
 <footer class="foot">
   <div class="wrap">
-    <p class="tagline"><span class="brand-mark" aria-hidden="true" style="display:inline-grid;vertical-align:-0.3em;margin-right:0.6rem">&gt;_</span><span data-i18n="tagline">Evolve as we grow.</span></p>
+    <p class="tagline"><picture><source srcset="brand/fresh-terminal/fresh-terminal-monogram-light.svg" media="(prefers-color-scheme: light)"><img src="brand/fresh-terminal/fresh-terminal-monogram-dark.svg" alt="" width="29" height="29"></picture><span data-i18n="tagline">Evolve as we grow.</span></p>
     <nav aria-label="Footer" data-i18n-attr="aria-label:foot.label">
       <a href="./" data-i18n="foot.app">Open the terminal</a>
       <a href="about" data-i18n="nav.about">About</a>
@@ -134,7 +169,7 @@
       <a href="wiki/" data-i18n="foot.docs">Docs</a>
       <a href="https://github.com/imagine-os/fresh-terminal" rel="noopener" data-i18n="foot.source">Source on GitHub</a>
     </nav>
-    <p class="fine" data-i18n="foot.fine">No trackers, no cookies on these pages. Screenshots are from real sessions. Items marked “coming soon” are not live yet.</p>
+    <p class="fine" data-i18n="foot.fine">No trackers and no cookies on these pages. Screenshots are taken from the current app by a script on every pass.</p>
   </div>
 </footer>
 <script src="sales/i18n-es.js" defer></script>

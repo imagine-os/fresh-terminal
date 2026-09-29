@@ -24,7 +24,8 @@
     "canvas:add": "tsx scripts/canvas-add.ts",
     "canvas:thumbs": "tsx scripts/canvas-thumbs.ts",
     "share:sync": "tsx scripts/share-sync.ts",
-    "og:card": "node scripts/og-card.mjs"
+    "og:card": "node scripts/og-card.mjs",
+    "sales:shots": "node scripts/sales-shots.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.20.1",

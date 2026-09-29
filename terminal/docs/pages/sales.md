@@ -19,3 +19,10 @@ Written 2026-09-29 (C-097, Opus 5.5). Live: https://freshterminal.ai/about, http
 ## Local preview
 
 `pnpm -C terminal build:app && pnpm -C terminal preview`, then http://localhost:4173/about.
+
+## Second pass (2026-09-29, C-101)
+
+- Look: FreshStack's (`pages/freshstack.html`) tokens, size classes and card grid; light and dark. Brand marks: the official colour SVG from `brand/index.json` on a `.mark[data-tile]` tile chosen for contrast with the mark's colour.
+- Screenshots: never by hand. `pnpm -C terminal build:app && pnpm -C terminal sales:shots` retakes all of them; an image on a page is `<img data-shot="scene">` and the script sets its src, width, height and alt. Add a scene in `scripts/sales-shots.mjs` (and its Spanish alt `shot.<scene>` in `sales/i18n-es.js`). CI (`sales-shots` job) fails when a scene breaks.
+- The sign-in button: `data-signin-cta` shows "Get $5 free" plus `data-offer` ("New accounts only...") until `ft.hasSignedIn`, then "Sign in".
+- The markup slider on /pricing is a preview (not wired yet); `PAYG_FEE` in `sales.js` holds the default (10%) and the minimum (5%).

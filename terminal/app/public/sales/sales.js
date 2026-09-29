@@ -15,7 +15,9 @@
    * no account fees. Every [data-fee] element shows it. Your key: 0%.
    * Storage matches STORAGE_PRICING in shared/src/credits/storage.ts (not final, not billed).
    */
-  var PAYG_FEE = { percent: 10, final: true };
+  var PAYG_FEE = { percent: 10, min: 5, final: true };
+  /** Set by the app after a first sign-in on this device (auth/firstSignIn.ts). Then the offer becomes plain "Sign in". */
+  var SIGNED_IN_FLAG = 'ft.hasSignedIn';
   var STORAGE = { freeMb: 100, usdPerGbMonth: 0.05, final: false };
 
   var PREFS = 'fresh-terminal.prefs';
@@ -135,6 +137,34 @@
   }
   window.addEventListener('hashchange', openFromHash);
   openFromHash();
+
+  // The $5 is a first-sign-up offer: a device that has signed in before sees plain "Sign in".
+  var signedInBefore = false;
+  try { signedInBefore = localStorage.getItem(SIGNED_IN_FLAG) === '1'; } catch (e) { /* no storage: show the offer */ }
+  if (signedInBefore) {
+    document.querySelectorAll('[data-signin-cta] [data-i18n]').forEach(function (el) { el.setAttribute('data-i18n', 'cta.signin'); el.textContent = 'Sign in'; });
+    document.querySelectorAll('[data-offer]').forEach(function (el) { el.hidden = true; });
+  }
+
+  // Pay what you want: an illustrative slider (not wired yet; nothing is saved).
+  var markup = document.getElementById('markup');
+  if (markup) {
+    markup.min = String(PAYG_FEE.min);
+    var shownToast = false;
+    var update = function () {
+      var pct = Number(markup.value);
+      var out = document.getElementById('markup-out');
+      if (out) out.textContent = pct + '%';
+      document.querySelectorAll('[data-markup-total]').forEach(function (el) { el.textContent = '$' + (1 + pct / 100).toFixed(2); });
+    };
+    markup.addEventListener('input', update);
+    markup.addEventListener('change', function () {
+      if (shownToast) return;
+      shownToast = true;
+      toast(root.getAttribute('lang') === 'es' ? (window.FT_ES || {})['markup.toast'] || '' : 'A preview only: choosing your markup is not wired yet. It arrives with billing.');
+    });
+    update();
+  }
 
   var fromUrl = new URLSearchParams(location.search).get('lang');
   var start = fromUrl === 'es' || fromUrl === 'en' ? fromUrl : readPrefs().lang === 'es' ? 'es' : 'en';

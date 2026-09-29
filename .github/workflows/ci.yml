@@ -19,3 +19,29 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+  # The sales pages' screenshots come from fixed scenes of the built app (scripts/sales-shots.mjs).
+  # This job renders every scene and fails when one breaks, so the pictures cannot silently go stale.
+  # It does not commit anything; the rendered set is uploaded as an artifact.
+  sales-shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C terminal exec playwright install --with-deps chromium
+      - run: pnpm -C terminal build:app
+      - run: pnpm -C terminal sales:shots --check | tee sales-shots.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sales-shots
+          path: |
+            sales-shots.log
+            /tmp/sales-shots-*/
+          if-no-files-found: ignore
+

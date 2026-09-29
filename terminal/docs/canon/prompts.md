@@ -828,3 +828,54 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 > in addition to the actions views, we should have a nother page they can go to, to see their tags as table list board, timeline, and probably graph by default. with some good view options in the graph.
 
 **What happened:** C-100: the Tags page shipped at `/tags` with the graph as the default view and four more views over the same rows.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661869088339?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661869.088339
+
+## 95. Tue Sep 29, 12:34 AM CDT · 2026-09-29 05:34:39 UTC (recorded after 94)
+
+> this needs preview thumbnails. Later i can ask you again about setup for billing. We can do passthrough billing or buy credit packs, if it can autorenew via clerk then its essentially the same as what i want. because pass is about keeping track of the spend and charging at what ever periods is correct either in advance or after. in our case its better if they buy credits first.  set it to 10% markup for now since we're not charigng account fees. this will offset credit card fee and hosting and such i think
+
+**What happened:** (With a screenshot of the hub cards.) Thumbnails went to the hub build. On the sales site (C-101): pay as you go reads "Model cost + your markup. 10% by default", no account fees, credits bought first as refill packs through Clerk (coming soon); your key has no markup.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790660079788909?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790660079.788909
+
+## 96. Tue Sep 29, 12:54 AM CDT · 2026-09-29 05:54:00 UTC (recorded after 94)
+
+> the screenshots on the site need to update to the latest version and abilities.
+
+**What happened:** C-101: every app screenshot on /about and /pricing is retaken from the current app by `pnpm -C terminal sales:shots` (fixed scenes, sample content, no network), with a CI job that fails when a scene breaks.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661240521379?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661240.521379
+
+## 97. Tue Sep 29, 12:56 AM CDT · 2026-09-29 05:56:08 UTC (recorded after 94)
+
+> this needs to match https://freshterminal.ai/pages/freshstack and the icons need to look correct. And it needs to be easier to read the whole thing. And update as needed
+
+**What happened:** C-101: the sales pages take FreshStack's look (its tokens, sans headings, size classes, rounded cards, pills, light and dark), official brand marks on contrast tiles, bigger text in shorter lines, less copy, and current facts.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661368926999?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661368.926999
+
+## 98. Tue Sep 29, 1:00 AM CDT · 2026-09-29 06:00:12 UTC (recorded after 94)
+
+> Sign in for $5 free is confusing. Maybe get $5 Free on signup. or register for $5 free .... or hmmmm not sure.
+>
+> pay as you go, they can also pay what they want. which is one of my favorite features of places like gumroad. and they can increase the markup to support us if they wish :wink:
+
+**What happened:** The wording was superseded by 99. Pay what you want is on /pricing and in the FAQ (C-101): your markup, 10% by default, 5% minimum, with a preview slider marked not wired yet until the billing setting ships.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661612925139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661612.925139
+
+## 99. Tue Sep 29, 1:02 AM CDT · 2026-09-29 06:02:07 UTC (recorded after 94)
+
+> :sparkles: I'm changing the button to "*Sign up — get $5 free*", with "Already have an account? Sign in" underneath.
+>
+> No!!!
+>
+> This is a leadmagnet. if they want $5 free they have to sign in for the 1st time. its only for first time signups.
+>
+> We do need a generous referral/affiliate program tho
+
+**What happened:** C-101: a device that has never signed in sees "Get $5 free" ("New accounts only. Sign in with GitHub, Google or email."), in the app and on the sales pages; after a first sign-in the button is plain "Sign in" (`ft.hasSignedIn`). No "Already have an account?" line. The pricing card says "$5 free when you create your account (once per person)" and the FAQ answers "Who gets the $5?". Once-per-person enforcement and referrals are the billing build's.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661727324539?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661727.324539
+
+## 100. Tue Sep 29, 1:17 AM CDT · 2026-09-29 06:17:08 UTC (recorded after 94)
+
+> make a page called projects should show what the tags look. it can say it auto-tags.  for 03. replay the whole sessoin, undo, redo, branch &amp; merge freely, step by step.
+
+**What happened:** (With a screenshot of the How it works section.) C-101: step 01 shows a real 2x screenshot of the prompt with "make a page called Projects" tagged (action, page) and "It auto-tags what you type"; step 03 reads "Replay the whole session, undo, redo and branch freely, step by step." with "Merge is coming soon." because merge is not built.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790662628273119?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790662628.273119

@@ -1,6 +1,7 @@
 import { ClerkProvider, useAuth, useClerk, useUser } from '@clerk/react';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { takeArrivalIntent } from '../lib/arrival';
+import { markSignedIn } from './firstSignIn';
 import { ROUTER_URL } from '../lib/routerClient';
 import { setSessionTokenProvider } from '../lib/routerFetch';
 import { store } from '../store';
@@ -72,7 +73,12 @@ function ClerkBridge({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('ft:action', onAction);
   }, [clerk]);
 
-  // "Sign in for $5 free" on the sales pages links to ?signin=1: open sign-in once Clerk is ready.
+  // Once anyone signs in on this device, the offer label becomes plain "Sign in" (firstSignIn.ts).
+  useEffect(() => {
+    if (isLoaded && isSignedIn) markSignedIn();
+  }, [isLoaded, isSignedIn]);
+
+  // "Get $5 free" on the sales pages links to ?signin=1: open sign-in once Clerk is ready.
   useEffect(() => {
     if (!isLoaded) return;
     if (takeArrivalIntent('signin') && !isSignedIn) clerk.openSignIn({ appearance: currentClerkAppearance() });

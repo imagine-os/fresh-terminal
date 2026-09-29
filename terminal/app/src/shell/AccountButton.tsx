@@ -1,5 +1,6 @@
 import { UserButton } from '@clerk/react';
 import { useAccount } from '../auth/Account';
+import { hasSignedInBefore, signInLabelKeys } from '../auth/firstSignIn';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { NotWiredButton } from '../ui/NotWiredButton';
@@ -23,10 +24,12 @@ export function AccountButton() {
   }
 
   if (!account.signedIn) {
+    // First sign-up offer: "Get $5 free" until this device has signed in once, then "Sign in".
+    const keys = signInLabelKeys(hasSignedInBefore());
     return (
-      <Tooltip label={account.loaded ? t('account.signIn.tip') : t('account.loading')} align="end">
-        <Button variant="ghost" className="account-signin" onClick={account.signIn} disabled={!account.loaded} data-testid="sign-in" aria-label={t('account.signIn')}>
-          <span className="account-label">{t('account.signIn')}</span>
+      <Tooltip label={account.loaded ? t(keys.tip) : t('account.loading')} align="end">
+        <Button variant="ghost" className="account-signin" onClick={account.signIn} disabled={!account.loaded} data-testid="sign-in" aria-label={t(keys.label)}>
+          <span className="account-label">{t(keys.label)}</span>
         </Button>
       </Tooltip>
     );
