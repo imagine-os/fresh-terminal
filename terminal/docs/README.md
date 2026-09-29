@@ -16,7 +16,7 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-073) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-074) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
 | [canon/prompts.md](canon/prompts.md) | All 69 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
@@ -77,6 +77,7 @@ Read this first.
 | [decisions/0018-skins-and-refine.md](decisions/0018-skins-and-refine.md) | Skins as records and the best-of-3 refine loop with its stop rules | 2026-09-29 |
 | [decisions/0019-playback.md](decisions/0019-playback.md) | Every step is a saved event with parents; replay first, branches and merges later | 2026-09-29 |
 | [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md) | freshterminal.ai on Workers, Clerk anonymous-first, accounts, boxes and ledger mirror in D1 | 2026-09-29 |
+| [decisions/0021-free-credits.md](decisions/0021-free-credits.md) | Free credits enforced by the router: grants, soft prompts, abuse limits, daily cap, cost estimates | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
 
@@ -89,6 +90,7 @@ Read this first.
 | [changelog/0005.md](changelog/0005.md) | Pass 5: skins, the material library and the refine loop, with live results | 2026-09-29 |
 | [changelog/0006.md](changelog/0006.md) | Replay: a playback scrubber over every step of a session; the tagline | 2026-09-29 |
 | [changelog/0007.md](changelog/0007.md) | freshterminal.ai, api.freshterminal.ai, Clerk sign-in and D1 sync, with the live check | 2026-09-29 |
+| [changelog/0008.md](changelog/0008.md) | Free credits enforced by the router, with the live check | 2026-09-29 |
 
 ## 6. Reference
 

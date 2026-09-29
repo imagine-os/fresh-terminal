@@ -69,6 +69,8 @@ jobs:
           curl -sS "${auth[@]}" "$base/workers/domains" | jq -r 'if .success then (if (.result|length)==0 then "  (none)" else (.result[] | "  \(.hostname) -> \(.service)") end) else "  FAILED: \([.errors[]?.message] | join("; "))" end'
           echo "D1 databases (Account D1 read):"
           curl -sS "${auth[@]}" "$base/d1/database" | jq -r 'if .success then (if (.result|length)==0 then "  (none)" else (.result[] | "  \(.name)") end) else "  FAILED: \([.errors[]?.message] | join("; "))" end'
+          echo "Turnstile widgets (Account Turnstile read; needed to script a widget):"
+          curl -sS "${auth[@]}" "$base/challenges/widgets" | jq -r 'if .success then "  ok, \(.result | length) widgets" else "  FAILED: \([.errors[]?.message] | join("; "))" end'
           echo "workers.dev subdomain:"
           curl -sS "${auth[@]}" "$base/workers/subdomain" | jq -r 'if .success then "  \(.result.subdomain).workers.dev" else "  FAILED" end'
 

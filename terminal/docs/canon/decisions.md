@@ -486,3 +486,17 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Justin: "Format and streamline your responses to me better. by the way you used to be able to give me screenshots here in slack thread." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652336159989?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
 - Decided: every reply has at most three parts. *Done*: one line per shipped thing with its link. *Try it*: one line. *Next*: one line with cost and how sure (C-070). Screenshots are posted into the Slack thread as image files (the thread session uploads them from the repo's `docs/qa/` URLs with one caption each), not only as links. No long explanations unless asked.
 - Status: current (a rule from Justin).
+
+**C-074 · 2026-09-29 03:40 · Free credits: the router enforces them; two soft prompts, then sign-in**
+- Justin, 03:14 UTC: "We do need to let them know they have some free credits to start. But we will need to give them 1 or 2 chances before the paywall becomes necessary for them to login. PS: we need to be smart about our own costs, because people might abuse the free start from multiple browser sessions" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651662236069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
+- Decided (numbers chosen by Opus 5.5 from the coordinator's proposal; Justin can change any of them as a Worker var, no code):
+  - **25¢ per anonymous browser**, on a device id the router signs and keeps in D1.
+  - **2 soft prompts**: each time the credits run out, the call still goes through with about 5¢ more and a line says "sign in to keep going ... (1 of 2)". The third time, a paid call needs sign-in. (The coordinator proposed 3; Justin said "1 or 2 chances", so 2.)
+  - **$1 per signed-in account**; boxes made signed out move to D1 on the first sign-in.
+  - **$2 per UTC day** of provider cost across all signed-out use, then signed-out paid calls stop for the day.
+  - Abuse brakes: 3 new devices per IP and 10 per /24 network per day get a grant; 30 paid calls a minute per IP, 120 per network; signed out means default models, no escalation, requests under 60 KB.
+  - Own key (BYOK) is never blocked.
+  - Names people see: "free usage" for the router-paid mode, "your key" for bring-your-own (Justin, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)); internal ids unchanged.
+- Cost estimates: one chat turn ≈ 0.6¢ (fairly sure, measured live), so 25¢ ≈ 40 turns; one device at most ≈ 37¢ (fairly sure); all signed-out use at most $2 a day, ≈ $60 a month (sure for the cap, rough guess for how fast it fills); signed-in at most $100 in total on the development instance (sure).
+- Not wired: Turnstile (the token has no Turnstile permission), buying more credits, a daily cap for signed-in accounts (needed before production).
+- Status: current. Repo: [0021-free-credits.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0021-free-credits.md), changelog 0008. The tray shows these numbers through `GET /credits` and `useCredits()` (Justin's session, C-071, C-072).

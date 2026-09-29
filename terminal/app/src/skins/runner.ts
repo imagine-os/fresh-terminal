@@ -6,6 +6,7 @@ import { compressDataUrl, putBlob } from '../lib/blobs';
 import { newId } from '../lib/ids';
 import { probeRouter } from '../lib/routerHealth';
 import { store } from '../store';
+import { routerFetch } from '../lib/routerFetch';
 
 /**
  * Runs one skin request end to end: an instant draft, Jev's path choice,
@@ -100,7 +101,7 @@ function ledger(entries: EntryDraft[]): number {
 }
 
 async function post<T>(url: string, body: unknown, signal: AbortSignal): Promise<T> {
-  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal });
+  const response = await routerFetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal }, { paid: true });
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     throw new Error(`${new URL(url).pathname} HTTP ${response.status}${text ? `: ${text.slice(0, 160)}` : ''}`);

@@ -1,6 +1,7 @@
 import { ClerkProvider, useAuth, useClerk, useUser } from '@clerk/react';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ROUTER_URL } from '../lib/routerClient';
+import { setSessionTokenProvider } from '../lib/routerFetch';
 import { store } from '../store';
 import { CloudSync, type SyncStatus } from '../sync/cloud';
 import { CLERK_PUBLISHABLE_KEY, clerkEnabled, clerkInstanceKind } from './clerkConfig';
@@ -54,6 +55,25 @@ function ClerkBridge({ children }: { children: ReactNode }) {
   const engine = useRef<CloudSync | null>(null);
   const tokenRef = useRef(getToken);
   tokenRef.current = getToken;
+
+  // The Sign in action (ft:action auth.signIn) opens Clerk from anywhere: a reply, the tray, voice.
+  useEffect(() => {
+    const onAction = (event: Event) => {
+      const id = (event as CustomEvent<{ id?: string }>).detail?.id;
+      if (id === 'auth.signIn') clerk.openSignIn({});
+      if (id === 'auth.signOut') void clerk.signOut();
+      if (id === 'sync.now') void engine.current?.sync();
+    };
+    window.addEventListener('ft:action', onAction);
+    return () => window.removeEventListener('ft:action', onAction);
+  }, [clerk]);
+
+  // Paid router calls carry the session token when signed in, so the account's credits are used.
+  useEffect(() => {
+    setSessionTokenProvider(isLoaded && isSignedIn ? () => tokenRef.current() : null);
+    window.dispatchEvent(new CustomEvent('ft:credits-changed'));
+    return () => setSessionTokenProvider(null);
+  }, [isLoaded, isSignedIn]);
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !userId) {

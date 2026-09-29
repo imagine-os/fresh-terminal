@@ -75,6 +75,18 @@ describe('CloudSync', () => {
     expect(a.store.uiState(box.id).nav.find((item) => item.id === navA.id)?.label).toBe('From B');
   });
 
+  it('uploads every box made while signed out on the first sign-in', async () => {
+    const { device } = setup();
+    const a = device('anon_a');
+    a.store.createBox('One');
+    a.store.createBox('Two');
+    a.store.createBox('Three');
+    await a.sync.sync();
+    const b = device('anon_b');
+    await b.sync.sync();
+    expect(b.store.getSnapshot().boxes.map((box) => box.name).sort()).toEqual(['One', 'Three', 'Two']);
+  });
+
   it('reports an error status instead of throwing when signed out', async () => {
     const store = new LocalStore('anon_x');
     const statuses: SyncStatus[] = [];

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import type { D1Database, D1PreparedStatement, D1Result } from '../d1';
@@ -7,7 +7,9 @@ import type { D1Database, D1PreparedStatement, D1Result } from '../d1';
 export function fakeD1(): D1Database {
   const sqlite = new DatabaseSync(':memory:');
   const dir = resolve(new URL('.', import.meta.url).pathname, '../../migrations');
-  sqlite.exec(readFileSync(resolve(dir, '0001_init.sql'), 'utf8'));
+  for (const file of readdirSync(dir).filter((name) => name.endsWith('.sql')).sort()) {
+    sqlite.exec(readFileSync(resolve(dir, file), 'utf8'));
+  }
   const toSql = (query: string) => query.replace(/\?(\d+)/g, '?');
   const statement = (query: string, values: unknown[] = []): D1PreparedStatement => {
     // ?N placeholders may repeat; expand them positionally.
@@ -18,8 +20,8 @@ export function fakeD1(): D1Database {
       first: async <T>() => (sqlite.prepare(toSql(query)).get(...args()) as T | undefined) ?? null,
       all: async <T>() => ({ results: sqlite.prepare(toSql(query)).all(...args()) as T[], success: true }),
       run: async () => {
-        sqlite.prepare(toSql(query)).run(...args());
-        return { results: [], success: true } as D1Result<unknown>;
+        const info = sqlite.prepare(toSql(query)).run(...args());
+        return { results: [], success: true, meta: { changes: Number(info.changes) } } as D1Result<unknown>;
       },
     };
   };

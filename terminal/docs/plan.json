@@ -592,6 +592,27 @@
       "pass": 6
     },
     {
+      "id": "free-credits",
+      "title": "Free credits enforced by the router: signed device ids, grants, 2 soft prompts, IP and /24 limits, daily anonymous cap, GET /credits + useCredits()",
+      "status": "done",
+      "depends_on": [
+        "d1-sync",
+        "clerk-dev"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "turnstile",
+      "title": "Turnstile before the first free call (needs Account Turnstile Edit on the Cloudflare token)",
+      "status": "todo",
+      "depends_on": [
+        "free-credits"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
       "id": "stripe-settlement",
       "title": "Stripe settlement for the ledger balance",
       "status": "todo",

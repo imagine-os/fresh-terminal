@@ -8,12 +8,18 @@ name: sync-smoke
 
 on:
   workflow_dispatch:
+  # After every router deploy, so a broken sign-in, sync or credits path shows up at once.
+  workflow_run:
+    workflows: [router-deploy]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
   smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
@@ -57,10 +63,27 @@ jobs:
           echo "POST /sync/ledger: $(curl -sS "${auth[@]}" -X POST "$API/sync/ledger" -d "{\"entries\":[$entry]}" | jq -c '{received, written}')"
           echo "GET /sync/ledger: $(curl -sS "${auth[@]}" "$API/sync/ledger?since=0" | jq -c '{entries: (.entries|length)}')"
           echo "anonymous /sync/boxes: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "$API/sync/boxes")"
+          echo "GET /credits (signed in): $(curl -sS "${auth[@]}" "$API/credits" | jq -c '{signed_in, mode, granted_micro, remaining_micro}')"
+      - name: Anonymous credits on the live router (one real call, about half a cent)
+        id: anon
+        run: |
+          origin=(-H 'Origin: https://freshterminal.ai' -H 'Content-Type: application/json')
+          echo "paid call without a device: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[]}')"
+          device=$(curl -sS "${origin[@]}" -X POST "$API/credits/device" | jq -r '.device // empty')
+          [ -n "$device" ] || { echo "device issue failed"; exit 1; }
+          echo "device_id=${device%%.*}" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$device"
+          echo "GET /credits (device): $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{mode, granted_micro, remaining_micro, soft_prompts_left, limited}')"
+          code=$(curl -sS -o "$RUNNER_TEMP/route.txt" -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"Say hi in two words.","chips":[]}')
+          echo "POST /route (device): HTTP $code, events: $(grep -c '^event:' "$RUNNER_TEMP/route.txt"), done: $(grep -A1 '^event: done' "$RUNNER_TEMP/route.txt" | tail -1 | sed 's/^data: //' | jq -c '{ok, served_model, price: .entry.price_micro, cost: .entry.cost_micro}')"
+          sleep 3
+          echo "GET /credits after the call: $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{spent_micro, remaining_micro}')"
+          echo "anonymous model choice: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[],"model":"anthropic/claude-sonnet-5.5"}')"
       - name: Clean up (D1 rows, Clerk user)
         if: always() && steps.user.outputs.uid != ''
         env:
           UID_: ${{ steps.user.outputs.uid }}
+          DEVICE_ID: ${{ steps.anon.outputs.device_id }}
         run: |
           cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
           base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
@@ -71,4 +94,7 @@ jobs:
             ok=$(curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "{\"sql\":\"DELETE FROM $table WHERE $col = ?\",\"params\":[\"$acct\"]}" | jq -r '.success')
             echo "delete $table rows: $ok"
           done
+          if [ -n "$DEVICE_ID" ]; then
+            echo "delete smoke device: $(curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "{\"sql\":\"DELETE FROM anon_devices WHERE id = ?\",\"params\":[\"$DEVICE_ID\"]}" | jq -r '.success')"
+          fi
           echo "delete Clerk user: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$UID_" | jq -r '.deleted')"
