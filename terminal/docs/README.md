@@ -100,6 +100,7 @@ Read this first.
 | [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas (`/canvas`) | 2026-09-28 |
 | [brand/registry.md](brand/registry.md) | Every brand mark in the repo: file, source, licence, date checked; what is still missing | 2026-09-29 |
 | [qa/responsive-latest.md](qa/responsive-latest.md) | The latest responsive check: 28 pages and widths (landing, box, canvas, replay), 360 to 3840 | 2026-09-29 |
+| [qa/skins/](qa/skins/) | Pass 5 live skin runs (before and after), the refine block at 390 and 1280, and three library "Open terminal" boxes | 2026-09-29 |
 
 Data files: [canvas/cards.json](canvas/cards.json) (master canvas seed; add with `pnpm -C terminal canvas:add`), [prompts/starters.json](prompts/starters.json) (starter prompts), `qa/*.png` (screenshots), [qa/ledger-sample.json](qa/ledger-sample.json).
 
