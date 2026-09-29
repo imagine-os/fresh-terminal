@@ -153,11 +153,13 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 **C-030 · 2026-09-29 01:28 · Skins and materials: instant draft, then Jev picks the route**
 - Decided: asking to skin something gives a quick draft in the same reply, from colors and styles. Jev then picks the best real route: custom code, a generated image, an image search or a free library. Rounds run in the background and only replace what's on screen if Jev scores them better. Each round has a small cost cap and can be undone.
 - Status: proposed (pass 5). The "up to three rounds" in this reply is superseded by C-031's stop rules.
+- 2026-09-29: **built in pass 5.** Draft from the material library or a colour tint, then Jev picks one of five paths: library, procedural CSS, colour tokens, image search (Openverse, licence recorded) or image generation (`openai/gpt-5-image-mini`). Repo: [0018-skins-and-refine.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0018-skins-and-refine.md).
 
 **C-031 · 2026-09-29 01:28 · Refine loop (best-of-3) is the core loop for anything that can get better**
 - Justin: "make 3 versions, choose best, make 3 upgrades, choose best … Of course set an end to the loop when appropraite."
 - Decided: each round makes three variants from the current best. Jev scores them; the winner becomes the new base. Stops at a target score, after two rounds with no gain, after five rounds, or at a small cost cap. You see three thumbnails with scores per round and can overrule the pick. Applies to skins, Draw layouts, pages and copy.
 - Status: proposed (ships with pass 5).
+- 2026-09-29: **built in pass 5** as `refine()` in `shared/src/refine/loop.ts`, used by skins. Scores come from a vision description plus a Jev score on five rungs. Stop rules as decided, with the 3¢ cap checked before each round from per-variant estimates in `router/rules.json`. Layouts, pages and copy do not use it yet.
 
 ## Money
 
@@ -247,11 +249,13 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Justin bought freshterminal.ai on Cloudflare Registrar for 2 years ("OK i paid $160 for 2 years freshterminal.ai on cloudflair").
 - Plan: freshterminal.ai serves the app from a Cloudflare Worker with static assets. api.freshterminal.ai serves the router. GitHub Pages stays as a mirror.
 - Status: current as the decision; **not live yet**. Supersedes C-033b; partly supersedes C-010.
+- 2026-09-29: **built** (C-064): app Worker `fresh-terminal-app` on freshterminal.ai (www redirects), router on api.freshterminal.ai, GitHub Pages kept as the fallback. Live status in [state.md](state.md).
 
 **C-046 · 2026-09-29 · Cloudflare automation runs from CI with an API token**
 - Decided: automation uses a Cloudflare API token held as a CI secret, not the laptop OAuth MCP setup, so Justin never has to open Cloudflare ("Make it so i dont need to go to cloudflare and you can do everything please").
 - Requested extra token scopes: Zone DNS Edit, Zone Read, Account D1 Edit, all zones.
 - Status: current. Whether the token has those scopes is not verified here.
+- 2026-09-29 02:31 UTC: **verified** by workflow `infra-verify` (run 36512972684): active user token, zone freshterminal.ai visible, DNS, Worker routes, Workers and D1 readable. Write access proven by the deploys (custom domains, D1 create).
 
 **C-047 · 2026-09-29 · Account data moves to Cloudflare D1 behind the router**
 - 2026-09-29 02:07: proposal C-052 would publish SpacetimeDB now instead, once Justin adds `SPACETIMEDB_TOKEN`. Until he decides, this entry stands.
@@ -259,12 +263,14 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Why: avoids another sign-up; the router already runs on Cloudflare.
 - SpacetimeDB stays the plan for live multiplayer and presence.
 - Status: current, and Justin can override it. Partly supersedes C-004c. Not built yet.
+- 2026-09-29: **built** (C-066): D1 database `fresh-terminal`, accounts, boxes and a ledger mirror, synced for signed-in people only.
 
 **C-048 · 2026-09-29 · Auth is Clerk, starting on development instance keys**
 - Decided: start with the Clerk development instance. Keys are held as the secrets `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` (names only; values never in the repo or Slack).
 - Moving to production later is one click in the Clerk dashboard, plus DNS records we add through the Cloudflare token (C-046).
 - Why: Justin wants to use his own Fresh Terminal account personally and start connecting it to things ("i'd like to start using my terminal account personally").
 - Status: current. Wiring not built yet. Builds on C-009.
+- 2026-09-29: **built** on the development instance (C-065). Verified 02:31 UTC: `pk_test_` / `sk_test_`, Frontend API relevant-flea-5813.clerk.accounts.dev, JWKS reachable, 0 users. "Moving to production is one click" was too short: it also needs Google and GitHub OAuth credentials of our own; steps in C-065.
 
 **C-049 · 2026-09-29 · No Liveblocks, no Colyseus: SpacetimeDB plus our own house rules**
 - Justin asked: "do we need liveblocks or colyseus for this? or does spacetimedb handle realtime, and the rest of the rules we can study other tools like liveblocks and make our own simpler cleaner rules?"
@@ -328,6 +334,33 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Decided: the Canon and the docs wiki (`terminal/docs`) are updated in the same commit as every pass. Plain dated lines, one fact per line. Superseded lines are kept and marked, never deleted. Each page links to the Slack message that caused it. One start-here index (`terminal/docs/README.md`) and an `llms.txt` for AI readers; the same pages serve people and agents.
 - Status: current (a rule from Justin). Written into the root README and [README.md](README.md). Repo prompt: 0015.
 
+## Domain, sign-in and accounts (2026-09-29, infra pass)
+
+**C-064 · 2026-09-29 02:50 · freshterminal.ai runs on a Worker; the router answers on api.freshterminal.ai**
+- Justin, 02:28 UTC: "i already did cloudflare clerk" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648903521149?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
+- Decided: the app is Worker `fresh-terminal-app` (`terminal/site`) with static assets and SPA fallback, on custom domains freshterminal.ai and www.freshterminal.ai; the Worker sends www to the apex with a 301. The router Worker adds custom domain api.freshterminal.ai. Custom domains make Cloudflare create the DNS records and certificates, so there is no DNS step. Both keep their workers.dev URLs; GitHub Pages keeps its own build as the fallback.
+- The app picks its router by where it is served from: api.freshterminal.ai on the domain, the workers.dev router everywhere else, so Pages is not moved until the domain is proven.
+- Deploys: `site-deploy.yml` (app) and `router-deploy.yml` (router) on push to main and on demand, from GitHub Actions with `CLOUDFLARE_API_TOKEN`.
+- Status: current. Repo: [0020-domain-clerk-d1.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0020-domain-clerk-d1.md). Builds C-045 and C-046.
+
+**C-065 · 2026-09-29 02:50 · Sign-in is Clerk, anonymous-first, on the development instance for now**
+- Decided: everyone starts signed out and everything works as before. A **Sign in** button in the header opens Clerk; signed in adds cloud sync. The app uses `@clerk/react` (Clerk's current React package). The router checks the Clerk session token itself, without a network call (the instance's public key is pushed as `CLERK_JWT_KEY` by the deploy; `CLERK_SECRET_KEY` is the fallback). Only `/me` and `/sync/*` need a session.
+- Limit (Clerk docs, read 2026-09-29): a development instance works from any domain, including freshterminal.ai, but shows a "Development mode" badge, holds at most 100 users, and should not carry real users. Its users cannot be moved to production.
+- Before inviting anyone, Justin does these steps once (about 15 minutes):
+  1. https://dashboard.clerk.com → open the Fresh Terminal app → click **Development** at the top → **Create production instance** → clone the development settings.
+  2. Domain: `freshterminal.ai`.
+  3. **SSO connections**: Google and GitHub need our own OAuth apps in production. Google: https://console.cloud.google.com/apis/credentials (OAuth client, web; redirect URI as shown by Clerk). GitHub: https://github.com/settings/developers → New OAuth App (callback URL as shown by Clerk). Paste each client id and secret into Clerk.
+  4. Production **API keys** page in Clerk → replace the GitHub secrets `CLERK_PUBLISHABLE_KEY` (`pk_live_…`) and `CLERK_SECRET_KEY` (`sk_live_…`) at https://github.com/imagine-os/fresh-terminal/settings/secrets/actions.
+  5. Run the `router-deploy` and `site-deploy` workflows (https://github.com/imagine-os/fresh-terminal/actions). `site-deploy` then reads the DNS records Clerk wants (clerk., accounts., clkmail., clk._domainkey., clk2._domainkey.) and creates them in Cloudflare, DNS only. Nothing to type into Cloudflare.
+  6. Back in the Clerk dashboard: wait for the **Domains** checks to pass, then press **Deploy certificates**.
+- Status: current. Development instance live; production not started (waiting on Justin). Builds C-048 and C-009.
+
+**C-066 · 2026-09-29 02:50 · Signed-in accounts, boxes and a ledger mirror live in D1; signed out stays in the browser**
+- Decided: D1 database `fresh-terminal`, created by the deploy if missing. Tables: `accounts` (clerk_user_id, plan, created_at, updated_at), `boxes` (id, account_id, name, state_json, created_at, updated_at, deleted_at), `ledger_entries` (the chained entry plus account_id and updated_at). Every row keeps a stable id and `updated_at` for later multiplayer.
+- Sync rule: last writer wins per box on `updated_at`; a box edited on this device since the last sync wins over an older server copy; an untouched box takes the newer server copy. Nobody can overwrite or read another account's box. The ledger mirror is append-only.
+- What syncs: each box's name, menu, pages, layout, theme, style, skins and glossary, and the ledger. Transcript lines stay in the browser for now (not wired yet). Sync runs on sign-in, after edits and when the window gets focus; it is not realtime.
+- Status: current. Builds C-047. SpacetimeDB or Durable Objects remain the plan for live multiplayer (C-049).
+
 ## Principles recorded as decisions
 
 **C-035 · 2026-09-28 22:33 · A plain-language house dialect**
@@ -368,3 +401,130 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Owner's one-time step: install `lk`, run `lk cloud auth` (browser sign-in, picks the project, mints a key), then copy the three values into the repo secrets. After that no dashboard visits are needed.
 - Status: decided, not started. Depends on the router exposing `/mcp` (see the integrations plan in the thread, 02:07 UTC).
 
+
+## Replay and the tagline (2026-09-29)
+
+**C-058 · 2026-09-29 02:29 · Every step is a saved event; replay first, branches and merges later**
+- Justin: "i need a playback scrubber that then evolves to have branching and merging capability if needed to watch through every step of our interactions with a terminal session please. Everything saved beatuifully. in the future we can save video adn audio and whatever else also, for now get us started and we can evolve as we grow" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648981706729?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: a session is a list of steps, each with `parent_ids` (a list, so a branch or a merge fits without a new shape) and a `branch_id` (only `main` today). Steps are derived from what the store already records (sessions, lines, edit batches, undo/redo ledger entries), so every existing box already replays from its first line. The interface at any step is rebuilt by reversing later edits with their stored inverses, never stored twice. Replay is read-only. One JSON file (`timeline.v0`) saves branches, steps, lines and edits. Media (audio, video, pointer) will be steps of new kinds pointing at media rows (C-053), on the same wall-clock lane.
+- Surface: `/box/<id>/play?step=N`, key `P`, replay button in the top bar; scrubber with lane marks, range, transport, speed, save, "Branch from here" (not wired yet).
+- Status: current. Shipped 2026-09-29 (changelog 0006, decision 0019). Branching and media are listed as not wired (`playback.branch`, `playback.media`).
+
+**C-059 · 2026-09-29 02:29 · Tagline: "Evolve as we grow."**
+- Justin: ""evolve as we grow" is great tagline" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), eleven seconds after the replay ask.
+- Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
+- Status: current.
+
+## Pass 5 additions (2026-09-29)
+
+**C-060 · 2026-09-29 02:46 · "Open terminal" in the library opens a new box that is already skinned**
+- Justin: "open terminal from the library should simply take us to a fresh terminal window thats arleady skinned." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649998972349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: each of the 17 library entries links to `box/new?theme=<built theme>&skin=<material>&from=<library id>` (relative, so it works under `/fresh-terminal/`). The new box opens with that theme and the material as the stage skin, with no toast and no screen in between. The mapping lives in `shared/src/skins/terminals.ts` and a test keeps the page in step with it.
+- Terminals whose look is not fully built open the closest built look with a line naming what is not wired yet: Bezel and Glass (moving bezel), You as the Camera (camera reflection), Tilt Window (phone tilt), Koi Pond (the live 3D pond inside a box; its own page stays linked), Night Sky (drifting stars).
+- Status: current. Built in pass 5.
+- Found then: the old links were `/box/new?...` from the site root, which on GitHub Pages leaves `/fresh-terminal/` and cannot open the app.
+
+**C-061 · 2026-09-29 02:47 · Ontology: one edge per relation, named both ways**
+- Asked: "ontology should be a big part of how you think. often 2 way connections have different meaning in each direction" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: each relation is stored once as an edge with a forward label and an inverse label ("Hoy employs Sergio" / "Sergio works at Hoy"). Some relations are symmetric ("partners with"). Every edge carries its source and date. Chips and Jev share one list of types.
+- Status: proposed.
+
+**C-062 · 2026-09-29 02:47 · Connectors: one managed OAuth layer that can also be self-hosted**
+- Asked: "How will we handle connectors for thingsl ike dropbox, google drive, email, whatsapp, sms, etc." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: one managed OAuth connector layer that can also be self-hosted (so it fits ours, your keys and self-host), chosen after verifying the options. First set: Google Drive, Dropbox and email over IMAP. WhatsApp and restricted Gmail scopes need vendor approval (Meta, Google) and come later.
+- Status: proposed. No connector layer chosen or verified yet.
+
+**C-063 · 2026-09-29 02:47 · Migration: originals kept, records mapped with source ids, duplicates flagged**
+- Asked: "migration is a huge ability we need to build out" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: raw originals go to storage untouched. Records are mapped onto the ontology (C-065) with their source ids, so an import can be re-run. Possible duplicates are flagged for review, never merged silently. First formats: Google Takeout, Dropbox, mbox email and WhatsApp chat export. Between Gigs and Company OS are the first real imports.
+- Status: proposed.
+## Nesting and the logo set (2026-09-29)
+
+**C-067 · 2026-09-29 02:44 · FreshStack nests a piece under what it runs through**
+- Justin: "consider jev is a subset of open router if thats where its being used . think of organizing with nesting as appropraite." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: a stack piece may name a `parent`. A child is a subset of its parent's account, key and exit, and renders inside the parent's card under "Through <parent>". Today: Jev under OpenRouter; Gemini Live (the default voice, C-023 as updated 02:29) and OpenAI Realtime (optional) under LiveKit. Cards show the piece's registered mark.
+- Status: current (this commit). The ontology behind it (links with a name per direction) is the other session's proposal from the same message.
+
+**C-068 · 2026-09-29 02:44 · Every logo ships as a set of configurations; heavier layers are costed**
+- Justin: "we're going to need the Logo system to do lightmode and dark mode and transparent and more as well as each of the configurations of that logo like wide, icon only, etc. we might even consider using an inexpensive vectororizer tool as needed, and or 3D .... each step is a cost question" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: one colour source per mark generates six transparent SVG files (colour, mono, light, dark, wide, stacked) with `scripts/brand-variants.mjs`; `app/public/brand/index.json` is the manifest chips and cards read. Wide and stacked are our own icon + name lockups, never presented as the vendor's wordmark. Later layers in cost order: raster export (free, Playwright), vectorizing raster-only logos (free potrace/vtracer first, paid Vectorizer.AI when quality matters, cost on the ledger), 3D and motion for our own marks only (best-of-3, C-031), official wordmarks and brand kits.
+- Status: current. 43 marks × 6 files generated 2026-09-29; the later layers are not automated yet (skill §4b).
+
+## Composer fixes (2026-09-29)
+
+**C-069 · 2026-09-29 02:54 · Modifier keys belong to the browser; the visible cursor follows the caret; a box can be removed**
+- Justin: "command v is triggering the voice tool in terminal. the voice tool doesnt seem to work. ... Paste did not paste. There were issues moving the cursor around." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)) and "i cant seem to remove a box from the left side." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Found: the shortcut handler let Ctrl/Cmd+key inside the composer fall through to the single-key shortcuts, so Cmd+V toggled voice and swallowed the paste. The themed block cursor was always drawn at the end of the text while the browser's caret was hidden, so moving the caret backwards was invisible.
+- Decided: Ctrl/Cmd combinations are never shortcuts of ours (Ctrl/Cmd+Z on an empty composer stays the one exception). The themed cursor shows only while the caret is at the end; anywhere else the browser's caret shows. Spell-check is on in the writing pad. Each box row in the sidebar has a remove control (with a confirm); removing a box deletes its lines, sessions, menu, pages, edits and box UI, and keeps its ledger entries (the chain is append-only).
+- Queued from the same messages: a formatted page that grows above the writing pad as you type, editable from either side; a top-bar tools tray with the menu, tools and sign-in behind it, draggable back; multi-word phrase chips ("make sure"), tagging "learn" and "tagged"; a small timer and model line per reply (the structured header already shows model, seconds and cost for edit and schedule replies).
+- Status: fixes shipped 2026-09-29 (this commit). Queued items: in progress, Justin's session.
+
+**C-070 · 2026-09-29 03:10 · Cost estimates with a level of certainty, as a rule**
+- Justin: "include cost estimates and level of sureity for stuff." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651442483669?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: proposed work and anything that spends shows an estimate and how sure it is: `sure` (fixed or free), `fairly sure` (per-step costs measured on live runs), `rough guess` (not measured). After it runs, the actual cost is shown next to the estimate.
+- First use (pass 5): a skin run shows "Estimate ≈X¢ (low–high), certainty" as soon as Jev has picked the path, before any round, and "actual Y¢" when it stops. Per-variant costs and typical rounds live in `router/rules.json` → `refine`.
+- First use on a page (Justin's session, 03:20): the estimate block on `pages/brands.html` for the 12 missing marks (about $0.40 in model calls, $0 vendor fees, about 15 minutes; likely for 9, unsure for OpenAI, Slack and W3C whose terms may keep them as text marks) with a "Start in the terminal" button that fills the prompt box. Running the gathering from the page itself is not wired yet; its real cost lands on the ledger.
+
+## The bar, the page and the estimate rule (2026-09-29)
+
+**C-071 · 2026-09-29 03:15 · Tools live in a tray; the bar keeps the counter; the pad grows a page; no turn ends in silence**
+- Justin: "hid everything but the money counter behind a tools icon in the top bar, make it easy to drag or add tools back to the top bar as needed" (screenshot, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)); "menu should probably be in the top bar and even hidden as a tool" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)); "writing make a page called notes removed ny prompt box from the bottom of the terminal" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651360900509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)); "i wanted to see my text spellcheck and format itself automatically, above where i'm writing. Like a type writer has the page growing taller".
+- Decided: the top bar shows the brand, the money counter, the sign-in slot and one tray button. Every other tool (new box, canvas, library, replay, sidebar, theme, language, settings, dev mode) sits in the tray; a pin, or a drag onto the bar, brings a tool back, and the pinned list is a preference (`pinnedTools`). The box menu lives in the tray too; the sidebar keeps the boxes.
+- Decided: a page of a box opens inside the box view, so the writing pad stays; sending from a page returns to the transcript so the reply is seen.
+- Decided: once a draft is long (80 characters or a second line) a Page grows above the pad: the same words, formatted as you type (sentence capitals, the pronoun I) with chips, length-preserving so chip positions hold. Clicking a paragraph puts the caret there in the pad. Editing on the page itself is next; the pad stays the source of truth.
+- Decided: a thrown turn leaves a visible system line ("No reply: the turn failed"); the stream client already reports dropped streams. Phrase chips: "make sure", "set up", "sign in" and similar read as one action; "learn", "tag", "tagged", "teach", "remember" are tagged wherever they appear.
+- Status: current (this commit).
+- Status: current (a rule from Justin).
+
+**C-072 · 2026-09-29 03:25 · First run: say where the work lives, offer the file, keep the bar optional**
+- Justin: "Think about the 1st time user experience. they need to know the info is saving to their browser but they need an account to save to the cloud, or maybe they can export their session? ... The top right corner can have an icon with options to turn things on and off like top and left sidebar. and maybe an icon to the right that represents save or login" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651662236069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided (Justin's session): a first-run line above the transcript, "Saved in this browser. Sign in to save to the cloud and open it on any device." with the free-credits counter slot (marked not wired until the router's `/credits` lands), an "Export this session" button and a dismiss. Export writes one `session.v0` file: the box, its timeline (steps, lines, edits), its interface records and its ledger entries; also in the tray. The tray gains "Hide the top bar" (key `H`; a small "Show the top bar" chip stays on screen). Instant local replies carry the same small line as router replies (intent · local · time · $0).
+- The other session owns the rest of the same message: free credits enforced on the router, two soft sign-in prompts then sign-in required, BYOK never blocked, abuse limits (signed device id, IP and network rate limits, a daily global cap). Proposed defaults quoted to Justin as proposed, not decided: 25¢ per anonymous device, $2/day global cap.
+- Status: current (this commit) for the notice, export, bar switch and local meta line; the credits figure is a placeholder.
+
+**C-073 · 2026-09-29 03:25 · Replies to Justin: Done / Try it / Next, with images in the thread**
+- Justin: "Format and streamline your responses to me better. by the way you used to be able to give me screenshots here in slack thread." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652336159989?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: every reply has at most three parts. *Done*: one line per shipped thing with its link. *Try it*: one line. *Next*: one line with cost and how sure (C-070). Screenshots are posted into the Slack thread as image files (the thread session uploads them from the repo's `docs/qa/` URLs with one caption each), not only as links. No long explanations unless asked.
+- Status: current (a rule from Justin).
+
+**C-074 · 2026-09-29 03:40 · Free credits: the router enforces them; two soft prompts, then sign-in**
+- Justin, 03:14 UTC: "We do need to let them know they have some free credits to start. But we will need to give them 1 or 2 chances before the paywall becomes necessary for them to login. PS: we need to be smart about our own costs, because people might abuse the free start from multiple browser sessions" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651662236069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
+- Decided (numbers chosen by Opus 5.5 from the coordinator's proposal; Justin can change any of them as a Worker var, no code):
+  - **25¢ per anonymous browser**, on a device id the router signs and keeps in D1.
+  - **2 soft prompts**: each time the credits run out, the call still goes through with about 5¢ more and a line says "sign in to keep going ... (1 of 2)". The third time, a paid call needs sign-in. (The coordinator proposed 3; Justin said "1 or 2 chances", so 2.)
+  - **$1 per signed-in account**; boxes made signed out move to D1 on the first sign-in.
+  - **$2 per UTC day** of provider cost across all signed-out use, then signed-out paid calls stop for the day.
+  - Abuse brakes: 3 new devices per IP and 10 per /24 network per day get a grant; 30 paid calls a minute per IP, 120 per network; signed out means default models, no escalation, requests under 60 KB.
+  - Own key (BYOK) is never blocked.
+  - Names people see: "free usage" for the router-paid mode, "your key" for bring-your-own (Justin, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)); internal ids unchanged.
+- Cost estimates: one chat turn ≈ 0.6¢ (fairly sure, measured live), so 25¢ ≈ 40 turns; one device at most ≈ 37¢ (fairly sure); all signed-out use at most $2 a day, ≈ $60 a month (sure for the cap, rough guess for how fast it fills); signed-in at most $100 in total on the development instance (sure).
+- Turnstile: an invisible check before a browser gets its device id is built and set up by the deploy through the Cloudflare API, but **not switched on**: the token can read Turnstile widgets and not create them ("Authentication error", 2026-09-29 03:48 UTC). Waiting on Justin: add Account → Turnstile → Edit to the token at https://dash.cloudflare.com/profile/api-tokens. Also not wired: buying more credits, a daily cap for signed-in accounts (needed before production).
+- Status: current. Repo: [0021-free-credits.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0021-free-credits.md), changelog 0008. The tray shows these numbers through `GET /credits` and `useCredits()` (Justin's session, C-071, C-072).
+
+**C-075 · 2026-09-29 03:30 · A super clean starting point**
+- Justin: "the shortcuts may not work right because we're typing in the prompt box ... We call it free useage. instead of our key. the drop down is ugly. the left sidebar can be hidden by defalt, maybe just a little icon top left for it to open. and then it has its own settings dropdown. Make the starter screen even cleaner. I'm not even sure the starter prompts are needed right now. but we should have a nice way to turn them on, maybe just a setting in the prompt box. Right now the goal is to get the starting point super super clean" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: Alt/Option + key runs every shortcut while typing in the prompt box; bare keys still type; Esc leaves the box; Ctrl/Cmd stays the browser's. The money counter says "free usage" (was "our key"). The left sidebar is hidden everywhere by default (the layout dialect's default changed); a small boxes icon at the top left opens it, and it has its own settings menu (show the box menu here; keep the sidebar open). Starter prompts and the start-screen hints (how-it-works cards, doodles) are off by default; two switches in the prompt box's hint row turn them on. The tray is calmer: pins show on hover, one footer line for the hints.
+- Status: current (this commit).
+
+**C-076 · 2026-09-29 03:37 · The export opens with human text and comes back in as a box**
+- Justin: "put some human text at the top of the export , including some askii art or something cool so its branded to us and tells them what they need to know to come back, and even import into the fresh terminal" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653063786309?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: the session file (`session.v0`, JSON) starts with a `readme`: our mark in plain characters, the tagline, what the file holds, "it is yours", the address to come back to, and how to import (tools icon → Import a session, or drag the file onto the terminal). Import rebuilds the box from its final state with new ids ("<name> (imported)"): lines, pages, menu (parents and page targets remapped), layout, theme, glossary. The edit history and ledger entries stay in the file for reference. The first-run line now reads the router's `/credits` (C-074) and shows "Free usage left: $x of $y"; when the router does not meter it says nothing, when it cannot answer it says the counter shows once the router answers.
+- Status: current (this commit).
+
+## Product Hunt (2026-09-29)
+
+**C-077 · 2026-09-29 03:55 · Launch Fresh Terminal on Product Hunt first; FreshStack is the story, not the listing**
+- Justin: "start thinking about the product hunt strategy. you can make a page for product hunt strategy" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Found (Product Hunt's help center, read 2026-09-29): featuring is editorial (Useful, Novel, High Craft, Creative), and templates, boilerplates and waitlists aren't featured (guidelines 2026-03-10). One root domain gets one launch per six months, plus a significant update (2026-07-07). Asking for upvotes can drop the ranking or remove the launch from the homepage. Points are upvotes plus meaningful engagement such as comments (2025-07-10). Launch at 12:01 AM Pacific, post it yourself, and schedule up to a month ahead. Coming Soon pages ended around August 2025 (reported by makers; not confirmed by Product Hunt).
+- Proposed: launch Fresh Terminal with tagline "The terminal that rebuilds itself when you ask" (option A of three). FreshStack goes in the maker's comment and on GitHub, with a Show HN on a different day. Its own Product Hunt launch comes later, only on its own domain and as a working product. Realtime multiplayer is saved for the second launch. No paid hunter, no upvote asks.
+- Blockers before scheduling: Clerk production instance (C-065; development is capped at 100 users), free usage with a per-device cap (enforced 03:40 UTC, C-074) and a launch-day spend limit on our key (the $2/day normal cap is too low for launch traffic), the minimal first screen (shipped, C-072, C-075), and a licence on the repo; three are open. Page copy says "tags" and "free usage" / "your key". Expected cash for launch month is about $35–$180, a rough guess (C-070), with the ceiling set by the spend limit.
+- Status: proposed. Page: https://imagine-os.github.io/fresh-terminal/pages/producthunt.html (doc: [pages/producthunt.md](../pages/producthunt.md)). Plan tasks `producthunt-strategy` (done), `producthunt-gates`, `producthunt-launch`.
+**C-078 · 2026-09-29 03:43 · Tighter start: square corners, one bottom row, the prompt begins in the middle, chips are tags**
+- Justin: "we dont need rounded corners to start. v.1.0 can go at the top. bottom only needs one row. starters hits can go next to the voice maybe , shifter enter isnt needed twice ... source and docs can be hidden behind a menu ... i dont think chips it the right word. maybe tags? ... I dont know why it says fresh terminal again at the bottom. Should the prompt box start in the middle, then move down to the bottom bar?" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653427634589?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: corners are square (`--radius: 0`); the version sits next to the name in the top bar; the landing footer is gone and source/docs live at the foot of the tray; the bottom is one row (the box with Starters and Hints as icon switches next to the mic; no hint line, no counter); what people read says "tags" (internal names stay `chip`); on an empty box the prompt starts in the middle of the stage with the headline and moves to the bottom bar after the first line, where it stays.
+- Status: current (this commit). The other session was told about "tags" so its copy matches.
+
+**C-079 · 2026-09-29 04:00 · Text stays readable over photo and material skins**
+- Coordinator for Justin: text over photo skins was still faint (meta lines, credits and the "Result:" line over the mossy stage). Asked for an automatic readability layer whenever a stage or bar skin is an image: a scrim or backdrop blur behind text surfaces, foreground at least WCAG AA against the sampled image luminance, small text never tinted the skin colour, and the image still visible around the edges.
+- Decided: the Shell samples each skin image (or reads a material's colour stops) and applies the weakest scrim in the theme background colour that keeps every text colour at 4.5:1, with neutral text colours. An accent that shares the skin's hue falls back to neutral ink. Images that cannot be sampled get the worst case. On the stage, the transcript is scrimmed with a blur and the stage padding shows the photo (the start screen is left to the start-layout rework); bars keep a 4px image frame. Image skins drop from a 72% to a 25% veil. The 3¢ refine cap is unchanged (open question 15).
+- Status: current. Changelog 0010.

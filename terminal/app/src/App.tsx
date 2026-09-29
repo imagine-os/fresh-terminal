@@ -4,12 +4,21 @@ import type { Op } from '@shared/ops';
 import type { NavTarget } from '@shared/ui';
 import { usedMicro } from '@shared/ledger';
 import { THEME_SURFACE_PAGES, findTheme, nextThemeId, resolveThemeId } from '@shared/themes';
-import { installActionsRegistry } from './actions/registry';
+import { deriveTimeline, stateAt, type Step } from '@shared/timeline';
+import type { EngineContext } from '@shared/ops';
+import { findLibraryTerminal, findMaterial, libraryToSkin } from '@shared/skins';
+import { installActionsRegistry, listActions } from './actions/registry';
+import { AccountProvider } from './auth/Account';
 import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
 import { I18nProvider, useI18n } from './i18n';
+import { newId } from './lib/ids';
+import { downloadSession } from './lib/exportSession';
+import { importSessionFile, pickAndImport, type ImportResult } from './lib/importSession';
 import { hrefFor, routeForPath, useRoute } from './lib/router';
+import { PlaybackView } from './playback/PlaybackView';
+import { usePlayback } from './playback/usePlayback';
 import { probeRouter } from './lib/routerHealth';
 import { PrefsProvider, usePrefs } from './prefs';
 import { SettingsPanel } from './settings/SettingsPanel';
@@ -30,6 +39,8 @@ function isEditable(target: EventTarget | null): boolean {
   const tag = target.tagName;
   return tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || target.isContentEditable;
 }
+
+const NO_STEPS: Step[] = [];
 
 function Product() {
   const { prefs, set, update } = usePrefs();
@@ -79,6 +90,18 @@ function Product() {
     installActionsRegistry();
   }, []);
 
+  // ?prompt=… on arrival fills the composer (static pages hand work to the terminal this way).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const prompt = params.get('prompt');
+    if (!prompt) return;
+    params.delete('prompt');
+    const rest = params.toString();
+    window.history.replaceState(null, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
+    const timer = window.setTimeout(() => window.dispatchEvent(new CustomEvent('ft:composer-insert', { detail: { text: prompt } })), 300);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   // First visit: create the visitor's first box. Landing shows the most recent box.
   useEffect(() => {
     if (snapshot.boxes.length === 0) {
@@ -91,17 +114,45 @@ function Product() {
     [snapshot.boxes],
   );
   const currentPage = route.name === 'page' ? snapshot.pages.find((page) => page.id === route.id) ?? null : null;
+  const replaying = route.name === 'play';
   const requested =
-    route.name === 'box'
+    route.name === 'box' || route.name === 'play'
       ? snapshot.boxes.find((box) => box.id === route.id) ?? null
       : currentPage
         ? snapshot.boxes.find((box) => box.id === currentPage.box_id) ?? null
         : null;
   const currentBox = requested ?? mostRecent;
-  const boxUi = useMemo(
+  const liveBoxUi = useMemo(
     () => (currentBox ? snapshot.boxUis.find((ui) => ui.box_id === currentBox.id) ?? null : null),
     [currentBox, snapshot.boxUis],
   );
+
+  // Replay: every step of this box, and the interface as it was at the chosen one.
+  const steps = useMemo(() => (replaying && currentBox ? deriveTimeline(snapshot, currentBox.id) : NO_STEPS), [replaying, currentBox, snapshot]);
+  const playback = usePlayback(steps, route.name === 'play' ? route.step : null);
+  const replayView = useMemo(() => {
+    if (!replaying || !currentBox) return null;
+    const ctx: EngineContext = {
+      boxId: currentBox.id,
+      now: Date.now(),
+      newId: (prefix) => newId(prefix),
+      themeIds: snapshot.themes.map((candidate) => candidate.id),
+      actionIds: listActions().map((action) => action.id),
+      boxes: snapshot.boxes.map((box) => ({ id: box.id, name: box.name })),
+    };
+    return stateAt(steps, playback.index, store.uiState(currentBox.id), snapshot.edits, ctx);
+  }, [replaying, currentBox, steps, playback.index, snapshot]);
+  const boxUi = replayView?.state.boxUi ?? liveBoxUi;
+  // An empty box shows the prompt in the middle of the stage; the bottom bar waits for the first line (C-077).
+  const composerCentered =
+    !!currentBox && (route.name === 'landing' || route.name === 'box') && !snapshot.lines.some((line) => line.box_id === currentBox.id);
+
+  // Keep ?step= in the address so a replay position can be shared.
+  useEffect(() => {
+    if (route.name === 'play' && currentBox && steps.length > 0) {
+      window.history.replaceState(null, '', hrefFor({ name: 'play', id: currentBox.id, step: playback.index }));
+    }
+  }, [route.name, currentBox, steps.length, playback.index]);
   const effectiveThemeId = boxUi?.theme_id ?? prefs.themeId;
   const dialectText = boxUi?.dialect_text ?? defaultSpecText;
 
@@ -122,28 +173,57 @@ function Product() {
     if (route.name === 'box' && requested === null && mostRecent !== null) {
       window.history.replaceState(null, '', hrefFor({ name: 'box', id: mostRecent.id }));
     }
+    if (route.name === 'play' && requested === null && mostRecent !== null) {
+      window.history.replaceState(null, '', hrefFor({ name: 'play', id: mostRecent.id, step: route.step }));
+    }
   }, [route, requested, mostRecent]);
 
-  // /box/new?theme=<id>: new box with that theme (or the closest built one), then focus the composer.
+  // /box/new?theme=<id>&skin=<material>&from=<library id>: a new box, already
+  // themed and skinned, then the composer. The library's "Open terminal" uses it.
   useEffect(() => {
     if (route.name !== 'new-box') {
       return;
     }
-    const surfacePage = route.theme ? THEME_SURFACE_PAGES[route.theme.toLowerCase()] : undefined;
+    const terminal = findLibraryTerminal(route.from);
+    const surfacePage = !terminal && route.theme ? THEME_SURFACE_PAGES[route.theme.toLowerCase()] : undefined;
     if (surfacePage !== undefined) {
-      // A whole-page surface (koi pond) until it becomes an in-app theme in pass 3.
+      // Legacy /box/new?theme=koi-pond links still open the koi page.
       window.location.replace(`${import.meta.env.BASE_URL}${surfacePage}`);
       return;
     }
-    const created = store.createBox(`${t('box.untitled')} ${snapshot.boxes.length + 1}`);
-    if (route.theme) {
-      const resolution = resolveThemeId(route.theme, snapshot.themes);
-      store.applyOps(created.id, [{ op: 'theme.set', theme_id: resolution.id }], 'system');
-      const name = findTheme(resolution.id, snapshot.themes).name;
-      if (!resolution.built) {
-        toast(t('theme.notBuilt', { name: route.theme, fallback: name }));
+    const created = store.createBox(terminal ? terminal.name : `${t('box.untitled')} ${snapshot.boxes.length + 1}`);
+    const themeId = terminal?.theme ?? route.theme;
+    const materialId = terminal ? terminal.skin : route.skin ?? null;
+    const ops: Op[] = [];
+    let themeName: string | null = null;
+    if (themeId) {
+      const resolution = resolveThemeId(themeId, snapshot.themes);
+      themeName = findTheme(resolution.id, snapshot.themes).name;
+      ops.push({ op: 'theme.set', theme_id: resolution.id });
+      if (!resolution.built && !terminal) {
+        store.appendLine(created.id, 'system', t('theme.notBuilt', { name: themeId, fallback: themeName }) + ` (${t('notWired').toLowerCase()})`, [], { reveal: 'none' });
       }
-      store.appendLine(created.id, 'system', t('system.newBoxTheme', { name }), [], { reveal: 'none' });
+    }
+    const material = findMaterial(materialId);
+    if (material) {
+      ops.push({ op: 'skin.apply', skin: libraryToSkin(material, 'stage', terminal?.name ?? material.name, newId('skin'), Date.now()) });
+    }
+    if (ops.length > 0) {
+      store.applyOps(created.id, ops, 'system');
+    }
+    const lookName = terminal?.name ?? [themeName, material?.name].filter(Boolean).join(' + ');
+    if (terminal && (!terminal.built || terminal.notWired)) {
+      const closest = [themeName, material?.name].filter(Boolean).join(' with ');
+      store.appendLine(
+        created.id,
+        'system',
+        t(terminal.built ? 'system.terminalPartly' : 'system.terminalClosest', { name: terminal.name, missing: terminal.notWired ?? '', closest }) +
+          (terminal.page ? ` ${t('system.terminalPage', { page: `${import.meta.env.BASE_URL}${terminal.page}` })}` : ''),
+        [],
+        { reveal: 'none', component: 'not-wired' },
+      );
+    } else if (lookName) {
+      store.appendLine(created.id, 'system', t('system.newBoxTheme', { name: lookName }), [], { reveal: 'none' });
     } else {
       store.appendLine(created.id, 'system', t('system.newBox'), [], { reveal: 'none' });
     }
@@ -166,12 +246,28 @@ function Product() {
     navigate({ name: 'box', id: created.id });
   }, [snapshot.boxes.length, navigate, t]);
 
+  /** Remove a box and everything in it; land on the most recent remaining box (or a fresh one). */
+  const removeBox = useCallback(
+    (id: string) => {
+      const box = snapshot.boxes.find((candidate) => candidate.id === id);
+      if (!box) return;
+      const remaining = snapshot.boxes.filter((candidate) => candidate.id !== id).sort((a, b) => b.updated_at - a.updated_at);
+      store.removeBox(id);
+      toast(t('box.removed', { name: box.name }));
+      if (currentBox?.id === id) {
+        if (remaining[0]) navigate({ name: 'box', id: remaining[0].id });
+        else navigate({ name: 'landing' });
+      }
+    },
+    [snapshot.boxes, currentBox, navigate, toast, t],
+  );
+
   const openBox = useCallback(
     (id: string) => {
       navigate({ name: 'box', id });
-      set('leftOpen', false);
+      if (!prefs.sidebarStay) set('leftOpen', false);
     },
-    [navigate, set],
+    [navigate, set, prefs.sidebarStay],
   );
 
   const toggleSidebar = useCallback(() => set('leftOpen', !prefs.leftOpen), [prefs.leftOpen, set]);
@@ -180,12 +276,49 @@ function Product() {
     [edit, effectiveThemeId, snapshot.themes],
   );
   const toggleDev = useCallback(() => update({ devMode: !prefs.devMode }), [prefs.devMode, update]);
+  const toggleBar = useCallback(() => set('topBarHidden', !prefs.topBarHidden), [prefs.topBarHidden, set]);
+  const afterImport = useCallback(
+    (result: ImportResult | null) => {
+      if (!result) return;
+      if (!result.ok) {
+        toast(result.reason);
+        return;
+      }
+      store.appendLine(result.box.id, 'system', t('import.done', { lines: String(result.lines), pages: String(result.pages) }), [], { reveal: 'none' });
+      toast(t('import.toast', { name: result.box.name }));
+      navigate({ name: 'box', id: result.box.id });
+    },
+    [toast, t, navigate],
+  );
+  const importSession = useCallback(() => {
+    void pickAndImport().then(afterImport);
+  }, [afterImport]);
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      const file = Array.from(event.dataTransfer.files).find((candidate) => candidate.name.endsWith('.json') || candidate.type === 'application/json');
+      if (!file) return;
+      event.preventDefault();
+      void importSessionFile(file).then(afterImport);
+    },
+    [afterImport],
+  );
+  const exportSession = useCallback(() => {
+    if (!currentBox) return;
+    const name = downloadSession(currentBox.id);
+    toast(t('firstRun.exported', { name }));
+  }, [currentBox, toast, t]);
   const toggleLang = useCallback(() => set('lang', prefs.lang === 'en' ? 'es' : 'en'), [prefs.lang, set]);
   const openCanvas = useCallback(() => {
     navigate(route.name === 'canvas' ? { name: 'landing' } : { name: 'canvas' });
   }, [navigate, route.name]);
 
   const openPage = useCallback((pageId: string) => navigate({ name: 'page', id: pageId }), [navigate]);
+
+  /** P: replay the current box step by step; P again (or Esc) returns to live. */
+  const toggleReplay = useCallback(() => {
+    if (!currentBox) return;
+    navigate(replaying ? { name: 'box', id: currentBox.id } : { name: 'play', id: currentBox.id, step: null });
+  }, [currentBox, replaying, navigate]);
 
   /** Undo the newest applied batch in this box; redo the most recently undone one. */
   const undoLast = useCallback(() => {
@@ -245,6 +378,10 @@ function Product() {
       'sidebar.toggle': () => toggleSidebar(),
       'edit.undo': () => undoLast(),
       'edit.redo': () => redoLast(),
+      'play.open': () => toggleReplay(),
+      'bar.toggle': () => toggleBar(),
+      'session.export': () => exportSession(),
+      'session.import': () => importSession(),
     };
     const onAction = (event: Event) => {
       const id = (event as CustomEvent<{ id?: string }>).detail?.id ?? '';
@@ -254,16 +391,19 @@ function Product() {
     };
     window.addEventListener('ft:action', onAction);
     return () => window.removeEventListener('ft:action', onAction);
-  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toast, t]);
+  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toggleReplay, toggleBar, exportSession, importSession, toast, t]);
 
   // Shortcuts: single key outside the composer, Ctrl/Cmd+key inside it.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.altKey) {
-        return;
-      }
       const inEditor = isEditable(event.target);
       const modifier = event.ctrlKey || event.metaKey;
+      // Alt/Option + key is the same shortcut anywhere, including inside the prompt box,
+      // where a bare letter must type. Alt alone with no letter is left alone.
+      const viaAlt = event.altKey && !modifier && /^[a-z[\]]$/i.test(event.key);
+      if (event.altKey && !viaAlt) {
+        return;
+      }
       // Ctrl/Cmd+Z undoes the last interface edit (outside fields, or in an empty composer).
       if (modifier && event.key.toLowerCase() === 'z') {
         const target = event.target;
@@ -275,14 +415,17 @@ function Product() {
         }
         return;
       }
-      if (inEditor && !modifier) {
+      if (inEditor && !modifier && !viaAlt) {
         if (event.key === 'Escape') {
           update({ leftOpen: false });
           setRightOpen(false);
+          (event.target as HTMLElement).blur();
         }
         return;
       }
-      if (!inEditor && modifier) {
+      // Inside a field, Ctrl/Cmd combos belong to the browser (paste, select all, copy).
+      // Outside one, modifier combos are not ours either.
+      if (modifier) {
         return;
       }
       const key = event.key.toLowerCase();
@@ -290,7 +433,13 @@ function Product() {
         event.preventDefault();
         action();
       };
-      if (key === 'n') run(newBox);
+      // While replaying, the scrubber owns space and the arrows; edits stay off.
+      if (replaying && !['p', '[', 'd', 'l', 'k', 'c', 'h', 'escape'].includes(key)) {
+        return;
+      }
+      if (key === 'p') run(toggleReplay);
+      else if (key === 'h') run(toggleBar);
+      else if (key === 'n') run(newBox);
       else if (key === '[') run(toggleSidebar);
       else if (key === 't') run(cycleTheme);
       else if (key === 'd') run(toggleDev);
@@ -306,7 +455,7 @@ function Product() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [newBox, toggleSidebar, cycleTheme, toggleDev, toggleLang, openCanvas, update, undoLast, redoLast]);
+  }, [newBox, toggleSidebar, cycleTheme, toggleDev, toggleLang, openCanvas, update, undoLast, redoLast, replaying, toggleReplay, toggleBar]);
 
   const closeFloating = useCallback(() => {
     update({ leftOpen: false });
@@ -324,8 +473,19 @@ function Product() {
         <PlanViewer />
       </div>
     );
-  } else if (route.name === 'page') {
+  } else if (route.name === 'page' && !currentBox) {
     stage = <PageView pageId={route.id} />;
+  } else if (replaying && currentBox) {
+    stage = (
+      <PlaybackView
+        key={`play:${currentBox.id}`}
+        box={currentBox}
+        steps={steps}
+        playback={playback}
+        exact={replayView?.exact ?? true}
+        onExit={() => navigate({ name: 'box', id: currentBox.id })}
+      />
+    );
   } else if (currentBox) {
     stage = (
       <BoxView
@@ -333,6 +493,8 @@ function Product() {
         box={currentBox}
         theme={theme}
         landing={landing}
+        pageId={route.name === 'page' ? route.id : null}
+        onLeavePage={() => navigate({ name: 'box', id: currentBox.id })}
         showNewBoxDoodle={snapshot.boxes.length === 1}
         onOpenBox={openBox}
         commands={{
@@ -344,6 +506,10 @@ function Product() {
           modelTagger: prefs.modelTagger,
           voiceProvider: prefs.voiceProvider,
           voiceMode: prefs.voiceMode,
+          showStarters: prefs.showStarters,
+          showHints: prefs.showHints,
+          toggleStarters: () => set('showStarters', !prefs.showStarters),
+          toggleHints: () => set('showHints', !prefs.showHints),
           openSettings: () => setSettingsOpen(true),
           realtimePrice: (provider) => realtimeProviders?.find((info) => info.id === provider)?.price ?? null,
         }}
@@ -361,14 +527,28 @@ function Product() {
       onCloseFloating={closeFloating}
       onSize={setSize}
       styleOverrides={boxUi?.style}
+      hideTopBar={prefs.topBarHidden}
+      hideBottomBar={composerCentered}
+      skins={boxUi?.skins}
       slots={{
         topBar: (
           <TopBar
-            boxName={route.name === 'canvas' ? t('canvas.title') : route.name === 'plan' ? t('dev.pm') : route.name === 'page' ? currentPage?.title ?? '' : landing ? '' : currentBox?.name ?? ''}
+            boxName={
+              route.name === 'canvas'
+                ? t('canvas.title')
+                : route.name === 'plan'
+                  ? t('dev.pm')
+                  : route.name === 'page'
+                    ? currentPage?.title ?? ''
+                    : replaying
+                      ? `${currentBox?.name ?? ''} · ${t('play.suffix')}`
+                      : landing
+                        ? ''
+                        : currentBox?.name ?? ''
+            }
             theme={theme}
             devMode={prefs.devMode}
             usedMicro={used}
-            showSave={snapshot.lines.length >= 3}
             onNewBox={newBox}
             onToggleSidebar={toggleSidebar}
             onCycleTheme={cycleTheme}
@@ -380,9 +560,35 @@ function Product() {
             onSettings={() => setSettingsOpen((current) => !current)}
             payMode={prefs.payMode}
             libraryHref={`${import.meta.env.BASE_URL}pages/library.html`}
+            onReplay={toggleReplay}
+            replayActive={replaying}
+            pinned={prefs.pinnedTools}
+            onPinned={(ids) => set('pinnedTools', ids)}
+            nav={replayView?.state.nav ?? (currentBox ? snapshot.navItems.filter((item) => item.box_id === currentBox.id) : [])}
+            onNavigate={navigateTo}
+            onExport={exportSession}
+            onImport={importSession}
+            onHideTopBar={toggleBar}
           />
         ),
-        leftSidebar: <Sidebar boxes={snapshot.boxes} currentId={currentBox?.id ?? null} onOpen={openBox} onNew={newBox} onNavigate={navigateTo} />,
+        leftSidebar: (
+          <Sidebar
+            boxes={snapshot.boxes}
+            currentId={currentBox?.id ?? null}
+            onOpen={openBox}
+            onNew={newBox}
+            onNavigate={navigateTo}
+            onRemove={removeBox}
+            navOverride={replayView?.state.nav ?? null}
+            showMenu={prefs.sidebarMenu}
+            settings={{
+              menu: prefs.sidebarMenu,
+              stay: prefs.sidebarStay,
+              onMenu: (value) => set('sidebarMenu', value),
+              onStay: (value) => set('sidebarStay', value),
+            }}
+          />
+        ),
         rightSidebar: prefs.devMode ? (
           <DevPanel
             dialectText={dialectText}
@@ -396,7 +602,18 @@ function Product() {
           />
         ) : null,
         stage: (
-          <>
+          <div
+            className="stage-drop"
+            onDragOver={(event) => {
+              if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault();
+            }}
+            onDrop={onDrop}
+          >
+            {prefs.topBarHidden ? (
+              <button type="button" className="btn show-bar" data-variant="ghost" onClick={toggleBar} aria-label={t('topbar.show')} data-testid="show-bar">
+                {t('topbar.show')} <kbd className="kbd">H</kbd>
+              </button>
+            ) : null}
             {stage}
             <SettingsPanel
               open={settingsOpen}
@@ -410,7 +627,7 @@ function Product() {
               realtimeProviders={realtimeProviders}
               routerOk={routerOk}
             />
-          </>
+          </div>
         ),
         bottomBar: <div id="composer-slot" />,
       }}
@@ -432,7 +649,9 @@ function WithLang() {
 export default function App() {
   return (
     <PrefsProvider>
-      <WithLang />
+      <AccountProvider>
+        <WithLang />
+      </AccountProvider>
     </PrefsProvider>
   );
 }

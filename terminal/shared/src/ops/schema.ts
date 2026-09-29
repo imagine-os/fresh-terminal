@@ -1,3 +1,4 @@
+import { SKIN_TARGETS, skinSchema } from '../ui/skin';
 import { z } from 'zod';
 import { CARD_KINDS, cardSchema } from '../canvas/types';
 import { CHIP_KINDS } from '../chips/types';
@@ -39,6 +40,8 @@ export const opSchema = z.discriminatedUnion('op', [
     replace: z.boolean().optional(),
   }),
   z.object({ op: z.literal('theme.set'), theme_id: z.string().min(1).max(40).nullable() }),
+  z.object({ op: z.literal('skin.apply'), skin: skinSchema.partial({ id: true }) }),
+  z.object({ op: z.literal('skin.clear'), target: z.enum(SKIN_TARGETS) }),
   z.object({
     op: z.literal('style.set'),
     token: z.string().regex(STYLE_TOKEN),

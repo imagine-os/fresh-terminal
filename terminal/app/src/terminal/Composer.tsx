@@ -6,11 +6,13 @@ import { useI18n } from '../i18n';
 import { tagRemote, type RemoteTagResult } from '../lib/modelTagger';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconMic, IconSend } from '../ui/icons';
+import { IconHint, IconMic, IconSend, IconSpark } from '../ui/icons';
 import type { VoiceControls } from '../voice/useVoice';
 import { ChipPopover, type ChipDecision, type ChipRecords } from './ChipPopover';
 import { ChipText } from './ChipText';
 import { ChipTray } from './ChipTray';
+import { DraftPage } from './DraftPage';
+import { wantsPage } from './format';
 import { SuggestionStrip } from './SuggestionStrip';
 
 interface Props {
@@ -35,6 +37,10 @@ interface Props {
   /** Text arriving from a final voice transcript to append to the draft. */
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
+  showStarters?: boolean;
+  showHints?: boolean;
+  onToggleStarters?: () => void;
+  onToggleHints?: () => void;
 }
 
 export interface ComposerHandle {
@@ -65,10 +71,18 @@ export function Composer({
   voiceAvailable,
   voiceAppend,
   onVoiceAppendConsumed,
+  showStarters = false,
+  showHints = false,
+  onToggleStarters,
+  onToggleHints,
 }: Props) {
   const { t } = useI18n();
   const [text, setText] = useState('');
   const [focused, setFocused] = useState(false);
+  // The themed block cursor is drawn only while the caret sits at the end of the text;
+  // anywhere else the browser's own caret shows, so moving backwards is visible.
+  const [caretAtEnd, setCaretAtEnd] = useState(true);
+  const trackCaret = (element: HTMLTextAreaElement) => setCaretAtEnd(element.selectionStart === element.value.length && element.selectionEnd === element.value.length);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // A final voice transcript lands in the draft, separated by a space.
@@ -177,10 +191,23 @@ export function Composer({
     }
   };
 
-  const showSuggestions = focused && text.trim().length === 0;
+  const showSuggestions = showStarters && focused && text.trim().length === 0;
 
   return (
     <div className="composer" data-testid="composer">
+      {wantsPage(text) ? (
+        <DraftPage
+          text={text}
+          chips={chips}
+          onJump={(offset) => {
+            const element = textareaRef.current;
+            if (!element) return;
+            element.focus();
+            element.setSelectionRange(offset, offset);
+            trackCaret(element);
+          }}
+        />
+      ) : null}
       <SuggestionStrip
         visible={showSuggestions}
         hasBoxes={hasBoxes}
@@ -194,7 +221,7 @@ export function Composer({
       <div className="composer-frame">
         <div className="composer-stack">
           <div className="composer-mirror" aria-hidden="true" data-testid="composer-mirror">
-            {text.length > 0 ? <ChipText text={text} chips={chips} cursor={focused && !voice.interim} /> : null}
+            {text.length > 0 ? <ChipText text={text} chips={chips} cursor={focused && !voice.interim && caretAtEnd} /> : null}
             {voice.interim ? (
               <span className="interim" data-testid="interim">
                 {text.length > 0 ? ' ' : ''}
@@ -213,10 +240,16 @@ export function Composer({
             value={text}
             placeholder={t('composer.placeholder')}
             aria-label={t('composer.placeholder')}
+            style={{ caretColor: caretAtEnd ? 'transparent' : 'var(--fg)' }}
+            spellCheck
             onChange={(event) => {
               setText(event.target.value);
+              trackCaret(event.target);
               onActivity?.();
             }}
+            onSelect={(event) => trackCaret(event.currentTarget)}
+            onKeyUp={(event) => trackCaret(event.currentTarget)}
+            onClick={(event) => trackCaret(event.currentTarget)}
             onKeyDown={onKeyDown}
             onFocus={() => {
               setFocused(true);
@@ -227,6 +260,20 @@ export function Composer({
           />
         </div>
         <div className="composer-tools">
+          {onToggleStarters ? (
+            <Tooltip label={t('composer.startersTip')} side="top" align="end">
+              <Button icon variant="ghost" aria-pressed={showStarters} aria-label={t('composer.starters')} onClick={onToggleStarters} data-testid="switch-starters">
+                <IconSpark />
+              </Button>
+            </Tooltip>
+          ) : null}
+          {onToggleHints ? (
+            <Tooltip label={t('composer.hintsTip')} side="top" align="end">
+              <Button icon variant="ghost" aria-pressed={showHints} aria-label={t('composer.hints')} onClick={onToggleHints} data-testid="switch-hints">
+                <IconHint />
+              </Button>
+            </Tooltip>
+          ) : null}
           {voice.active ? <Waveform level={voice.level} state={voice.state} /> : null}
           {voiceAvailable ? (
             <Tooltip
@@ -303,12 +350,6 @@ export function Composer({
         />
       ) : null}
       <audio ref={voice.audioRef} autoPlay data-testid="assistant-audio" />
-      <div className="composer-hint">
-        <span>{voice.active ? t(voice.state === 'connecting' ? 'voice.connecting' : voice.state === 'speaking' ? 'voice.speaking' : 'voice.listening') : t('composer.hint')}</span>
-        <span>
-          {chips.length} {t('composer.chips')}
-        </span>
-      </div>
     </div>
   );
 }

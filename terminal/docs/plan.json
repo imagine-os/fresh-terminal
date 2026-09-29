@@ -540,6 +540,79 @@
       "pass": 2
     },
     {
+      "id": "infra-verify",
+      "title": "Verify the Cloudflare token scopes and Clerk keys from Actions (names and booleans only)",
+      "status": "done",
+      "depends_on": [
+        "router-deploy"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "domain-workers",
+      "title": "freshterminal.ai on an app Worker (www to apex), router on api.freshterminal.ai, Pages kept as fallback",
+      "status": "done",
+      "depends_on": [
+        "infra-verify"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "clerk-dev",
+      "title": "Clerk sign-in, anonymous-first, development instance; router verifies session tokens",
+      "status": "done",
+      "depends_on": [
+        "auth-seam",
+        "infra-verify"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "d1-sync",
+      "title": "D1 accounts, boxes and ledger mirror; signed-in cloud sync (last writer wins)",
+      "status": "done",
+      "depends_on": [
+        "clerk-dev",
+        "domain-workers"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "clerk-production",
+      "title": "Clerk production instance on freshterminal.ai (Justin: steps in Canon C-065; DNS by site-deploy)",
+      "status": "todo",
+      "depends_on": [
+        "clerk-dev"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "free-credits",
+      "title": "Free credits enforced by the router: signed device ids, grants, 2 soft prompts, IP and /24 limits, daily anonymous cap, GET /credits + useCredits()",
+      "status": "done",
+      "depends_on": [
+        "d1-sync",
+        "clerk-dev"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "turnstile",
+      "title": "Turnstile before a new free-credit device: code in; switch on needs Account Turnstile Edit on the Cloudflare token (deploy said Authentication error)",
+      "status": "todo",
+      "depends_on": [
+        "free-credits"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
       "id": "stripe-settlement",
       "title": "Stripe settlement for the ledger balance",
       "status": "todo",
@@ -858,7 +931,7 @@
     {
       "id": "skin-apply-op",
       "title": "skin.apply op and material record (css_tokens, procedural_code, image_generate, image_search via Openverse, library MIT/CC0 only)",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "op-language"
       ],
@@ -868,7 +941,7 @@
     {
       "id": "draft-material",
       "title": "Instant draft material as the first result while better versions are made",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "skin-apply-op"
       ],
@@ -878,7 +951,7 @@
     {
       "id": "refine-loop",
       "title": "Shared refine() best-of-3 beam loop: vision + Jev scoring 1–5; stop at 4.5, 2 rounds without gain, 5 rounds, 3¢ cap or Stop; loop parameters in the route table; ledger per round",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "skin-apply-op",
         "jev-routing"
@@ -889,7 +962,7 @@
     {
       "id": "refine-ui",
       "title": "Refine UI: one row per round, winner outlined, user can pick any variant",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "refine-loop",
         "super-cli-replies"
@@ -917,6 +990,64 @@
       ],
       "model": "Opus 5.5",
       "pass": 4
+    },
+    {
+      "id": "playback",
+      "title": "Replay: every step of a session as a saved event with parent ids; scrubber at /box/:id/play (P); interface rebuilt at any step; timeline.v0 export",
+      "status": "done",
+      "depends_on": [
+        "op-language"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "playback-branching",
+      "title": "Branch and merge a session from a replay step (two live heads per box; needs the shared store)",
+      "status": "todo",
+      "depends_on": [
+        "playback"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "playback-media",
+      "title": "Audio, video and pointer steps in the replay, aligned on the same wall-clock lane (media rows in R2 + SpacetimeDB)",
+      "status": "todo",
+      "depends_on": [
+        "playback"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "producthunt-strategy",
+      "title": "Product Hunt strategy page: research, pitch, shot list, readiness, timeline, costs (pages/producthunt.html)",
+      "status": "done",
+      "depends_on": [],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "producthunt-gates",
+      "title": "Product Hunt blockers: Clerk production, free credits + per-browser cap, daily spend limit, first-run screen, repo licence",
+      "status": "todo",
+      "depends_on": [
+        "producthunt-strategy"
+      ],
+      "model": "Opus 5.5 (Fable for limits)",
+      "pass": 6
+    },
+    {
+      "id": "producthunt-launch",
+      "title": "Product Hunt launch: gallery, video, first comment, schedule, launch day, retro (tasks P10-P16, L1-L5, A1-A4 on the page)",
+      "status": "todo",
+      "depends_on": [
+        "producthunt-gates"
+      ],
+      "model": "Sonnet 5 (captures), Fable (comments)",
+      "pass": 7
     }
   ]
 }

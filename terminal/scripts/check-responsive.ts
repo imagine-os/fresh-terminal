@@ -15,8 +15,10 @@ const PAGES = [
   { name: 'landing', path: '/', composer: true, ready: '[data-testid="composer"]' },
   { name: 'box', path: '/box/demo', composer: true, ready: '[data-testid="composer"]' },
   { name: 'canvas', path: '/canvas', composer: false, ready: '[data-testid="canvas-surface"]' },
+  { name: 'replay', path: '/box/demo/play', composer: false, ready: '[data-testid="scrubber"]' },
 ];
-const PORT = 4173;
+// RESPONSIVE_PORT lets two checkouts run the check at the same time.
+const PORT = Number(process.env.RESPONSIVE_PORT ?? 4173);
 const MIN_TARGET = 44;
 
 interface Result {

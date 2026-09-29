@@ -6,6 +6,7 @@ import { applyOps as applyOpsPure, summarize, type EngineContext, type UiState }
 import type { Op } from '@shared/ops';
 import type { Reply } from '@shared/reply';
 import type { Starter } from '@shared/starters';
+import type { SyncBox } from '@shared/sync';
 import { SEED_THEMES } from '@shared/themes';
 import { SEED_NAV, defaultBoxUi, type BoxUi, type GlossaryTerm, type NavItem, type Page } from '@shared/ui';
 import { listActions } from '../actions/registry';
@@ -81,7 +82,8 @@ export class LocalStore implements Store {
       cards: mergeCards(saved.cards),
       navItems: saved.navItems ?? [],
       pages: saved.pages ?? [],
-      boxUis: saved.boxUis ?? [],
+      // Records from before pass 5 have no skins.
+      boxUis: (saved.boxUis ?? []).map((ui) => ({ ...ui, skins: ui.skins ?? {} })),
       glossary: saved.glossary ?? [],
       starters: saved.starters ?? [],
       edits: saved.edits ?? [],
@@ -168,6 +170,71 @@ export class LocalStore implements Store {
     };
     this.commit({ boxes: [...this.snapshot.boxes, box] }, false);
     this.ensureSeeded(box.id, true);
+    return box;
+  }
+
+  removeBox(id: string): void {
+    const gone = (record: { box_id: string }) => record.box_id !== id;
+    this.commit({
+      boxes: this.snapshot.boxes.filter((box) => box.id !== id),
+      sessions: this.snapshot.sessions.filter(gone),
+      lines: this.snapshot.lines.filter(gone),
+      presence: this.snapshot.presence.filter(gone),
+      navItems: this.snapshot.navItems.filter(gone),
+      pages: this.snapshot.pages.filter(gone),
+      boxUis: this.snapshot.boxUis.filter(gone),
+      glossary: this.snapshot.glossary.filter(gone),
+      edits: this.snapshot.edits.filter(gone),
+    });
+  }
+
+  importSession(file: { box: Box | null; timeline: { lines: Array<{ kind: LineKind; text: string; chips_json?: string; component?: string; reveal?: string; blocks_json?: string; created_at: number }> }; ui: UiState }): Box {
+    const now = Date.now();
+    const box: Box = {
+      id: newId('box'),
+      owner_identity: this.identity,
+      name: `${(file.box?.name ?? 'Imported box').trim() || 'Imported box'} (imported)`,
+      created_at: file.box?.created_at ?? now,
+      updated_at: now,
+    };
+    // New ids everywhere so an import into the same browser never collides; menu parents and page targets follow.
+    const pageIds = new Map<string, string>();
+    const pages: Page[] = file.ui.pages.map((page) => {
+      const id = newId('page');
+      pageIds.set(page.id, id);
+      return { ...page, id, box_id: box.id };
+    });
+    const navIds = new Map<string, string>();
+    for (const item of file.ui.nav) navIds.set(item.id, newId('nav'));
+    const navItems: NavItem[] = file.ui.nav.map((item) => ({
+      ...item,
+      id: navIds.get(item.id) ?? newId('nav'),
+      box_id: box.id,
+      parent_id: item.parent_id ? navIds.get(item.parent_id) ?? null : null,
+      target: item.target && item.target.kind === 'page' ? { kind: 'page', ref: pageIds.get(item.target.ref) ?? item.target.ref } : item.target,
+    }));
+    const glossary: GlossaryTerm[] = file.ui.glossary.map((term) => ({ ...term, id: newId('term'), box_id: box.id }));
+    const ui: BoxUi = { ...file.ui.boxUi, box_id: box.id, seeded: true, updated_at: now };
+    const lines: Line[] = file.timeline.lines.map((line) => ({
+      id: newId('line'),
+      box_id: box.id,
+      kind: line.kind,
+      text: line.text,
+      chips_json: line.chips_json ?? '[]',
+      component: line.component ?? '',
+      reveal: 'none',
+      blocks_json: line.blocks_json ?? '',
+      created_at: line.created_at,
+      streaming: false,
+    }));
+    this.commit({
+      boxes: [...this.snapshot.boxes, box],
+      lines: [...this.snapshot.lines, ...lines],
+      pages: [...this.snapshot.pages, ...pages],
+      navItems: [...this.snapshot.navItems, ...navItems],
+      glossary: [...this.snapshot.glossary, ...glossary],
+      boxUis: [...this.snapshot.boxUis, ui],
+    });
     return box;
   }
 
@@ -383,5 +450,55 @@ export class LocalStore implements Store {
       glossary: state.glossary.slice(0, 300),
       effectiveThemeId,
     };
+  }
+
+  syncBoxes(): SyncBox[] {
+    return this.snapshot.boxes.map((box) => {
+      const state = this.uiState(box.id);
+      return {
+        id: box.id,
+        name: box.name,
+        state_json: JSON.stringify({ nav: state.nav, pages: state.pages, boxUi: state.boxUi, glossary: state.glossary }),
+        created_at: box.created_at,
+        updated_at: box.updated_at,
+        deleted_at: null,
+      };
+    });
+  }
+
+  importSyncBoxes(rows: SyncBox[]): number {
+    let applied = 0;
+    let next = this.snapshot;
+    for (const row of rows) {
+      if (row.deleted_at !== null) {
+        continue;
+      }
+      let state: { nav?: unknown; pages?: unknown; boxUi?: unknown; glossary?: unknown };
+      try {
+        state = JSON.parse(row.state_json) as typeof state;
+      } catch {
+        continue;
+      }
+      const nav = Array.isArray(state.nav) ? (state.nav as NavItem[]).map((item) => ({ ...item, box_id: row.id })) : [];
+      const pages = Array.isArray(state.pages) ? (state.pages as Page[]).map((page) => ({ ...page, box_id: row.id })) : [];
+      const glossary = Array.isArray(state.glossary) ? (state.glossary as GlossaryTerm[]).map((term) => ({ ...term, box_id: row.id })) : [];
+      const boxUi: BoxUi =
+        state.boxUi && typeof state.boxUi === 'object' ? { ...(state.boxUi as BoxUi), box_id: row.id, seeded: true } : { ...defaultBoxUi(row.id, row.updated_at), seeded: true };
+      const box: Box = { id: row.id, owner_identity: this.identity, name: row.name, created_at: row.created_at, updated_at: row.updated_at };
+      const exists = next.boxes.some((candidate) => candidate.id === row.id);
+      next = {
+        ...next,
+        boxes: exists ? next.boxes.map((candidate) => (candidate.id === row.id ? box : candidate)) : [...next.boxes, box],
+        navItems: [...next.navItems.filter((item) => item.box_id !== row.id), ...nav],
+        pages: [...next.pages.filter((page) => page.box_id !== row.id), ...pages],
+        glossary: [...next.glossary.filter((term) => term.box_id !== row.id), ...glossary],
+        boxUis: [...next.boxUis.filter((ui) => ui.box_id !== row.id), boxUi],
+      };
+      applied += 1;
+    }
+    if (applied > 0) {
+      this.commit({ boxes: next.boxes, navItems: next.navItems, pages: next.pages, glossary: next.glossary, boxUis: next.boxUis });
+    }
+    return applied;
   }
 }

@@ -4,9 +4,15 @@ import type { Change, Op } from '@shared/ops';
 import type { ReplyBlock } from '@shared/reply';
 import type { EntryDraft } from '@shared/ledger';
 import { resolveRouterUrl } from '../config/router';
+import type { CreditsErrorCode } from '@shared/credits';
+import { routerFetch } from './routerFetch';
 
 
-export const ROUTER_URL: string = resolveRouterUrl(import.meta.env.VITE_ROUTER_URL as string | undefined, import.meta.env.DEV);
+export const ROUTER_URL: string = resolveRouterUrl(
+  import.meta.env.VITE_ROUTER_URL as string | undefined,
+  import.meta.env.DEV,
+  typeof window === 'undefined' ? '' : window.location.hostname,
+);
 
 export interface RouteMeta {
   routing?: { intent: string; source: string; confidence: number | null; model: string | null; costMicro: number };
@@ -36,7 +42,9 @@ export type RouteFailure =
   | { kind: 'no-router' }
   | { kind: 'no-key'; hint?: string }
   | { kind: 'pending'; note: string }
-  | { kind: 'error'; message: string };
+  | { kind: 'error'; message: string }
+  /** Free credits: used up, daily cap, rate limit, too large, or a model choice that needs sign-in. */
+  | { kind: 'credits'; code: CreditsErrorCode; message: string };
 
 export interface OpsPayload {
   ops: Op[];
@@ -51,6 +59,8 @@ export interface RouteHandlers {
   onOps?: (payload: OpsPayload) => void;
   /** The structured reply. */
   onReply?: (blocks: ReplyBlock[]) => void;
+  /** Jev routed the prompt to the skin loop (pass 5); the app runs it. */
+  onSkin?: (payload: { text: string }) => void;
   onDone: (done: RouteDone) => void;
   onFail: (failure: RouteFailure) => void;
 }
@@ -70,16 +80,27 @@ export interface RouteRequest {
 export async function streamRoute(request: RouteRequest, handlers: RouteHandlers): Promise<void> {
   let response: Response;
   try {
-    response = await fetch(`${ROUTER_URL}/route`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
+    response = await routerFetch(
+      '/route',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+      },
+      { paid: true },
+    );
   } catch {
     handlers.onFail({ kind: 'no-router' });
     return;
   }
 
+  if ([401, 402, 403, 413, 429].includes(response.status)) {
+    const body = (await response.clone().json().catch(() => ({}))) as { code?: CreditsErrorCode; error?: string };
+    if (body.code) {
+      handlers.onFail({ kind: 'credits', code: body.code, message: body.error ?? `HTTP ${response.status}` });
+      return;
+    }
+  }
   if (response.status === 503) {
     const body = (await response.json().catch(() => ({}))) as { hint?: string };
     handlers.onFail({ kind: 'no-key', ...(body.hint ? { hint: body.hint } : {}) });
@@ -112,6 +133,8 @@ export async function streamRoute(request: RouteRequest, handlers: RouteHandlers
       handlers.onMeta?.(JSON.parse(data) as RouteMeta);
     } else if (eventName === 'ops') {
       handlers.onOps?.(JSON.parse(data) as OpsPayload);
+    } else if (eventName === 'skin') {
+      handlers.onSkin?.(JSON.parse(data) as { text: string });
     } else if (eventName === 'reply') {
       handlers.onReply?.((JSON.parse(data) as { blocks: ReplyBlock[] }).blocks);
     } else if (eventName === 'done') {

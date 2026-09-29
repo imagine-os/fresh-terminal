@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['shared/**/*.test.ts', 'router/**/*.test.ts', 'app/**/*.test.ts', 'app/**/*.test.tsx', 'scripts/**/*.test.ts'],
+    include: ['shared/**/*.test.ts', 'router/**/*.test.ts', 'app/**/*.test.ts', 'app/**/*.test.tsx', 'scripts/**/*.test.ts', 'site/**/*.test.ts'],
     environment: 'node',
   },
 });

@@ -30,15 +30,17 @@ Router (`terminal/router/.env`, copy from `.env.example`; never reaches the brow
 | `OPENROUTER_JEV_MODEL` | optional; overrides the Jev decisions model (default `typesafe/jev-1.13`) |
 | `ROUTER_USE_JEV` | optional; `false` routes by rules only |
 | `OPENROUTER_TAGGER_MODEL` | optional; overrides the tagger tier (default `google/gemini-2.5-flash-lite`) |
-| `ALLOWED_ORIGINS` | comma-separated browser origins for CORS (default: the Pages origin + localhost 5173/4173) |
+| `ALLOWED_ORIGINS` | comma-separated browser origins for CORS and Clerk authorized parties (default: freshterminal.ai, www, the Pages origin, localhost 5173/4173) |
 | `OPENAI_API_KEY` | realtime voice (OpenAI). The router mints ephemeral client secrets; the browser never sees this key. |
 | `GOOGLE_API_KEY` | realtime voice (Gemini Live token minting; audio not wired yet) |
+| `DEVICE_SIGNING_KEY` | signs anonymous device ids for free credits (created once by `router-deploy`). Credit numbers are vars: `ANON_GRANT_MICRO`, `ANON_CHANCES`, `ANON_DAILY_COST_CAP_MICRO` and more (decision 0021). Without D1 (local Node) metering is off. |
+| `CLERK_SECRET_KEY` / `CLERK_JWT_KEY` | Clerk session checks for `/me` and `/sync/*` (the PEM public key makes it networkless). Without them signed-in calls get 503; signed-out use is unchanged. |
 
-App (build-time, optional): `VITE_ROUTER_URL` (default `/api`), `VITE_BASE` (`/fresh-terminal/` on GitHub Pages), `VITE_SPACETIMEDB_URI` / `VITE_SPACETIMEDB_NAME` (recognised, not used until the module is published).
+App (build-time, optional): `VITE_CLERK_PUBLISHABLE_KEY` (Clerk sign-in; without it the Sign in button says not wired yet), `VITE_ROUTER_URL` (default: `/api` in dev, `https://api.freshterminal.ai` when served from freshterminal.ai, the workers.dev router elsewhere), `VITE_BASE` (`/fresh-terminal/` on GitHub Pages), `VITE_SPACETIMEDB_URI` / `VITE_SPACETIMEDB_NAME` (recognised, not used until the module is published).
 
 ## Two ways to pay
 
-Press `K` (key icon). Default: use Fresh Terminal's key through the router, pass-through cost plus margin. Or bring your own OpenRouter key: stored only in your browser, never sent to our router; calls go straight to OpenRouter and the ledger records price = cost. "Delete my key" removes it.
+Press `K` (key icon). Default: **free usage** through the router (free credits: 25¢ per browser, $1 once signed in; pass-through cost plus margin). Or bring your own OpenRouter key: stored only in your browser, never sent to our router; calls go straight to OpenRouter and the ledger records price = cost. "Delete my key" removes it.
 
 ## Pages and the canvas
 
@@ -59,10 +61,12 @@ A brand-new Cloudflare account must register a workers.dev subdomain once (dashb
 
 ## Hosting
 
+**Live on the domain (2026-09-29):** https://freshterminal.ai (app Worker `fresh-terminal-app` in `terminal/site`, www redirects to the apex) and https://api.freshterminal.ai (the router). Deployed by `.github/workflows/site-deploy.yml` and `router-deploy.yml` with Workers custom domains, which create the DNS records and certificates. Signed-in accounts, boxes and the ledger mirror live in Cloudflare D1 (`fresh-terminal`, migrations in `terminal/router/migrations`). GitHub Pages below stays as the fallback.
+
 The static app deploys to GitHub Pages through `.github/workflows/pages.yml` on every push to `main`. Pages must be set to the "GitHub Actions" source once in the repository settings; this repo does not change settings through the API. `/box/:id` works on Pages through a `404.html` copy of `index.html`. The router runs as a Node process or as a Cloudflare Worker (`terminal/router/wrangler.toml`); moving out later is DNS plus one redeploy.
 
 ## Not wired yet
 
-SpacetimeDB live store (module written and type-checked, not published), Clerk sign-in (seam exists, anonymous identity in use), Stripe settlement, model-generated compositions from "Draw" (demo compositions only), per-owner billing rules, server-side permission enforcement (Jev `needsOwner()` exists, nothing enforces it yet), publishing the shared ledger chain outside the browser, presence of other people, canvas document rendering, voice/TV-remote input, camera and tilt theme responses. Every visible placeholder shows a "not wired yet" tooltip and toast; the full list is in the dev-mode panel (press `D`).
+SpacetimeDB live store (module written and type-checked, not published), Clerk production instance (sign-in runs on the development instance), transcript lines in cloud sync, Stripe settlement, model-generated compositions from "Draw" (demo compositions only), per-owner billing rules, server-side permission enforcement (Jev `needsOwner()` exists, nothing enforces it yet), publishing the shared ledger chain outside the browser, presence of other people, canvas document rendering, voice/TV-remote input, camera and tilt theme responses. Every visible placeholder shows a "not wired yet" tooltip and toast; the full list is in the dev-mode panel (press `D`).
 
-Model used for this pass: Fable 5.1.
+Model used for this pass: Fable 5.1. Domain, sign-in and D1 pass (2026-09-29): Opus 5.5.

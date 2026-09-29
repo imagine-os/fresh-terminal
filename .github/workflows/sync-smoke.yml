@@ -1,0 +1,106 @@
+name: sync-smoke
+
+# End-to-end check of signed-in sync on the live router, run on demand.
+# Creates a throwaway user in the Clerk DEVELOPMENT instance, mints a session
+# token for it through the Clerk Backend API, calls /me and /sync/* on
+# api.freshterminal.ai, then deletes the D1 rows and the user. Prints statuses
+# and counts only; the session token is masked.
+
+on:
+  workflow_dispatch:
+  # After every router deploy, so a broken sign-in, sync or credits path shows up at once.
+  workflow_run:
+    workflows: [router-deploy]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      API: https://api.freshterminal.ai
+    steps:
+      - name: Refuse to run against a production Clerk instance
+        run: |
+          case "$CLERK_SECRET_KEY" in sk_test_*) echo "development instance: ok";; *) echo "not a development key; stopping"; exit 1;; esac
+      - name: Signed in (throwaway user, session token, /me, /sync, /credits)
+        id: user
+        run: |
+          clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
+          user=$(curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/users \
+            -d "{\"email_address\":[\"ft-smoke-${GITHUB_RUN_ID}@freshterminal.ai\"],\"username\":\"ftsmoke${GITHUB_RUN_ID}\",\"phone_number\":[\"+1201555$(printf '%04d' $((100 + GITHUB_RUN_ID % 100)))\"],\"skip_password_requirement\":true,\"skip_password_checks\":true}")
+          uid=$(echo "$user" | jq -r '.id // empty')
+          [ -n "$uid" ] || { echo "user create failed: $(echo "$user" | jq -c '[.errors[]?.long_message // .errors[]?.message]')"; exit 1; }
+          echo "uid=$uid" >> "$GITHUB_OUTPUT"
+          echo "user: created"
+          sess=$(curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/sessions -d "{\"user_id\":\"$uid\"}")
+          sid=$(echo "$sess" | jq -r '.id // empty')
+          [ -n "$sid" ] || { echo "session create failed: $(echo "$sess" | jq -c '[.errors[]?.long_message // .errors[]?.message]')"; exit 1; }
+          jwt=$(curl -sS "${clerk[@]}" -X POST "https://api.clerk.com/v1/sessions/$sid/tokens" -d '{}' | jq -r '.jwt // empty')
+          [ -n "$jwt" ] || { echo "token mint failed"; exit 1; }
+          echo "::add-mask::$jwt"
+          echo "session token: minted"
+          # Same step on purpose: GitHub drops step outputs that hold masked values.
+          JWT="$jwt"
+          auth=(-H "Authorization: Bearer $JWT" -H 'Content-Type: application/json' -H 'Origin: https://freshterminal.ai')
+          now=$(date +%s%3N)
+          echo "GET /me: $(curl -sS "${auth[@]}" "$API/me" | jq -c '{signedIn, error, plan: .account.plan, sync}')"
+          box="{\"id\":\"box-smoke-$GITHUB_RUN_ID\",\"name\":\"Smoke\",\"state_json\":\"{\\\"nav\\\":[]}\",\"created_at\":$now,\"updated_at\":$now,\"deleted_at\":null}"
+          echo "PUT /sync/boxes: $(curl -sS "${auth[@]}" -X PUT "$API/sync/boxes" -d "{\"boxes\":[$box]}" | jq -c '{accepted: (.accepted|length), conflicts: (.conflicts|length), rejected: (.rejected|length)}')"
+          echo "PUT older copy: $(curl -sS "${auth[@]}" -X PUT "$API/sync/boxes" -d "{\"boxes\":[$(echo "$box" | jq -c ".updated_at = $((now-1000)) | .name = \"stale\"")]}" | jq -c '{accepted: (.accepted|length), conflicts: [.conflicts[].name]}')"
+          echo "GET /sync/boxes: $(curl -sS "${auth[@]}" "$API/sync/boxes?since=0" | jq -c '{boxes: [.boxes[] | .name]}')"
+          entry="{\"id\":\"entry-smoke-$GITHUB_RUN_ID\",\"box_id\":\"box-smoke-$GITHUB_RUN_ID\",\"owner_identity\":\"anon-smoke\",\"kind\":\"charge\",\"what\":\"model.call\",\"model\":\"m\",\"units\":1,\"unit_kind\":\"call\",\"cost_micro\":1,\"price_micro\":1,\"ref\":\"\",\"created_at\":$now,\"prev_hash\":\"$(printf '0%.0s' $(seq 64))\",\"hash\":\"$(printf 'a%.0s' $(seq 64))\",\"shared_prev_hash\":null,\"shared_hash\":null}"
+          echo "POST /sync/ledger: $(curl -sS "${auth[@]}" -X POST "$API/sync/ledger" -d "{\"entries\":[$entry]}" | jq -c '{received, written}')"
+          echo "GET /sync/ledger: $(curl -sS "${auth[@]}" "$API/sync/ledger?since=0" | jq -c '{entries: (.entries|length)}')"
+          echo "anonymous /sync/boxes: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "$API/sync/boxes")"
+          echo "GET /credits (signed in): $(curl -sS "${auth[@]}" "$API/credits" | jq -c '{signed_in, mode, granted_micro, remaining_micro}')"
+      - name: Anonymous credits on the live router (one real call, about half a cent)
+        id: anon
+        if: always()
+        run: |
+          origin=(-H 'Origin: https://freshterminal.ai' -H 'Content-Type: application/json')
+          echo "paid call without a device: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[]}')"
+          turnstile=$(curl -sS "${origin[@]}" "$API/credits" | jq -r '.turnstile')
+          issued=$(curl -sS "${origin[@]}" -X POST "$API/credits/device" -d '{}')
+          device=$(echo "$issued" | jq -r '.device // empty')
+          if [ -z "$device" ]; then
+            if [ "$turnstile" = "on" ] && [ "$(echo "$issued" | jq -r '.code')" = "turnstile_failed" ]; then
+              echo "Turnstile is on: a device without a browser token is refused (expected). Paid-call check skipped."
+              exit 0
+            fi
+            echo "device issue failed: $(echo "$issued" | jq -c '{code, error}')"; exit 1
+          fi
+          echo "device_id=${device%%.*}" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$device"
+          echo "GET /credits (device): $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{mode, granted_micro, remaining_micro, soft_prompts_left, limited}')"
+          code=$(curl -sS -o "$RUNNER_TEMP/route.txt" -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"Say hi in two words.","chips":[]}')
+          echo "POST /route (device): HTTP $code, events: $(grep -c '^event:' "$RUNNER_TEMP/route.txt"), done: $(grep -A1 '^event: done' "$RUNNER_TEMP/route.txt" | tail -1 | sed 's/^data: //' | jq -c '{ok, served_model, price: .entry.price_micro, cost: .entry.cost_micro}')"
+          sleep 3
+          echo "GET /credits after the call: $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{spent_micro, remaining_micro}')"
+          echo "anonymous model choice: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[],"model":"anthropic/claude-sonnet-5.5"}')"
+      - name: Clean up (D1 rows, Clerk user)
+        if: always()
+        env:
+          UID_: ${{ steps.user.outputs.uid }}
+          DEVICE_ID: ${{ steps.anon.outputs.device_id }}
+        run: |
+          cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          db=$(curl -sS "${cf[@]}" "$base?name=fresh-terminal" | jq -r '[.result[]? | select(.name=="fresh-terminal")][0].uuid // empty')
+          acct="acct_$UID_"
+          [ -n "$UID_" ] && for table in ledger_entries boxes accounts; do
+            col=$([ "$table" = accounts ] && echo id || echo account_id)
+            ok=$(curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "{\"sql\":\"DELETE FROM $table WHERE $col = ?\",\"params\":[\"$acct\"]}" | jq -r '.success')
+            echo "delete $table rows: $ok"
+          done
+          if [ -n "$DEVICE_ID" ]; then
+            echo "delete smoke device: $(curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "{\"sql\":\"DELETE FROM anon_devices WHERE id = ?\",\"params\":[\"$DEVICE_ID\"]}" | jq -r '.success')"
+          fi
+          [ -n "$UID_" ] && echo "delete Clerk user: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$UID_" | jq -r '.deleted')" || true

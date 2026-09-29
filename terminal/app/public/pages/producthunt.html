@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en" data-size="desk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Product Hunt strategy</title>
+<meta name="description" content="How Fresh Terminal launches on Product Hunt: the pitch, the gallery, a readiness checklist tied to what is live, a dependency timeline, the maker's first comment, risks and costs. Proposed 2026-09-29; nothing is scheduled.">
+<meta name="robots" content="noindex">
+<script>
+(function () {
+  var d = document.documentElement;
+  function size() {
+    var w = d.clientWidth || window.innerWidth;
+    d.setAttribute('data-size', w < 640 ? 'phone' : w < 1024 ? 'tablet' : w < 2000 ? 'desk' : 'wall');
+  }
+  size();
+  window.addEventListener('resize', size);
+  try { var t = localStorage.getItem('ft-lib-theme'); if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t); } catch (e) {}
+})();
+</script>
+<script type="application/json" id="page-actions">
+{
+  "$comment": "Actions this page offers (WebMCP / voice vocabulary). Update with every UI change.",
+  "page": "pages/producthunt.html",
+  "actions": [
+    { "id": "ph.jump", "intent": "go to a section of the Product Hunt plan", "permission": "anyone", "target": "nav.toc a" },
+    { "id": "ph.checklist.filter", "intent": "show only blockers / live / not wired items in the launch checklist", "permission": "anyone", "target": "#check-filter button" },
+    { "id": "ph.comment.copy", "intent": "copy the maker's first comment draft", "permission": "anyone", "target": "#copy-comment" }
+  ]
+}
+</script>
+<style>
+/* Same quiet reading room as freshstack.html and library.html: tokens on :root, size class on <html>, cards on a grid.
+   Lists that change (checklist, shots, timeline, costs) are data arrays at the bottom; each item has one status word. Edit the arrays, not the markup. */
+:root {
+  --bg: #0b0d10;
+  --bg-2: #12151a;
+  --bg-3: #191d23;
+  --fg: #e8eaed;
+  --muted: #8d939c;
+  --line: #242830;
+  --line-2: #323844;
+  --accent: #8ee6a1;
+  --accent-ink: #0b0d10;
+  --focus: #b9f5c6;
+  --live: #8ee6a1;
+  --written: #f0c674;
+  --planned: #8d939c;
+  --blocker: #ff8f7a;
+  --justin: #9cc7ff;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --gutter: clamp(16px, 3.5vw, 56px);
+  --radius: 14px;
+  color-scheme: dark;
+  font-size: 18px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f4f2; --bg-2: #ffffff; --bg-3: #e9ebe8; --fg: #15181d; --muted: #5b6169; --line: #d9dce0; --line-2: #c4c9cf;
+    --accent: #1f8a45; --accent-ink: #ffffff; --focus: #1f8a45; --live: #1f8a45; --written: #9a6b00; --planned: #5b6169; --blocker: #b3261e; --justin: #1a5fb4;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f4f2; --bg-2: #ffffff; --bg-3: #e9ebe8; --fg: #15181d; --muted: #5b6169; --line: #d9dce0; --line-2: #c4c9cf;
+  --accent: #1f8a45; --accent-ink: #ffffff; --focus: #1f8a45; --live: #1f8a45; --written: #9a6b00; --planned: #5b6169; --blocker: #b3261e; --justin: #1a5fb4;
+  color-scheme: light;
+}
+html[data-size="phone"] { font-size: 16px; }
+html[data-size="tablet"] { font-size: 17px; }
+html[data-size="desk"] { font-size: 18px; }
+html[data-size="wall"] { font-size: 26px; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 1rem; line-height: 1.55; -webkit-font-smoothing: antialiased; min-height: 100%; overflow-x: hidden; }
+a { color: var(--accent); overflow-wrap: anywhere; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+[hidden] { display: none !important; }
+code { font-family: var(--mono); font-size: .92em; }
+
+.wrap { max-width: 1680px; margin-inline: auto; padding-inline: var(--gutter); padding-block: clamp(24px, 4vw, 64px) clamp(40px, 6vw, 96px); display: grid; gap: clamp(28px, 3.2vw, 56px); }
+html[data-size="wall"] .wrap { max-width: 3500px; }
+.wrap > * { min-width: 0; }
+
+header.top { display: grid; gap: .8rem; }
+.crumbs { display: flex; gap: .6rem; flex-wrap: wrap; font-size: .9rem; color: var(--muted); }
+.crumbs a { color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+.crumbs { align-items: center; }
+.crumbs a:hover { color: var(--fg); }
+h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1.08; font-weight: 600; letter-spacing: -.015em; text-wrap: balance; }
+h2 { margin: 0; font-size: clamp(1.3rem, 1.1rem + .6vw, 1.75rem); font-weight: 600; letter-spacing: -.01em; line-height: 1.2; }
+h3 { margin: 0; font-size: 1.08rem; font-weight: 600; letter-spacing: -.005em; }
+.lede { margin: 0; max-width: 70ch; color: var(--muted); font-size: 1.05rem; }
+.lede strong { color: var(--fg); font-weight: 600; }
+.meta { display: flex; gap: .5rem 1.2rem; flex-wrap: wrap; font-size: .85rem; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 600; }
+
+nav.toc { display: flex; flex-wrap: wrap; gap: .5rem; }
+nav.toc a { display: inline-flex; align-items: center; min-height: 44px; padding: .35rem .85rem; border: 1px solid var(--line-2); border-radius: 999px; background: var(--bg-2); color: var(--fg); text-decoration: none; font-size: .9rem; }
+nav.toc a:hover { border-color: var(--accent); }
+
+section.block { display: grid; gap: 1rem; scroll-margin-top: 1rem; }
+section.block > header { display: grid; gap: .35rem; }
+section.block > header p { margin: 0; color: var(--muted); max-width: 75ch; }
+
+.verdict { display: grid; gap: .7rem; padding: 1.2rem 1.3rem; border-radius: var(--radius); background: var(--bg-2); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); max-width: 95ch; }
+.verdict p, .verdict ol { margin: 0; }
+.verdict ol { padding-left: 1.2em; display: grid; gap: .35rem; }
+.verdict strong { color: var(--fg); }
+
+.grid { display: grid; gap: clamp(14px, 1.6vw, 24px); grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+.grid.wide { grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); }
+.card { display: grid; gap: .6rem; align-content: start; padding: 1.1rem 1.2rem 1.2rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.card > header { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.card p { margin: 0; }
+.card .sub { font-size: .9rem; color: var(--muted); }
+.card[data-pick="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.quote { font-size: 1.15rem; font-weight: 600; letter-spacing: -.005em; }
+.count { font: 600 .74rem var(--mono); color: var(--muted); }
+.count[data-over="true"] { color: var(--blocker); }
+
+.pill { margin-left: auto; font: 600 .74rem var(--mono); letter-spacing: .02em; text-transform: uppercase; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.pill[data-status="live"] { color: var(--live); border-color: color-mix(in srgb, var(--live) 45%, transparent); }
+.pill[data-status="progress"] { color: var(--written); border-color: color-mix(in srgb, var(--written) 45%, transparent); }
+.pill[data-status="notwired"] { color: var(--blocker); border-color: color-mix(in srgb, var(--blocker) 45%, transparent); }
+.pill[data-status="justin"] { color: var(--justin); border-color: color-mix(in srgb, var(--justin) 45%, transparent); }
+.pill[data-status="pick"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.tag { font: 600 .7rem var(--mono); letter-spacing: .02em; text-transform: uppercase; padding: .1rem .45rem; border-radius: 6px; background: var(--bg-3); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.tag.blocker { color: var(--blocker); }
+
+.toolbar { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; background: var(--bg-2); }
+.seg button { min-height: 44px; min-width: 44px; padding: .4rem .9rem; border: 0; background: transparent; cursor: pointer; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line-2); }
+.seg button[aria-pressed="true"] { background: var(--bg-3); color: var(--fg); font-weight: 600; }
+.tally { font-size: .9rem; color: var(--muted); }
+.tally b { color: var(--fg); }
+
+.list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.row { display: grid; gap: .35rem; padding: .85rem 1rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.row > .head { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+.row .what { font-weight: 600; }
+.row .note { margin: 0; font-size: .92rem; color: var(--muted); }
+.row .note a { word-break: break-word; }
+.row[data-status="notwired"][data-blocker="true"] { border-left: 4px solid var(--blocker); }
+
+.phase { display: grid; gap: .6rem; }
+.phase h3 { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+.phase h3 .sub { font-weight: 400; color: var(--muted); font-size: .9rem; }
+.deps { display: flex; gap: .35rem; flex-wrap: wrap; font-size: .82rem; color: var(--muted); }
+.deps code { padding: .05rem .4rem; border-radius: 6px; background: var(--bg-3); border: 1px solid var(--line); }
+.id { font: 600 .78rem var(--mono); color: var(--muted); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; vertical-align: top; padding: .7rem .85rem; border-bottom: 1px solid var(--line); }
+th { font: 600 .74rem var(--mono); text-transform: uppercase; letter-spacing: .03em; color: var(--muted); background: var(--bg-3); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); }
+td.date { white-space: nowrap; }
+html[data-size="phone"] table, html[data-size="phone"] tbody, html[data-size="phone"] tr, html[data-size="phone"] td { display: block; width: 100%; }
+html[data-size="phone"] thead { display: none; }
+html[data-size="phone"] tr { padding: .6rem 0; border-bottom: 1px solid var(--line); }
+html[data-size="phone"] td { border: 0; padding: .2rem .85rem; }
+html[data-size="phone"] td::before { content: attr(data-k); display: block; font: 600 .7rem var(--mono); text-transform: uppercase; color: var(--muted); }
+
+.comment { display: grid; gap: .8rem; padding: 1.2rem 1.3rem; border-radius: var(--radius); background: var(--bg-2); border: 1px solid var(--line); max-width: 80ch; }
+.comment p, .comment ul { margin: 0; }
+.comment ul { padding-left: 1.2em; display: grid; gap: .25rem; }
+.comment .fill { color: var(--justin); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: .45rem 1rem; border-radius: 10px; border: 1px solid var(--line-2); background: var(--bg-3); cursor: pointer; font-weight: 600; }
+.btn:hover { border-color: var(--accent); }
+
+details.faq { background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; }
+details.faq summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: .6rem 1rem; font-weight: 600; }
+details.faq > div { padding: 0 1rem 1rem; color: var(--fg); }
+details.faq > div p { margin: 0 0 .5rem; }
+
+.src { font-size: .85rem; color: var(--muted); }
+.src a { color: var(--muted); }
+.v { font: 600 .7rem var(--mono); text-transform: uppercase; padding: .05rem .4rem; border-radius: 6px; border: 1px solid var(--line-2); white-space: nowrap; }
+.v.ok { color: var(--live); border-color: color-mix(in srgb, var(--live) 45%, transparent); }
+.v.no { color: var(--written); border-color: color-mix(in srgb, var(--written) 45%, transparent); }
+
+.ask { display: grid; gap: .7rem; padding: 1.2rem 1.3rem; border-radius: var(--radius); border: 1px solid color-mix(in srgb, var(--justin) 50%, var(--line)); background: var(--bg-2); max-width: 95ch; }
+.ask ol { margin: 0; padding-left: 1.3em; display: grid; gap: .45rem; }
+.foot { color: var(--muted); font-size: .85rem; max-width: 95ch; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: .6rem 1rem; border-radius: 10px; background: var(--fg); color: var(--bg); font-weight: 600; z-index: 10; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <nav class="crumbs" aria-label="Where you are">
+      <a href="../">Fresh Terminal</a><span aria-hidden="true">/</span><a href="library.html">Library</a><span aria-hidden="true">/</span><span>Product Hunt strategy</span>
+    </nav>
+    <h1>Product Hunt strategy</h1>
+    <p class="lede">How Fresh Terminal launches on Product Hunt. <strong>Launch the product people can use today, tell the FreshStack story inside it, and go only when the blockers below are green.</strong> Nothing here is scheduled; the order is set by dependencies, not dates.</p>
+    <p class="meta"><span><b>Status</b> proposed, waiting on Justin</span><span><b>Written</b> 2026-09-29 by Opus 5.5 (research and page)</span><span><b>Asked</b> <a href="https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&amp;cid=C0C2YAS5TL5">Justin, 03:14 UTC</a></span><span><b>Canon</b> C-077</span></p>
+  </header>
+
+  <nav class="toc" aria-label="On this page">
+    <a href="#verdict">The call</a>
+    <a href="#research">What the research says</a>
+    <a href="#pitch">Pitch and tagline</a>
+    <a href="#gallery">Gallery shot list</a>
+    <a href="#ready">Launch readiness</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#community">Community</a>
+    <a href="#comment">First comment</a>
+    <a href="#faq">FAQ and objections</a>
+    <a href="#metrics">Metrics</a>
+    <a href="#risks">Risks</a>
+    <a href="#costs">Costs</a>
+    <a href="#justin">What we need from Justin</a>
+  </nav>
+
+  <section class="block" id="verdict">
+    <header><h2>The call</h2></header>
+    <div class="verdict">
+      <p><strong>Launch Fresh Terminal first, not FreshStack.</strong> Product Hunt's featuring guidelines (2026-03-10) list templates and boilerplates among things it does not feature, and products on the same root domain share one six-month gap between launches. A starter kit posted on its own would probably land in the unfeatured "All" feed and use up the domain's slot.</p>
+      <ol>
+        <li><strong>Lead with what nothing else does:</strong> you type, the terminal changes itself, and every change can be undone or replayed. That is live today and shows in a three-second clip.</li>
+        <li><strong>FreshStack is the story in the maker's comment and the GitHub link.</strong> It grows on GitHub and developer forums, not on the leaderboard. It gets its own launch later only if it becomes a working product (for example, one command that deploys a live multiplayer game) on its own domain.</li>
+        <li><strong>Five blockers before scheduling:</strong> Clerk production sign-in (development is capped at 100 users), free usage with a per-browser cap, a launch-day spend limit on our key, a first-run screen that says where your work is saved, and a licence on the repo (it has none, so "open" can't be claimed yet). Free usage (03:40 UTC, C-074) and the minimal first screen (C-072, C-075) have shipped; three are still open.</li>
+        <li><strong>Don't claim realtime multiplayer on launch day.</strong> SpacetimeDB isn't published yet. Save "game-first realtime" for the second launch, where it counts as the significant update Product Hunt requires.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="research">
+    <header>
+      <h2>What the research says</h2>
+      <p>Checked 2026-09-29 against Product Hunt's own help center and launch guide, plus 2025–2026 write-ups. <span class="v ok">verified</span> means we read it on Product Hunt's own site. <span class="v no">unverified</span> means a third party says it, or it's folklore.</p>
+    </header>
+    <div class="grid wide" id="findings"></div>
+    <h3>Launches from 2025–2026 worth learning from</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Launch</th><th>Date</th><th>Result</th><th>Why it worked (or didn't)</th><th>Source</th></tr></thead>
+        <tbody id="examples"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="pitch">
+    <header>
+      <h2>Pitch and tagline</h2>
+      <p>Product Hunt's tagline can be 60 characters at most, and the description 260. Their guide asks for plain and descriptive over clever. "Evolve as we grow." stays our brand line on the site and at the end of the maker's comment; it doesn't say what the product does, so it isn't the Product Hunt tagline.</p>
+    </header>
+    <div class="grid" id="pitches"></div>
+  </section>
+
+  <section class="block" id="gallery">
+    <header>
+      <h2>Gallery shot list</h2>
+      <p>Thumbnail 240×240 (a GIF works, under 3 MB, no strobing). Gallery images 1270×760, at least two, each under 3 MB. Video is YouTube only, with the full link and set to public before launch. Order matters: the first image shows up in shares, so it has to show the product changing itself. Every shot is taken from the live site with Playwright, so nothing is a mock-up.</p>
+    </header>
+    <ol class="list" id="shots"></ol>
+  </section>
+
+  <section class="block" id="ready">
+    <header>
+      <h2>Launch readiness</h2>
+      <p>Each line shows its state today (2026-09-29 04:00 UTC), with a link where it's live. A red edge marks a blocker: we don't schedule until it's green.</p>
+    </header>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Filter the checklist" id="check-filter">
+        <button type="button" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" data-filter="blocker" aria-pressed="false">Blockers</button>
+        <button type="button" data-filter="live" aria-pressed="false">Live</button>
+        <button type="button" data-filter="open" aria-pressed="false">Not done</button>
+      </div>
+      <p class="tally" id="tally" aria-live="polite"></p>
+    </div>
+    <ul class="list" id="checklist"></ul>
+  </section>
+
+  <section class="block" id="timeline">
+    <header>
+      <h2>Timeline by dependencies</h2>
+      <p>No dates. Each task starts when the tasks it names are done. The model follows the house rule: Fable for judgment and shared code, Opus 5 for building, Sonnet 5 for mechanical passes. Launch day starts at 12:01 AM Pacific, when the Product Hunt day begins. Tuesday to Thursday is folklore; Product Hunt says the best day is the one you're ready for.</p>
+    </header>
+    <div class="grid wide" id="phases"></div>
+  </section>
+
+  <section class="block" id="community">
+    <header>
+      <h2>Community plan</h2>
+      <p>The rule: we never ask for upvotes. Product Hunt says asking can push a product down the ranking or take it off the homepage. We ask people to try it and tell us what breaks. Points count upvotes and meaningful engagement, like comments, so honest comments help and a vote ring hurts.</p>
+    </header>
+    <div class="grid" id="community-grid">
+      <article class="card"><header><h3>Before</h3></header>
+        <p>Justin's personal Product Hunt account (company accounts aren't allowed), with a complete maker profile, commenting on other launches for a few weeks. We add a "tell me on launch day" email field to our own site, because Product Hunt ended its Coming Soon pages around August 2025. Post in Product Hunt's forums (<code>/p/</code>) about the build, not the launch. Share build clips on X and LinkedIn that link to the site, not to Product Hunt.</p></article>
+      <article class="card"><header><h3>Launch day</h3></header>
+        <p>At 12:01 AM Pacific: the maker's comment goes up, the email goes out, and a banner appears on the site. One personal note per person on our list, saying "we're live, try it, tell us what breaks," and never "please upvote." Two people answer comments in shifts all day, aiming for under 15 minutes. Bugs reported in comments get fixed the same day, and we reply with the changelog link.</p></article>
+      <article class="card"><header><h3>Where developers already are</h3></header>
+        <p>The FreshStack story goes to GitHub (README, topics, a pinned "start here" discussion), a Show HN on a different day, and one or two forums where the stack's own communities gather (SpacetimeDB, LiveKit, Cloudflare). We post only when we have something to show, not to promote the launch.</p></article>
+      <article class="card"><header><h3>What we don't do</h3></header>
+        <p>No paid hunters (Product Hunt says there's no advantage), no upvote exchanges, no bought votes, no mass DMs, no incentives for votes, no posting from new or company accounts. Friends who have never used Product Hunt should comment with something real, or not at all.</p></article>
+    </div>
+  </section>
+
+  <section class="block" id="comment">
+    <header>
+      <h2>Maker's first comment (draft)</h2>
+      <p>Posted by Justin right after the gallery. Blue text is Justin's to confirm or rewrite in his own words. The comment asks for feedback and never for votes. Bracketed lines ship only if that feature is live on the day.</p>
+    </header>
+    <div class="comment" id="comment-text">
+      <p>Hi Product Hunt, I'm Justin, and I make Fresh Terminal.</p>
+      <p class="fill">I kept rebuilding the same dashboard for every business I run, and every rebuild was a week of waiting on someone else's tools. So we built a terminal that rebuilds itself instead.</p>
+      <p>You type what you want, like "switch to Glass Window", "add a Projects menu" or "show the sidebar as a rail", and the interface changes in front of you. Every change is a step you can undo, or scrub back through in Replay.</p>
+      <p>What you can try right now:</p>
+      <ul>
+        <li>Open a skinned terminal from the Library. The koi pond is my favourite.</li>
+        <li>Click a tag on a word to tell it what you mean: "Hoy" the brand, or "hoy" the day.</li>
+        <li>Watch what every reply costs in the top bar. We pass the model cost straight through, or you can use your own OpenRouter key, which never leaves your browser.</li>
+        <li>Free usage to start: about 40 replies on us, no account. Sign in when you want your boxes in the cloud.</li>
+      </ul>
+      <p>Under it is FreshStack, the stack we build on: Cloudflare, GitHub, OpenRouter, Clerk, SpacetimeDB and LiveKit. Each piece is listed with its job and a documented way out, so nothing is forever.</p>
+      <p>What isn't done yet: realtime multiplayer (that's next), spoken replies and payments. We'd rather tell you than have you find out.</p>
+      <p>Two questions for you: what's the first thing you'd make it change about itself? And what broke?</p>
+      <p>Evolve as we grow.</p>
+    </div>
+    <div class="toolbar"><button type="button" class="btn" id="copy-comment">Copy comment</button><span class="tally" id="comment-count"></span></div>
+  </section>
+
+  <section class="block" id="faq">
+    <header><h2>FAQ and objections</h2><p>Answers to have ready in the comments, all true today. If one stops being true, change it here first.</p></header>
+    <div class="list" id="faqs"></div>
+  </section>
+
+  <section class="block" id="metrics">
+    <header><h2>Metrics to watch</h2><p>What we check hourly on launch day and once a day for a week after. "Measurable now" means the data exists today; the rest needs the analytics task (P8) or the spend dashboard (P5) first.</p></header>
+    <div class="table-wrap"><table><thead><tr><th>Metric</th><th>Why</th><th>Target</th><th>Measurable now?</th></tr></thead><tbody id="metrics-body"></tbody></table></div>
+  </section>
+
+  <section class="block" id="risks">
+    <header><h2>Risks</h2><p>Ranked by how badly each could hurt launch day.</p></header>
+    <div class="grid wide" id="risk-grid"></div>
+  </section>
+
+  <section class="block" id="costs">
+    <header><h2>Cost estimate</h2><p>Every paid item has a certainty, in the words of the estimate rule (C-070). <b>Sure</b> means fixed or free, from the vendor's pricing page checked 2026-09-29. <b>Fairly sure</b> means our own measured costs, scaled up. <b>Rough guess</b> means third-party traffic estimates or a guess. Launch-day model spend is the only large unknown, and the daily spend limit (P5) caps it.</p></header>
+    <div class="table-wrap"><table><thead><tr><th>Item</th><th>Estimate</th><th>Certainty</th><th>Basis</th></tr></thead><tbody id="cost-body"></tbody></table></div>
+    <p class="foot" id="cost-total"></p>
+  </section>
+
+  <section class="block" id="justin">
+    <header><h2>What we need from Justin</h2></header>
+    <div class="ask">
+      <ol>
+        <li><strong>Pick the pitch.</strong> Option A is recommended. Or send your own words and we'll check them against the 60-character limit.</li>
+        <li><strong>Create the Clerk production instance.</strong> The steps are in Canon C-065. The development instance stops at 100 users and shows a "Development mode" badge.</li>
+        <li><strong>Set the launch-day spend limit.</strong> Free usage is live with 25¢ per browser and a $2 daily cap on all signed-out use (C-074). At about 0.6¢ a turn, $2 is roughly 330 turns, which launch traffic uses up in minutes. It is a Worker variable, so no code is needed: we suggest $150 for launch day and the day after, checked hourly. When it trips, signed-out free calls stop for the day and your-key users are never blocked.</li>
+        <li><strong>Choose a licence for the repo</strong> (MIT or Apache-2.0 are the usual picks for a starter kit). Until there is one, FreshStack isn't open source, however we describe it.</li>
+        <li><strong>Get your Product Hunt account ready.</strong> It must be personal, with a photo and headline, and you should comment on a few launches over the coming weeks. You post the launch yourself; we don't hire a hunter.</li>
+        <li><strong>Rewrite the blue lines in the first comment</strong> so the story is yours, and decide whether to record the voice-over for the 60-second video.</li>
+        <li><strong>Send us the people to tell personally</strong> on launch day. Each gets a "try it, tell us what breaks" note, never an upvote ask.</li>
+        <li><strong>Pick the day once the blockers are green.</strong> We can schedule up to a month ahead. Say whether FreshStack should get its own domain for a later launch.</li>
+        <li><strong>Optional:</strong> the <code>SPACETIMEDB_TOKEN</code> secret (C-052). This only matters if you want multiplayer in the first launch rather than the second.</li>
+      </ol>
+    </div>
+  </section>
+
+  <p class="foot">This page renders its lists from the arrays at the bottom of its own source (FINDINGS, EXAMPLES, PITCHES, SHOTS, CHECKLIST, PHASES, FAQS, METRICS, RISKS, COSTS). To change a status, change one <code>status</code> word: <code>live</code>, <code>progress</code>, <code>notwired</code>, <code>justin</code>. The tally updates by itself. Live-state source of truth: <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/state.md">Canon: state</a>. Decision: <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/decisions.md">Canon C-077</a>. Certainty words follow the estimate rule C-070.</p>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+var SITE = 'https://freshterminal.ai';
+var PAGES = 'https://imagine-os.github.io/fresh-terminal';
+var REPO = 'https://github.com/imagine-os/fresh-terminal';
+
+/* Findings. v: true = read on Product Hunt's own site; false = third party or folklore. */
+var FINDINGS = [
+  { title: 'Featuring is an editorial choice, and starter kits are on the exclusion list', v: true,
+    body: 'Product Hunt\'s team picks featured launches by four criteria: Useful, Novel, High Craft and Creative. A launch doesn\'t have to score high on all four. The list of things they don\'t feature includes waitlisted products (unless there is immediate access), templates and boilerplates. That is why Fresh Terminal leads and FreshStack doesn\'t.',
+    src: [['Featuring guidelines, 2026-03-10', 'https://help.producthunt.com/en/articles/9883485-product-hunt-featuring-guidelines']] },
+  { title: 'Asking for upvotes is against the rules and gets punished', v: true,
+    body: '"Mass messaging users, asking for upvotes, using bots, incentivizing upvotes" are not allowed. Asking "may trigger the algorithm to drop the product in the ranks or remove it from the homepage entirely." Votes that look fake are removed, and accounts can be suspended.',
+    src: [['Community guidelines, 2025-04-11', 'https://help.producthunt.com/en/articles/3615694-community-guidelines'], ['Can I ask friends to upvote?, 2025-02-10', 'https://help.producthunt.com/en/articles/484935-can-i-ask-my-community-friends-family-to-upvote-a-product'], ['Fair voting, 2025-07-28', 'https://help.producthunt.com/en/articles/11869098-how-does-product-hunt-ensure-fair-voting-and-prevent-spam-or-vote-manipulation']] },
+  { title: 'Rank is points, and points include comments', v: true,
+    body: 'Product of the Day goes to the launch with the most points that day. "Points are a combination of upvotes and meaningful engagement (like comments or shares)." Kitty Points (your profile score) "don\'t impact rankings, launches, or being featured."',
+    src: [['Product of the Day, Week, Month, 2025-07-10', 'https://help.producthunt.com/en/articles/11751186-product-of-the-day-week-month'], ['Kitty Points, 2025-07-28', 'https://help.producthunt.com/en/articles/4457447-what-are-kitty-points']] },
+  { title: 'Launch at 12:01 AM Pacific, post it yourself, schedule up to a month ahead', v: true,
+    body: 'The Product Hunt day runs on Pacific time. Makers are encouraged to post their own launch: "there\'s no discernible advantage to using a third-party hunter." Launching is free. Company accounts aren\'t allowed.',
+    src: [['Launch guide (undated, read 2026-09-29)', 'https://www.producthunt.com/launch'], ['Preparing for launch (undated)', 'https://www.producthunt.com/launch/preparing-for-launch']] },
+  { title: 'Asset sizes, and why the maker comment and video matter', v: true,
+    body: 'Tagline 60 characters at most, description 260. Gallery 1270×760, at least two images. Thumbnail 240×240, under 3 MB. Video is YouTube only. Product Hunt says 70% of Product of the Day, Week or Month winners had a first comment from the maker, and about 53% of Product of the Day winners since 2021 had a video.',
+    src: [['Preparing for launch (undated)', 'https://www.producthunt.com/launch/preparing-for-launch'], ['How to post a product, 2025-05-28', 'https://help.producthunt.com/en/articles/479557-how-to-post-a-product']] },
+  { title: 'Relaunches need six months and a significant update, counted per root domain', v: true,
+    body: 'New UIs and pricing changes don\'t count as significant. "Products that share the same root domain must adhere to a six-month submission gap." So Fresh Terminal and FreshStack on freshterminal.ai share one slot. Realtime multiplayer is a good candidate for the second launch.',
+    src: [['Can I relaunch?, 2026-07-07', 'https://help.producthunt.com/en/articles/484934-can-i-relaunch-my-product']] },
+  { title: 'Coming Soon and "Notify me" pages are gone', v: false,
+    body: 'Makers report the teaser pages were discontinued around August 2025, and a Product Hunt forum thread discusses it. The staff quote ("a very old surface area that was quite buggy") is secondhand. Product Hunt\'s old help article about teasers is still online. We collect launch-day emails on our own site instead.',
+    src: [['Product Hunt forum thread, 2025', 'https://www.producthunt.com/p/general/product-hunt-discontinued-coming-soon-teaser-pages-did-they-work-for-you'], ['Submitator, 2026-07-30', 'https://submitator.com/blog/product-hunt-launch-advice-thats-now-wrong']] },
+  { title: 'Hidden vote counts and a shuffled order for the first four hours', v: false,
+    body: 'This is widely reported and attributed to Product Hunt, but we didn\'t find it in the current help center. Product Hunt did run a one-day "Randomized Leaderboard Day" experiment in 2026, where votes cast during random periods counted double. Plan for the first hours to count without relying on the exact rule.',
+    src: [['Dub, updated 2026-03-15', 'https://dub.co/blog/product-hunt'], ['fmerian launch guide, 2026', 'https://github.com/fmerian/awesome-product-hunt/blob/main/product-hunt-launch-guide.md'], ['Randomized Leaderboard Day, 2026', 'https://www.producthunt.com/p/producthunt/introducing-randomized-leaderboard-day-on-product-hunt']] },
+  { title: 'Folklore: about 10% get featured, votes from older accounts count more, and 1,000–5,000 visitors if featured', v: false,
+    body: 'These numbers come from third-party blogs (late 2025), not from Product Hunt. We use the visitor range only to size the model-spend estimate, and we treat it as low certainty.',
+    src: [['Awesome Directories, 2025', 'https://awesome-directories.com/blog/product-hunt-launch-guide-2025-algorithm-changes/'], ['shno.co stats, 2026', 'https://www.shno.co/marketing-statistics/product-hunt-launch-statistics']] },
+  { title: 'Golden Kitty was retired and Orbit Awards replaced it', v: true,
+    body: 'Orbit Awards run quarterly, one category at a time, and focus on traction and good reviews. Planned categories include coding agents and vibe-coding tools. That rewards having real users after launch day, which is one more reason not to launch before the first-run experience works.',
+    src: [['Product Hunt forum, late 2025', 'https://www.producthunt.com/p/producthunt/rip-golden-kitty-awards-long-live-orbit-awards']] }
+];
+
+var EXAMPLES = [
+  { name: 'Cursor 2.0', date: '2025-10-30', result: '#1 Day, #1 Week', why: 'A large version with an existing audience. Cursor launched 9 times in 2025–26, and every launch placed in the daily top 4.', src: 'https://www.producthunt.com/products/cursor/awards' },
+  { name: 'Lovable 2.0', date: '2025-04-25', result: '#1 Day, #5 Week', why: 'Steady significant launches: Feb 7 (#2), Feb 13 (#2), Apr 25 (#1), Jul 24 (#4), and two in April 2026 (#4). Each one was a new ability you could try right away.', src: 'https://www.producthunt.com/products/lovable/awards' },
+  { name: 'Appwrite Sites', date: '2025-05-19', result: '#1 Day, #4 Week, #4 Month', why: 'An open-source, self-hostable story (a Vercel alternative) on top of an existing brand. That is closest to our FreshStack angle, and it launched as a working product, not as a template.', src: 'https://rocketdevs.com/blog/how-to-launch-on-product-hunt' },
+  { name: 'Kilo Code', date: '2025–26', result: '#1 Day and #1 Week (and a #5 Day)', why: 'An open-source coding agent with GitHub stars as proof. It relaunched with new abilities (a code reviewer, a VS Code extension).', src: 'https://dev.to/fmerian/5-awesome-oss-products-launched-on-product-hunt-in-2026-2p9' },
+  { name: 'InsForge 2.0', date: '2026', result: '#1 Day, #3 Week', why: 'A backend platform with 10k GitHub stars. The second version was the launch: a significant update, not a first post.', src: 'https://dev.to/fmerian/5-awesome-oss-products-launched-on-product-hunt-in-2026-2p9' },
+  { name: 'Warp 2.0', date: '2025-06-24', result: 'About 396 upvotes; no 2025 award on its Product Hunt page', why: 'Even a known terminal brand didn\'t place when it relaunched as an "agentic development environment". Crowded coding-agent positioning. Our tagline avoids the category words and shows the unusual part. (Rank not confirmed.)', src: 'https://www.producthunt.com/products/warp/awards' }
+];
+
+var PITCHES = [
+  { id: 'A', pick: true, tagline: 'The terminal that rebuilds itself when you ask',
+    line: 'Type what you want and Fresh Terminal changes itself: its menu, layout and look. Every change can be undone, and every cent is shown.',
+    why: 'This is the Novel criterion in one sentence, and it shows in a three-second clip. It is live today (pass 4), and it doesn\'t fight Warp or Cursor for "coding agent".' },
+  { id: 'B', tagline: 'A terminal you skin, reshape and replay by typing',
+    line: 'Pick a terminal from the library (koi pond, glass window, blank page) and make it yours in plain words. Scrub back through every step.',
+    why: 'Strong on Creative and High Craft, with the best images. But the skins are the hook rather than the engine, and some library looks are still marked "not wired yet".' },
+  { id: 'C', tagline: 'Start from our stack: every piece has a way out',
+    line: 'Fresh Terminal is built on FreshStack, an open starter kit where every dependency has one job and a documented exit.',
+    why: 'Our long-term goal, but not for this launch. Product Hunt doesn\'t feature boilerplates, the repo has no licence yet, and it would use up the freshterminal.ai slot. Use it on GitHub and in a Show HN.' }
+];
+
+var SHOTS = [
+  { n: 'Thumbnail', size: '240×240 GIF, under 3 MB', what: 'The Fresh Terminal mark. A prompt types "Glass Window", and the empty first screen turns to glass. Loops in 3 s, no flashing.', from: 'live box', status: 'progress', note: 'Needs our own mark (not made yet; logo skill §4b).' },
+  { n: '1', size: '1270×760', what: 'The hero. Left: the minimal first screen, just a headline and the prompt box, with the sidebar hidden and the tools in the top-right tray, and the prompt "add a Projects menu and switch to Glass Window". Right: the result, with its structured reply and Undo. Caption: "Ask, and it changes itself."', from: SITE, status: 'live' },
+  { n: '2', size: '1270×760', what: 'Tags and the glossary. "Hoy" tagged as a brand next to "hoy" the day, with the tag popover open. Caption: "Tell it what your words mean."', from: SITE, status: 'live' },
+  { n: '3', size: '1270×760', what: 'The library grid: koi pond, glass window, blank page, night sky. Caption: "Start from a terminal with character." Only built looks are shown.', from: PAGES + '/pages/library.html', status: 'live' },
+  { n: '4', size: '1270×760', what: 'Replay. The scrubber halfway through a session, with the interface as it was at that step. Caption: "Every step, replayable."', from: PAGES + '/', status: 'live' },
+  { n: '5', size: '1270×760', what: 'Cost in the open. The top-bar counter, the cost of each reply, and the "use your own key" dialog. Caption: "Pay what the model costs, or bring your own key."', from: SITE, status: 'live' },
+  { n: '6', size: '1270×760', what: 'FreshStack. The stack cards in "Ours" mode with the exits visible. Caption: "Built on a stack you can leave."', from: PAGES + '/pages/freshstack.html', status: 'live' },
+  { n: '7', size: '1270×760', what: 'The typewriter page. Rough notes in the pad, and the formatted page growing above them. Caption: "Write rough, read clean."', from: SITE, status: 'live', note: 'The page above the pad shipped 03:20 UTC (C-071). Editing on the page itself is next.' },
+  { n: 'Video', size: 'YouTube, 45–60 s, public, full URL', what: 'Cold open on a blank terminal. Three prompts change it (a menu, a skin, the sidebar back as a rail), then Undo and Replay. Show the cost counter and end on "Evolve as we grow." Captions burned in. Voice-over is optional (Justin).', from: 'recorded on the live site', status: 'justin' }
+];
+
+/* status: live | progress | notwired | justin. blocker: true = don't schedule until live. */
+var CHECKLIST = [
+  { what: 'Type a prompt and get a streamed reply through our key', status: 'live', link: SITE, note: 'Jev routes and Haiku 4.5 answers. First live reply took about 1.5 s and cost 148 micro-dollars.' },
+  { what: 'The terminal edits itself with undoable ops', status: 'live', link: SITE, note: 'Menu, pages, layout, theme and styles, each with Undo. Checked live 2026-09-29 02:15 UTC.' },
+  { what: 'Bring your own OpenRouter key (press K)', status: 'live', link: SITE, note: 'The key stays in the browser.' },
+  { what: 'Tags on words, with a glossary per box', status: 'live', link: SITE },
+  { what: 'Library of skinned terminals; Open terminal starts a skinned box', status: 'live', link: PAGES + '/pages/library.html', note: 'Some looks open the closest built look, with a "not wired yet" line.' },
+  { what: 'Replay scrubber (press P)', status: 'live', link: PAGES + '/' },
+  { what: 'FreshStack page', status: 'live', link: PAGES + '/pages/freshstack.html' },
+  { what: 'English and Spanish', status: 'live', link: SITE, note: 'In the app. This strategy page is English only; Spanish fill is a later pass.' },
+  { what: 'freshterminal.ai and api.freshterminal.ai', status: 'live', link: SITE, note: 'Router health reports the key set, Clerk on and D1 on.' },
+  { what: 'Sign-in on a production Clerk instance', status: 'justin', blocker: true, note: 'Today it runs on the development instance: 100-user cap and a "Development mode" badge. Steps in C-065.' },
+  { what: 'Free usage: 25¢ per browser, two soft sign-in prompts, then sign-in', status: 'live', blocker: true, link: SITE, note: 'Enforced by the router since 03:40 UTC (C-074): signed device ids in D1, $1 per signed-in account, 3 new devices per IP and 10 per /24 a day, rate limits, and default models only while signed out. Invisible Turnstile runs before a new device gets its id. Not wired: buying more credits, a daily cap for signed-in accounts.' },
+  { what: 'Launch-day spend limit on signed-out use', status: 'justin', blocker: true, note: 'The $2/day cap exists (C-074) and is a Worker variable. It needs a launch-day value (suggested $150), an hourly check, and a small spend view (P5).' },
+  { what: 'Minimal first screen: a headline and the prompt box; sidebar hidden, tools in a top-right tray; "Saved in this browser" line with live free usage; session export', status: 'live', blocker: true, link: SITE, note: 'Shipped 2026-09-29 (C-072, C-075). Rehearse it with fresh browsers (P15).' },
+  { what: 'A licence on the repo', status: 'justin', blocker: true, note: 'The repo is public with no licence file, so "open" can\'t be claimed for FreshStack.' },
+  { what: 'Every turn ends with a visible line, even when the stream drops', status: 'live', link: SITE, note: 'A failed turn now leaves "No reply: the turn failed" (C-071). Two prompts went unanswered earlier on 2026-09-29; the 10× rehearsal (P15) checks it under load.' },
+  { what: 'Privacy policy and terms pages', status: 'notwired', note: 'Needed for Clerk production and for the launch-day email list.' },
+  { what: 'Social cards (Open Graph images and titles)', status: 'notwired', note: 'The app\'s index.html has no og: tags, so links shared on launch day show no preview.' },
+  { what: 'Launch analytics: visits, first prompt, sign-in, with the referrer kept', status: 'notwired', note: 'We don\'t measure page views yet. Product Hunt links add a ref parameter (unverified; check on the day).' },
+  { what: 'Launch-day email list on our site', status: 'notwired', note: 'Replaces Product Hunt\'s ended Coming Soon page.' },
+  { what: 'Realtime multiplayer and presence (SpacetimeDB)', status: 'notwired', note: 'The module is written, not published, and needs SPACETIMEDB_TOKEN. Not claimed on launch day; planned for the second launch.' },
+  { what: 'Spoken replies (Gemini Live audio)', status: 'notwired', note: 'Token flow only. Browser speech-to-text works. Not claimed.' },
+  { what: 'Payments (Stripe)', status: 'notwired', note: 'Fine for launch: the balance is shown, and nobody is charged yet. Say so in the FAQ.' },
+  { what: 'Master canvas redesign', status: 'progress', link: SITE + '/canvas', note: 'Justin called the current one awful. It stays out of the gallery until the redesign ships.' },
+  { what: 'Our own Fresh Terminal mark (thumbnail)', status: 'progress', note: 'Vendor marks are gathered; ours isn\'t made yet.' },
+  { what: 'Justin\'s Product Hunt maker profile, active', status: 'justin', note: 'Personal account, photo, headline, a few weeks of real comments.' }
+];
+
+var PHASES = [
+  { name: 'Pre-launch', sub: 'gates first, then assets', tasks: [
+    { id: 'P1', what: 'Pick the pitch and tagline', who: 'Justin', model: 'Fable (options)', deps: [] },
+    { id: 'P2', what: 'Choose a licence and add it to the repo', who: 'Justin decides', model: 'Fable', deps: [] },
+    { id: 'P3', what: 'Clerk production instance', who: 'Justin', model: 'Opus 5 (wire-up)', deps: [] },
+    { id: 'P4', what: 'Free usage: per-browser cap, two soft prompts, then sign-in (done 03:40 UTC, C-074)', who: 'Claude', model: 'Opus 5', deps: [] },
+    { id: 'P5', what: 'Launch-day value for the signed-out cap (a Worker variable), plus a small spend view', who: 'Justin sets, Claude builds the view', model: 'Fable (limits) + Opus 5', deps: ['P4'] },
+    { id: 'P6', what: 'First-run screen and top-right controls', who: 'Claude', model: 'Opus 5', deps: [] },
+    { id: 'P7', what: 'Privacy and terms pages', who: 'Claude drafts, Justin approves', model: 'Fable', deps: ['P3'] },
+    { id: 'P8', what: 'Social cards and launch analytics', who: 'Claude', model: 'Opus 5', deps: [] },
+    { id: 'P9', what: 'Every turn ends visibly; router error and outage copy', who: 'Claude', model: 'Opus 5', deps: [] },
+    { id: 'P10', what: 'Launch-day email field on the site', who: 'Claude', model: 'Opus 5', deps: ['P7'] },
+    { id: 'P11', what: 'Our mark and the thumbnail GIF', who: 'Claude', model: 'Opus 5', deps: [] },
+    { id: 'P12', what: 'Gallery screenshots at 1270×760 from the live site', who: 'Claude', model: 'Sonnet 5', deps: ['P1', 'P6'] },
+    { id: 'P13', what: '60-second video (script, capture, captions)', who: 'Claude, Justin voice optional', model: 'Opus 5 script, Sonnet 5 capture', deps: ['P12'] },
+    { id: 'P14', what: 'Final first comment in Justin\'s words', who: 'Justin', model: 'Fable (edit)', deps: ['P1'] },
+    { id: 'P15', what: 'Rehearsal: 5 fresh browsers, abuse attempts, a 10× load test, cost check', who: 'Claude', model: 'Sonnet 5 (QA matrix)', deps: ['P4', 'P5', 'P6', 'P9'] },
+    { id: 'P16', what: 'Schedule on Product Hunt (up to a month ahead)', who: 'Justin', model: 'none', deps: ['P2', 'P3', 'P5', 'P6', 'P12', 'P13', 'P14', 'P15'] }
+  ] },
+  { name: 'Launch day', sub: 'starts 12:01 AM Pacific', tasks: [
+    { id: 'L1', what: 'Go live, post the maker\'s comment, send the email, turn on the site banner', who: 'Justin', model: 'none', deps: ['P16'] },
+    { id: 'L2', what: 'Personal notes: "try it, tell us what breaks"', who: 'Justin', model: 'none', deps: ['L1'] },
+    { id: 'L3', what: 'Answer every comment in under 15 minutes, in shifts', who: 'Justin + Claude drafts', model: 'Fable (replies)', deps: ['L1'] },
+    { id: 'L4', what: 'Check spend and abuse hourly; raise or lower the limit', who: 'Claude, Justin approves', model: 'Sonnet 5', deps: ['L1'] },
+    { id: 'L5', what: 'Fix reported bugs the same day and reply with the changelog link', who: 'Claude', model: 'Opus 5', deps: ['L3'] }
+  ] },
+  { name: 'After', sub: 'the week after, then six months', tasks: [
+    { id: 'A1', what: 'Thank-you post: what we fixed because of your comments', who: 'Justin', model: 'Fable (draft)', deps: ['L5'] },
+    { id: 'A2', what: 'Retro in the docs: metrics against targets, costs against estimates', who: 'Claude', model: 'Sonnet 5', deps: ['L4'] },
+    { id: 'A3', what: 'Show HN on a different day, led by FreshStack', who: 'Justin', model: 'Fable (post)', deps: ['A1', 'P2'] },
+    { id: 'A4', what: 'Second Product Hunt launch after 6 months or more: realtime multiplayer (a significant update)', who: 'both', model: 'Fable (plan)', deps: ['A2'] }
+  ] }
+];
+
+var FAQS = [
+  { q: 'Is this like Warp?', a: 'No. Warp is a terminal and coding agent for your machine. Fresh Terminal runs in the browser, and its main trick is that it changes its own interface when you ask. The menus, pages and look are data it edits, and every edit can be undone.' },
+  { q: 'Is my OpenRouter key safe?', a: 'It stays in your browser and goes straight to OpenRouter. Our router never sees it. With our key, the cost of each reply is passed through and shown in the top bar.' },
+  { q: 'What does it cost?', a: 'Free usage to start: 25¢ of model cost per browser, about 40 replies, with two reminders before sign-in. Signed in, you get $1 more. After that, you pay what the model costs, or use your own key. We don\'t take payments yet: the balance is shown, and nobody is charged until payments are wired.' },
+  { q: 'Where is my work saved?', a: 'In your browser until you sign in. Signed in, your boxes and ledger sync to our database on Cloudflare. Replay can export a session as a file.' },
+  { q: 'Is it open source?', a: 'The code is public on GitHub. It becomes open source once a licence is added (waiting on Justin). Until then, say "public", not "open source".' },
+  { q: 'Can I use it with friends in real time?', a: 'Not yet. Realtime multiplayer on SpacetimeDB is written but not live. It\'s the next big release.' },
+  { q: 'Why not just ChatGPT?', a: 'A chat gives you text. Fresh Terminal changes the tool you\'re using: menus, pages and layout. It shows the cost of every reply and lets you undo or replay any step.' },
+  { q: 'Which models does it use?', a: 'Jev makes the fast routing decisions, Claude Haiku answers everyday prompts, and bigger models handle harder edits. All go through one OpenRouter key.' }
+];
+
+var METRICS = [
+  { m: 'Points and rank by hour', why: 'The launch result. hunted.space shows rank during the hidden hours.', target: 'Top 5 of the day (stretch: #1)', now: 'Yes (Product Hunt, hunted.space)' },
+  { m: 'Comments, and our median reply time', why: 'Comments count toward points and show the launch is alive.', target: 'Reply in under 15 min; 60+ real comments', now: 'Yes (manual)' },
+  { m: 'Visitors from Product Hunt', why: 'Featured launches reportedly bring 1,000–5,000 (low certainty).', target: 'Measure it', now: 'No, needs P8' },
+  { m: 'First-prompt rate', why: 'Share of visitors who send at least one prompt. This is the first-run test.', target: 'At least 40%', now: 'No, needs P8' },
+  { m: 'First edit that sticks', why: 'Share of first self-edits not undone within a minute. This is the "wow" test.', target: 'At least 60%', now: 'Partly (the op log has undo steps)' },
+  { m: 'Sign-in after the soft prompts', why: 'Share of free-credit users who sign in.', target: 'At least 10%', now: 'No, needs P4 + P8' },
+  { m: 'Model spend per active visitor, and in total', why: 'Keeps the free start affordable.', target: 'Under $0.03 each; under the daily limit', now: 'Yes (the ledger), dashboard in P5' },
+  { m: 'Abuse flags', why: 'Many browsers from one network, or scripted prompts.', target: 'Under 5% of spend', now: 'No, needs P4/P5' },
+  { m: 'Router errors and turns with no answer', why: 'A silent turn on launch day costs trust.', target: 'Zero turns with no visible line', now: 'Partly (router health), fully after P9' },
+  { m: 'GitHub stars and forks', why: 'FreshStack\'s real scoreboard.', target: 'Measure the week-over-week lift', now: 'Yes' }
+];
+
+var RISKS = [
+  { r: 'Free usage gets farmed', level: 'high', body: 'People open many browsers or private windows to reset free usage. Built (C-074): signed device ids, 3 new devices per IP and 10 per /24 network a day, per-minute rate limits, default models only while signed out, and a daily cap on all signed-out spend. Built but not switched on: an invisible Turnstile check before a new device (the Cloudflare token needs Turnstile Edit; the next deploy turns it on). Not yet: a daily cap for signed-in accounts, which is needed before Clerk production. On launch day, the cap is the real protection: set it, and watch it hourly.', status: 'live' },
+  { r: 'First-run confusion', level: 'high', body: 'Visitors don\'t know what to type, or where their work goes. The first screen shows three starter prompts that change the interface, one line saying "saved in this browser; sign in to keep it", and sign-in in the top-right tray. The first screen is already minimal: a headline and the prompt box. Rehearse it with 5 fresh browsers (P15).', status: 'progress' },
+  { r: 'Sign-in stops at 100 users', level: 'high', body: 'The Clerk development instance has a cap. A featured launch passes 100 sign-ups early in the day. We need the production instance first (P3).', status: 'justin' },
+  { r: 'A silent or failed reply in front of launch traffic', level: 'medium', body: 'Two prompts got no answer on 2026-09-29. Every turn must end with a visible line, and outages must show a clear "use your own key" path (P9). Rehearse at 10× load.', status: 'progress' },
+  { r: 'Not featured', level: 'medium', body: 'The launch stays in the "All" feed with far fewer visitors. Reduce the odds with a novel product that works today, high-craft images, no waitlist and no template framing. If it happens anyway, we still get the comments. We don\'t relaunch early.', status: 'live' },
+  { r: 'Well-meaning friends get us penalized', level: 'medium', body: 'Brand-new accounts voting all at once, or "upvote us" posts, look like a vote ring. Every note says "try it, tell us what breaks". No links in group chats with vote asks.', status: 'live' },
+  { r: 'Claims run ahead of the product', level: 'medium', body: 'Multiplayer, voice, payments and some library looks aren\'t wired yet. The page, comment and FAQ above claim only what\'s live. Unfinished controls keep their "not wired yet" tooltips.', status: 'live' },
+  { r: 'The FreshStack launch slot gets used up', level: 'low', body: 'Same root domain means one six-month gap. If FreshStack ever gets its own Product Hunt launch, it needs its own domain and has to be a working product.', status: 'justin' }
+];
+
+/* certainty words follow rule C-070: sure | fairly sure | rough guess */
+var COSTS = [
+  { item: 'Product Hunt listing and featuring', est: '$0', certainty: 'sure', basis: 'Product Hunt: "100% free to use." No hunter fee, because we post it ourselves.' },
+  { item: 'Model spend on launch day (free usage)', est: '$30–$150 expected; capped at the launch-day limit', certainty: 'rough guess', basis: 'Measured: about 0.6¢ per chat turn (C-074, fairly sure) and about 1.1¢ per self-edit turn (4 turns cost $0.0437 on 2026-09-29). Assumes 1,000–5,000 visitors (a third-party range), with 40% sending about 4 turns: roughly $10–$50. Times 3 for skins, retries and abuse. The signed-out daily cap is the true ceiling.' },
+  { item: 'Model spend, worst case with no daily cap', est: 'About $1,850', certainty: 'rough guess', basis: '5,000 browsers × 37¢ (the most one device can use, C-074). The daily cap makes this impossible, which is why it has to be set on purpose for launch day instead of being removed.' },
+  { item: 'OpenRouter fee on the credits we buy', est: '5.5% of top-ups', certainty: 'sure', basis: 'OpenRouter pricing (read 2026-09-29). BYO-key users cost us nothing.' },
+  { item: 'Clerk production', est: '$0 on Hobby (50,000 retained users); Pro $25/mo if we need its features', certainty: 'sure', basis: 'Clerk pricing page (read 2026-09-29). "First Day Free": sign-ups who never return aren\'t billed.' },
+  { item: 'Cloudflare Workers Paid', est: '$5/mo', certainty: 'sure', basis: 'The free plan allows 100,000 requests a day. Paid includes 10M a month plus $0.30 per million. D1 free: 5M rows read and 100k written a day. Buy it before launch as insurance.' },
+  { item: 'Video and gallery', est: '$0', certainty: 'fairly sure', basis: 'Playwright capture from the live site plus free editing. YouTube hosting is free. A paid screen recorder is optional and not priced here.' },
+  { item: 'Domain', est: '$0 now', certainty: 'sure', basis: 'freshterminal.ai was bought 2026-09-29 (C-045). Renewal isn\'t included here.' },
+  { item: 'Paid hunters, launch services, bought votes, Product Hunt ads', est: 'Not spent', certainty: 'sure', basis: 'Product Hunt says a hunter gives no advantage, and bought votes break the rules. We don\'t price ads.' }
+];
+
+(function () {
+  function el(tag, attrs, children) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'text') n.textContent = attrs[k]; else if (attrs[k] !== undefined && attrs[k] !== null) n.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function link(href, text) { return el('a', { href: href, rel: 'noopener', target: href.indexOf('http') === 0 ? '_blank' : null, text: text }); }
+  var STATUS = { live: 'live', progress: 'in progress', notwired: 'not wired yet', justin: 'needs Justin' };
+
+  var f = document.getElementById('findings');
+  FINDINGS.forEach(function (x) {
+    var src = el('p', { 'class': 'src' }, ['Source: ']);
+    x.src.forEach(function (s, i) { if (i) src.appendChild(document.createTextNode(' · ')); src.appendChild(link(s[1], s[0])); });
+    f.appendChild(el('article', { 'class': 'card' }, [
+      el('header', null, [el('h3', { text: x.title }), el('span', { 'class': 'v ' + (x.v ? 'ok' : 'no'), text: x.v ? 'verified' : 'unverified' })]),
+      el('p', { text: x.body }), src
+    ]));
+  });
+
+  var ex = document.getElementById('examples');
+  EXAMPLES.forEach(function (x) {
+    ex.appendChild(el('tr', null, [
+      el('td', { 'data-k': 'Launch' }, [el('strong', { text: x.name })]),
+      el('td', { 'data-k': 'Date', 'class': 'num date', text: x.date }),
+      el('td', { 'data-k': 'Result', text: x.result }),
+      el('td', { 'data-k': 'Why', text: x.why }),
+      el('td', { 'data-k': 'Source' }, [link(x.src, new URL(x.src).hostname.replace('www.', ''))])
+    ]));
+  });
+
+  var p = document.getElementById('pitches');
+  PITCHES.forEach(function (x) {
+    var n = x.tagline.length;
+    p.appendChild(el('article', { 'class': 'card', 'data-pick': x.pick ? 'true' : 'false' }, [
+      el('header', null, [el('h3', { text: 'Option ' + x.id }), x.pick ? el('span', { 'class': 'pill', 'data-status': 'pick', text: 'our pick' }) : null]),
+      el('p', { 'class': 'quote', text: x.tagline }),
+      el('span', { 'class': 'count', 'data-over': n > 60 ? 'true' : 'false', text: 'tagline ' + n + '/60 characters' }),
+      el('p', null, [el('strong', { text: 'One line: ' }), x.line]),
+      el('p', { 'class': 'sub', text: x.why })
+    ]));
+  });
+
+  var s = document.getElementById('shots');
+  SHOTS.forEach(function (x) {
+    var from = x.from.indexOf('http') === 0 ? link(x.from, x.from.replace('https://', '')) : document.createTextNode(x.from);
+    s.appendChild(el('li', { 'class': 'row', 'data-status': x.status }, [
+      el('div', { 'class': 'head' }, [el('span', { 'class': 'tag', text: x.n === 'Thumbnail' || x.n === 'Video' ? x.n : 'Image ' + x.n }), el('span', { 'class': 'what', text: x.size }), el('span', { 'class': 'pill', 'data-status': x.status, text: STATUS[x.status] })]),
+      el('p', { text: x.what }),
+      el('p', { 'class': 'note' }, ['From: ', from, x.note ? ' · ' + x.note : ''])
+    ]));
+  });
+
+  var list = document.getElementById('checklist');
+  CHECKLIST.forEach(function (x) {
+    list.appendChild(el('li', { 'class': 'row', 'data-status': x.status, 'data-blocker': x.blocker ? 'true' : 'false' }, [
+      el('div', { 'class': 'head' }, [
+        el('span', { 'class': 'what', text: x.what }),
+        x.blocker ? el('span', { 'class': 'tag blocker', text: 'blocker' }) : null,
+        el('span', { 'class': 'pill', 'data-status': x.status, text: STATUS[x.status] })
+      ]),
+      (x.note || x.link) ? el('p', { 'class': 'note' }, [x.note || '', x.link ? (x.note ? ' ' : '') : '', x.link ? link(x.link, 'Open') : null]) : null
+    ]));
+  });
+  function tally() {
+    var rows = list.querySelectorAll('.row');
+    var live = 0, blockers = 0, open = 0;
+    rows.forEach(function (r) {
+      var st = r.getAttribute('data-status');
+      if (st === 'live') live++; else open++;
+      if (r.getAttribute('data-blocker') === 'true' && st !== 'live') blockers++;
+    });
+    var t = document.getElementById('tally');
+    t.textContent = '';
+    t.appendChild(el('b', { text: String(live) })); t.appendChild(document.createTextNode(' live · '));
+    t.appendChild(el('b', { text: String(open) })); t.appendChild(document.createTextNode(' not done · '));
+    t.appendChild(el('b', { text: String(blockers) })); t.appendChild(document.createTextNode(blockers === 1 ? ' blocker left' : ' blockers left'));
+  }
+  tally();
+  var filterButtons = Array.prototype.slice.call(document.querySelectorAll('#check-filter button'));
+  function applyFilter(v) {
+    list.querySelectorAll('.row').forEach(function (r) {
+      var st = r.getAttribute('data-status');
+      var show = v === 'all' || (v === 'live' && st === 'live') || (v === 'open' && st !== 'live') || (v === 'blocker' && r.getAttribute('data-blocker') === 'true' && st !== 'live');
+      r.hidden = !show;
+    });
+    filterButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === v)); });
+    try { localStorage.setItem('ft-ph-filter', v); } catch (e) {}
+  }
+  filterButtons.forEach(function (b) { b.addEventListener('click', function () { applyFilter(b.getAttribute('data-filter')); }); });
+  try { var saved = localStorage.getItem('ft-ph-filter'); if (saved) applyFilter(saved); } catch (e) {}
+
+  var ph = document.getElementById('phases');
+  PHASES.forEach(function (phase) {
+    var ul = el('ol', { 'class': 'list' });
+    phase.tasks.forEach(function (t) {
+      var deps = el('div', { 'class': 'deps' }, [t.deps.length ? 'after ' : 'can start now']);
+      t.deps.forEach(function (d) { deps.appendChild(el('code', { text: d })); });
+      ul.appendChild(el('li', { 'class': 'row' }, [
+        el('div', { 'class': 'head' }, [el('span', { 'class': 'id', text: t.id }), el('span', { 'class': 'what', text: t.what })]),
+        el('p', { 'class': 'note', text: t.who + ' · model: ' + t.model }),
+        deps
+      ]));
+    });
+    ph.appendChild(el('div', { 'class': 'phase card' }, [el('h3', null, [phase.name, el('span', { 'class': 'sub', text: phase.sub })]), ul]));
+  });
+
+  var fq = document.getElementById('faqs');
+  FAQS.forEach(function (x) { fq.appendChild(el('details', { 'class': 'faq' }, [el('summary', { text: x.q }), el('div', null, [el('p', { text: x.a })])])); });
+
+  var mb = document.getElementById('metrics-body');
+  METRICS.forEach(function (x) {
+    mb.appendChild(el('tr', null, [el('td', { 'data-k': 'Metric' }, [el('strong', { text: x.m })]), el('td', { 'data-k': 'Why', text: x.why }), el('td', { 'data-k': 'Target', text: x.target }), el('td', { 'data-k': 'Measurable now?', text: x.now })]));
+  });
+
+  var rg = document.getElementById('risk-grid');
+  RISKS.forEach(function (x) {
+    rg.appendChild(el('article', { 'class': 'card' }, [
+      el('header', null, [el('h3', { text: x.r }), el('span', { 'class': 'tag' + (x.level === 'high' ? ' blocker' : ''), text: x.level })]),
+      el('p', { text: x.body })
+    ]));
+  });
+
+  var cb = document.getElementById('cost-body');
+  COSTS.forEach(function (x) {
+    cb.appendChild(el('tr', null, [el('td', { 'data-k': 'Item' }, [el('strong', { text: x.item })]), el('td', { 'data-k': 'Estimate', 'class': 'num', text: x.est }), el('td', { 'data-k': 'Certainty' }, [el('span', { 'class': 'v ' + (x.certainty === 'sure' ? 'ok' : 'no'), text: x.certainty })]), el('td', { 'data-k': 'Basis', text: x.basis })]));
+  });
+  document.getElementById('cost-total').textContent = 'Expected cash for launch month: about $35–$180 (Cloudflare $5, model spend $30–$150 plus the 5.5% OpenRouter fee, Clerk $0). Certainty: rough guess, because model spend depends on traffic. The ceiling is whatever launch-day spend limit Justin picks. Time: about one working day of agent passes for the blockers after Justin\'s steps (rough guess).';
+
+  var text = document.getElementById('comment-text');
+  var words = (text.innerText || text.textContent).trim().split(/\s+/).length;
+  document.getElementById('comment-count').textContent = 'about ' + words + ' words';
+  var toast = document.getElementById('toast');
+  function say(msg) { toast.textContent = msg; toast.hidden = false; clearTimeout(say.t); say.t = setTimeout(function () { toast.hidden = true; }, 2200); }
+  document.getElementById('copy-comment').addEventListener('click', function () {
+    var body = Array.prototype.map.call(text.querySelectorAll('p, li'), function (n) { return (n.tagName === 'LI' ? '• ' : '') + n.textContent.trim(); }).join('\n\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(body).then(function () { say('Copied the first comment'); }, function () { say('Copy is blocked here; select the text instead'); });
+    } else { say('Copy is blocked here; select the text instead'); }
+  });
+})();
+</script>
+</body>
+</html>

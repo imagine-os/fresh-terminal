@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { localTagger, type Chip } from '@shared/chips';
 import type { Change, Op } from '@shared/ops';
 import type { Reply, ReplyBlock, ReplyMeta } from '@shared/reply';
-import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
+import { PRODUCT_NAME } from '@shared/brand';
 import type { Theme } from '@shared/themes';
 import { verifyLedger } from '@shared/ledger';
 import { listActions } from '../actions/registry';
@@ -17,8 +17,14 @@ import { store, useStoreSnapshot, type Box } from '../store';
 import type { GlossaryTerm } from '@shared/ui';
 import type { ChipDecision, ChipRecords } from './ChipPopover';
 import { Composer } from './Composer';
+import { looksLikeSkinRequest } from '@shared/skins';
+import { startSkinRun } from '../skins/runner';
 import { Doodles } from './Doodles';
 import { Transcript } from './Transcript';
+import { PageView } from '../pages/PageView';
+import { downloadSession } from '../lib/exportSession';
+import { FirstRun } from './FirstRun';
+import { creditsSnapshot, reportCreditsError } from '../credits';
 
 export interface AppCommands {
   setLang: (lang: 'en' | 'es') => void;
@@ -31,6 +37,10 @@ export interface AppCommands {
   modelTagger: boolean;
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
   voiceMode: 'toggle' | 'hold';
+  showStarters: boolean;
+  showHints: boolean;
+  toggleStarters: () => void;
+  toggleHints: () => void;
   openSettings: () => void;
   realtimePrice: (provider: 'openai' | 'gemini') => { audio_in_micro_per_minute: number; audio_out_micro_per_minute: number } | null;
 }
@@ -39,6 +49,10 @@ interface Props {
   box: Box;
   theme: Theme;
   landing: boolean;
+  /** A page of this box shown in the stage instead of the transcript; the composer stays. */
+  pageId?: string | null;
+  /** Sending from a page returns to the transcript so the reply is seen. */
+  onLeavePage?: () => void;
   showNewBoxDoodle: boolean;
   onOpenBox: (id: string) => void;
   commands: AppCommands;
@@ -98,7 +112,7 @@ function assemble(meta: ReplyMeta | null, modelBlocks: ReplyBlock[], batch: { id
  * The terminal: transcript above, composer below. Used for both `/` (landing,
  * with the one-line headline and the how-it-works row) and `/box/:id`.
  */
-export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, commands }: Props) {
+export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, commands, pageId = null, onLeavePage }: Props) {
   const { t, lang } = useI18n();
   const snapshot = useStoreSnapshot();
   const [busy, setBusy] = useState(false);
@@ -182,6 +196,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
 
   const lines = useMemo(() => snapshot.lines.filter((line) => line.box_id === box.id), [snapshot.lines, box.id]);
   const isEmpty = lines.length === 0;
+  // An empty box starts with the prompt in the middle; it moves to the bottom bar after the first line (C-077).
+  const centered = isEmpty && !pageId;
 
   useEffect(() => {
     store.openSession(box.id);
@@ -194,8 +210,17 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         sentOnce.current = true;
         setFading(true);
       }
+      if (pageId) onLeavePage?.();
       store.appendLine(box.id, 'user', text, chips);
 
+      // Skins and materials run the refine loop (pass 5).
+      if (looksLikeSkinRequest(text)) {
+        const line = store.appendLine(box.id, 'assistant', text, []);
+        void startSkinRun({ boxId: box.id, text, lineId: line.id });
+        return;
+      }
+
+      const localStarted = performance.now();
       const { matchLocalCommand } = await import('./localCommands');
       const local = matchLocalCommand(text, chips, {
         boxes: snapshot.boxes,
@@ -212,10 +237,17 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             return;
           }
           case 'system':
-            store.appendLine(box.id, 'system', t(local.key, local.vars ?? {}), [], { reveal: local.reveal });
+            store.appendLine(box.id, 'system', t(local.key, local.vars ?? {}), [], {
+              reveal: local.reveal,
+              reply: { meta: { intent: 'local', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] },
+            });
             return;
           case 'text':
-            store.appendLine(box.id, 'assistant', local.text, [], { reveal: local.reveal });
+            store.appendLine(box.id, 'assistant', local.text, [], {
+              reveal: local.reveal,
+              // A header line only (no blocks): the transcript keeps the plain text and its reveal.
+              reply: { meta: { intent: 'local', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] },
+            });
             if (local.speak && 'speechSynthesis' in window) {
               window.speechSynthesis.speak(new SpeechSynthesisUtterance(local.text));
             }
@@ -226,7 +258,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               'assistant',
               local.wired ? `${local.component} (live data)` : `${local.component} (${t('notWired').toLowerCase()}: demo composition)`,
               [],
-              { component: local.component, reveal: local.reveal },
+              { component: local.component, reveal: local.reveal, reply: { meta: { intent: 'draw', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] } },
             );
             return;
           case 'ops': {
@@ -270,110 +302,142 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       }
 
       setBusy(true);
-      const started = performance.now();
-      const reply = store.appendLine(box.id, 'assistant', '', []);
-      let assembled = '';
-      let modelBlocks: ReplyBlock[] = [];
-      let batch: { id: string; summary: string; changes: Change[] } | null = null;
-      const extra: ReplyBlock[] = [];
-      let intent = 'chat';
-      const history = lines
-        .filter((line) => line.kind !== 'system')
-        .slice(-12)
-        .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
-      const boxSnapshot = store.snapshotFor(box.id, commands.effectiveThemeId);
+      let replyLineId: string | null = null;
+      try {
+        const started = performance.now();
+        const startedAt = Date.now();
+        const reply = store.appendLine(box.id, 'assistant', '', []);
+        replyLineId = reply.id;
+        let assembled = '';
+        let modelBlocks: ReplyBlock[] = [];
+        let batch: { id: string; summary: string; changes: Change[] } | null = null;
+        const extra: ReplyBlock[] = [];
+        let intent = 'chat';
+        let skinRequested = false;
+        const promptText = text;
+        const history = lines
+          .filter((line) => line.kind !== 'system')
+          .slice(-12)
+          .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
+        const boxSnapshot = store.snapshotFor(box.id, commands.effectiveThemeId);
 
-      const handlers: RouteHandlers = {
-        onMeta: (meta) => {
-          intent = meta.routing?.intent ?? meta.route.intent;
-        },
-        onDelta: (delta) => {
-          assembled += delta;
-          store.updateLine(reply.id, assembled, true);
-        },
-        onOps: (payload) => {
-          if (payload.ops.length === 0) {
-            if (payload.rejected.length > 0) {
-              extra.push({ kind: 'error', text: payload.rejected.join('; ').slice(0, 600) });
+        const handlers: RouteHandlers = {
+          onMeta: (meta) => {
+            intent = meta.routing?.intent ?? meta.route.intent;
+          },
+          onDelta: (delta) => {
+            assembled += delta;
+            store.updateLine(reply.id, assembled, true);
+          },
+          onOps: (payload) => {
+            if (payload.ops.length === 0) {
+              if (payload.rejected.length > 0) {
+                extra.push({ kind: 'error', text: payload.rejected.join('; ').slice(0, 600) });
+              }
+              return;
             }
+            const applied = store.applyOps(box.id, payload.ops as Op[], 'assistant');
+            if (applied.ok) {
+              batch = { id: applied.batch.id, summary: applied.batch.summary, changes: applied.batch.changes };
+            } else {
+              extra.push({ kind: 'error', text: `Not applied: ${applied.reason}` });
+            }
+          },
+          onReply: (blocks) => {
+            modelBlocks = blocks;
+          },
+          onSkin: () => {
+            skinRequested = true;
+          },
+          onDone: (done) => {
+            if (done.entry) {
+              const { owner_identity: _ignored, ...draft } = done.entry;
+              store.appendEntry(draft);
+            }
+            if (skinRequested) {
+              store.updateLine(reply.id, promptText, false);
+              void startSkinRun({ boxId: box.id, text: promptText, lineId: reply.id });
+              return;
+            }
+            const meta: ReplyMeta = {
+              intent,
+              model: done.served_model,
+              ms: performance.now() - started,
+              cost_micro: done.entry?.price_micro ?? 0,
+            };
+            const summaryText = modelBlocks.find((block) => block.kind === 'summary');
+            const text = summaryText && summaryText.kind === 'summary' ? summaryText.text : assembled || batch?.summary || '';
+            store.updateLine(reply.id, text, false);
+            const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
+            store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
+            // Free credits ran out and the router let this one through: say so, softly (1 of 2, 2 of 2).
+            const soft = creditsSnapshot().lastSoftPrompt;
+            if (soft && soft.at >= startedAt) {
+              store.appendLine(box.id, 'system', t('credits.softPrompt', { n: String(soft.n), of: String(soft.of) }), []);
+            }
+          },
+          onFail: (failure) => {
+            store.updateLine(reply.id, assembled, false);
+            let message: string;
+            if (failure.kind === 'no-router') {
+              message = t('system.noRouter');
+            } else if (failure.kind === 'no-key') {
+              message = t('system.noKey');
+            } else if (failure.kind === 'pending') {
+              message = t('system.pending', { note: failure.note });
+            } else if (failure.kind === 'credits') {
+              reportCreditsError(failure.code, failure.message);
+              message = t(`credits.${failure.code}` as 'credits.sign_in_required');
+            } else {
+              message = t('system.error', { message: failure.message });
+            }
+            store.appendLine(box.id, 'system', message, []);
+          },
+        };
+        const ownKey = commands.payMode === 'own' ? readOwnKey() : '';
+        if (ownKey) {
+          // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
+          await streamDirect(
+            { boxId: box.id, text, chips, history, snapshot: boxSnapshot },
+            { apiKey: ownKey, referer: window.location.origin },
+            handlers,
+          );
+        } else {
+          // Never POST to a static host: a missing router used to surface as "HTTP 405".
+          const health = await probeRouter();
+          if (health.state !== 'ok') {
+            store.updateLine(reply.id, '', false);
+            store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
             return;
           }
-          const applied = store.applyOps(box.id, payload.ops as Op[], 'assistant');
-          if (applied.ok) {
-            batch = { id: applied.batch.id, summary: applied.batch.summary, changes: applied.batch.changes };
-          } else {
-            extra.push({ kind: 'error', text: `Not applied: ${applied.reason}` });
-          }
-        },
-        onReply: (blocks) => {
-          modelBlocks = blocks;
-        },
-        onDone: (done) => {
-          if (done.entry) {
-            const { owner_identity: _ignored, ...draft } = done.entry;
-            store.appendEntry(draft);
-          }
-          const meta: ReplyMeta = {
-            intent,
-            model: done.served_model,
-            ms: performance.now() - started,
-            cost_micro: done.entry?.price_micro ?? 0,
-          };
-          const summaryText = modelBlocks.find((block) => block.kind === 'summary');
-          const text = summaryText && summaryText.kind === 'summary' ? summaryText.text : assembled || batch?.summary || '';
-          store.updateLine(reply.id, text, false);
-          const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
-          store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
-        },
-        onFail: (failure) => {
-          store.updateLine(reply.id, assembled, false);
-          let message: string;
-          if (failure.kind === 'no-router') {
-            message = t('system.noRouter');
-          } else if (failure.kind === 'no-key') {
-            message = t('system.noKey');
-          } else if (failure.kind === 'pending') {
-            message = t('system.pending', { note: failure.note });
-          } else {
-            message = t('system.error', { message: failure.message });
-          }
-          store.appendLine(box.id, 'system', message, []);
-        },
-      };
-      const ownKey = commands.payMode === 'own' ? readOwnKey() : '';
-      if (ownKey) {
-        // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
-        await streamDirect(
-          { boxId: box.id, text, chips, history, snapshot: boxSnapshot },
-          { apiKey: ownKey, referer: window.location.origin },
-          handlers,
-        );
-      } else {
-        // Never POST to a static host: a missing router used to surface as "HTTP 405".
-        const health = await probeRouter();
-        if (health.state !== 'ok') {
-          store.updateLine(reply.id, '', false);
-          store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
-          setBusy(false);
-          return;
+          await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers);
         }
-        await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers);
+      } catch (error) {
+        // Nothing may end in silence: a thrown turn leaves a visible line.
+        if (replyLineId) store.updateLine(replyLineId, '', false);
+        const message = error instanceof Error ? error.message : String(error);
+        store.appendLine(box.id, 'system', t('system.turnFailed', { message: message.slice(0, 200) }), [], { reveal: 'none' });
+      } finally {
+        setBusy(false);
       }
-      setBusy(false);
     },
-    [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands],
+    [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands, pageId, onLeavePage],
   );
 
   return (
     <>
-      {isEmpty ? (
-        <section className="empty" data-fading={fading} aria-label={PRODUCT_NAME}>
+      <FirstRun onExport={() => downloadSession(box.id)} />
+      {pageId ? (
+        <PageView pageId={pageId} />
+      ) : isEmpty ? (
+        <section className="empty" data-fading={fading} data-centered={centered} aria-label={PRODUCT_NAME}>
           {landing ? (
             <>
               <h1 className="headline">
                 {t('landing.headline').split(' ').slice(0, -3).join(' ')}{' '}
                 <em>{t('landing.headline').split(' ').slice(-3).join(' ')}</em>
               </h1>
+              {commands.showHints ? (
               <ol className="how">
                 <li>
                   <b>{t('landing.how.1.title')}</b>
@@ -388,29 +452,17 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
                   {t('landing.how.3.body')}
                 </li>
               </ol>
+              ) : null}
             </>
           ) : null}
-          <Doodles fading={fading} showNewBox={showNewBoxDoodle} />
+          {commands.showHints ? <Doodles fading={fading} showNewBox={showNewBoxDoodle} /> : null}
+          <div id="composer-inline" className="composer-inline" />
         </section>
       ) : (
         <Transcript lines={lines} />
       )}
-      {landing ? (
-        <footer className="footer">
-          <span>
-            {PRODUCT_NAME} · {t('footer.version')} {PRODUCT_VERSION}
-          </span>
-          <span>
-            <a className="btn" data-variant="ghost" href={REPO_URL} rel="noreferrer">
-              {t('footer.source')}
-            </a>
-            <a className="btn" data-variant="ghost" href={`${import.meta.env.BASE_URL}wiki/`}>
-              {t('footer.docs')}
-            </a>
-          </span>
-        </footer>
-      ) : null}
       <ComposerSlot
+        inline={centered}
         boxId={box.id}
         theme={theme}
         hasBoxes={snapshot.boxes.length > 1}
@@ -433,6 +485,10 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         voiceAvailable={voiceAvailable}
         voiceAppend={voiceAppend}
         onVoiceAppendConsumed={() => setVoiceAppend(null)}
+        showStarters={commands.showStarters}
+        showHints={commands.showHints}
+        onToggleStarters={commands.toggleStarters}
+        onToggleHints={commands.toggleHints}
       />
     </>
   );
@@ -457,15 +513,21 @@ function ComposerSlot(props: {
   voiceAvailable: boolean;
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
+  showStarters: boolean;
+  showHints: boolean;
+  onToggleStarters: () => void;
+  onToggleHints: () => void;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
   onSend: (text: string, chips: Chip[]) => void;
+  /** Render in the middle of the empty stage instead of the bottom bar. */
+  inline?: boolean;
 }) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    setTarget(document.getElementById('composer-slot'));
-  }, []);
+    setTarget(document.getElementById(props.inline ? 'composer-inline' : 'composer-slot'));
+  }, [props.inline]);
   if (target === null) {
     return null;
   }
@@ -483,6 +545,10 @@ function ComposerSlot(props: {
       voiceAvailable={props.voiceAvailable}
       voiceAppend={props.voiceAppend}
       onVoiceAppendConsumed={props.onVoiceAppendConsumed}
+      showStarters={props.showStarters}
+      showHints={props.showHints}
+      onToggleStarters={props.onToggleStarters}
+      onToggleHints={props.onToggleHints}
       hasBoxes={props.hasBoxes}
       hasLines={props.hasLines}
       busy={props.busy}

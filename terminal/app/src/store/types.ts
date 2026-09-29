@@ -7,6 +7,7 @@ import type { BoxUi, GlossaryTerm, NavItem, Page } from '@shared/ui';
 import type { Chip } from '@shared/chips';
 import type { Entry, EntryDraft } from '@shared/ledger';
 import type { Theme } from '@shared/themes';
+import type { SyncBox } from '@shared/sync';
 
 export type LineKind = 'user' | 'assistant' | 'system';
 
@@ -118,6 +119,10 @@ export interface Store {
   subscribe(listener: () => void): () => void;
   getSnapshot(): StoreSnapshot;
   createBox(name: string): Box;
+  /** Deletes a box with its lines, sessions, menu, pages, edits and box UI. Ledger entries stay (the chain is append-only). */
+  removeBox(id: string): void;
+  /** Rebuilds a box from an exported session file's final state (new ids; edits and ledger stay in the file). */
+  importSession(file: { box: Box | null; timeline: { lines: Array<{ kind: LineKind; text: string; chips_json?: string; component?: string; reveal?: string; blocks_json?: string; created_at: number }> }; ui: UiState }): Box;
   openSession(boxId: string): Session;
   appendLine(boxId: string, kind: LineKind, text: string, chips: Chip[], options?: LineOptions): Line;
   updateLine(lineId: string, text: string, streaming: boolean): void;
@@ -137,4 +142,8 @@ export interface Store {
   /** Dev-panel live editing of the layout text (not logged per keystroke). */
   setBoxDialect(boxId: string, text: string | null): void;
   snapshotFor(boxId: string, effectiveThemeId: string): Snapshot;
+  /** Cloud sync (signed in): this browser's boxes as sync rows (updated_at is the box's own). */
+  syncBoxes(): SyncBox[];
+  /** Cloud sync: adopt server rows (replaces those boxes' records here). Returns how many were applied. */
+  importSyncBoxes(rows: SyncBox[]): number;
 }

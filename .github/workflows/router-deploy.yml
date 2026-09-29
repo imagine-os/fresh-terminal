@@ -1,9 +1,13 @@
 name: router-deploy
 
-# Deploys terminal/router to a Cloudflare Worker on every push to main, but only
-# when the repository secret CLOUDFLARE_API_TOKEN exists. Secrets never touch the
-# repo: they are read from GitHub Actions secrets and pushed to the Worker with
-# `wrangler secret put` over stdin.
+# Deploys terminal/router to the Cloudflare Worker "fresh-terminal-router" on
+# every push to main that touches it, and on demand. Only runs when the
+# repository secret CLOUDFLARE_API_TOKEN exists. Secrets never touch the repo:
+# they are read from GitHub Actions secrets and pushed to the Worker with
+# `wrangler secret put` over stdin. Logs show names and booleans only.
+#
+# Order: D1 database (create if missing) -> migrations -> deploy (custom domain
+# api.freshterminal.ai + workers.dev) -> Worker secrets -> smoke check.
 
 on:
   push:
@@ -11,8 +15,14 @@ on:
     paths:
       - 'terminal/router/**'
       - 'terminal/shared/**'
+      - 'terminal/package.json'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/router-deploy.yml'
   workflow_dispatch:
+
+concurrency:
+  group: router-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -20,6 +30,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      D1_NAME: fresh-terminal
     steps:
       - id: gate
         name: Check for a Cloudflare token
@@ -44,10 +55,41 @@ jobs:
       - if: steps.gate.outputs.ok == 'true'
         name: Typecheck and test the router
         run: pnpm -C terminal exec tsc -p router/tsconfig.json --noEmit && pnpm -C terminal exec vitest run router
+
       - if: steps.gate.outputs.ok == 'true'
-        name: Deploy the Worker
+        name: Make sure the D1 database exists (idempotent)
+        id: d1
+        run: |
+          base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+          id=$(curl -sS "${auth[@]}" "$base?name=$D1_NAME" | jq -r --arg n "$D1_NAME" '[.result[]? | select(.name == $n)][0].uuid // empty')
+          if [ -z "$id" ]; then
+            echo "D1 $D1_NAME: not found, creating"
+            created=$(curl -sS "${auth[@]}" -H 'Content-Type: application/json' -X POST "$base" -d "{\"name\":\"$D1_NAME\"}")
+            if [ "$(echo "$created" | jq -r '.success')" != "true" ]; then
+              echo "D1 create FAILED: $(echo "$created" | jq -c '[.errors[]?.message]')"
+              echo "The token needs Account > D1 > Edit."
+              exit 1
+            fi
+            id=$(echo "$created" | jq -r '.result.uuid')
+            echo "D1 $D1_NAME: created"
+          else
+            echo "D1 $D1_NAME: exists"
+          fi
+          echo "D1 id: $id"
+          sed -i "s/D1_DATABASE_ID/$id/" terminal/router/wrangler.toml
+          grep -q "$id" terminal/router/wrangler.toml
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Apply D1 migrations (remote)
+        working-directory: terminal/router
+        run: pnpm dlx wrangler@4 d1 migrations apply "$D1_NAME" --remote
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Deploy the Worker (workers.dev + api.freshterminal.ai)
         working-directory: terminal/router
         run: pnpm dlx wrangler@4 deploy
+
       - if: steps.gate.outputs.ok == 'true'
         name: Push Worker secrets from repository secrets
         working-directory: terminal/router
@@ -55,13 +97,67 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: |
-          for name in OPENROUTER_API_KEY OPENAI_API_KEY GOOGLE_API_KEY; do
+          for name in OPENROUTER_API_KEY OPENAI_API_KEY GOOGLE_API_KEY CLERK_SECRET_KEY; do
             value="${!name}"
             if [ -n "$value" ]; then
-              printf '%s' "$value" | pnpm dlx wrangler@4 secret put "$name"
+              printf '%s' "$value" | pnpm dlx wrangler@4 secret put "$name" > /dev/null
               echo "set $name"
             else
               echo "skip $name (repository secret not set)"
             fi
+          done
+          # Anonymous device ids are signed with DEVICE_SIGNING_KEY. Created once; rotating it would hand every browser a new grant.
+          if pnpm dlx wrangler@4 secret list --format json 2>/dev/null | jq -e '.[] | select(.name == "DEVICE_SIGNING_KEY")' > /dev/null; then
+            echo "keep DEVICE_SIGNING_KEY (already set)"
+          else
+            openssl rand -base64 48 | tr -d '\n' | pnpm dlx wrangler@4 secret put DEVICE_SIGNING_KEY > /dev/null
+            echo "set DEVICE_SIGNING_KEY (new, random)"
+          fi
+          # Invisible Turnstile widget "fresh-terminal": found or created, then its secret and site key go to the Worker.
+          tbase="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/challenges/widgets"
+          tauth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          sitekey=$(curl -sS "${tauth[@]}" "$tbase?per_page=50" | jq -r '[.result[]? | select(.name == "fresh-terminal")][0].sitekey // empty')
+          if [ -z "$sitekey" ]; then
+            created=$(curl -sS "${tauth[@]}" -X POST "$tbase" -d '{"name":"fresh-terminal","mode":"invisible","domains":["freshterminal.ai","www.freshterminal.ai","imagine-os.github.io","fresh-terminal-app.jmassion.workers.dev"]}')
+            sitekey=$(echo "$created" | jq -r '.result.sitekey // empty')
+            [ -n "$sitekey" ] && echo "Turnstile widget: created" || echo "Turnstile widget: not created ($(echo "$created" | jq -c '[.errors[]?.message]')); free credits run without it"
+          else
+            echo "Turnstile widget: exists"
+          fi
+          if [ -n "$sitekey" ]; then
+            tsecret=$(curl -sS "${tauth[@]}" "$tbase/$sitekey" | jq -r '.result.secret // empty')
+            if [ -n "$tsecret" ]; then
+              echo "::add-mask::$tsecret"
+              printf '%s' "$tsecret" | pnpm dlx wrangler@4 secret put TURNSTILE_SECRET > /dev/null
+              printf '%s' "$sitekey" | pnpm dlx wrangler@4 secret put TURNSTILE_SITEKEY > /dev/null
+              echo "set TURNSTILE_SECRET and TURNSTILE_SITEKEY"
+            else
+              echo "Turnstile secret not readable; skipped"
+            fi
+          fi
+          # Networkless session checks: the instance's public signing key as PEM, from the Clerk JWKS.
+          if [ -n "$CLERK_SECRET_KEY" ]; then
+            curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" https://api.clerk.com/v1/jwks > "$RUNNER_TEMP/jwks.json"
+            if node -e "const {createPublicKey}=require('node:crypto');const j=require(process.argv[1]);if(!j.keys||!j.keys[0])process.exit(2);process.stdout.write(createPublicKey({key:j.keys[0],format:'jwk'}).export({type:'spki',format:'pem'}))" "$RUNNER_TEMP/jwks.json" > "$RUNNER_TEMP/clerk.pem"; then
+              pnpm dlx wrangler@4 secret put CLERK_JWT_KEY < "$RUNNER_TEMP/clerk.pem" > /dev/null
+              echo "set CLERK_JWT_KEY (PEM from Clerk JWKS)"
+            else
+              echo "skip CLERK_JWT_KEY (could not read the Clerk JWKS; the router falls back to CLERK_SECRET_KEY)"
+            fi
+            rm -f "$RUNNER_TEMP/jwks.json" "$RUNNER_TEMP/clerk.pem"
+          fi
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Smoke check (/health on both hosts)
+        run: |
+          for url in https://fresh-terminal-router.jmassion.workers.dev/health https://api.freshterminal.ai/health; do
+            ok=""
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              body=$(curl -sS --max-time 10 "$url" 2>/dev/null || true)
+              if echo "$body" | jq -e '.ok == true' > /dev/null 2>&1; then ok=1; break; fi
+              sleep $((i * 6))
+            done
+            if [ -n "$ok" ]; then echo "$url: $(echo "$body" | jq -c '{ok, keyConfigured, auth, store, credits: (.credits | {metered, signed_devices, rate_limits, turnstile})}')"; else echo "$url: not answering yet (a new custom domain can take a few minutes)"; fi
           done

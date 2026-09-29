@@ -4,10 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 export type Route =
   | { name: 'landing' }
   | { name: 'box'; id: string }
-  | { name: 'new-box'; theme: string | null }
+  | { name: 'new-box'; theme: string | null; skin?: string | null; from?: string | null }
   | { name: 'canvas' }
   | { name: 'plan' }
-  | { name: 'page'; id: string };
+  | { name: 'page'; id: string }
+  | { name: 'play'; id: string; step: number | null };
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -23,8 +24,15 @@ function parse(pathname: string, search: string): Route {
   if (page !== null && page[1]) {
     return { name: 'page', id: decodeURIComponent(page[1]) };
   }
+  const play = /^\/box\/([^/]+)\/play\/?$/.exec(path);
+  if (play !== null && play[1]) {
+    const raw = new URLSearchParams(search).get('step');
+    const step = raw === null || raw === '' || Number.isNaN(Number(raw)) ? null : Math.max(0, Math.floor(Number(raw)));
+    return { name: 'play', id: decodeURIComponent(play[1]), step };
+  }
   if (/^\/box\/new\/?$/.test(path)) {
-    return { name: 'new-box', theme: new URLSearchParams(search).get('theme') };
+    const params = new URLSearchParams(search);
+    return { name: 'new-box', theme: params.get('theme'), skin: params.get('skin'), from: params.get('from') };
   }
   const match = /^\/box\/([^/]+)\/?$/.exec(path);
   if (match !== null && match[1]) {
@@ -45,6 +53,8 @@ export function hrefFor(route: Route): string {
       return `${base}/plan`;
     case 'page':
       return `${base}/page/${encodeURIComponent(route.id)}`;
+    case 'play':
+      return `${base}/box/${encodeURIComponent(route.id)}/play${route.step !== null ? `?step=${route.step}` : ''}`;
     default:
       return `${base}/`;
   }

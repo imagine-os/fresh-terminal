@@ -162,6 +162,22 @@
       "thumb": "canvas/thumbs/brand-marks.jpg"
     },
     {
+      "id": "product-hunt-strategy",
+      "title": "Product Hunt strategy",
+      "kind": "page",
+      "href": "pages/producthunt.html",
+      "x": 40,
+      "y": 940,
+      "w": 340,
+      "h": 220,
+      "thickness_mm": 1,
+      "rotation": 0,
+      "created_at": 1790652577086,
+      "updated_at": 1790652577086,
+      "section": "docs",
+      "thumb": "canvas/thumbs/product-hunt-strategy.jpg"
+    },
+    {
       "id": "koi-pond-v2",
       "title": "Koi pond v2",
       "kind": "page",
@@ -200,7 +216,7 @@
       "title": "Canvas v1",
       "kind": "page",
       "href": "canvas?v=1",
-      "x": 40,
+      "x": 420,
       "y": 940,
       "w": 340,
       "h": 220,

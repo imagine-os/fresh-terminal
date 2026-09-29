@@ -1,4 +1,8 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import type { Skin, SkinTarget } from '@shared/skins';
+import { resolveImageRef } from '../lib/blobs';
+import { sampleImageTones } from '../skins/tones';
+import { UNKNOWN_TONES, blend, colorsInBackground, parseColor, readableOver, tonesFromColors, type ImageTones, type Readability } from '@shared/ui';
 import type { RegionBehaviour, ShellRegion, ShellSpec, SizeClass } from '@shared/dialect';
 import { CURSOR_COLOR_VALUES, type Theme } from '@shared/themes';
 import { useSizeClass, type SizeReadout } from './useSizeClass';
@@ -24,6 +28,12 @@ interface ShellProps {
   onSize?: (readout: SizeReadout) => void;
   /** Per-box style token overrides (style.set ops), layered over the theme. */
   styleOverrides?: Record<string, string>;
+  /** Per-box skins by target (skin.apply ops). */
+  /** The tray's hide-the-top-bar switch. */
+  hideTopBar?: boolean;
+  /** The prompt is in the middle of an empty box; the bottom bar has nothing to show. */
+  hideBottomBar?: boolean;
+  skins?: Partial<Record<SkinTarget, Skin>>;
 }
 
 export interface ResolvedRegions {
@@ -60,7 +70,114 @@ function effectiveBehaviour(behaviour: RegionBehaviour, open: boolean): RegionBe
   return behaviour;
 }
 
-export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides }: ShellProps) {
+/** Object URLs for skin images (and their thumbnails) stored in IndexedDB; https refs pass through. */
+function useSkinImages(skins: Partial<Record<SkinTarget, Skin>> | undefined): Record<string, string> {
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const refs = Object.values(skins ?? {})
+    .flatMap((skin) => [skin?.image?.ref, skin?.image?.thumb])
+    .filter((ref): ref is string => Boolean(ref));
+  const key = refs.join('|');
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all(refs.map(async (ref) => [ref, await resolveImageRef(ref)] as const)).then((pairs) => {
+      if (cancelled) return;
+      const next: Record<string, string> = {};
+      for (const [ref, url] of pairs) if (url) next[ref] = url;
+      setUrls(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // refs are summarised by key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return urls;
+}
+
+/** Image skins keep the photo vivid; the scrim behind text does the reading work. */
+const IMAGE_VEIL = 25;
+
+export function skinVeil(skin: Skin): number {
+  return skin.image ? Math.min(skin.veil, IMAGE_VEIL) : skin.veil;
+}
+
+/** Sampled tones per image URL; null while loading or when the image cannot be read. */
+function useImageTones(skins: Partial<Record<SkinTarget, Skin>> | undefined, urls: Record<string, string>): Record<string, ImageTones | null> {
+  const [tones, setTones] = useState<Record<string, ImageTones | null>>({});
+  const wanted = Object.values(skins ?? {})
+    .map((skin) => (skin?.image ? urls[skin.image.thumb ?? ''] ?? urls[skin.image.ref] : undefined))
+    .filter((url): url is string => Boolean(url));
+  const key = wanted.join('|');
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all(wanted.map(async (url) => [url, await sampleImageTones(url)] as const)).then((pairs) => {
+      if (!cancelled) setTones(Object.fromEntries(pairs));
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return tones;
+}
+
+/**
+ * The readability layer for one skinned region, or null when the skin has no
+ * image or material behind its text. Tones are composited under the region's
+ * veil first, because that is what text actually sits on.
+ */
+export function skinReadability(
+  skin: Skin | undefined,
+  themeTokens: Record<string, string>,
+  sampled: ImageTones | null | undefined,
+): Readability | null {
+  if (!skin || (!skin.image && !skin.background)) return null;
+  const bg = skin.tokens['--bg'] ?? themeTokens['--bg'];
+  const accent = skin.tokens['--accent'] ?? themeTokens['--accent'];
+  const raw = skin.image ? (sampled ?? UNKNOWN_TONES) : (tonesFromColors(colorsInBackground(skin.background ?? '')) ?? UNKNOWN_TONES);
+  const base = (bg ? parseColor(bg) : null) ?? [11, 13, 16];
+  const veil = skinVeil(skin) / 100;
+  const tones: ImageTones = {
+    dark: blend(base, raw.dark, veil),
+    light: blend(base, raw.light, veil),
+    mean: raw.mean,
+  };
+  return readableOver(tones, { ...(bg ? { bg } : {}), ...(accent ? { accent } : {}) });
+}
+
+/** Style and attributes for a skinned region: tokens scoped to it, material layers, a veil, and the readability layer. */
+export function skinProps(
+  skin: Skin | undefined,
+  urls: Record<string, string>,
+  readable: Readability | null = null,
+): { style?: CSSProperties & Record<string, string>; 'data-skinned'?: string; 'data-skin-path'?: string; 'data-readable'?: string } {
+  if (!skin) return {};
+  const style: CSSProperties & Record<string, string> = { ...skin.tokens };
+  if (skin.tokens['--bg'] && !skin.tokens['--bg-elevated']) style['--bg-elevated'] = skin.tokens['--bg'];
+  const layers: string[] = [];
+  const url = skin.image ? urls[skin.image.ref] : undefined;
+  if (url) layers.push(`url("${url.replace(/"/g, '%22')}")`);
+  if (skin.background) layers.push(skin.background);
+  style['--skin-layers'] = layers.length > 0 ? layers.join(', ') : 'none';
+  style['--skin-layer-sizes'] = layers.length > 0 ? layers.map(() => 'cover').join(', ') : 'cover';
+  style['--skin-veil'] = `${skinVeil(skin)}%`;
+  if (!readable) return { style, 'data-skinned': skin.target, 'data-skin-path': skin.path };
+  style['--fg'] = readable.fg;
+  style['--fg-muted'] = readable.fgMuted;
+  style['--fg-faint'] = readable.fgFaint;
+  if (readable.accent) style['--accent'] = readable.accent;
+  style['--scrim'] = readable.scrim.join(' ');
+  style['--scrim-a'] = String(readable.alpha);
+  style['--scrim-blur'] = readable.alpha > 0 ? '8px' : '0px';
+  return {
+    style,
+    'data-skinned': skin.target,
+    'data-skin-path': skin.path,
+    'data-readable': skin.image ? 'image' : 'material',
+  };
+}
+
+export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false, hideBottomBar = false }: ShellProps) {
   const ref = useRef<HTMLDivElement>(null);
   const readout = useSizeClass(ref);
 
@@ -69,13 +186,26 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
   }, [readout, onSize]);
 
   const regions = resolveRegions(spec, readout.sizeClass, devMode);
+  if (hideTopBar) {
+    regions.topBar = 'hidden';
+  }
+  if (hideBottomBar) {
+    regions.bottomBar = 'hidden';
+  }
   const left = effectiveBehaviour(regions.leftSidebar, leftOpen);
   const right = effectiveBehaviour(regions.rightSidebar, rightOpen || (devMode && regions.rightSidebar === 'floating'));
   const anyFloatingOpen =
     (left === 'floating' && leftOpen) || (right === 'floating' && (rightOpen || devMode));
 
   // Theme tokens are custom properties on the shell root. Nothing else.
-  const style: CSSProperties & Record<string, string> = { ...theme.tokens, ...(styleOverrides ?? {}) };
+  const skinUrls = useSkinImages(skins);
+  const skinTones = useImageTones(skins, skinUrls);
+  const regionSkin = (skin: Skin | undefined) => {
+    const sampleUrl = skin?.image ? (skinUrls[skin.image.thumb ?? ''] ?? skinUrls[skin.image.ref]) : undefined;
+    return skinProps(skin, skinUrls, skinReadability(skin, { ...theme.tokens, ...(styleOverrides ?? {}) }, sampleUrl ? skinTones[sampleUrl] : null));
+  };
+  const shellSkin = skinProps(skins?.shell, skinUrls);
+  const style: CSSProperties & Record<string, string> = { ...theme.tokens, ...(styleOverrides ?? {}), ...(shellSkin.style ?? {}) };
   style['--cursor-color'] = CURSOR_COLOR_VALUES[theme.cursor.color];
 
   const onPointerMove =
@@ -106,10 +236,11 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
       data-motion={theme.motion}
       data-responds={theme.respondsTo}
       data-theme-id={theme.id}
+      data-skinned={shellSkin['data-skinned']}
       style={style}
       onPointerMove={onPointerMove}
     >
-      <header className="region region-top" data-behaviour={regions.topBar}>
+      <header className="region region-top" data-behaviour={regions.topBar} {...regionSkin(skins?.topbar)}>
         {slots.topBar}
       </header>
 
@@ -118,11 +249,12 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
         data-behaviour={left}
         data-open={left === 'floating' ? String(leftOpen) : undefined}
         aria-label="boxes"
+        {...regionSkin(skins?.sidebar)}
       >
         {slots.leftSidebar}
       </aside>
 
-      <main className="region region-stage" data-behaviour={regions.stage} id="stage">
+      <main className="region region-stage" data-behaviour={regions.stage} id="stage" {...regionSkin(skins?.stage ?? skins?.shell)}>
         {slots.stage}
       </main>
 
@@ -135,7 +267,7 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
         {slots.rightSidebar}
       </aside>
 
-      <footer className="region region-bottom" data-behaviour={regions.bottomBar}>
+      <footer className="region region-bottom" data-behaviour={regions.bottomBar} {...regionSkin(skins?.composer)}>
         {slots.bottomBar}
       </footer>
 

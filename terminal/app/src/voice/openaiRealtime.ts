@@ -1,4 +1,5 @@
 import { ROUTER_URL } from '../lib/routerClient';
+import { routerFetch } from '../lib/routerFetch';
 import { LevelMeter } from './level';
 import { handleOpenAIEvent, type OpenAIEvent } from './openaiEvents';
 import type { VoiceEvents, VoiceProvider, VoiceSessionSummary } from './types';
@@ -35,7 +36,7 @@ export class OpenAIRealtimeVoice implements VoiceProvider {
     this.events.onState('connecting');
     let session: SessionResponse;
     try {
-      const response = await this.fetchImpl(`${ROUTER_URL}/realtime/session?provider=openai`, { method: 'POST' });
+      const response = await routerFetch(`${ROUTER_URL}/realtime/session?provider=openai`, { method: 'POST' }, { paid: true, fetchImpl: this.fetchImpl });
       if (!response.ok) {
         const body = (await response.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? `router ${response.status}`);

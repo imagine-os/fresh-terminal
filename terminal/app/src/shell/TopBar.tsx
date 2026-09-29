@@ -1,19 +1,20 @@
-import { PRODUCT_NAME } from '@shared/brand';
+import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
 import { formatMicro } from '@shared/ledger';
 import type { Theme } from '@shared/themes';
+import type { NavItem, NavTarget } from '@shared/ui';
 import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
-import { NotWiredButton } from '../ui/NotWiredButton';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconSave, IconSidebar, IconTheme } from '../ui/icons';
+import { IconBox, IconDev, IconDownload, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme, IconTopBar, IconUpload } from '../ui/icons';
+import { AccountButton } from './AccountButton';
+import { Tray, type Tool } from './Tray';
 
 interface Props {
   boxName: string;
   theme: Theme;
   devMode: boolean;
   usedMicro: number;
-  showSave: boolean;
   onNewBox: () => void;
   onToggleSidebar: () => void;
   onCycleTheme: () => void;
@@ -25,6 +26,16 @@ interface Props {
   onSettings: () => void;
   payMode: 'ours' | 'own';
   libraryHref: string;
+  onReplay: () => void;
+  replayActive: boolean;
+  /** Tools pinned back onto the bar; everything else waits in the tray. */
+  pinned: string[];
+  onPinned: (ids: string[]) => void;
+  nav: NavItem[];
+  onNavigate: (target: NavTarget, item: NavItem) => void;
+  onExport: () => void;
+  onImport: () => void;
+  onHideTopBar: () => void;
 }
 
 function key(id: string): string {
@@ -32,10 +43,33 @@ function key(id: string): string {
   return shortcut.length === 1 ? shortcut.toUpperCase() : shortcut;
 }
 
+/**
+ * Top bar: brand, the money counter, the sign-in slot and the tray. Every
+ * other tool lives in the tray until it is pinned (decision C-071).
+ */
 export function TopBar(props: Props) {
   const { t, lang } = useI18n();
+  const tools: Tool[] = [
+    { id: 'box.new', label: t('topbar.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
+    { id: 'canvas.open', label: t('topbar.canvas'), icon: <IconBox />, onClick: props.onCanvas, shortcut: key('canvas.open'), pressed: props.canvasActive, testId: 'canvas-link' },
+    { id: 'library.open', label: t('topbar.library'), icon: <IconLibrary />, onClick: () => {}, href: props.libraryHref, shortcut: key('library.open'), testId: 'library-link' },
+    { id: 'play.open', label: t('topbar.replay'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
+    { id: 'sidebar.toggle', label: t('topbar.toggleSidebar'), icon: <IconSidebar />, onClick: props.onToggleSidebar, shortcut: key('sidebar.toggle') },
+    { id: 'theme.cycle', label: `${t('topbar.theme')}: ${props.theme.name}`, icon: <IconTheme />, onClick: props.onCycleTheme, shortcut: key('theme.cycle') },
+    { id: 'lang.toggle', label: `${t('topbar.language')} (${lang})`, icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
+    { id: 'settings.open', label: t('topbar.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
+    { id: 'dev.toggle', label: t('topbar.devMode'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },
+    { id: 'session.export', label: t('firstRun.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
+    { id: 'session.import', label: t('import.label'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
+    { id: 'bar.toggle', label: t('topbar.hide'), icon: <IconTopBar />, onClick: props.onHideTopBar, shortcut: key('bar.toggle'), testId: 'hide-bar' },
+  ];
   return (
     <>
+      <Tooltip label={t('topbar.boxes')} shortcut={key('sidebar.toggle')} align="start">
+        <Button icon variant="ghost" className="boxes-toggle" aria-label={t('topbar.boxes')} onClick={props.onToggleSidebar} data-testid="boxes-toggle">
+          <IconSidebar />
+        </Button>
+      </Tooltip>
       <Tooltip label={PRODUCT_NAME} align="start">
         <a
           className="brand"
@@ -49,6 +83,7 @@ export function TopBar(props: Props) {
             &gt;_
           </span>
           <span>{PRODUCT_NAME}</span>
+          <span className="version" data-testid="version">v{PRODUCT_VERSION}</span>
         </a>
       </Tooltip>
       <span className="tagline">{props.boxName ? `/ ${props.boxName}` : t('landing.tagline')}</span>
@@ -57,52 +92,18 @@ export function TopBar(props: Props) {
         {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
       </span>
       <span className="topbar-group">
-        <Tooltip label={t('topbar.newBox')} shortcut={key('box.new')}>
-          <Button icon variant="ghost" aria-label={t('topbar.newBox')} onClick={props.onNewBox} data-testid="new-box">
-            <IconPlus />
-          </Button>
-        </Tooltip>
-        <Tooltip label={t('topbar.canvas')} shortcut={key('canvas.open')}>
-          <Button icon variant="ghost" aria-label={t('topbar.canvas')} aria-pressed={props.canvasActive} onClick={props.onCanvas} data-testid="canvas-link">
-            <IconBox />
-          </Button>
-        </Tooltip>
-        <Tooltip label={t('topbar.library')} shortcut={key('library.open')}>
-          <a className="btn" data-variant="ghost" data-icon="true" aria-label={t('topbar.library')} href={props.libraryHref} data-testid="library-link">
-            <IconLibrary />
-          </a>
-        </Tooltip>
-        <Tooltip label={t('topbar.toggleSidebar')} shortcut={key('sidebar.toggle')}>
-          <Button icon variant="ghost" aria-label={t('topbar.toggleSidebar')} onClick={props.onToggleSidebar}>
-            <IconSidebar />
-          </Button>
-        </Tooltip>
-        <Tooltip label={`${t('topbar.theme')}: ${props.theme.name}`} shortcut={key('theme.cycle')}>
-          <Button icon variant="ghost" aria-label={`${t('topbar.theme')}: ${props.theme.name}`} onClick={props.onCycleTheme}>
-            <IconTheme />
-          </Button>
-        </Tooltip>
-        <Tooltip label={t('topbar.language')} shortcut={key('lang.toggle')}>
-          <Button icon variant="ghost" aria-label={t('topbar.language')} onClick={props.onToggleLang}>
-            <IconLang />
-            <span className="sr-only">{lang}</span>
-          </Button>
-        </Tooltip>
-        <Tooltip label={t('topbar.settings')} shortcut={key('settings.open')}>
-          <Button icon variant="ghost" aria-label={t('topbar.settings')} onClick={props.onSettings} data-testid="settings-link">
-            <IconKey />
-          </Button>
-        </Tooltip>
-        <Tooltip label={t('topbar.devMode')} shortcut={key('dev.toggle')} align="end">
-          <Button icon variant="ghost" aria-label={t('topbar.devMode')} aria-pressed={props.devMode} onClick={props.onToggleDev}>
-            <IconDev />
-          </Button>
-        </Tooltip>
-        {props.showSave || props.devMode ? (
-          <NotWiredButton what="Clerk sign-in" label={t('topbar.save')} icon align="end">
-            <IconSave />
-          </NotWiredButton>
-        ) : null}
+        <Tray
+          tools={tools}
+          pinned={props.pinned}
+          onPinned={props.onPinned}
+          nav={props.nav}
+          onNavigate={props.onNavigate}
+          links={[
+            { label: t('footer.source'), href: REPO_URL },
+            { label: t('footer.docs'), href: `${import.meta.env.BASE_URL}wiki/` },
+          ]}
+        />
+        <AccountButton />
       </span>
     </>
   );

@@ -15,6 +15,7 @@ describe('canvas cards', () => {
       'canon',
       'freshstack',
       'brand-marks',
+      'product-hunt-strategy',
       'koi-pond-v2',
       'koi-pond-v1',
       'canvas-v1',

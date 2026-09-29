@@ -1,4 +1,5 @@
 import { ROUTER_URL } from '../lib/routerClient';
+import { routerFetch } from '../lib/routerFetch';
 import { NotWiredError } from '../lib/notWired';
 import { handleGeminiMessage, type GeminiMessage } from './geminiEvents';
 import type { VoiceEvents, VoiceProvider, VoiceSessionSummary } from './types';
@@ -28,7 +29,7 @@ export class GeminiLiveVoice implements VoiceProvider {
   ) {}
 
   async connect(): Promise<WebSocket> {
-    const response = await this.fetchImpl(`${ROUTER_URL}/realtime/session?provider=gemini`, { method: 'POST' });
+    const response = await routerFetch(`${ROUTER_URL}/realtime/session?provider=gemini`, { method: 'POST' }, { paid: true, fetchImpl: this.fetchImpl });
     if (!response.ok) {
       const body = (await response.json().catch(() => ({}))) as { error?: string };
       throw new Error(body.error ?? `router ${response.status}`);

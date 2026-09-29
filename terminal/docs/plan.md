@@ -48,6 +48,10 @@ Model note, 2026-09-29: pass 4 onward runs on **Opus 5.5** at Justin's request (
 5. Koi pond v2, the Canon, the wiki (`koi-v2`, `canon`, `wiki`).
 6. Standing: keep the Canon and the wiki current every pass (`canon-current`).
 
-## Pass 5 — skins, materials and the refine loop (queued; starts after pass 4 is live)
+## Pass 5 — skins, materials and the refine loop (shipped 2026-09-29, Opus 5.5)
 
-`skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui`; `pond-ops` (wire `window.pond` to ops); `koi-realism`. See prompt 0013.
+Done: `skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui` (decision 0018, changelog 0005). Still to do: `pond-ops` (wire `window.pond` to ops); `koi-realism`. See prompt 0013.
+
+## Infra — freshterminal.ai, sign-in, D1 (shipped 2026-09-29, Opus 5.5; tasks tagged pass 6 in plan.json)
+
+Done: `infra-verify` → `domain-workers` → `clerk-dev` → `d1-sync` (decision 0020, changelog 0007, Canon C-064 to C-066) → `free-credits` (decision 0021, changelog 0008, Canon C-074). Also to do: `turnstile` (needs a token permission). Still to do: `clerk-production` (Justin creates the production instance and OAuth apps; the deploy adds the DNS records), transcript lines in sync, realtime sync (SpacetimeDB or Durable Objects, C-049). See prompt 0017.

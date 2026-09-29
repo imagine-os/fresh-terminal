@@ -590,7 +590,7 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
     </dl>
   </div>
   <div class="actions">
-    <a class="btn primary" id="openFull" href="../box/new?theme=blank-page">Open full screen</a>
+    <a class="btn primary" id="openFull" href="../box/new?theme=blank-page&amp;from=blank-page">Open terminal</a>
     <span class="ph">
       <button class="btn" type="button" id="setDefault" aria-describedby="setDefaultTip">Set as default</button>
       <span class="tip" id="setDefaultTip" role="tooltip">Not wired yet</span>
@@ -723,7 +723,31 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
 
   function dots(n) { return n === 1 ? '●' : n === 2 ? '●●' : '●●●'; }
   function dotsSr(n) { return n === 1 ? '1 of 3, simplest' : n === 2 ? '2 of 3' : '3 of 3, richest'; }
-  function href(t) { return t.href || ('/box/new?theme=' + t.id); }
+  // What "Open terminal" opens: kept equal to shared/src/skins/terminals.ts (a test checks).
+  var OPEN = {
+    'blank-page': { theme: 'blank-page', skin: null },
+    'void': { theme: 'void', skin: null },
+    'phosphor': { theme: 'void', skin: 'phosphor' },
+    'amber': { theme: 'void', skin: 'amber' },
+    'bezel-and-glass': { theme: 'glass-window', skin: 'glass' },
+    'glass-window': { theme: 'glass-window', skin: null },
+    'you-as-the-camera': { theme: 'glass-window', skin: 'glass' },
+    'tilt-window': { theme: 'glass-window', skin: 'night-sky' },
+    'paper-and-typewriter': { theme: 'blank-page', skin: 'paper' },
+    'ledger-lines': { theme: 'blank-page', skin: 'ledger' },
+    'chalkboard': { theme: 'void', skin: 'slate' },
+    'frosted': { theme: 'glass-window', skin: 'glass' },
+    'hardware-panel': { theme: 'void', skin: 'hardware' },
+    'night-sky': { theme: 'void', skin: 'night-sky' },
+    'deep-water': { theme: 'void', skin: 'ocean' },
+    'e-ink': { theme: 'blank-page', skin: 'e-ink' },
+    'koi-pond': { theme: 'void', skin: 'ocean' }
+  };
+  // Straight into a new box that already has this terminal's theme and skin. Relative, so it works under /fresh-terminal/.
+  function href(t) {
+    var open = OPEN[t.id] || { theme: t.id, skin: null };
+    return '../box/new?theme=' + encodeURIComponent(open.theme) + (open.skin ? '&skin=' + encodeURIComponent(open.skin) : '') + '&from=' + encodeURIComponent(t.id);
+  }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pvHtml(t, extra) {
@@ -821,7 +845,7 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
     var pool = vis.length ? vis.map(function (c) { return byId[c.dataset.themeId]; }) : T;
     var t = pool[Math.floor(Math.random() * pool.length)];
     surprise.href = href(t);
-    surprise.setAttribute('aria-label', 'Surprise me: open ' + t.name + ' full screen');
+    surprise.setAttribute('aria-label', 'Surprise me: open ' + t.name + ' in a new box');
   }
   surprise.addEventListener('pointerdown', pickSurprise);
   surprise.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') pickSurprise(); });
@@ -889,7 +913,7 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
     els.dotsSr.textContent = dotsSr(t.simp);
     els.prompt.textContent = t.prompt;
     els.open.href = href(t);
-    els.open.setAttribute('aria-label', 'Open ' + t.name + ' full screen');
+    els.open.setAttribute('aria-label', 'Open ' + t.name + ' in a new box');
     grid.querySelectorAll('.card').forEach(function (c) { c.setAttribute('aria-expanded', c.dataset.themeId === t.id ? 'true' : 'false'); });
     els.body.scrollTop = 0;
   }
