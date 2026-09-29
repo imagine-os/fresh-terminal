@@ -104,6 +104,7 @@ As of 2026-09-29:
 | **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |
 | **Review pass** (C-081) | Shipped 2026-09-29 04:45 UTC: no-op edits refused, names not ids, one Undo bar, created pages open, screen context, mood tags. |
 | **No silent turns, smarter tagger, tiles, stage** (C-080) | Shipped 2026-09-29 04:20 UTC. |
+| **Sign-in in our look** (C-084) | Shipped 2026-09-29 about 04:35 UTC (Opus 5.5): Clerk themed from the active theme. Justin: turn off required username and phone in Clerk; Branding toggle optional. |
 | **Tighter start** (C-078) | Shipped 2026-09-29 04:00 UTC: square corners, one bottom row, centered prompt on an empty box, tags. |
 | **Branded export, import, live credits** (C-076) | Shipped 2026-09-29 03:50 UTC. |
 | **Clean start** (C-075) | Shipped 2026-09-29 03:40 UTC: Alt+key shortcuts while typing, free usage label, sidebar hidden with top-left icon and settings, starters and hints behind switches, calmer tray. |

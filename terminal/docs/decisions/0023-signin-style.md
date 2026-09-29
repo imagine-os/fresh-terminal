@@ -1,0 +1,14 @@
+# 0023 — Clerk in our look
+
+Date: 2026-09-29. Model: Opus 5.5. Prompt: prompts/0019 (Justin, "signin system should match style", [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655000670529?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). Canon: C-084. Builds on 0020.
+
+## Rules
+
+- **One source for the look: the theme on screen.** Clerk renders its modal and user menu in a portal on `<body>`, outside `.shell`, so our custom properties do not reach it. `app/src/auth/clerkAppearance.ts` reads `--bg`, `--bg-elevated`, `--surface`, `--fg`, `--fg-muted`, `--accent`, `--accent-fg`, `--border`, `--border-strong`, `--danger`, `--warn`, `--focus`, `--font-sans` and `--font-mono` from the shell and passes Clerk plain values. Translucent tokens (Glass Window) are flattened onto the background first so the card stays solid and readable.
+- **Where it applies:** `ClerkProvider appearance` (so every Clerk surface, including `UserButton` and its profile modal, uses it) and each `openSignIn` call (so the modal matches the theme at the moment it opens). `useClerkAppearance()` re-reads the tokens when the shell's `data-theme-id` or `data-skinned` changes; pointer effects on the shell do not trigger it.
+- **The look:** radius 0 everywhere; `--font-sans` for text and buttons (monospace in Void), `--font-mono` for meta text (subtitle, labels, hints, divider, footer, badges); the accent as the primary button with the accent foreground; a 1px border instead of Clerk's layered shadow; the modal backdrop is the theme background at 82%.
+- **Accessible:** primary, social, reset and alternative-method buttons, inputs, the footer link, the "Use phone" action, the close button, the user button and its menu items are at least 44px (`max(2.75rem, 3.1em)`); keyboard focus shows a 2px outline in `--focus` with a 2px offset.
+- **Phone to 4K:** type is `clamp(0.875rem, 0.6rem + 0.35vw, 1.5rem)`, spacing `clamp(1rem, 0.75rem + 0.3vw, 1.75rem)` and the card `min(100vw - 2rem, clamp(25rem, 16rem + 10vw, 46rem))`, so it is 14px on phones and laptops and about 23px on a 3840 screen. Clerk's own icons (GitHub, Google, the Clerk mark) keep their fixed size.
+- **Left in place, on purpose:** "Secured by Clerk" (removing it is Clerk's Branding setting: free on development instances, a paid plan on production; we do not hide it with CSS) and the "Development mode" notice (it goes away only on a production instance; Clerk's `unsafe_disableDevelopmentModeWarnings` exists but is not used). Both are styled muted and mono.
+- **Not ours to change in code:** the sign-up fields. This instance requires a username and a phone number, which is why the modal shows "Email address or username" and "Use phone". Justin turns those off in Clerk (User & authentication) if email plus GitHub / Google is enough.
+- Clerk screens in Spanish stay not wired yet (`auth.clerk.es`).
