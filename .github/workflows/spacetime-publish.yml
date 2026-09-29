@@ -37,8 +37,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install (the module compiles against the spacetimedb package at terminal/)
-        run: pnpm -C terminal install --frozen-lockfile
+      - name: Install (one lockfile at the repo root; the module compiles against the spacetimedb package)
+        run: pnpm install --frozen-lockfile
       - name: Token present? (name only, never the value)
         env:
           S: ${{ secrets.SPACETIMEDB_TOKEN }}
