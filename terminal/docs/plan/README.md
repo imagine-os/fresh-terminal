@@ -1,6 +1,6 @@
 # Development plan
 
-Tasks are bound by dependencies, not calendar days. `plan.json` holds the same plan as data (id, title, status, depends_on, model, pass); the in-app PM viewer (dev mode, `D`) shows it as kanban, list and a timeline by dependency depth.
+Tasks are bound by dependencies, not calendar days. [`plan.json`](plan.json) holds the same plan as data (id, title, status, depends_on, model, pass). This is our build plan, not the person's activity: it lives here in `docs/plan/` (moved 2026-09-29, C-095), in the hub's Plan section (https://freshterminal.ai/hub#plan) and in the dev-mode viewer at `/plan` (kanban, list and a timeline by dependency depth). People's own activity is the Actions page at `/actions`.
 
 Model routing: **Fable 5.1** for judgment, architecture, shell and shared code; **Opus 5** for building modules and pages; **Sonnet 5** for mechanical passes (screenshots, Spanish fill, QA matrices). This first pass was executed entirely by Fable 5.1; the model column records who *should* own each task in later passes.
 

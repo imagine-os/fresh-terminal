@@ -1,5 +1,5 @@
 {
-  "stamp": "2026-09-29T05:30:29.408Z",
+  "stamp": "2026-09-29T05:34:30.035Z",
   "results": [
     {
       "page": "landing",
@@ -224,6 +224,62 @@
       "composerVisible": true,
       "smallTargets": [],
       "screenshot": "replay-3840.png"
+    },
+    {
+      "page": "actions",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-360.png"
+    },
+    {
+      "page": "actions",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-390.png"
+    },
+    {
+      "page": "actions",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-768.png"
+    },
+    {
+      "page": "actions",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-1280.png"
+    },
+    {
+      "page": "actions",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-1920.png"
+    },
+    {
+      "page": "actions",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-2560.png"
+    },
+    {
+      "page": "actions",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "actions-3840.png"
     }
   ]
 }

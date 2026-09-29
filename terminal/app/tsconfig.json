@@ -38,7 +38,7 @@
     "src",
     "vite.config.ts",
     "../shared/src/**/*.ts",
-    "../docs/plan.json",
+    "../docs/plan/plan.json",
     "../router/rules.json"
   ],
   "exclude": [

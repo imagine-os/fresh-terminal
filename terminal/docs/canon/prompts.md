@@ -720,6 +720,8 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** C-090 (this session): the interface and voice parts, the SpacetimeDB answer, the Terminal-talk demo in docs/voice-experience.md. Other session: Split. This pass took the starter kit and the privacy question: C-089, a $5 starter kit per signed-in account that is also the pass-through threshold, `GET /credits` returns `granted` and the label "starter kit" for "of $5 starter kit"; open question 19 on end-to-end encryption, linked from the hub (changelog 0014). Justin's session took the rest (top bar, tray, mobile, Actions, voice, the currency switch, the SpacetimeDB answer).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657599.470899
 
+**Follow-up to 81 (2026-09-29 05:40 UTC, Opus 5.5):** the Actions part, word for word from the message above: "Plan can keep track of any actions we gave it and the status so thats good. I also like that you can show the order of operations in timeline, and anything that had dependencies. make sure the lists are filterable and sortable. but keep it very very simple. The plan is for the users activity not for our project plan. our project plan can go elsewhere. Maybe just called it Actions instead of plan. ... table should be in option in plan. Kanban should be called board. timeline needs ability to adjust the width of left column. we'll make this smarter as we go." C-090 built the page; C-095 added model and cost from the ledger, filters by status, stage, model and words, a cost sort, dependency arrows on the timeline, a remembered, keyboard-resizable label column, typed undo, and moved our build plan to `docs/plan/` (hub and wiki; `/plan` stays the dev viewer). Changelog 0015.
+
 ## 82. Mon Sep 28, 11:55 PM CDT · 2026-09-29 04:55:43 UTC
 
 > please give me a sales wesbite for this product. simple clean strong easy to understand. can be more than one page and have pricing based on what you think is best checkout, and or whatever calls to action you want. Make it nice and simple. You can look at omarchy for some simplicity inspiration though we can be way better.
@@ -803,5 +805,5 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 >
 > One thing you can do is color code nounds, verbs, adjectives by default.
 
-**What happened:** C-095: the tighter menu shipped; parts of speech in colour is proposed with an estimate.
+**What happened:** C-096: the tighter menu shipped; parts of speech in colour is proposed with an estimate.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659643321609?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659643.321609

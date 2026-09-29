@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import plan from '@docs/plan.json';
+import plan from '@docs/plan/plan.json';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 
