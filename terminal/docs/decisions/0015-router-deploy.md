@@ -5,3 +5,5 @@
 - CORS: `ALLOWED_ORIGINS` (comma list; `wrangler.toml` sets the Pages origin plus localhost 5173/4173 as the default) replaces the single `ROUTER_ALLOWED_ORIGIN`; unknown origins get no `access-control-allow-origin`.
 - Pages: `VITE_ROUTER_URL` comes from the repository variable `ROUTER_URL` (the Worker URL, e.g. `https://fresh-terminal-router.<account>.workers.dev`). Until it is set the site shows the "no router" line and own-key mode works.
 - What the owner adds once (Settings → Secrets and variables → Actions): secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `OPENROUTER_API_KEY`, `OPENAI_API_KEY` (and `GOOGLE_API_KEY` when Gemini is wired); variable `ROUTER_URL`. Then re-run `router-deploy` and `pages`.
+
+- 2026-09-29: `ROUTER_URL` is not used. The Worker URL is committed as `DEFAULT_ROUTER_URL` in `app/src/config/router.ts` (a public URL, not a secret); `VITE_ROUTER_URL` remains an override. The Cloudflare account needed a workers.dev subdomain registered once before the first deploy.

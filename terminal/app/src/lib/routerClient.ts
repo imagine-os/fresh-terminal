@@ -1,7 +1,9 @@
 import type { Chip } from '@shared/chips';
 import type { EntryDraft } from '@shared/ledger';
+import { resolveRouterUrl } from '../config/router';
 
-export const ROUTER_URL: string = (import.meta.env.VITE_ROUTER_URL as string | undefined) ?? '/api';
+
+export const ROUTER_URL: string = resolveRouterUrl(import.meta.env.VITE_ROUTER_URL as string | undefined, import.meta.env.DEV);
 
 export interface RouteMeta {
   route: {

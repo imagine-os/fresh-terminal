@@ -49,9 +49,9 @@ Press `V` or the mic. Default is browser speech recognition (no key): your words
 1. Cloudflare: create a Worker API token and note the account id.
 2. GitHub → Settings → Secrets and variables → Actions → **Secrets**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `OPENROUTER_API_KEY`, `OPENAI_API_KEY` (optional `GOOGLE_API_KEY`).
 3. Run the `router-deploy` workflow (or push to `main`). It deploys `terminal/router` with wrangler and pushes the keys into Worker secrets. Note the Worker URL it prints.
-4. **Variables**: `ROUTER_URL` = that Worker URL (e.g. `https://fresh-terminal-router.<account>.workers.dev`). Re-run `pages`.
+4. The deployed Worker is `https://fresh-terminal-router.jmassion.workers.dev`, committed as the app default in `terminal/app/src/config/router.ts`. A repository variable `ROUTER_URL` is optional and only overrides it.
 
-Without step 4 the site says "No router is deployed for this site yet" and only own-key mode (`K`) calls a model. Keys are never committed; `.env` files are git-ignored.
+A brand-new Cloudflare account must register a workers.dev subdomain once (dashboard → Workers & Pages) before the first deploy. Keys are never committed; `.env` files are git-ignored.
 
 ## Hosting
 
