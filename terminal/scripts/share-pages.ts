@@ -41,6 +41,8 @@ function htmlFiles(dir: string): string[] {
 }
 
 const titleLines = (text: string) => [text];
+/** freshterminal.ai serves /pages/koi.html at /pages/koi (the asset store redirects), so that is the canonical address. */
+const cleanPath = (path: string) => path.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
 const jobs: Array<{ file: string; page: SharePage; html: string }> = [];
 const add = (file: string, page: Omit<SharePage, 'image'>, html = readFileSync(file, 'utf8')) => jobs.push({ file, html, page: { ...page, image: `/og/${slugFor(page.path)}.png` } });
 
@@ -60,7 +62,7 @@ for (const [name, kicker] of [['pricing', 'Pricing'], ['faq', 'FAQ']] as const) 
 for (const file of htmlFiles(join(dist, 'pages'))) {
   const html = readFileSync(file, 'utf8');
   const meta = readMeta(html);
-  const path = `/${relative(dist, file).split('\\').join('/')}`;
+  const path = cleanPath(`/${relative(dist, file).split('\\').join('/')}`);
   const title = meta.title ?? meta.h1 ?? path;
   const description = meta.description ?? meta.firstParagraph ?? GENERIC;
   add(file, { path, title: title.includes('Fresh Terminal') ? title : `${title} · Fresh Terminal`, description, card: { kicker: 'Page', lines: titleLines(meta.h1 ?? title), accentLast: false, body: description, prompt: false }, private: false }, html);
@@ -68,7 +70,7 @@ for (const file of htmlFiles(join(dist, 'pages'))) {
 for (const file of htmlFiles(join(dist, 'wiki'))) {
   const html = readFileSync(file, 'utf8');
   const meta = readMeta(html);
-  const path = `/${relative(dist, file).split('\\').join('/')}`;
+  const path = cleanPath(`/${relative(dist, file).split('\\').join('/')}`);
   const short = (meta.title ?? meta.h1 ?? 'Docs').replace(/\s*·\s*Fresh Terminal wiki$/, '');
   const weak = !meta.description || /^Fresh Terminal docs wiki:/.test(meta.description);
   const description = weak ? meta.firstParagraph ?? `Fresh Terminal docs: ${short}.` : meta.description!;
