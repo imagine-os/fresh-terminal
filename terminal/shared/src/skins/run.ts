@@ -28,6 +28,11 @@ export const skinRunSchema = z.object({
   error: z.string().max(400).nullable(),
   /** A plain note from the plan, e.g. why a costlier path was not used. */
   note: z.string().max(400).nullable().default(null),
+  /** Shown before the rounds start: expected spend, a range, and how sure we are. */
+  estimate: z
+    .object({ micro: z.number().int().min(0), low_micro: z.number().int().min(0), high_micro: z.number().int().min(0), certainty: z.enum(['sure', 'fairly sure', 'rough guess']) })
+    .nullable()
+    .default(null),
   spent_micro: z.number().int().min(0),
   cap_micro: z.number().int().min(0),
   draft: skinSchema.nullable(),

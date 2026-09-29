@@ -147,7 +147,7 @@ export const SKIN_LIBRARY: LibraryMaterial[] = [
     keywords: ['ledger', 'ruled', 'lined', 'accounting', 'notebook', 'margin'],
     tokens: { '--bg': '#fbfaf3', '--surface': '#ffffff', '--fg': '#1f2a36', '--accent': '#c0392b', '--border': '#cfd8e3' },
     background:
-      'linear-gradient(90deg, rgba(0,0,0,0) 3.9rem, rgba(192,57,43,0.55) 3.9rem, rgba(192,57,43,0.55) 4rem, rgba(0,0,0,0) 4rem), repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 27px, rgba(70,120,190,0.28) 27px, rgba(70,120,190,0.28) 28px), linear-gradient(180deg, #fdfcf6, #f4f2e6)',
+      'linear-gradient(90deg, rgba(0,0,0,0) 1.4rem, rgba(192,57,43,0.55) 1.4rem, rgba(192,57,43,0.55) 1.5rem, rgba(0,0,0,0) 1.5rem), repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 27px, rgba(70,120,190,0.28) 27px, rgba(70,120,190,0.28) 28px), linear-gradient(180deg, #fdfcf6, #f4f2e6)',
     veil: 10,
   },
   {

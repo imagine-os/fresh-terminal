@@ -145,18 +145,27 @@
     "max_pages": 10
   },
   "refine": {
-    "$comment": "refine() best-of-3 loop for skins. Stops at target_score, after patience rounds without a better best, at max_rounds, when cap_micro is spent, or on Stop. estimate_micro is per variant (generate + score) and keeps the loop under the cap before it spends. image_generate measured 2026-09-29: openai/gpt-5-image-mini cost 41,709 micro-dollars for one image, over the cap, so plans that pick it fall back to the next affordable path.",
+    "$comment": "refine() best-of-3 loop for skins. Stops at target_score, after patience rounds without a better best, at max_rounds, when cap_micro is spent, or on Stop. estimate_micro is per variant (generate + score), measured on the live router 2026-09-29: library ~19, CSS ~1,390 (Haiku 4.5), image search ~75 (Flash-Lite vision + Jev), one generated image 41,709 (openai/gpt-5-image-mini, over the cap, so plans that pick it fall back). typical_rounds is what runs usually take before a stop rule fires.",
     "variants": 3,
     "target_score": 4.5,
     "patience": 2,
     "max_rounds": 5,
     "cap_micro": 30000,
     "estimate_micro": {
-      "library": 150,
-      "css_tokens": 2500,
-      "procedural_code": 2500,
-      "image_search": 400,
+      "library": 25,
+      "css_tokens": 1400,
+      "procedural_code": 1400,
+      "image_search": 80,
       "image_generate": 42000
+    },
+    "typical_rounds": 3,
+    "measured": {
+      "$comment": "Paths whose per-variant estimate comes from live runs on 2026-09-29 (certainty 'fairly sure'); others are 'rough guess'.",
+      "library": true,
+      "procedural_code": true,
+      "css_tokens": false,
+      "image_search": true,
+      "image_generate": true
     }
   }
 }

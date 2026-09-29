@@ -16,4 +16,4 @@
 
 **Replay** (2026-09-29, decision 0019). `P`, the replay button, or `/box/:id/play?step=N` opens the same box read-only: the transcript as it stood at the chosen step (current line marked), the menu, layout and theme as they were, and the scrubber in place of the composer (lane marks per step, range, start/back/play/forward/end, speed, save as JSON, "Branch from here" not wired yet, back to live). Space, ←/→, Home/End and Esc work; edits and sends are off.
 
-**Top bar and tray** (2026-09-29, C-070). The bar shows brand, the money counter, sign-in and the tray button. Tools are pinned back by click or drag; the box menu is in the tray. **Page** (C-070): long drafts grow a formatted page above the pad. Pages of the box open inside the box view, composer included.
+**Top bar and tray** (2026-09-29, C-070). The bar shows brand, the money counter, sign-in and the tray button. Tools are pinned back by click or drag; the box menu is in the tray. **Page** (C-071): long drafts grow a formatted page above the pad. Pages of the box open inside the box view, composer included.

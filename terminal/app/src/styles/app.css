@@ -1961,6 +1961,11 @@ textarea.field-input {
 .rf {
   display: grid;
   gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  /* Readable over any skin, however busy. */
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  border: 1px solid var(--border);
 }
 .rf-status {
   display: flex;
@@ -1975,6 +1980,12 @@ textarea.field-input {
   font-family: var(--font-mono);
   font-size: var(--type-whisper);
   color: var(--fg-faint);
+}
+.rf-estimate {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg);
 }
 .rf-stop {
   min-height: var(--target);
@@ -2071,7 +2082,7 @@ textarea.field-input {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .rf-row[data-kind='draft'] {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 9rem);
   }
   .rf-round {
     grid-column: 1 / -1;
@@ -2300,7 +2311,7 @@ textarea.field-input {
   display: none;
 }
 
-/* ---------- top bar: tools tray and pinned tools (C-070) ---------- */
+/* ---------- top bar: tools tray and pinned tools (C-071) ---------- */
 
 .topbar-pins {
   display: inline-flex;

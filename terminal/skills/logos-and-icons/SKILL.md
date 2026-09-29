@@ -74,7 +74,7 @@ Later layers, each a cost question and none automated yet (2026-09-29):
 
 ## 4c. Say what it costs and how sure you are
 
-Rule C-071 (Justin, 2026-09-29 03:10): any proposal to gather, generate or upgrade marks states the money (model calls and vendor fees separately), the time, and how sure we are in plain words with a rough percentage. Put it where the decision is made: on the page (see the estimate block on `pages/brands.html`) or in the reply. When the work runs, its real cost goes on the ledger and the estimate is checked against it.
+Rule C-070 (Justin, 2026-09-29 03:10): any proposal to gather, generate or upgrade marks states the money (model calls and vendor fees separately), the time, and how sure we are in plain words with a rough percentage. Put it where the decision is made: on the page (see the estimate block on `pages/brands.html`) or in the reply. When the work runs, its real cost goes on the ledger and the estimate is checked against it.
 
 ## 5. Generate only when nothing good exists
 

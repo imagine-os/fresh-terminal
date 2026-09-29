@@ -17,7 +17,7 @@ export interface Prefs {
   /** Voice provider and mic behaviour. */
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
   voiceMode: 'toggle' | 'hold';
-  /** Tool ids pinned back onto the top bar; the rest live in the tray (C-070). */
+  /** Tool ids pinned back onto the top bar; the rest live in the tray (C-071). */
   pinnedTools: string[];
   /** cached for the pre-paint script in index.html */
   bg?: string;

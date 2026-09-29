@@ -15,7 +15,7 @@ interface Props {
   onNew: () => void;
   onNavigate: (target: NavTarget, item: NavItem) => void;
   onRemove?: (id: string) => void;
-  /** The menu moved to the top-bar tray (C-070); the sidebar shows it only when asked. */
+  /** The menu moved to the top-bar tray (C-071); the sidebar shows it only when asked. */
   showMenu?: boolean;
   /** Replay: the menu as it was at the chosen step, instead of the live one. */
   navOverride?: NavItem[] | null;
