@@ -139,4 +139,20 @@ describe('skins', () => {
     expect(body.note).toContain('over the 3¢ cap');
     expect(body.material).toBe('misty koi pond at dawn');
   });
+
+  it('image search upgrades fall back to the next search page when "related" 404s', async () => {
+    const urls: string[] = [];
+    const fakeFetch: typeof fetch = async (url) => {
+      urls.push(String(url));
+      if (String(url).includes('/related/')) return json({ detail: 'not found' }, 404);
+      return json({ results: [{ id: 'b1', title: 'Moss', url: 'https://example.org/m.jpg', creator: 'D', license: 'cc0', license_version: '1.0' }] });
+    };
+    const app = createApp({ bindings: () => ({}), fetchImpl: fakeFetch });
+    const body = (await (await post(app, '/skin/variants', { boxId: 'b1', path: 'image_search', material: 'moss', target: 'stage', round: 3, n: 3, parent: { name: 'x', openverse_id: 'gone' } })).json()) as { variants: unknown[]; entries: unknown[]; error?: string };
+    expect(urls[0]).toContain('/gone/related/');
+    expect(urls[1]).toContain('page=3');
+    expect(body.variants).toHaveLength(1);
+    expect(body.entries).toHaveLength(2);
+    expect(body.error).toBeUndefined();
+  });
 });
