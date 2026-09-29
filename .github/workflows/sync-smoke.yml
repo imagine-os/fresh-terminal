@@ -30,7 +30,7 @@ jobs:
       - name: Refuse to run against a production Clerk instance
         run: |
           case "$CLERK_SECRET_KEY" in sk_test_*) echo "development instance: ok";; *) echo "not a development key; stopping"; exit 1;; esac
-      - name: Throwaway user and session token
+      - name: Signed in (throwaway user, session token, /me, /sync, /credits)
         id: user
         run: |
           clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
@@ -46,12 +46,9 @@ jobs:
           jwt=$(curl -sS "${clerk[@]}" -X POST "https://api.clerk.com/v1/sessions/$sid/tokens" -d '{}' | jq -r '.jwt // empty')
           [ -n "$jwt" ] || { echo "token mint failed"; exit 1; }
           echo "::add-mask::$jwt"
-          echo "jwt=$jwt" >> "$GITHUB_OUTPUT"
           echo "session token: minted"
-      - name: /me and /sync on the live router
-        env:
-          JWT: ${{ steps.user.outputs.jwt }}
-        run: |
+          # Same step on purpose: GitHub drops step outputs that hold masked values.
+          JWT="$jwt"
           auth=(-H "Authorization: Bearer $JWT" -H 'Content-Type: application/json' -H 'Origin: https://freshterminal.ai')
           now=$(date +%s%3N)
           echo "GET /me: $(curl -sS "${auth[@]}" "$API/me" | jq -c '{signedIn, plan: .account.plan, sync}')"
