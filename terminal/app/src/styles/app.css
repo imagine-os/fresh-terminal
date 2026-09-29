@@ -3512,6 +3512,8 @@ textarea.field-input {
   width: min(100%, 72rem);
   margin-inline: auto;
   display: grid;
+  /* One column that never grows past the page: the controls row scrolls inside it (C-095). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-cozy);
   padding-bottom: var(--space-roomy);
 }

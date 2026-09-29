@@ -260,9 +260,10 @@ export function ActionsView({ boxId }: { boxId: string | null }) {
       {view === 'timeline' && rows.length > 0 ? (
         <div ref={timelineRef} className="act-timeline" style={{ ['--label-w' as string]: `${labelWidth}px` }} data-testid="actions-timeline">
           {timeline.map((row, index, ordered) => {
-            const left = ((row.at - first) / span) * 100;
             const next = ordered[index + 1];
             const width = Math.max(1.2, (((next?.at ?? last) - row.at) / span) * 100);
+            // The last bar keeps its minimum width inside the track instead of poking past the edge.
+            const left = Math.min(((row.at - first) / span) * 100, 100 - width);
             const parent = row.follows ? byId.get(row.follows) : undefined;
             return (
               <div key={row.id} className="act-tl-row" data-status={row.status}>

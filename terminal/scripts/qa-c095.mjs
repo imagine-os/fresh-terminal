@@ -68,7 +68,11 @@ try {
       await page.waitForTimeout(350);
       const shot = `${PREFIX}-actions-${view}-${width}.png`;
       await page.screenshot({ path: resolve(OUT, shot), fullPage: false });
-      report.overflow[`${view}-${width}`] = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      // The stage hides sideways overflow, so also check that nothing is clipped inside the page itself.
+      report.overflow[`${view}-${width}`] = await page.evaluate(() => {
+        const actions = document.querySelector('.actions');
+        return document.documentElement.scrollWidth > document.documentElement.clientWidth + 1 || (actions ? actions.getBoundingClientRect().right > window.innerWidth + 1 || actions.scrollWidth > actions.clientWidth + 1 : false);
+      });
       report.smallTargets[`${view}-${width}`] = await page.evaluate(() => {
         const out = [];
         for (const element of document.querySelectorAll('.actions button, .actions input, .actions select, .actions [role="separator"]')) {
