@@ -3,10 +3,10 @@ import { localTagger, type Chip } from '@shared/chips';
 import type { CursorSpec } from '@shared/themes';
 import { useI18n } from '../i18n';
 import { mergeChips, tagRemote } from '../lib/modelTagger';
-import { useSpeech } from '../lib/speech';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
 import { IconMic, IconSend } from '../ui/icons';
+import type { VoiceControls } from '../voice/useVoice';
 import { ChipText } from './ChipText';
 import { SuggestionStrip } from './SuggestionStrip';
 
@@ -21,6 +21,12 @@ interface Props {
   busy: boolean;
   onSend: (text: string, chips: Chip[]) => void;
   onActivity?: () => void;
+  voice: VoiceControls;
+  voiceMode: 'toggle' | 'hold';
+  voiceAvailable: boolean;
+  /** Text arriving from a final voice transcript to append to the draft. */
+  voiceAppend: string | null;
+  onVoiceAppendConsumed: () => void;
 }
 
 export interface ComposerHandle {
@@ -33,12 +39,36 @@ export interface ComposerHandle {
  * inserts a newline. A mirror layer paints chips and the theme cursor over
  * the real textarea, which keeps native editing, IME and accessibility.
  */
-export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes, hasLines, busy, onSend, onActivity }: Props) {
-  const { t, lang } = useI18n();
+export function Composer({
+  boxId,
+  cursor,
+  themeId,
+  modelTagger = false,
+  hasBoxes,
+  hasLines,
+  busy,
+  onSend,
+  onActivity,
+  voice,
+  voiceMode,
+  voiceAvailable,
+  voiceAppend,
+  onVoiceAppendConsumed,
+}: Props) {
+  const { t } = useI18n();
   const [text, setText] = useState('');
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const spokenBase = useRef('');
+
+  // A final voice transcript lands in the draft, separated by a space.
+  useEffect(() => {
+    if (voiceAppend === null) {
+      return;
+    }
+    setText((current) => (current.trim().length > 0 ? `${current.trimEnd()} ${voiceAppend}` : voiceAppend));
+    onVoiceAppendConsumed();
+    textareaRef.current?.focus();
+  }, [voiceAppend, onVoiceAppendConsumed]);
 
   const localChips = useMemo<Chip[]>(() => localTagger.tag(text), [text]);
   const [remoteChips, setRemoteChips] = useState<Chip[]>([]);
@@ -81,18 +111,6 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
     textareaRef.current?.focus();
   }, [boxId]);
 
-  const onSpeech = useCallback(
-    (spoken: string, final: boolean) => {
-      const base = spokenBase.current;
-      const joined = base ? `${base} ${spoken}` : spoken;
-      setText(joined);
-      if (final) {
-        spokenBase.current = joined;
-      }
-    },
-    [],
-  );
-  const speech = useSpeech(lang, onSpeech);
 
   const send = useCallback(() => {
     const trimmed = text.trim();
@@ -101,10 +119,8 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
     }
     onSend(trimmed, localTagger.tag(trimmed));
     setText('');
-    spokenBase.current = '';
-    speech.stop();
     textareaRef.current?.focus();
-  }, [text, busy, onSend, speech]);
+  }, [text, busy, onSend]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -130,9 +146,14 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
       <div className="composer-frame">
         <div className="composer-stack">
           <div className="composer-mirror" aria-hidden="true" data-testid="composer-mirror">
-            {text.length > 0 ? (
-              <ChipText text={text} chips={chips} cursor={focused} />
-            ) : focused ? (
+            {text.length > 0 ? <ChipText text={text} chips={chips} cursor={focused && !voice.interim} /> : null}
+            {voice.interim ? (
+              <span className="interim" data-testid="interim">
+                {text.length > 0 ? ' ' : ''}
+                {voice.interim}
+                {focused ? <span className="cursor" /> : null}
+              </span>
+            ) : text.length === 0 && focused ? (
               <span className="cursor" />
             ) : null}
           </div>
@@ -146,7 +167,6 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
             aria-label={t('composer.placeholder')}
             onChange={(event) => {
               setText(event.target.value);
-              spokenBase.current = event.target.value;
               onActivity?.();
             }}
             onKeyDown={onKeyDown}
@@ -159,16 +179,45 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
           />
         </div>
         <div className="composer-tools">
-          {speech.available ? (
-            <Tooltip label={speech.listening ? t('composer.micStop') : t('composer.mic')} side="top" align="end">
+          {voice.active ? <Waveform level={voice.level} state={voice.state} /> : null}
+          {voiceAvailable ? (
+            <Tooltip
+              label={voice.active ? t('voice.stop') : voiceMode === 'hold' ? t('voice.hold') : t('voice.start')}
+              shortcut="V"
+              side="top"
+              align="end"
+            >
               <Button
                 icon
                 variant="ghost"
                 className="mic"
-                data-listening={speech.listening}
-                aria-pressed={speech.listening}
-                aria-label={speech.listening ? t('composer.micStop') : t('composer.mic')}
-                onClick={speech.toggle}
+                data-listening={voice.active}
+                data-state={voice.state}
+                aria-pressed={voice.active}
+                aria-label={voice.active ? t('voice.stop') : t('voice.start')}
+                onClick={voiceMode === 'toggle' ? voice.toggle : undefined}
+                onPointerDown={voiceMode === 'hold' ? voice.start : undefined}
+                onPointerUp={voiceMode === 'hold' ? voice.stop : undefined}
+                onPointerCancel={voiceMode === 'hold' ? voice.stop : undefined}
+                onKeyDown={
+                  voiceMode === 'hold'
+                    ? (event) => {
+                        if (event.key === ' ' || event.key === 'Enter') {
+                          event.preventDefault();
+                          voice.start();
+                        }
+                      }
+                    : undefined
+                }
+                onKeyUp={
+                  voiceMode === 'hold'
+                    ? (event) => {
+                        if (event.key === ' ' || event.key === 'Enter') {
+                          voice.stop();
+                        }
+                      }
+                    : undefined
+                }
                 data-testid="mic"
               >
                 <IconMic />
@@ -181,6 +230,13 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
               </Button>
             </Tooltip>
           )}
+          {voice.active && voice.state !== 'idle' ? (
+            <Tooltip label={voice.muted ? t('voice.unmute') : t('voice.mute')} side="top" align="end">
+              <Button icon variant="ghost" aria-pressed={voice.muted} aria-label={voice.muted ? t('voice.unmute') : t('voice.mute')} onClick={() => voice.setMuted(!voice.muted)}>
+                {voice.muted ? '🔇' : '🔊'}
+              </Button>
+            </Tooltip>
+          ) : null}
           <Tooltip label={t('composer.send')} shortcut="↵" side="top" align="end">
             <Button icon variant="primary" aria-label={t('composer.send')} onClick={send} disabled={busy || text.trim().length === 0}>
               <IconSend />
@@ -188,12 +244,24 @@ export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes
           </Tooltip>
         </div>
       </div>
+      <audio ref={voice.audioRef} autoPlay data-testid="assistant-audio" />
       <div className="composer-hint">
-        <span>{t('composer.hint')}</span>
+        <span>{voice.active ? t(voice.state === 'connecting' ? 'voice.connecting' : voice.state === 'speaking' ? 'voice.speaking' : 'voice.listening') : t('composer.hint')}</span>
         <span>
           {chips.length} {t('composer.chips')}
         </span>
       </div>
     </div>
+  );
+}
+
+function Waveform({ level, state }: { level: number; state: string }) {
+  const bars = [0.4, 0.7, 1, 0.7, 0.4];
+  return (
+    <span className="wave" data-state={state} aria-hidden="true">
+      {bars.map((weight, index) => (
+        <span key={index} style={{ transform: `scaleY(${0.15 + Math.min(1, level * 2.2) * weight})` }} />
+      ))}
+    </span>
   );
 }

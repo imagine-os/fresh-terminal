@@ -1,0 +1,9 @@
+# 0010 — realtime voice, live transcript, and the 405
+
+Source: Justin, Slack, 2026-09-29. Verbatim:
+
+> integrate google realtime or openai realtime voice please. i want to see my real time transcript coming through also, by the way Router error: HTTP 405 i got that when i wrote my 1st prompt.
+
+## Reply summary
+
+The 405 came from the GitHub Pages site POSTing to `/api/route` with no router deployed: a static host answers 405. The app now probes `GET <router>/health` once on load (3 s timeout, cached) and, when no router is configured or reachable, never POSTs; it says "No router is deployed for this site yet. Press K to use your own OpenRouter key, or ask the owner to deploy the router." with the K action inline. Voice: a provider seam (`app/src/voice/`) with three providers. Browser speech (default, no key) streams the interim transcript as gray text in the composer and solidifies it into chips. OpenAI Realtime over WebRTC (complete): the router mints an ephemeral client secret with `OPENAI_API_KEY`, the browser does the SDP exchange, input transcription (`gpt-live-transcribe`) streams the live transcript into the composer, the assistant's text streams into the transcript and its audio plays with a mute toggle; one ledger entry per session (seconds, estimated price). Gemini Live: seam, token endpoint and client skeleton with event mapping; audio capture/playback not wired yet, labelled so. `V` toggles voice; press-to-talk or toggle is a setting; provider picker in Settings (K) shows "not configured" when the router lacks the key. Router deploy: `.github/workflows/router-deploy.yml` deploys the Worker when `CLOUDFLARE_API_TOKEN` exists and pushes `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` as Worker secrets; Pages reads the `ROUTER_URL` variable. Decisions 0014, 0015.

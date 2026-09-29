@@ -1457,3 +1457,41 @@ textarea {
   border-radius: var(--radius);
   padding: var(--space-cozy) var(--space-roomy);
 }
+
+
+/* ---------- voice ---------- */
+
+.interim {
+  color: var(--fg-faint);
+  font-style: italic;
+}
+.wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: var(--target);
+  padding-inline: 0.35rem;
+}
+.wave span {
+  display: block;
+  width: 3px;
+  height: 1.4rem;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: center;
+  transition: transform 80ms linear;
+}
+.wave[data-state='speaking'] span {
+  background: var(--chip-date);
+}
+.wave[data-state='connecting'] span {
+  opacity: 0.4;
+}
+.mic[data-state='listening'] {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.mic[data-state='speaking'] {
+  color: var(--chip-date);
+  border-color: var(--chip-date);
+}

@@ -16,6 +16,9 @@ export interface Prefs {
   payMode: 'ours' | 'own';
   /** Dev toggle: also ask the router's tagger tier for chips on keystroke pause. */
   modelTagger: boolean;
+  /** Voice provider and mic behaviour. */
+  voiceProvider: 'webspeech' | 'openai' | 'gemini';
+  voiceMode: 'toggle' | 'hold';
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -29,6 +32,8 @@ const defaults: Prefs = {
   leftOpen: false,
   payMode: 'ours',
   modelTagger: false,
+  voiceProvider: 'webspeech',
+  voiceMode: 'toggle',
 };
 
 interface PrefsValue {

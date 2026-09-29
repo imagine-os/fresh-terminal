@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { useToast } from '../ui/Toast';
+import { VOICE_PROVIDERS, speechRecognitionCtor, type RealtimeProviderInfo, type VoiceProviderId } from '../voice';
 import { deleteOwnKey, maskKey, readOwnKey, writeOwnKey } from './ownKey';
 
 export type PayMode = 'ours' | 'own';
@@ -11,6 +12,13 @@ interface Props {
   payMode: PayMode;
   onPayMode: (mode: PayMode) => void;
   onClose: () => void;
+  voiceProvider: VoiceProviderId;
+  onVoiceProvider: (id: VoiceProviderId) => void;
+  voiceMode: 'toggle' | 'hold';
+  onVoiceMode: (mode: 'toggle' | 'hold') => void;
+  /** null while the router probe is still running; [] when there is no router. */
+  realtimeProviders: RealtimeProviderInfo[] | null;
+  routerOk: boolean | null;
 }
 
 /**
@@ -19,7 +27,7 @@ interface Props {
  * key: stored only in this browser, calls go straight to OpenRouter, the
  * ledger records price = cost with margin 0.
  */
-export function SettingsPanel({ open, payMode, onPayMode, onClose }: Props) {
+export function SettingsPanel({ open, payMode, onPayMode, onClose, voiceProvider, onVoiceProvider, voiceMode, onVoiceMode, realtimeProviders, routerOk }: Props) {
   const { t } = useI18n();
   const { toast } = useToast();
   const [draft, setDraft] = useState('');
@@ -148,6 +156,54 @@ export function SettingsPanel({ open, payMode, onPayMode, onClose }: Props) {
             </Button>
           </div>
         ) : null}
+
+        <h2 style={{ fontSize: 'var(--type-body)' }}>{t('voice.title')}</h2>
+        <fieldset className="pay-options">
+          <legend className="sr-only">{t('voice.title')}</legend>
+          {VOICE_PROVIDERS.map((candidate) => {
+            const info = realtimeProviders?.find((entry) => entry.id === candidate.id);
+            let status = '';
+            let disabled = false;
+            if (candidate.id === 'webspeech') {
+              if (speechRecognitionCtor() === null) {
+                status = t('composer.micUnavailable');
+                disabled = true;
+              }
+            } else if (routerOk === false || realtimeProviders?.length === 0) {
+              status = t('voice.noRouter');
+              disabled = true;
+            } else if (info && !info.configured) {
+              status = t('voice.notConfigured');
+              disabled = true;
+            } else if (!candidate.wired) {
+              status = t('notWired');
+            }
+            return (
+              <label key={candidate.id} className="pay-option" data-checked={voiceProvider === candidate.id} data-disabled={disabled}>
+                <input type="radio" name="voice" value={candidate.id} checked={voiceProvider === candidate.id} disabled={disabled} onChange={() => onVoiceProvider(candidate.id)} />
+                <span>
+                  <b>{t(`voice.provider.${candidate.id}` as 'voice.provider.webspeech')}</b>
+                  <small>
+                    {info?.model ? `${info.model} · ` : ''}
+                    {status || (candidate.realtime ? (info?.price?.estimate ? 'estimated price per minute' : '') : '')}
+                    {candidate.id === 'gemini' ? ` — ${t('voice.geminiNote')}` : ''}
+                  </small>
+                </span>
+              </label>
+            );
+          })}
+        </fieldset>
+        <fieldset className="pay-options">
+          <legend className="canvas-meta">{t('voice.mode')}</legend>
+          {(['toggle', 'hold'] as const).map((mode) => (
+            <label key={mode} className="pay-option" data-checked={voiceMode === mode}>
+              <input type="radio" name="voice-mode" value={mode} checked={voiceMode === mode} onChange={() => onVoiceMode(mode)} />
+              <span>
+                <b>{t(`voice.mode.${mode}`)}</b>
+              </span>
+            </label>
+          ))}
+        </fieldset>
 
         <div className="pm-tabs" style={{ justifyContent: 'flex-end' }}>
           <Button variant="ghost" onClick={onClose}>

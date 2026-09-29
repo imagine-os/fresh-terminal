@@ -443,6 +443,80 @@
       "pass": 2
     },
     {
+      "id": "router-health",
+      "title": "Router health probe; no POST on static hosts; inline K action (fixes the Pages 405)",
+      "status": "done",
+      "depends_on": [
+        "pages-hosting",
+        "two-ways-to-pay"
+      ],
+      "model": "Fable 5.1",
+      "pass": 3
+    },
+    {
+      "id": "voice-seam",
+      "title": "Voice provider seam + WebSpeech live interim transcript, waveform, V key",
+      "status": "done",
+      "depends_on": [
+        "composer"
+      ],
+      "model": "Fable 5.1",
+      "pass": 3
+    },
+    {
+      "id": "voice-openai",
+      "title": "OpenAI Realtime over WebRTC: ephemeral secrets, live input transcription, assistant audio/text, session ledger entry",
+      "status": "done",
+      "depends_on": [
+        "voice-seam",
+        "router"
+      ],
+      "model": "Opus 5",
+      "pass": 3
+    },
+    {
+      "id": "voice-gemini",
+      "title": "Gemini Live: token endpoint + WebSocket skeleton + event mapping (audio capture/playback pending)",
+      "status": "doing",
+      "depends_on": [
+        "voice-seam",
+        "router"
+      ],
+      "model": "Opus 5",
+      "pass": 3
+    },
+    {
+      "id": "router-deploy",
+      "title": "Cloudflare Worker deploy workflow gated on CLOUDFLARE_API_TOKEN; CORS allowlist; Pages reads ROUTER_URL",
+      "status": "done",
+      "depends_on": [
+        "worker-router"
+      ],
+      "model": "Fable 5.1",
+      "pass": 3
+    },
+    {
+      "id": "voice-gemini-audio",
+      "title": "Gemini Live 16 kHz PCM capture and 24 kHz playback",
+      "status": "todo",
+      "depends_on": [
+        "voice-gemini"
+      ],
+      "model": "Opus 5",
+      "pass": 4
+    },
+    {
+      "id": "voice-usage-pricing",
+      "title": "Realtime session pricing from real usage instead of estimates",
+      "status": "todo",
+      "depends_on": [
+        "voice-openai",
+        "ledger"
+      ],
+      "model": "Opus 5",
+      "pass": 4
+    },
+    {
       "id": "stdb-publish",
       "title": "Publish module, generate bindings, wire SpacetimeStore",
       "status": "todo",

@@ -5,9 +5,17 @@ import { z } from 'zod';
 import { PRODUCT_NAME, PRODUCT_VERSION } from '../../shared/src/brand';
 import { entryDraftSchema, type EntryDraft } from '../../shared/src/ledger/types';
 import { routeIntent } from './jev';
+import {
+  GEMINI_LIVE_MODEL,
+  OPENAI_REALTIME_MODEL,
+  OPENAI_TRANSCRIBE_MODEL,
+  isMintFailure,
+  mintGeminiSession,
+  mintOpenAISession,
+} from './realtime';
 import { streamChat, type ChatMessage } from './openrouter';
 import { tagWithModel } from './tagger';
-import { costMicroFor, priceMicroFor, type Usage } from './pricing';
+import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
 
 /**
@@ -21,8 +29,31 @@ export interface RouterBindings {
   /** "false" disables Jev routing (rules only). Default on when a key exists. */
   ROUTER_USE_JEV?: string;
   OPENROUTER_TAGGER_MODEL?: string;
+  /** Legacy single origin. Prefer ALLOWED_ORIGINS. */
   ROUTER_ALLOWED_ORIGIN?: string;
+  /** Comma-separated list of allowed browser origins. */
+  ALLOWED_ORIGINS?: string;
   ROUTER_REFERER?: string;
+  /** Realtime voice: server-side only. */
+  OPENAI_API_KEY?: string;
+  OPENAI_REALTIME_MODEL?: string;
+  OPENAI_TRANSCRIBE_MODEL?: string;
+  GOOGLE_API_KEY?: string;
+  GEMINI_LIVE_MODEL?: string;
+}
+
+/** Origins allowed by default: the GitHub Pages site and local dev/preview. */
+export const DEFAULT_ALLOWED_ORIGINS = ['https://imagine-os.github.io', 'http://localhost:5173', 'http://localhost:4173'];
+
+export function allowedOrigins(bindings: RouterBindings): string[] {
+  const list = (bindings.ALLOWED_ORIGINS ?? bindings.ROUTER_ALLOWED_ORIGIN ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (list.includes('*')) {
+    return ['*'];
+  }
+  return list.length > 0 ? list : DEFAULT_ALLOWED_ORIGINS;
 }
 
 const routeBodySchema = z.object({
@@ -55,7 +86,8 @@ export function createApp(options: CreateAppOptions) {
 
   app.use('*', async (c, next) => {
     const bindings = options.bindings(c.env);
-    const origin = bindings.ROUTER_ALLOWED_ORIGIN ?? '*';
+    const origins = allowedOrigins(bindings);
+    const origin = origins.includes('*') ? '*' : origins;
     return cors({ origin, allowMethods: ['GET', 'POST', 'OPTIONS'] })(c, next);
   });
 
@@ -66,7 +98,68 @@ export function createApp(options: CreateAppOptions) {
       product: PRODUCT_NAME,
       version: PRODUCT_VERSION,
       keyConfigured: Boolean(bindings.OPENROUTER_API_KEY),
+      realtime: {
+        openai: Boolean(bindings.OPENAI_API_KEY),
+        gemini: Boolean(bindings.GOOGLE_API_KEY),
+      },
     });
+  });
+
+  /** Which realtime voice providers this router can mint sessions for. */
+  app.get('/realtime/providers', (c) => {
+    const bindings = options.bindings(c.env);
+    return c.json({
+      providers: [
+        {
+          id: 'openai',
+          configured: Boolean(bindings.OPENAI_API_KEY),
+          model: bindings.OPENAI_REALTIME_MODEL ?? OPENAI_REALTIME_MODEL,
+          transcribe_model: bindings.OPENAI_TRANSCRIBE_MODEL ?? OPENAI_TRANSCRIBE_MODEL,
+          price: realtimePrice(bindings.OPENAI_REALTIME_MODEL ?? OPENAI_REALTIME_MODEL),
+        },
+        {
+          id: 'gemini',
+          configured: Boolean(bindings.GOOGLE_API_KEY),
+          model: bindings.GEMINI_LIVE_MODEL ?? GEMINI_LIVE_MODEL,
+          price: realtimePrice(bindings.GEMINI_LIVE_MODEL ?? GEMINI_LIVE_MODEL),
+        },
+      ],
+    });
+  });
+
+  /** Mints a short-lived client credential; the browser then talks to the provider directly. */
+  app.post('/realtime/session', async (c) => {
+    const bindings = options.bindings(c.env);
+    const provider = c.req.query('provider') ?? 'openai';
+    if (provider === 'openai') {
+      if (!bindings.OPENAI_API_KEY) {
+        return c.json({ error: 'OPENAI_API_KEY is not set on the router' }, 503);
+      }
+      const session = await mintOpenAISession(
+        bindings.OPENAI_API_KEY,
+        bindings.OPENAI_REALTIME_MODEL ?? OPENAI_REALTIME_MODEL,
+        bindings.OPENAI_TRANSCRIBE_MODEL ?? OPENAI_TRANSCRIBE_MODEL,
+        options.fetchImpl ? { fetchImpl: options.fetchImpl } : {},
+      );
+      if (isMintFailure(session)) {
+        return c.json({ error: session.message }, 502);
+      }
+      return c.json({ ...session, price: realtimePrice(session.model) });
+    }
+    if (provider === 'gemini') {
+      if (!bindings.GOOGLE_API_KEY) {
+        return c.json({ error: 'GOOGLE_API_KEY is not set on the router' }, 503);
+      }
+      const session = await mintGeminiSession(bindings.GOOGLE_API_KEY, bindings.GEMINI_LIVE_MODEL ?? GEMINI_LIVE_MODEL, {
+        ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
+        ...(options.now ? { now: options.now } : {}),
+      });
+      if (isMintFailure(session)) {
+        return c.json({ error: session.message }, 502);
+      }
+      return c.json({ ...session, price: realtimePrice(session.model) });
+    }
+    return c.json({ error: `Unknown provider "${provider}"` }, 400);
   });
 
   app.get('/rules', (c) => {

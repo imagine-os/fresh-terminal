@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Chip } from '@shared/chips';
+import { localTagger, type Chip } from '@shared/chips';
 import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
 import type { Theme } from '@shared/themes';
 import { verifyLedger } from '@shared/ledger';
@@ -7,6 +7,9 @@ import { listActions } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { streamDirect } from '../lib/openrouterDirect';
 import { streamRoute, type RouteHandlers } from '../lib/routerClient';
+import { probeRouter } from '../lib/routerHealth';
+import { speechRecognitionCtor, type VoiceSessionSummary } from '../voice';
+import { useVoice, type VoiceControls } from '../voice/useVoice';
 import { readOwnKey } from '../settings/ownKey';
 import { store, useStoreSnapshot, type Box } from '../store';
 import { Composer } from './Composer';
@@ -20,6 +23,10 @@ export interface AppCommands {
   dialectText: string;
   payMode: 'ours' | 'own';
   modelTagger: boolean;
+  voiceProvider: 'webspeech' | 'openai' | 'gemini';
+  voiceMode: 'toggle' | 'hold';
+  openSettings: () => void;
+  realtimePrice: (provider: 'openai' | 'gemini') => { audio_in_micro_per_minute: number; audio_out_micro_per_minute: number } | null;
 }
 
 interface Props {
@@ -41,6 +48,71 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
   const [busy, setBusy] = useState(false);
   const [fading, setFading] = useState(false);
   const sentOnce = useRef(false);
+  const [voiceAppend, setVoiceAppend] = useState<string | null>(null);
+  const assistantLine = useRef<{ id: string; text: string } | null>(null);
+
+  const voice = useVoice({
+    providerId: commands.voiceProvider,
+    lang,
+    onFinalTranscript: (text) => {
+      if (commands.voiceProvider === 'webspeech') {
+        setVoiceAppend(text);
+      } else {
+        // Realtime conversation: what you said becomes a user line right away.
+        store.appendLine(box.id, 'user', text, localTagger.tag(text), { reveal: 'none' });
+      }
+    },
+    onAssistantText: (text, isFinal) => {
+      if (!isFinal) {
+        if (assistantLine.current === null) {
+          const line = store.appendLine(box.id, 'assistant', '', [], { reveal: 'none' });
+          assistantLine.current = { id: line.id, text: '' };
+        }
+        assistantLine.current.text += text;
+        store.updateLine(assistantLine.current.id, assistantLine.current.text, true);
+        return;
+      }
+      if (assistantLine.current !== null) {
+        store.updateLine(assistantLine.current.id, text || assistantLine.current.text, false);
+        assistantLine.current = null;
+      } else if (text) {
+        store.appendLine(box.id, 'assistant', text, [], { reveal: 'none' });
+      }
+    },
+    onSessionEnd: (summary: VoiceSessionSummary) => {
+      if (summary.provider === 'webspeech') {
+        return;
+      }
+      const price = commands.realtimePrice(summary.provider);
+      const perMinute = price ? price.audio_in_micro_per_minute + price.audio_out_micro_per_minute : 0;
+      const costMicro = Math.round((summary.seconds / 60) * perMinute);
+      store.appendEntry({
+        box_id: box.id,
+        kind: 'charge',
+        what: 'voice.session.estimate',
+        model: summary.model,
+        units: summary.seconds,
+        unit_kind: 'second',
+        cost_micro: costMicro,
+        price_micro: costMicro,
+        ref: '',
+        created_at: summary.endedAt,
+      });
+      store.appendLine(box.id, 'system', t('voice.sessionEntry', { seconds: String(summary.seconds), model: summary.model }), [], { reveal: 'none' });
+    },
+    onError: (message) => {
+      store.appendLine(box.id, 'system', t('voice.error', { message }), [], { reveal: 'none' });
+    },
+  });
+
+  // V toggles voice from anywhere (App dispatches the event on the shortcut).
+  useEffect(() => {
+    const onToggle = () => voice.toggle();
+    window.addEventListener('ft:voice-toggle', onToggle);
+    return () => window.removeEventListener('ft:voice-toggle', onToggle);
+  }, [voice]);
+
+  const voiceAvailable = commands.voiceProvider === 'webspeech' ? speechRecognitionCtor() !== null : true;
 
   const lines = useMemo(() => snapshot.lines.filter((line) => line.box_id === box.id), [snapshot.lines, box.id]);
   const isEmpty = lines.length === 0;
@@ -162,6 +234,14 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
         await streamDirect({ boxId: box.id, text, chips, history }, { apiKey: ownKey, referer: window.location.origin }, handlers);
       } else {
+        // Never POST to a static host: a missing router used to surface as "HTTP 405".
+        const health = await probeRouter();
+        if (health.state !== 'ok') {
+          store.updateLine(reply.id, '', false);
+          store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
+          setBusy(false);
+          return;
+        }
         await streamRoute({ boxId: box.id, text, chips, history }, handlers);
       }
       setBusy(false);
@@ -223,6 +303,11 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         busy={busy}
         onSend={onSend}
         modelTagger={commands.modelTagger}
+        voice={voice}
+        voiceMode={commands.voiceMode}
+        voiceAvailable={voiceAvailable}
+        voiceAppend={voiceAppend}
+        onVoiceAppendConsumed={() => setVoiceAppend(null)}
       />
     </>
   );
@@ -239,6 +324,11 @@ function ComposerSlot(props: {
   boxId: string;
   theme: Theme;
   modelTagger: boolean;
+  voice: VoiceControls;
+  voiceMode: 'toggle' | 'hold';
+  voiceAvailable: boolean;
+  voiceAppend: string | null;
+  onVoiceAppendConsumed: () => void;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -257,6 +347,11 @@ function ComposerSlot(props: {
       cursor={props.theme.cursor}
       themeId={props.theme.id}
       modelTagger={props.modelTagger}
+      voice={props.voice}
+      voiceMode={props.voiceMode}
+      voiceAvailable={props.voiceAvailable}
+      voiceAppend={props.voiceAppend}
+      onVoiceAppendConsumed={props.onVoiceAppendConsumed}
       hasBoxes={props.hasBoxes}
       hasLines={props.hasLines}
       busy={props.busy}

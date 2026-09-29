@@ -199,3 +199,45 @@ describe('router app', () => {
     expect(body.allowed).toContain('anthropic/claude-haiku-4.5');
   });
 });
+
+describe('realtime voice sessions', () => {
+  it('lists providers with configured flags and prices', async () => {
+    const app = createApp({ bindings: () => ({ OPENAI_API_KEY: 'sk' }) });
+    const response = await app.request('/realtime/providers');
+    const body = (await response.json()) as { providers: Array<{ id: string; configured: boolean; price: { estimate: boolean } | null }> };
+    expect(body.providers.find((p) => p.id === 'openai')).toMatchObject({ configured: true });
+    expect(body.providers.find((p) => p.id === 'gemini')).toMatchObject({ configured: false });
+    expect(body.providers.find((p) => p.id === 'openai')?.price?.estimate).toBe(true);
+  });
+
+  it('mints an OpenAI client secret without exposing the server key', async () => {
+    const fakeFetch: typeof fetch = async (url, init) => {
+      expect(String(url)).toContain('/v1/realtime/client_secrets');
+      expect((init?.headers as Record<string, string>).Authorization).toBe('Bearer sk-server');
+      return new Response(JSON.stringify({ value: 'ek_abc', expires_at: 1 }), { status: 200 });
+    };
+    const app = createApp({ bindings: () => ({ OPENAI_API_KEY: 'sk-server' }), fetchImpl: fakeFetch });
+    const response = await app.request('/realtime/session?provider=openai', { method: 'POST' });
+    expect(response.status).toBe(200);
+    const text = await response.text();
+    expect(text).toContain('"value":"ek_abc"');
+    expect(text).not.toContain('sk-server');
+  });
+
+  it('returns 503 when the provider key is missing and 400 for an unknown provider', async () => {
+    const app = createApp({ bindings: () => ({}) });
+    expect((await app.request('/realtime/session?provider=gemini', { method: 'POST' })).status).toBe(503);
+    expect((await app.request('/realtime/session?provider=nope', { method: 'POST' })).status).toBe(400);
+  });
+
+  it('allows the Pages origin by default and honours ALLOWED_ORIGINS', async () => {
+    const app = createApp({ bindings: () => ({}) });
+    const pages = await app.request('/health', { headers: { Origin: 'https://imagine-os.github.io' } });
+    expect(pages.headers.get('access-control-allow-origin')).toBe('https://imagine-os.github.io');
+    const other = await app.request('/health', { headers: { Origin: 'https://evil.example' } });
+    expect(other.headers.get('access-control-allow-origin')).toBeNull();
+    const custom = createApp({ bindings: () => ({ ALLOWED_ORIGINS: 'https://a.test, https://b.test' }) });
+    const b = await custom.request('/health', { headers: { Origin: 'https://b.test' } });
+    expect(b.headers.get('access-control-allow-origin')).toBe('https://b.test');
+  });
+});

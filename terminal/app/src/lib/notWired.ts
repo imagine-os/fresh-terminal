@@ -13,5 +13,7 @@ export const NOT_WIRED = [
   { id: 'chain.shared.publish', label: 'Publishing the shared chain outside this browser' },
   { id: 'presence.others', label: 'Presence of other people in a box' },
   { id: 'canvas.document', label: 'Canvas document model rendering' },
-  { id: 'voice.control', label: 'Voice controller / TV remote input' },
+  { id: 'voice.gemini.audio', label: 'Gemini Live audio capture and playback (token + transcript events exist)' },
+  { id: 'voice.usage.pricing', label: 'Realtime voice priced from real usage (entries are estimates)' },
+  { id: 'voice.control', label: 'Voice controller over the actions registry / TV remote input' },
 ] as const;

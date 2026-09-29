@@ -26,7 +26,9 @@ Router (`terminal/router/.env`, copy from `.env.example`; never reaches the brow
 | `OPENROUTER_JEV_MODEL` | optional; overrides the Jev decisions model (default `typesafe/jev-1.13`) |
 | `ROUTER_USE_JEV` | optional; `false` routes by rules only |
 | `OPENROUTER_TAGGER_MODEL` | optional; overrides the tagger tier (default `google/gemini-2.5-flash-lite`) |
-| `ROUTER_ALLOWED_ORIGIN` | optional CORS lock for production |
+| `ALLOWED_ORIGINS` | comma-separated browser origins for CORS (default: the Pages origin + localhost 5173/4173) |
+| `OPENAI_API_KEY` | realtime voice (OpenAI). The router mints ephemeral client secrets; the browser never sees this key. |
+| `GOOGLE_API_KEY` | realtime voice (Gemini Live token minting; audio not wired yet) |
 
 App (build-time, optional): `VITE_ROUTER_URL` (default `/api`), `VITE_BASE` (`/fresh-terminal/` on GitHub Pages), `VITE_SPACETIMEDB_URI` / `VITE_SPACETIMEDB_NAME` (recognised, not used until the module is published).
 
@@ -37,6 +39,19 @@ Press `K` (key icon). Default: use Fresh Terminal's key through the router, pass
 ## Pages and the canvas
 
 Static deliverable pages live in `terminal/app/public/pages/` and ship on GitHub Pages under `/pages/` (today: `audit.html`, `library.html`; `themes.html` redirects to the library). Every deliverable appears as a card on the master canvas at `/canvas` (shortcut `C`); add one with `pnpm -C terminal canvas:add --title "Name" --href pages/x.html --kind page`. Paper cards are 1 mm thick, images 10 mm.
+
+## Voice
+
+Press `V` or the mic. Default is browser speech recognition (no key): your words appear live as gray text and solidify into chips. In Settings (`K`) pick **OpenAI Realtime** for a spoken conversation with a live transcript (needs `OPENAI_API_KEY` on the deployed router). Gemini Live is listed but not wired for audio yet.
+
+## Deploying the router (one-time, by the repository owner)
+
+1. Cloudflare: create a Worker API token and note the account id.
+2. GitHub → Settings → Secrets and variables → Actions → **Secrets**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `OPENROUTER_API_KEY`, `OPENAI_API_KEY` (optional `GOOGLE_API_KEY`).
+3. Run the `router-deploy` workflow (or push to `main`). It deploys `terminal/router` with wrangler and pushes the keys into Worker secrets. Note the Worker URL it prints.
+4. **Variables**: `ROUTER_URL` = that Worker URL (e.g. `https://fresh-terminal-router.<account>.workers.dev`). Re-run `pages`.
+
+Without step 4 the site says "No router is deployed for this site yet" and only own-key mode (`K`) calls a model. Keys are never committed; `.env` files are git-ignored.
 
 ## Hosting
 

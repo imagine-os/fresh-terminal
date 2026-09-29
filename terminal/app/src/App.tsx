@@ -8,8 +8,10 @@ import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
 import { I18nProvider, useI18n } from './i18n';
 import { hrefFor, routeForPath, useRoute } from './lib/router';
+import { probeRouter } from './lib/routerHealth';
 import { PrefsProvider, usePrefs } from './prefs';
 import { SettingsPanel } from './settings/SettingsPanel';
+import type { RealtimeProviderInfo } from './voice';
 import { Shell } from './shell/Shell';
 import { Sidebar } from './shell/Sidebar';
 import { TopBar } from './shell/TopBar';
@@ -35,6 +37,40 @@ function Product() {
   const [size, setSize] = useState<SizeReadout>({ sizeClass: 'laptop', widthEm: 80, widthPx: 1280 });
   const [rightOpen, setRightOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [realtimeProviders, setRealtimeProviders] = useState<RealtimeProviderInfo[] | null>(null);
+  const [routerOk, setRouterOk] = useState<boolean | null>(null);
+
+  // Probe the router once on load (3 s timeout); learn which voice providers it can mint.
+  useEffect(() => {
+    let cancelled = false;
+    void probeRouter().then(async (health) => {
+      if (cancelled) {
+        return;
+      }
+      setRouterOk(health.state === 'ok');
+      if (health.state !== 'ok') {
+        setRealtimeProviders([]);
+        return;
+      }
+      try {
+        const response = await fetch(`${health.url}/realtime/providers`);
+        const body = (await response.json()) as { providers: RealtimeProviderInfo[] };
+        if (!cancelled) {
+          setRealtimeProviders(body.providers);
+        }
+      } catch {
+        if (!cancelled) {
+          setRealtimeProviders([]);
+        }
+      }
+    });
+    const onOpenSettings = () => setSettingsOpen(true);
+    window.addEventListener('ft:open-settings', onOpenSettings);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('ft:open-settings', onOpenSettings);
+    };
+  }, []);
 
   useEffect(() => {
     installActionsRegistry();
@@ -150,6 +186,7 @@ function Product() {
       else if (key === 'l') run(toggleLang);
       else if (key === 'c') run(openCanvas);
       else if (key === 'k') run(() => setSettingsOpen((current) => !current));
+      else if (key === 'v') run(() => window.dispatchEvent(new CustomEvent('ft:voice-toggle')));
       else if (key === 'b') run(() => window.location.assign(`${import.meta.env.BASE_URL}pages/library.html`));
       else if (key === 'escape') {
         update({ leftOpen: false });
@@ -192,6 +229,10 @@ function Product() {
           dialectText: prefs.dialectText,
           payMode: prefs.payMode,
           modelTagger: prefs.modelTagger,
+          voiceProvider: prefs.voiceProvider,
+          voiceMode: prefs.voiceMode,
+          openSettings: () => setSettingsOpen(true),
+          realtimePrice: (provider) => realtimeProviders?.find((info) => info.id === provider)?.price ?? null,
         }}
       />
     );
@@ -248,6 +289,12 @@ function Product() {
               payMode={prefs.payMode}
               onPayMode={(mode) => set('payMode', mode)}
               onClose={() => setSettingsOpen(false)}
+              voiceProvider={prefs.voiceProvider}
+              onVoiceProvider={(id) => set('voiceProvider', id)}
+              voiceMode={prefs.voiceMode}
+              onVoiceMode={(mode) => set('voiceMode', mode)}
+              realtimeProviders={realtimeProviders}
+              routerOk={routerOk}
             />
           </>
         ),

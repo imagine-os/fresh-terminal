@@ -37,7 +37,15 @@ export function bindingsFromProcessEnv(): RouterBindings {
     'OPENROUTER_DEFAULT_MODEL',
     'OPENROUTER_JEV_MODEL',
     'ROUTER_ALLOWED_ORIGIN',
+    'ALLOWED_ORIGINS',
     'ROUTER_REFERER',
+    'ROUTER_USE_JEV',
+    'OPENROUTER_TAGGER_MODEL',
+    'OPENAI_API_KEY',
+    'OPENAI_REALTIME_MODEL',
+    'OPENAI_TRANSCRIBE_MODEL',
+    'GOOGLE_API_KEY',
+    'GEMINI_LIVE_MODEL',
   ];
   for (const key of keys) {
     const value = process.env[key];

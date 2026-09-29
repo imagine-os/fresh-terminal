@@ -99,7 +99,7 @@ const entry = table(
     /** Served model id for model calls ('' otherwise). */
     model: t.string(),
     units: t.u64(),
-    /** 'token_in' | 'token_out' | 'byte' | 'call' */
+    /** 'token_in' | 'token_out' | 'byte' | 'call' | 'second' */
     unit_kind: t.string(),
     cost_micro: t.u64(),
     price_micro: t.u64(),
@@ -249,7 +249,7 @@ export const set_on_chain = spacetimedb.reducer({ on_chain: t.bool() }, (ctx, { 
 });
 
 const ENTRY_KINDS = ['charge', 'credit', 'settle'];
-const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call'];
+const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call', 'second'];
 const HEX_64 = /^[0-9a-f]{64}$/;
 
 export const append_entry = spacetimedb.reducer(

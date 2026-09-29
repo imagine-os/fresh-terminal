@@ -1,5 +1,7 @@
 # Cloudflare Worker deployment of the same router code.
-#   pnpm dlx wrangler secret put OPENROUTER_API_KEY
+# Deployed by .github/workflows/router-deploy.yml when CLOUDFLARE_API_TOKEN exists, or by hand:
+#   cd terminal/router
+#   pnpm dlx wrangler secret put OPENROUTER_API_KEY   # and OPENAI_API_KEY, GOOGLE_API_KEY
 #   pnpm dlx wrangler deploy
 name = "fresh-terminal-router"
 main = "src/worker.ts"
@@ -7,4 +9,4 @@ compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-ROUTER_ALLOWED_ORIGIN = "*"
+ALLOWED_ORIGINS = "https://imagine-os.github.io,http://localhost:5173,http://localhost:4173"

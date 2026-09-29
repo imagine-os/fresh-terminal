@@ -12,7 +12,7 @@ export const CREDIT_MICRO = 10_000;
 export const ENTRY_KINDS = ['charge', 'credit', 'settle'] as const;
 export type EntryKind = (typeof ENTRY_KINDS)[number];
 
-export const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call'] as const;
+export const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call', 'second'] as const;
 export type UnitKind = (typeof UNIT_KINDS)[number];
 
 const integer = z.number().int().finite();

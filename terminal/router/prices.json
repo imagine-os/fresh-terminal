@@ -45,5 +45,18 @@
       "input_micro_per_million": 1000000,
       "output_micro_per_million": 5000000
     }
+  },
+  "realtime": {
+    "$comment": "Micro-dollars per minute of audio, in and out. ESTIMATES derived from published per-token audio prices (OpenAI gpt-realtime: $32/M audio input, $64/M audio output tokens at roughly 600 audio tokens per minute in, 1200 out; Gemini Live: $3/M audio input, $12/M audio output tokens at ~1920 tokens/min). Replace with measured usage; entries stay marked estimate until then.",
+    "gpt-realtime-2.1": {
+      "audio_in_micro_per_minute": 19200,
+      "audio_out_micro_per_minute": 76800,
+      "estimate": true
+    },
+    "gemini-3.8-live": {
+      "audio_in_micro_per_minute": 5760,
+      "audio_out_micro_per_minute": 23040,
+      "estimate": true
+    }
   }
 }

@@ -25,9 +25,12 @@ function LineBody({ line, fresh }: { line: Line; fresh: boolean }) {
   if (line.component && isComposition(line.component)) {
     const Component = COMPOSITIONS[line.component];
     return (
-      <Reveal pattern={fresh ? patternOf(line) : 'none'}>
-        <Component />
-      </Reveal>
+      <>
+        {line.kind === 'system' && line.text ? <div>{line.text}</div> : null}
+        <Reveal pattern={fresh ? patternOf(line) : 'none'}>
+          <Component />
+        </Reveal>
+      </>
     );
   }
   if (line.kind === 'user') {

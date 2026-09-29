@@ -1,0 +1,67 @@
+name: router-deploy
+
+# Deploys terminal/router to a Cloudflare Worker on every push to main, but only
+# when the repository secret CLOUDFLARE_API_TOKEN exists. Secrets never touch the
+# repo: they are read from GitHub Actions secrets and pushed to the Worker with
+# `wrangler secret put` over stdin.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'terminal/router/**'
+      - 'terminal/shared/**'
+      - '.github/workflows/router-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - id: gate
+        name: Check for a Cloudflare token
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "CLOUDFLARE_API_TOKEN is not set; skipping router deploy."
+          fi
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/checkout@v4
+      - if: steps.gate.outputs.ok == 'true'
+        uses: pnpm/action-setup@v4
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - if: steps.gate.outputs.ok == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.gate.outputs.ok == 'true'
+        name: Typecheck and test the router
+        run: pnpm -C terminal exec tsc -p router/tsconfig.json --noEmit && pnpm -C terminal exec vitest run router
+      - if: steps.gate.outputs.ok == 'true'
+        name: Deploy the Worker
+        working-directory: terminal/router
+        run: pnpm dlx wrangler@4 deploy
+      - if: steps.gate.outputs.ok == 'true'
+        name: Push Worker secrets from repository secrets
+        working-directory: terminal/router
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          for name in OPENROUTER_API_KEY OPENAI_API_KEY GOOGLE_API_KEY; do
+            value="${!name}"
+            if [ -n "$value" ]; then
+              printf '%s' "$value" | pnpm dlx wrangler@4 secret put "$name"
+              echo "set $name"
+            else
+              echo "skip $name (repository secret not set)"
+            fi
+          done

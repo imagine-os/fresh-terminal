@@ -6,9 +6,21 @@ export interface ModelPrice {
   output_micro_per_million: number;
 }
 
+export interface RealtimePrice {
+  /** Micro-dollars per minute of audio in / out. Estimates until usage arrives. */
+  audio_in_micro_per_minute: number;
+  audio_out_micro_per_minute: number;
+  estimate: boolean;
+}
+
 export interface PriceTable {
   default: ModelPrice;
   models: Record<string, ModelPrice>;
+  realtime?: Record<string, RealtimePrice>;
+}
+
+export function realtimePrice(model: string, table: PriceTable = loadPrices()): RealtimePrice | null {
+  return table.realtime?.[model] ?? null;
 }
 
 export interface Usage {
@@ -20,7 +32,7 @@ export interface Usage {
 }
 
 export function loadPrices(): PriceTable {
-  return pricesJson as PriceTable;
+  return pricesJson as unknown as PriceTable;
 }
 
 /** Cost in integer micro-dollars from OpenRouter usage, or the price table. */

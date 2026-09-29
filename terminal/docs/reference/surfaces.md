@@ -10,6 +10,7 @@ Honest status: most of this is planned. What exists is listed as such.
 ## API (router)
 
 - **Exists:** `GET /health` → `{ ok, product, version, keyConfigured }`; `GET /rules` → resolved route table plus `allowed_models`; `POST /route` `{ boxId, text, chips, history?, model? }` → SSE `meta` (`route`, `routing` = Jev decision or rules fallback) | `delta` | `error` | `done` (`usage`, `served_model`, `routing`, `entry`). 503 without a key, 400 for a bad body or an unlisted model. `POST /tag { text }` → `{ chips, model, ok, cost_micro, ref }` from the tagger tier.
+- **Realtime voice:** `GET /realtime/providers` → configured flags, models, estimated prices; `POST /realtime/session?provider=openai|gemini` → short-lived client credential (`value` + `sdp_url` for OpenAI WebRTC; `token` + `ws_url` for Gemini Live). 503 when the provider key is missing.
 - **Browser-direct (own key):** the same chat completion call from the browser (`app/src/lib/openrouterDirect.ts`); our router is not involved.
 - **Decisions (Jev):** `router/src/jev.ts` `decide()`, `routeIntent()`, `needsOwner()` over `POST https://openrouter.ai/api/alpha/decisions`.
 - **Planned:** `GET /ledger/:owner` once entries live in SpacetimeDB; enforcing `needsOwner()` once identities exist server-side.
