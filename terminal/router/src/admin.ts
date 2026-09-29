@@ -1,8 +1,10 @@
 import type { Context, Hono } from 'hono';
+import { verifyWebhook } from '@clerk/backend/webhooks';
 import { z } from 'zod';
 import { authenticate, type AuthResult, type TokenVerifier } from './auth';
 import { applyStarter, billingProvider, creditLimitMicro, sha256Hex, starterMicro, type CreditsBindings, type CreditsResources } from './credits';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
+import { canSeeContent } from './privacy';
 
 /**
  * Friend credits, the admin API and the payment hook (2026-09-29, C-086..C-088).
@@ -379,11 +381,13 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const grants = await db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(amount_micro),0) AS total FROM credit_grants').first<Json>();
     const invites = await db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN disabled = 0 AND uses < max_uses THEN 1 ELSE 0 END),0) AS open FROM invite_codes').first<Json>();
     const devices = await db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(spent_micro),0) AS spent, COALESCE(SUM(cost_micro),0) AS cost FROM anon_devices').first<Json>();
+    const privacy = await db.prepare('SELECT COALESCE(SUM(share_data),0) AS sharing, COALESCE(SUM(stored_bytes),0) AS stored_bytes FROM accounts').first<Json>();
     return c.json({
       accounts,
       grants,
       invites,
       devices,
+      privacy,
       billing: { provider: billingProvider(bindings), default_threshold_micro: 5_000_000, starter_micro: starterMicro(bindings), topup_amounts_usd: TOPUP_AMOUNTS_USD },
       admins: { ids: list(bindings.ADMIN_USER_IDS).length, emails: list(bindings.ADMIN_EMAILS).length, you_via: gate.via },
       max_grant_micro: maxGrantMicro(bindings),
@@ -468,24 +472,69 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     return c.json({ account: await accountView(gate.db, target.userId), email: target.email });
   });
 
+  // Numbers only (C-090): counts, money, bytes and the privacy flag. Never stage content or prompts.
   app.get('/admin/accounts', async (c) => {
     const gate = await requireAdmin(c);
     if (!gate.ok) return gate.response;
     const { results } = await gate.db
-      .prepare('SELECT id, clerk_user_id, grant_micro, spent_micro, cost_micro, billing_threshold_micro, billing_state, paid_micro, created_at, updated_at FROM accounts ORDER BY updated_at DESC LIMIT 100')
+      .prepare(
+        `SELECT a.id, a.clerk_user_id, a.grant_micro, a.spent_micro, a.cost_micro, a.billing_threshold_micro, a.billing_state, a.paid_micro, a.share_data, a.stored_bytes, a.created_at, a.updated_at,
+                (SELECT COUNT(*) FROM boxes b WHERE b.account_id = a.id AND b.deleted_at IS NULL) AS stages,
+                (SELECT COUNT(*) FROM ledger_entries l WHERE l.account_id = a.id) AS ledger_entries
+         FROM accounts a ORDER BY a.updated_at DESC LIMIT 100`,
+      )
       .all<Json>();
     return c.json({ accounts: results });
   });
 
+  // Credit lines are ours (grants, codes, top-ups) and always shown. Anything else is shown line by line only for
+  // accounts that share their data or granted access (scope ledger); every other account is one aggregate row.
   app.get('/admin/ledger', async (c) => {
     const gate = await requireAdmin(c);
     if (!gate.ok) return gate.response;
     const limit = Math.min(200, Math.max(1, Number(c.req.query('limit') ?? '50') || 50));
+    const now = options.now();
     const { results } = await gate.db
       .prepare('SELECT account_id, id, box_id, kind, what, model, cost_micro, price_micro, ref, created_at FROM ledger_entries ORDER BY created_at DESC LIMIT ?1')
       .bind(limit)
-      .all<Json>();
-    return c.json({ entries: results });
+      .all<{ account_id: string; id: string; kind: string; cost_micro: number; price_micro: number; created_at: number } & Json>();
+    const visible = new Map<string, boolean>();
+    const entries: Json[] = [];
+    const privateTotals = new Map<string, { account_id: string; entries: number; cost_micro: number; price_micro: number; last_at: number }>();
+    for (const entry of results) {
+      let open = entry.kind === 'credit' && String(entry.id).startsWith('srv_');
+      if (!open) {
+        if (!visible.has(entry.account_id)) visible.set(entry.account_id, (await canSeeContent(gate.db, entry.account_id, gate.userId, 'ledger', now)).ok);
+        open = visible.get(entry.account_id) === true;
+      }
+      if (open) {
+        entries.push(entry);
+        continue;
+      }
+      const total = privateTotals.get(entry.account_id) ?? { account_id: entry.account_id, entries: 0, cost_micro: 0, price_micro: 0, last_at: 0 };
+      total.entries += 1;
+      total.cost_micro += Number(entry.cost_micro);
+      total.price_micro += Number(entry.price_micro);
+      total.last_at = Math.max(total.last_at, Number(entry.created_at));
+      privateTotals.set(entry.account_id, total);
+    }
+    return c.json({ entries, private_totals: [...privateTotals.values()], note: 'Accounts that have not shared their data appear as totals only.' });
+  });
+
+  // An account's stage content: only when the person shares their data or granted access (C-090).
+  app.get('/admin/account-content', async (c) => {
+    const gate = await requireAdmin(c);
+    if (!gate.ok) return gate.response;
+    const userId = c.req.query('user_id') ?? '';
+    if (!/^user_[A-Za-z0-9]+$/.test(userId)) return c.json({ error: 'Send ?user_id=user_...' }, 400);
+    const accountId = accountIdFor(userId);
+    const access = await canSeeContent(gate.db, accountId, gate.userId, 'stages', options.now());
+    if (!access.ok) {
+      const counts = await gate.db.prepare('SELECT COUNT(*) AS stages FROM boxes WHERE account_id = ?1 AND deleted_at IS NULL').bind(accountId).first<Json>();
+      return c.json({ error: 'This account has not shared its data or granted you access. Only totals are available.', code: 'private', counts }, 403);
+    }
+    const { results } = await gate.db.prepare('SELECT id, name, state_json, updated_at FROM boxes WHERE account_id = ?1 AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT 100').bind(accountId).all<Json>();
+    return c.json({ access: access.why, stages: results });
   });
 
   // ----- signed-in, not admin -----
@@ -512,6 +561,8 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const auth = await who(c);
     if (auth.state !== 'signed-in') return c.json({ error: 'Sign in to add a payment method.', code: 'sign_in_required' }, 401);
     const bindings = options.bindings(c.env);
+    // Clerk Billing (C-092): checkout happens in Clerk's own components (the Billing tab of the profile); the app opens it.
+    if (billingProvider(bindings) === 'clerk') return c.json({ provider: 'clerk', open: 'user-profile-billing' });
     if (billingProvider(bindings) !== 'stripe' || !bindings.STRIPE_SECRET_KEY) {
       return c.json({ error: 'Top up / add payment is not wired yet. Your key still works.', code: 'not_wired' }, 501);
     }
@@ -543,6 +594,27 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     return c.json({ url: session.url, id: session.id });
   });
 
+  // Clerk Billing refill plans (C-092). A paid charge (checkout or monthly renewal) on a plan whose slug starts with
+  // CLERK_CREDIT_PLAN_PREFIX ("credit") credits its amount to the payer's ledger, once per payment attempt.
+  // Signature: Svix, checked by @clerk/backend's verifyWebhook. Not tested against live Clerk Billing yet.
+  app.post('/billing/clerk/webhook', async (c) => {
+    const bindings = options.bindings(c.env);
+    const db = options.resources(c.env).DB;
+    if (!bindings.CLERK_WEBHOOK_SIGNING_SECRET || !db) return c.json({ error: 'not wired yet', code: 'not_wired' }, 501);
+    let event: { type?: string; data?: ClerkPaymentAttempt };
+    try {
+      event = (await verifyWebhook(c.req.raw, { signingSecret: bindings.CLERK_WEBHOOK_SIGNING_SECRET })) as unknown as { type?: string; data?: ClerkPaymentAttempt };
+    } catch {
+      return c.json({ error: 'bad signature' }, 400);
+    }
+    const credit = clerkCreditFor(event, bindings.CLERK_CREDIT_PLAN_PREFIX ?? 'credit');
+    if (!credit) return c.json({ received: true, credited: false });
+    const seen = await db.prepare('SELECT id FROM credit_grants WHERE ref = ?1').bind(credit.ref).first();
+    if (seen) return c.json({ received: true, credited: false, duplicate: true });
+    await applyCredit(db, { clerkUserId: credit.userId, amountMicro: credit.amountMicro, source: 'topup', grantedBy: 'clerk-billing', note: `Clerk Billing ${credit.plan} (${credit.chargeType})`, ref: credit.ref }, options.now());
+    return c.json({ received: true, credited: true });
+  });
+
   app.post('/billing/stripe/webhook', async (c) => {
     const bindings = options.bindings(c.env);
     const db = options.resources(c.env).DB;
@@ -562,6 +634,29 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     await applyCredit(db, { clerkUserId: userId, amountMicro: cents * 10_000, source: 'topup', grantedBy: 'stripe', note: 'Stripe Checkout top-up', ref: session.id }, options.now());
     return c.json({ received: true, credited: true });
   });
+}
+
+export interface ClerkPaymentAttempt {
+  id?: string;
+  payment_id?: string;
+  status?: string;
+  charge_type?: string;
+  payer?: { user_id?: string };
+  totals?: { grand_total?: { amount?: number; currency?: string } };
+  subscription_items?: Array<{ plan?: { slug?: string } }>;
+}
+
+/** A paid Clerk Billing charge on a credit plan → what to credit, or null. Amounts are cents (USD only in Clerk Billing). */
+export function clerkCreditFor(event: { type?: string; data?: ClerkPaymentAttempt }, prefix: string): { userId: string; amountMicro: number; ref: string; plan: string; chargeType: string } | null {
+  const data = event.data;
+  if (event.type !== 'paymentAttempt.updated' || !data || data.status !== 'paid') return null;
+  const userId = data.payer?.user_id;
+  const cents = Number(data.totals?.grand_total?.amount ?? 0);
+  const currency = (data.totals?.grand_total?.currency ?? 'USD').toUpperCase();
+  const plan = (data.subscription_items ?? []).map((item) => item.plan?.slug ?? '').find((slug) => slug.startsWith(prefix));
+  const ref = data.id ?? data.payment_id;
+  if (!userId || !plan || !ref || !(cents > 0) || currency !== 'USD') return null;
+  return { userId, amountMicro: cents * 10_000, ref: `clerk:${ref}`, plan, chargeType: data.charge_type ?? 'checkout' };
 }
 
 export async function accountView(db: D1Database, clerkUserId: string): Promise<Json | null> {

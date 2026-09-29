@@ -213,3 +213,44 @@ describe('pass-through billing gate', () => {
     expect(credits.billing).toMatchObject({ state: 'active', paid_micro: 10_000_000, provider: 'stripe' });
   });
 });
+
+describe('Clerk Billing refill plans (C-092)', () => {
+  const secretBytes = new TextEncoder().encode('fresh-terminal-test-signing-key!');
+  const secret = `whsec_${btoa(String.fromCharCode(...secretBytes))}`;
+  async function signed(body: string) {
+    const id = 'msg_test_1';
+    const ts = String(Math.floor(Date.now() / 1000));
+    const key = await crypto.subtle.importKey('raw', secretBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${id}.${ts}.${body}`)));
+    return { 'svix-id': id, 'svix-timestamp': ts, 'svix-signature': `v1,${btoa(String.fromCharCode(...mac))}` };
+  }
+  const paid = (overrides: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      type: 'paymentAttempt.updated',
+      object: 'event',
+      data: { id: 'pa_1', status: 'paid', charge_type: 'checkout', payer: { user_id: 'user_friend' }, totals: { grand_total: { amount: 1000, currency: 'USD' } }, subscription_items: [{ plan: { slug: 'credit-10' } }], ...overrides },
+    });
+
+  it('is not wired without the signing secret, and says clerk once it is', async () => {
+    expect((await harness().call('/billing/clerk/webhook', { raw: '{}' })).status).toBe(501);
+    const h = harness({ BILLING_PROVIDER: 'clerk', CLERK_WEBHOOK_SIGNING_SECRET: secret });
+    const credits = (await h.call('/credits', { token: 'good-user_friend' })).body as unknown as CreditsStatus;
+    expect(credits.billing?.provider).toBe('clerk');
+    expect((await h.call('/billing/checkout', { token: 'good-user_friend', body: {} })).body).toMatchObject({ provider: 'clerk', open: 'user-profile-billing' });
+  });
+
+  it('credits a paid charge on a credit plan once, and ignores the rest', async () => {
+    const h = harness({ BILLING_PROVIDER: 'clerk', CLERK_WEBHOOK_SIGNING_SECRET: secret });
+    await h.call('/credits', { token: 'good-user_friend' });
+    expect((await h.call('/billing/clerk/webhook', { raw: paid(), headers: { 'svix-id': 'x', 'svix-timestamp': '1', 'svix-signature': 'v1,AAAA' } })).status).toBe(400);
+    const body = paid();
+    expect((await h.call('/billing/clerk/webhook', { raw: body, headers: await signed(body) })).body).toMatchObject({ credited: true });
+    expect((await h.call('/billing/clerk/webhook', { raw: body, headers: await signed(body) })).body).toMatchObject({ duplicate: true });
+    for (const other of [paid({ id: 'pa_2', status: 'failed' }), paid({ id: 'pa_3', subscription_items: [{ plan: { slug: 'pro' } }] })]) {
+      expect((await h.call('/billing/clerk/webhook', { raw: other, headers: await signed(other) })).body).toMatchObject({ credited: false });
+    }
+    const credits = (await h.call('/credits', { token: 'good-user_friend' })).body as unknown as CreditsStatus;
+    expect(credits.granted_micro).toBe(15_000_000);
+    expect(credits.billing).toMatchObject({ state: 'active', paid_micro: 10_000_000 });
+  });
+});

@@ -8,14 +8,16 @@ import { refreshCredits } from './useCredits';
  * and STRIPE_WEBHOOK_SECRET are set there, it answers 501 not_wired and this
  * says so. Invite codes land as credit on the signed-in account.
  */
-export type TopUpResult = { kind: 'redirect'; url: string } | { kind: 'not-wired' } | { kind: 'sign-in' } | { kind: 'error'; message: string };
+export type TopUpResult = { kind: 'redirect'; url: string } | { kind: 'clerk' } | { kind: 'not-wired' } | { kind: 'sign-in' } | { kind: 'error'; message: string };
 
 export async function startTopUp(amountUsd = 10): Promise<TopUpResult> {
   try {
     const response = await routerFetch('/billing/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount_usd: amountUsd }) });
-    const body = (await response.json().catch(() => ({}))) as { url?: string; code?: string; error?: string };
+    const body = (await response.json().catch(() => ({}))) as { url?: string; code?: string; error?: string; provider?: string };
     if (response.status === 401) return { kind: 'sign-in' };
     if (response.status === 501 || body.code === 'not_wired') return { kind: 'not-wired' };
+    // Clerk Billing (C-092): the refill plans live in the Billing tab of Clerk's profile window.
+    if (response.ok && body.provider === 'clerk') return { kind: 'clerk' };
     if (response.ok && body.url && /^https:\/\/checkout\.stripe\.com\//.test(body.url)) return { kind: 'redirect', url: body.url };
     return { kind: 'error', message: body.error ?? `HTTP ${response.status}` };
   } catch (error) {

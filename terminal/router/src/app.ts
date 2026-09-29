@@ -23,6 +23,8 @@ import type { ChatMessage } from './openrouter';
 import { tagWithModel } from './tagger';
 import { mountSkinRoutes } from './skins';
 import { mountAdminRoutes, type AdminBindings } from './admin';
+import { mountPrivacyRoutes } from './privacy';
+import { measureStorage } from './storage';
 import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
 import { authenticate, clerkConfigured, type TokenVerifier } from './auth';
@@ -190,6 +192,8 @@ export function createApp(options: CreateAppOptions) {
   mountCreditRoutes(app as never, meterOptions);
   // Friend credits (admin grants, invite codes), the admin API for the hub, and the payment hook (router/src/admin.ts).
   mountAdminRoutes(app, meterOptions);
+  // Privacy by default: share_data and access grants (router/src/privacy.ts, C-090).
+  mountPrivacyRoutes(app, meterOptions);
 
   const resourcesFor = (env: unknown): RouterResources => options.resources?.(env) ?? ((env ?? {}) as RouterResources);
   const now = () => (options.now ?? Date.now)();
@@ -256,7 +260,9 @@ export function createApp(options: CreateAppOptions) {
     if (!who.ok) return c.json(who.body, who.status);
     const parsed = pushBoxesSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: 'Invalid body', issues: parsed.error.issues.slice(0, 5) }, 400);
-    return c.json(await pushBoxes(who.db, who.account.id, parsed.data.boxes, now()));
+    const result = await pushBoxes(who.db, who.account.id, parsed.data.boxes, now());
+    await measureStorage(who.db, who.account.id, now()); // C-091: storage is measured on every write
+    return c.json(result);
   });
 
   app.get('/sync/ledger', async (c) => {
@@ -272,6 +278,7 @@ export function createApp(options: CreateAppOptions) {
     const parsed = pushEntriesSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: 'Invalid body', issues: parsed.error.issues.slice(0, 5) }, 400);
     const written = await pushEntries(who.db, who.account.id, parsed.data.entries, now());
+    await measureStorage(who.db, who.account.id, now());
     return c.json({ received: parsed.data.entries.length, written, server_time: now() });
   });
 

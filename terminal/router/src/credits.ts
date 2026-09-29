@@ -2,6 +2,7 @@ import type { Context, MiddlewareHandler } from 'hono';
 import { DEVICE_HEADER, SOFT_PROMPT_HEADER, type AccountBilling, type BillingState, type CreditsError, type CreditsErrorCode, type CreditsStatus } from '../../shared/src/credits/types';
 import { authenticate, type AuthBindings, type TokenVerifier } from './auth';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
+import { measureStorage } from './storage';
 
 /**
  * Free credits, enforced here and nowhere else (2026-09-29).
@@ -47,6 +48,11 @@ export interface CreditsBindings extends AuthBindings {
   /** Stripe Checkout top-ups (C-086). Both set = the "Top up / add payment" button is wired. */
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
+  /** Clerk Billing refill plans (C-092): "clerk" plus the Clerk webhook signing secret switch it on. */
+  BILLING_PROVIDER?: string;
+  CLERK_WEBHOOK_SIGNING_SECRET?: string;
+  /** Only paid Clerk plans whose slug starts with this credit the ledger (default "credit"). */
+  CLERK_CREDIT_PLAN_PREFIX?: string;
 }
 
 export interface RateLimiter {
@@ -68,10 +74,10 @@ export const CREDIT_DEFAULTS = {
   chances: 2,
   /** $2 of provider cost per UTC day across all anonymous devices. */
   anonDailyCostCapMicro: 2_000_000,
-  /** $1 of free usage (price) per signed-in account per UTC day. */
-  accountDailyMicro: 1_000_000,
-  /** $10 of provider cost per UTC day across all signed-in accounts on free usage. */
-  accountDailyTotalCostMicro: 10_000_000,
+  /** Per-account daily cap on free usage: off (0) since C-090 ("no daily cap . just $5 on us"). ACCOUNT_DAILY_MICRO turns it back on. */
+  accountDailyMicro: 0,
+  /** Hidden circuit breaker (C-090): $25 of provider cost per UTC day across all signed-in accounts on free usage. 0 = off. */
+  accountDailyTotalCostMicro: 25_000_000,
   /** The $5 starter kit per signed-in account (C-089; was $1). ACCOUNT_STARTER_USD sets it. */
   accountGrantMicro: 5_000_000,
   /** A call needs at least 1¢ left to start. */
@@ -228,6 +234,7 @@ export function creditLimitMicro(row: Pick<AccountCreditRow, 'grant_micro' | 'bi
 }
 
 export function billingProvider(bindings: CreditsBindings): AccountBilling['provider'] {
+  if (bindings.BILLING_PROVIDER === 'clerk' && bindings.CLERK_WEBHOOK_SIGNING_SECRET) return 'clerk';
   return bindings.STRIPE_SECRET_KEY && bindings.STRIPE_WEBHOOK_SECRET ? 'stripe' : 'not-wired';
 }
 
@@ -263,6 +270,15 @@ async function accountDaily(db: D1Database, accountId: string, now: number): Pro
 }
 
 export const DAILY_FREE_USAGE_REACHED = 'Daily free usage reached. It resets at 00:00 UTC, or use your key.';
+/** The all-accounts circuit breaker (C-090) is not advertised; this is what a caller sees if it trips. */
+export const FREE_USAGE_PAUSED = 'Free usage is paused for the rest of the day (UTC). Your key still works.';
+
+/** Per-account cap (off by default) and the all-accounts breaker; 0 turns either off. */
+function dailyCapHit(daily: { mine: number; allCost: number }, config: CreditConfig): 'mine' | 'all' | null {
+  if (config.accountDailyMicro > 0 && daily.mine >= config.accountDailyMicro) return 'mine';
+  if (config.accountDailyTotalCostMicro > 0 && daily.allCost >= config.accountDailyTotalCostMicro) return 'all';
+  return null;
+}
 
 async function accountCredits(db: D1Database, clerkUserId: string, now: number, config: CreditConfig): Promise<AccountCreditRow> {
   await ensureAccount(db, clerkUserId, now);
@@ -488,9 +504,9 @@ export function meter(options: MeterOptions): MiddlewareHandler {
       // Daily caps for signed-in free usage (your key goes browser -> OpenRouter and is never capped).
       // An account that has paid (billing_state active) spends its own money and is not capped.
       if (payer.row.billing_state !== 'active') {
-        const daily = await accountDaily(db, payer.id, now);
-        if (daily.mine >= config.accountDailyMicro || daily.allCost >= config.accountDailyTotalCostMicro) {
-          return deny(c, 402, 'account_daily_cap', DAILY_FREE_USAGE_REACHED, statusFor(payer, config, true, bindings));
+        const hit = dailyCapHit(await accountDaily(db, payer.id, now), config);
+        if (hit) {
+          return deny(c, 402, 'account_daily_cap', hit === 'mine' ? DAILY_FREE_USAGE_REACHED : FREE_USAGE_PAUSED, statusFor(payer, config, true, bindings));
         }
       }
     } else {
@@ -558,8 +574,11 @@ export function mountCreditRoutes(app: { get: (path: string, handler: (c: Contex
     let cap = false;
     if (payer.kind === 'device') cap = (await dailyAnonCost(db, options.now())) >= config.anonDailyCostCapMicro;
     if (payer.kind === 'account') {
-      const daily = await accountDaily(db, payer.id, options.now());
-      cap = daily.mine >= config.accountDailyMicro || daily.allCost >= config.accountDailyTotalCostMicro;
+      cap = dailyCapHit(await accountDaily(db, payer.id, options.now()), config) !== null;
+      // C-091: what this account stores with us (measured; billing above 100 MB is not wired).
+      const storage = await measureStorage(db, payer.id, options.now());
+      const share = await db.prepare('SELECT share_data FROM accounts WHERE id = ?1').bind(payer.id).first<{ share_data: number }>();
+      return c.json({ ...statusFor(payer, config, cap, bindings), storage, share_data: Number(share?.share_data ?? 0) === 1 });
     }
     return c.json(statusFor(payer, config, cap, bindings));
   });

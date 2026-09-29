@@ -25,6 +25,12 @@ ADMIN_USER_IDS = ""
 SITE_URL = "https://freshterminal.ai"
 # The signed-in starter kit in dollars (C-089). It is also the pass-through threshold: once it is spent, paying starts.
 ACCOUNT_STARTER_USD = "5"
+# Payments (C-092): Clerk Billing refill plans, switched on only when the CLERK_WEBHOOK_SIGNING_SECRET Worker secret exists.
+BILLING_PROVIDER = "clerk"
+# No per-account daily cap (C-090: "no daily cap . just $5 on us"); ACCOUNT_DAILY_MICRO would turn one back on.
+# Hidden circuit breaker: $25 of provider cost per UTC day across all signed-in accounts on free usage.
+# Not advertised. Justin can remove it by setting "0".
+ACCOUNT_DAILY_TOTAL_COST_MICRO = "25000000"
 
 [[d1_databases]]
 binding = "DB"

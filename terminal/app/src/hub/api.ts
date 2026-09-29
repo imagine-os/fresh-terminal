@@ -43,8 +43,8 @@ export function hubSession(token: TokenFn): Promise<{ admin: boolean; userId: st
   return send(`/hub/api/session`, token);
 }
 
-export function admin<T>(path: string, token: TokenFn, body?: unknown): Promise<T> {
-  return send<T>(`${HUB_ROUTER_URL}${path}`, token, body === undefined ? {} : { method: 'POST', body: JSON.stringify(body) });
+export function admin<T>(path: string, token: TokenFn, body?: unknown, method: 'POST' | 'PUT' = 'POST'): Promise<T> {
+  return send<T>(`${HUB_ROUTER_URL}${path}`, token, body === undefined ? {} : { method, body: JSON.stringify(body) });
 }
 
 export function usd(micro: number | undefined | null, digits = 2): string {

@@ -62,7 +62,7 @@ export function TopBar(props: Props) {
   const credits = useCredits();
   const { toast } = useToast();
   // C-086: wired only when the router says a payment provider is connected.
-  const paymentsWired = credits.status?.billing?.provider === 'stripe';
+  const paymentsWired = credits.status?.billing?.provider === 'stripe' || credits.status?.billing?.provider === 'clerk';
   const onTopUp = async () => {
     if (!account.signedIn) {
       toast(t('billing.signInFirst'));
@@ -72,7 +72,8 @@ export function TopBar(props: Props) {
     if (result.kind === 'redirect') {
       toast(t('billing.opening'));
       window.location.assign(result.url);
-    } else if (result.kind === 'not-wired') toast(t('billing.notWired'));
+    } else if (result.kind === 'clerk') window.dispatchEvent(new CustomEvent('ft:action', { detail: { id: 'billing.open' } }));
+    else if (result.kind === 'not-wired') toast(t('billing.notWired'));
     else if (result.kind === 'sign-in') toast(t('billing.signInFirst'));
     else toast(result.message);
   };

@@ -25,7 +25,7 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | api.freshterminal.ai (same router, custom domain) | https://api.freshterminal.ai/health | 2026-09-29, infra pass (C-064) |
 | Sign in (Clerk development instance) and cloud sync (D1) | Header **Sign in** button on freshterminal.ai and on Pages | 2026-09-29, infra pass (C-065, C-066) |
 | Free credits, enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day signed-out cap) | `GET https://api.freshterminal.ai/credits`; live check in changelog 0008 | 2026-09-29 (C-074) |
-| $5 starter kit per signed-in account (C-089), which is also the pass-through threshold (past it `402 payment_required`), friend credits and invite codes | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
+| $5 starter kit per signed-in account (C-089), no per-account daily cap (C-090), which is also the pass-through threshold (past it `402 payment_required`), friend credits and invite codes; privacy by default (`share_data` off, access grants, admin sees totals only; C-090); storage measured per account (100 MB free, not billed; C-091) | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
 | The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-088) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |

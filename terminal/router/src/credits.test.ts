@@ -189,16 +189,23 @@ describe('signed-in daily caps', () => {
     const capped = await h.call('/paid/json?cost=1', { token: 'good-user_c' });
     expect(capped.status).toBe(402);
     expect(capped.body.code).toBe('account_daily_cap');
+    expect(capped.body.error).toBe('Free usage is paused for the rest of the day (UTC). Your key still works.');
     const { token } = await h.newDevice();
     expect((await h.call('/paid/json?cost=1', { device: token })).status).toBe(200);
   });
 
-  it('defaults to $1 per account and $10 across accounts per day', async () => {
+  it('has no per-account daily cap by default (C-090) and a hidden $25 all-accounts breaker', async () => {
     const db = fakeD1();
     const app = createApp({ bindings: () => ({ DEVICE_SIGNING_KEY: KEY }), resources: () => ({ DB: db }) });
     const health = (await (await app.request('/health')).json()) as { credits: { accountDailyMicro: number; accountDailyTotalCostMicro: number } };
-    expect(health.credits.accountDailyMicro).toBe(1_000_000);
-    expect(health.credits.accountDailyTotalCostMicro).toBe(10_000_000);
+    expect(health.credits.accountDailyMicro).toBe(0);
+    expect(health.credits.accountDailyTotalCostMicro).toBe(25_000_000);
+    // One account can use more than $1 in a day of its $5 starter kit.
+    const h = harness();
+    expect((await h.call('/paid/json?cost=3000000', { token: 'good-user_big' })).status).toBe(200);
+    expect((await h.call('/paid/json?cost=1000000', { token: 'good-user_big' })).status).toBe(200);
+    const status = (await h.call('/credits', { method: 'GET', token: 'good-user_big' })).body as unknown as CreditsStatus;
+    expect(status).toMatchObject({ spent_micro: 4_000_000, daily_cap_reached: false });
   });
 });
 

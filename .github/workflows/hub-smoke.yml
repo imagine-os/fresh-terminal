@@ -91,7 +91,8 @@ jobs:
 
           printf '%s' "$admin" | npx --yes wrangler@4 secret put ADMIN_USER_IDS_SMOKE --name fresh-terminal-router > /dev/null
           echo "smoke admin id set on the router"
-          for i in $(seq 1 20); do r=$(call "$sa" GET "$API/admin/whoami"); [ "$(status "$r")" = "200" ] && break; sleep 3; done
+          # A new Worker secret reaches every location within seconds, not at once: wait for the router and for the site's path to it.
+          for i in $(seq 1 30); do r=$(call "$sa" GET "$API/admin/whoami"); r2=$(call "$sa" GET "$SITE/hub/api/session"); [ "$(status "$r")" = "200" ] && [ "$(status "$r2")" = "200" ] && break; sleep 3; done
           echo "admin /admin/whoami: HTTP $(status "$r") $(body "$r" | jq -c '{admin, via}')"
           r=$(call "$sa" GET "$SITE/hub/api/session"); echo "admin /hub/api/session: HTTP $(status "$r")"
           r=$(call "$sa" GET "$SITE/hub/data/library.json"); echo "admin /hub/data/library.json: HTTP $(status "$r") $(body "$r" | jq -c '{prompts: (.prompts|length), canon: (.canon|length), records: (.records|length)}')"

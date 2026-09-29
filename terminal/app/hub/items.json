@@ -185,10 +185,12 @@
       "name": "Pass-through billing",
       "status": "not wired",
       "href": "#credits",
-      "about": "$5 starter kit per account, then pass-through (402 payment_required); paying needs the Stripe keys: not wired yet.",
+      "about": "$5 starter kit per account, no daily cap, then pass-through (402 payment_required); your key: $0 for models, storage over 100 MB metered (not billed). Paying needs the Stripe keys: not wired yet.",
       "canon": [
         "C-086",
-        "C-089"
+        "C-089",
+        "C-090",
+        "C-091"
       ]
     },
     {
@@ -200,10 +202,13 @@
     },
     {
       "id": "privacy-e2e",
-      "name": "Customer data privacy (end-to-end encryption)",
-      "status": "planned",
+      "name": "Privacy",
+      "status": "in progress",
       "href": "/wiki/canon/open-questions.html",
-      "about": "Open question 19: today the owner can read stages, the ledger and credits (D1) and identities (Clerk). Should user content be unreadable even to us, and which data?"
+      "about": "Live: data is private from us by default (share_data off, access grants, admin sees totals only; C-090). Next: encryption with a key the person holds (open question 19).",
+      "canon": [
+        "C-090"
+      ]
     }
   ]
 }

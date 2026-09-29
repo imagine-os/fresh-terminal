@@ -719,3 +719,23 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** Split. This pass took the starter kit and the privacy question: C-089, a $5 starter kit per signed-in account that is also the pass-through threshold, `GET /credits` returns `granted` and the label "starter kit" for "of $5 starter kit"; open question 19 on end-to-end encryption, linked from the hub (changelog 0014). Justin's session took the rest (top bar, tray, mobile, Actions, voice, the currency switch, the SpacetimeDB answer).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657599.470899
+
+## 82. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
+
+> no daily cap . just $5 on us.
+>
+> Of note, even with openrouter key supplied by then we have other basic costs like their data storegae if its alot.
+>
+> spacetimedb is important or at least real time db is because if they're logged into multiple devices of their own they need to stay in sync. Also we will need good handling if theyre not online and put in a prompt that may or may not meant to be going through late.r thats important.
+>
+> they can have a cehckbox to share their data with us or not. But of course they need to be able to have that checked off by default and know their data is private from us unless chosen to share. Unless we add them personally as a client, then we shouldnt have acess to their data unless they grant it to us.
+
+**What happened:** C-090 and C-091 (Opus 5.5, changelog 0014). No per-account daily cap: $5 on us, then pay as you go; the all-accounts cap stays only as a hidden $25/day breaker Justin can remove. Your key pays $0 for models, and storage above 100 MB per account is metered (about $0.05/GB-month, not final, not billed yet). `share_data` is off by default with a toggle in Settings and the hub; access grants cover "add as a client"; admin endpoints show totals only unless the person shares or grants. The realtime sync and offline-prompt points went to open question 19's neighbours and Justin's session (SpacetimeDB is still waiting on its token).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658094.470499
+
+## 83. Tue Sep 29, 12:09 AM CDT · 2026-09-29 05:09:13 UTC
+
+> can we use clerk billing please? or is stripe already necessary for this
+
+**What happened:** C-092 (Opus 5.5, changelog 0014). Checked on Clerk's pages: yes, Clerk Billing, and a Stripe account is still needed for real money (Clerk uses Stripe only for processing; you connect it once inside Clerk; development runs on Clerk's shared test gateway with no Stripe account). Clerk Billing sells plans, not one-off top-ups, so pass-through runs as monthly "credit" refill plans: each paid charge lands on the ledger through the Clerk webhook. Built, not wired until the webhook secret exists.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658553862549?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658553.862549

@@ -64,6 +64,8 @@ function ClerkBridge({ children }: { children: ReactNode }) {
       if (id === 'auth.signIn') clerk.openSignIn({ appearance: currentClerkAppearance() });
       if (id === 'auth.signOut') void clerk.signOut();
       if (id === 'sync.now') void engine.current?.sync();
+      // C-092: Clerk Billing's refill plans live in the profile window's Billing tab.
+      if (id === 'billing.open') clerk.openUserProfile({});
     };
     window.addEventListener('ft:action', onAction);
     return () => window.removeEventListener('ft:action', onAction);
