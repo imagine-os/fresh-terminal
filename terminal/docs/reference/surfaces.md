@@ -25,10 +25,14 @@ Honest status: most of this is planned. What exists is listed as such.
 - **Exists (unpublished):** tables and reducers in `terminal/module/src/index.ts`, including pass 4's `nav_item`, `page`, `box_ui`, `glossary_term`, `edit_batch` and `line.blocks_json` with owner-checked reducers. Once published, the generated client bindings are the data API (`DbConnection`, `useTable`). Canon C-047 (2026-09-29): account data goes to Cloudflare D1 behind the router first; SpacetimeDB stays for multiplayer and presence.
 - **Planned:** a procedure that calls OpenRouter from inside the module (procedures may make HTTP calls), which would let the module write `entry` rows directly.
 
+## Docs (wiki)
+
+- **Exists (pass 4):** the wiki at https://imagine-os.github.io/fresh-terminal/wiki/ (HTML), each page also as Markdown next to it (`/wiki/<path>.md`), and `llms.txt` at https://imagine-os.github.io/fresh-terminal/llms.txt and `/wiki/llms.txt`. Built by `scripts/build-wiki.ts` from `terminal/docs` on every Pages deploy.
+
 ## CLI
 
 - **Exists:** `pnpm dev`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm check:responsive`, `pnpm -C terminal verify:chain [file]`, `pnpm -C terminal ledger:sample`, `pnpm -C terminal start:router`, `pnpm -C terminal canvas:add --title --href --kind [--thickness]`.
-- **Planned:** a `fresh` CLI that speaks the dialect (`fresh shell "Left sidebar: rail on laptop"`), and `spacetime publish` / `generate` wired into scripts once the module is published.
+- **Planned:** a `fresh` CLI that speaks the dialect (`fresh do "…"`, `fresh shell "Left sidebar: rail on laptop"`; proposed in Canon C-053), and `spacetime publish` / `generate` wired into scripts once the module is published.
 
 ## MCP (server)
 

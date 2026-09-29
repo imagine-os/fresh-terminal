@@ -6,7 +6,7 @@ How to read this page:
 
 - **Id**: `C-###` is a Canon id. When a decision changed, the versions share a number with a letter (C-004a, C-004b, C-004c). The last letter is the current one.
 - **Date**: UTC. Justin's local time is CDT (UTC−5), so anything before 05:00 UTC on 2026-09-29 was still the evening of 2026-09-28 for him.
-- **Status**: `current`, `superseded by C-###`, `proposed` (agreed, not built), or `open` (not decided; see [open-questions.md](open-questions.md)).
+- **Status**: `current`, `superseded by C-###`, `proposed` (answered in Slack as a plan; Justin has not decided and nothing is built), or `open` (not decided; see [open-questions.md](open-questions.md)). Until 2026-09-29 02:00 UTC `proposed` also meant "agreed, not built"; entries from before then keep their wording.
 - **Repo file**: the numbered decision in `imagine-os/fresh-terminal`, under `terminal/docs/decisions/`, when one exists. Those files are append-only; this page is the summary across all of them.
 - When sources disagree, the newer one wins and the older one is marked superseded.
 
@@ -254,6 +254,7 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Status: current. Whether the token has those scopes is not verified here.
 
 **C-047 · 2026-09-29 · Account data moves to Cloudflare D1 behind the router**
+- 2026-09-29 02:07: proposal C-050 would publish SpacetimeDB now instead, once Justin adds `SPACETIMEDB_TOKEN`. Until he decides, this entry stands.
 - Decided: boxes, glossary, ledger, nav and pages are stored in Cloudflare D1, reached through the router, instead of publishing to SpacetimeDB now.
 - Why: avoids another sign-up; the router already runs on Cloudflare.
 - SpacetimeDB stays the plan for live multiplayer and presence.
@@ -277,6 +278,55 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
   - Comments attach to any record.
 - Alternative noted: Cloudflare Durable Objects, if Justin prefers not to sign in to SpacetimeDB.
 - Status: current as the direction. Not built yet. Records carry ids and `updated_at` today; version numbers, leases and presence come with multiplayer.
+
+## Proposed 2026-09-29 (answered in Slack 02:07–02:11 UTC, not decided)
+
+These are plans Claude answered with. Justin has not decided them, and none is built. Facts about outside services below were read from their pages on 2026-09-29 and not tested by us unless a line says so.
+
+**C-050 · 2026-09-29 02:07 · Publish SpacetimeDB to Maincloud from CI**
+- Asked: "Get the skills you need for spacetimedb please. and give me link as needed and directions to sign up and get you going." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647341270939?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: Justin installs the CLI, runs `spacetime login`, then `spacetime login show --token`, and saves the token as the Actions secret `SPACETIMEDB_TOKEN` (name only; never the value in Slack or the repo).
+- Proposed: GitHub Actions runs `spacetime login --token` and then `spacetime publish fresh-terminal --server maincloud`. The app connects to `https://maincloud.spacetimedb.com`, database `fresh-terminal`. Maincloud scales to zero when idle.
+- Proposed: vendor the skills pack https://github.com/DanMossa/spacetimedb-skills into the repo so every agent reads it (https://github.com/douglance/stdb-skills as a second reference).
+- Proposed: the pointer presence row (who, cursor, focus from C-049) goes live once the module is published.
+- Status: proposed. The token is an open item, waiting on Justin. Conflicts with C-047 (account data in D1 first) if adopted; see [open-questions.md](open-questions.md).
+
+**C-051 · 2026-09-29 02:07 · Media: bytes in Cloudflare R2, one row per file in SpacetimeDB**
+- Asked: "where is all my media being stored? and does that stay realtime as well?" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647396138619?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Fact (2026-09-29): no media is stored server-side today. Canvas image upload is not wired; the koi pond and library use files shipped with the site.
+- Proposed: file bytes go to Cloudflare R2 under freshterminal.ai; each file's record (owner, box, type, size, where) is a row in SpacetimeDB, so lists and changes stay live.
+- Status: proposed.
+
+**C-052 · 2026-09-29 02:07 · Browsers: streamed, not iframes**
+- Asked: "I want logged in browsers built into my window management system … the one thing i would like to avoid though is lag … too many things block iframes" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647506492349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Why: many sites refuse to load inside an iframe.
+- Proposed: streamed browsers. Hyperbeam for windows people use; Browserbase or our own Fly.io machine for agents.
+- Status: proposed. Lag not measured by us.
+
+**C-053 · 2026-09-29 02:07–02:09 · Integrations: a ladder Jev chooses from; one registry exposes everything**
+- Asked: plug Slack, Claude, ChatGPT, Cursor, Grok and Muse in, use Pro/Max credits, and "consider how WebMCP or any other api, cli, mcp, skills, plugins, or whatever protocal is necessary" ([message 1](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647341270939?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [message 2](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647710134419?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply 1](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply 2](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647779666479?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Correction recorded: Jev doesn't click. It returns decisions only. A runtime (Playwright in the agent browser) lists candidates, Jev picks one, the runtime clicks or types. Reading pages and writing text route to Flash-Lite; judgment routes to Claude.
+- Keys move by API, never by screen: GitHub secrets, Cloudflare, Clerk and OpenRouter all have APIs. The browser is the last resort, and then the key comes from a vault and is never shown to a model.
+- The ladder, top first: API, then CLI, then MCP, then WebMCP, then browser. Jev picks the rung and the target from a routing table that is a record, editable from the box.
+- WebMCP, as reported on 2026-09-29 and **not verified by us**: a W3C Community Group draft; Chrome 146 behind a flag; a public origin trial in 149; the entry point is `document.modelContext` since 150 (was `navigator.modelContext`). Plan: expose our tools through it, and use it on other sites only when present.
+- Fresh Terminal exposes, all generated from the one action registry: an MCP server, a CLI (`fresh do "…"`), a `SKILL.md` pack, a webhook (how Slack gets in), and WebMCP tools in the page.
+- Plans: a Claude Pro/Max plan can be used through Agent SDK sign-in ("Sign in with Claude"), per Anthropic's help page read 2026-09-29. ChatGPT, Cursor and Grok plans can't be used from outside their apps yet; they connect as MCP clients or with API keys.
+- Live input: the pointer is a presence row; webcam follow uses in-browser face landmarks targeting the pointer row; AI characters use a parameter plus state-machine model (the same idea as our illustration runtime, C-017b).
+- Status: proposed.
+
+**C-054 · 2026-09-29 02:10 · Recipes: tasks get cheaper every run**
+- Asked: "every time it figures out how to do things it will then figure out how to do those thigns faster and faster until it reaches the most efficient path" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647778785799?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647843929359?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: a first run is recorded as a trace; the trace becomes a recipe; the recipe replays with Jev checking each step; after N clean runs it replays as plain code with no model calls. When a recipe stops getting cheaper, the best-of-3 loop (C-031) tries variants.
+- Proposed: each recipe splits into a shareable **shape** (steps, calls, rung choices, checks; no values) and a private **binding** (tenant, credentials, ids, personal data). Private by default. Sharing needs a secret scan, a Jev check ("contains no tenant-specific data") and the owner's approval.
+- Proposed: recipes are their own pass, after SpacetimeDB is live.
+- Status: proposed.
+
+## Rules for the docs
+
+**C-055 · 2026-09-29 02:11 · Keep the wiki and the Canon current, as a rule**
+- Justin: "are you keeping and updating your documentation wiki? please do as a rule. very human and ai readable" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647944459239?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: the Canon and the docs wiki (`terminal/docs`) are updated in the same commit as every pass. Plain dated lines, one fact per line. Superseded lines are kept and marked, never deleted. Each page links to the Slack message that caused it. One start-here index (`terminal/docs/README.md`) and an `llms.txt` for AI readers; the same pages serve people and agents.
+- Status: current (a rule from Justin). Written into the root README and [README.md](README.md). Repo prompt: 0015.
 
 ## Principles recorded as decisions
 

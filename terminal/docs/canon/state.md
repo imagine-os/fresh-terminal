@@ -17,7 +17,8 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | Audit and rebuild recommendation | https://imagine-os.github.io/fresh-terminal/pages/audit.html | 2026-09-28 |
 | Old themes page | `/pages/themes.html`, now redirects to the library | 2026-09-29 |
 | Router | https://fresh-terminal-router.jmassion.workers.dev (Cloudflare Worker) | 2026-09-29 01:13 UTC |
-| Repo | https://github.com/imagine-os/fresh-terminal, `main` at 1d77c83 | 2026-09-29 01:13 UTC |
+| Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
+| Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |
 
 Superseded copies: the audit and themes were first published as Claude artifacts (https://claude.ai/artifact/L8MipNPfHdVDzCNCf6ernn and https://claude.ai/artifact/NxgFUdxJ9tgu4SXGwhuKeN, 2026-09-28). The GitHub Pages copies above are the current ones.
 
@@ -26,13 +27,14 @@ Superseded copies: the audit and themes were first published as Claude artifacts
 - Type a prompt and the reply streams back through our key. Jev picks the route; Claude Haiku 4.5 answers. The first live test replied in about 1.5 seconds and cost 148 micro-dollars (about 0.015 cents). The balance in the top bar ticks up.
 - Bring your own OpenRouter key (press `K`). It stays in your browser.
 - Chips and starter suggestions. Superseded by pass 4: the model tagger is on by default, chips can be clicked to set a type, and each box has a glossary.
-- Pass 4 (pushed 2026-09-29): the terminal edits itself. Prompts change the sidebar menu (nested), pages, layout, theme and styles through undoable ops; replies are structured with a header line and an Undo button. Live results are recorded in changelog 0004 and the pass 4 report.
+- Pass 4 (live 2026-09-29): the terminal edits itself. Prompts change the sidebar menu (nested), pages, layout, theme and styles through undoable ops; replies are structured with a header line and an Undo button. Checked live 2026-09-29 about 02:15 UTC: the nested Projects menu (Koi Pond, Library) applied, opened the right pages, undid and redid; "rename Projects to Work", "make the sidebar a rail on laptop" and "switch to Glass Window" applied; the Hoy chips and a structured reply rendered. Four model turns cost $0.0437. Details: changelog 0004.
+- Found and fixed live 2026-09-29: the Sonnet 5.5 retry failed on Amazon Bedrock (`tool_choice` "any" not supported); rounds now fall back to `auto` (commit 5fccf07).
 - Three themes: Void (default), Blank Page, Glass Window. `T` cycles.
 - CRT "Draw" reveal, with demo drawings made from our own parts.
 - Ledger with a verifiable hash chain and an opt-in shared chain, in the browser.
 - Voice with a live transcript through browser speech (press `V` or the mic).
 - English and Spanish.
-- Checks: typecheck, 96 tests, build, and 21 responsive checks from 360 to 3840 wide. CI, Pages and router-deploy workflows green. Pass 4: 126 tests, 21/21 responsive.
+- Checks: typecheck, 96 tests, build, and 21 responsive checks from 360 to 3840 wide. CI, Pages and router-deploy workflows green. Pass 4: 132 tests, 21/21 responsive.
 
 ### Commits
 
@@ -77,6 +79,8 @@ As of 2026-09-29:
 | --- | --- |
 | **Pass 4: self-editing, chips v2, structured replies, koi pond v2, this Canon** | Pushed to `main` 2026-09-29 about 02:10 UTC by Opus 5.5 in one commit. Details: changelog [0004](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/changelog/0004.md), decisions 0016 and 0017. Live check on the site follows the push. |
 | **freshterminal.ai, Cloudflare and Clerk** | Decided 2026-09-29 (C-045 to C-048). Waiting on Justin: add token scopes (Zone DNS Edit, Zone Read, Account D1 Edit, all zones) and create the Clerk app with its two key secrets. Then: app on a Worker at freshterminal.ai, router at api.freshterminal.ai, sign-in, account data in D1, a Connections page. |
+| **SpacetimeDB publish** | Proposed 2026-09-29 02:07 UTC (C-050). Waiting on Justin for the `SPACETIMEDB_TOKEN` secret. |
+| **Proposals waiting on Justin** | Media in R2 (C-051), streamed browsers (C-052), integration ladder (C-053), recipes (C-054). Not started. |
 | **Multiplayer rules** | Decided 2026-09-29 (C-049): no Liveblocks or Colyseus; our own house rules on SpacetimeDB. Not started. |
 | **Pass 5: skins and the refine loop** | Next after pass 4. Instant draft, Jev picks the route, best-of-3 rounds with stop rules. |
 | **Fresh Terminal company in between-gigs** | Saved to GitHub (b191350). Waiting for a Sites sync to show on between-gigs.com. |

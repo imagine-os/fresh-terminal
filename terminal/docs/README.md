@@ -1,27 +1,105 @@
-# Fresh Terminal docs — start here
+# Fresh Terminal wiki — start here
 
-**[Canon: what is true now, and how it got there](canon/README.md).** Read it first. It is updated in the same commit as every pass.
+Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (pass 4, Opus 5.5).
 
-Everything about the product lives in this folder. Numbered files are append-only: add the next number, never rewrite an old one.
+- Read it rendered: https://imagine-os.github.io/fresh-terminal/wiki/
+- Read it on GitHub: https://github.com/imagine-os/fresh-terminal/tree/main/terminal/docs
+- For AI readers: [llms.txt](llms.txt) lists every page with a one-line summary, and every page is plain Markdown.
 
-| where | what |
-| --- | --- |
-| [plan.md](plan.md) / [plan.json](plan.json) | development plan, order of operations, model per task. The dev-mode PM viewer reads plan.json. |
-| [prompts/](prompts/) | Justin's prompts verbatim, with the reply summary once known; `starters.json` seeds the suggestion strip and the verb vocabulary |
-| [canon/](canon/README.md) | the Canon: vision, dated decisions (reversals marked), every prompt verbatim, glossary, state, open questions, people and access |
-| [decisions/](decisions/) | one decision per file: repo shape, SpacetimeDB, router, dialect, homepage, hosting, auth, ledger, themes, voice, router deploy, self-editing (0016), chips and replies (0017) |
-| [changelog/](changelog/) | what shipped per pass and what is not wired yet (`0001` pass 1, `0002` pass 2, `0003` pass 3, `0004` pass 4) |
-| [reference/surfaces.md](reference/surfaces.md) | MCP / WebMCP / CLI / API abilities as of this pass |
-| [pages/](pages/) | per-page spec: purpose, regions, actions, states, i18n keys |
-| [canvas/cards.json](canvas/cards.json) | master canvas seed: every deliverable is a card (append with `pnpm -C terminal canvas:add`) |
-| [qa/](qa/) | responsive-check output: screenshots, `responsive-latest.md`, `ledger-sample.json` |
+**The rule** (Justin, 2026-09-29 02:11 UTC, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)): every pass updates this wiki and the Canon in the same commit. Numbered files (`prompts/`, `decisions/`, `changelog/`) are append-only: add the next number, never rewrite an old one. The Canon summarizes across them; superseded lines there are kept and marked, never deleted.
 
-Code map (all under `terminal/`):
+## 1. Canon: what is true now, and how it got there
 
-- `app/` Vite + React 19 + TypeScript + Tailwind 4. `src/shell` (five regions), `src/terminal` (composer, chips, transcript, doodles), `src/dev` (dev panel, PM viewer), `src/store` (local fallback + SpacetimeDB seam), `src/auth` (anonymous now, Clerk stub), `src/actions/registry.ts`, `src/i18n`.
+Read this first.
+
+| Page | What it says | Updated |
+| --- | --- | --- |
+| [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
+| [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-055) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 52 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
+| [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
+| [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, wiki and more | 2026-09-29 |
+| [canon/people-and-access.md](canon/people-and-access.md) | Who is who, which repos each route can reach, secret names (never values) | 2026-09-29 |
+
+## 2. Plan
+
+| Page | What it says | Updated |
+| --- | --- | --- |
+| [plan.md](plan.md) | The development plan by pass, order of operations, model per task | 2026-09-29 |
+| [plan.json](plan.json) | The same plan as data (id, title, status, depends_on, model, pass); the PM viewer at `/plan` reads it | 2026-09-29 |
+
+## 3. Prompts: Justin's build prompts, verbatim
+
+| Page | What it says | Updated |
+| --- | --- | --- |
+| [prompts/README.md](prompts/README.md) | How prompt files and `starters.json` work | 2026-09-28 |
+| [prompts/0001-first-build.md](prompts/0001-first-build.md) | The first build: terminal, boxes, SpacetimeDB, "Game 1st" | 2026-09-28 |
+| [prompts/0002-homepage.md](prompts/0002-homepage.md) | Homepage in the Excalidraw pattern | 2026-09-28 |
+| [prompts/0003-auth-hosting.md](prompts/0003-auth-hosting.md) | Auth and hosting | 2026-09-28 |
+| [prompts/0004-billing.md](prompts/0004-billing.md) | Pass-through billing and the simplest chain | 2026-09-28 |
+| [prompts/0005-themes.md](prompts/0005-themes.md) | Themes for the starting page | 2026-09-28 |
+| [prompts/0006-motion.md](prompts/0006-motion.md) | Motion: interactive illustration | 2026-09-28 |
+| [prompts/0007-starters.md](prompts/0007-starters.md) | Sample starting prompts and the CRT reveal | 2026-09-28 |
+| [prompts/0008-canvas.md](prompts/0008-canvas.md) | GitHub Pages over artifacts; the master canvas | 2026-09-28 |
+| [prompts/0009-two-ways-to-pay.md](prompts/0009-two-ways-to-pay.md) | Two ways to pay | 2026-09-29 |
+| [prompts/0010-voice-and-405.md](prompts/0010-voice-and-405.md) | Realtime voice, live transcript, and the 405 | 2026-09-29 |
+| [prompts/0011-self-editing.md](prompts/0011-self-editing.md) | "Fail: if it can't edit itself than its not good enough" | 2026-09-29 |
+| [prompts/0012-chips-and-structured-replies.md](prompts/0012-chips-and-structured-replies.md) | Clickable chips, Hoy the brand versus hoy the day, super-CLI replies | 2026-09-29 |
+| [prompts/0013-skins-and-materials.md](prompts/0013-skins-and-materials.md) | Skins, materials and the best-of-3 refine loop (pass 5, queued) | 2026-09-29 |
+| [prompts/0014-koi-v2.md](prompts/0014-koi-v2.md) | Koi pond v2: any-shape lily pads, stone paths, tilt, bridge and sky | 2026-09-29 |
+| [prompts/0015-wiki.md](prompts/0015-wiki.md) | Keep the documentation wiki current, as a rule | 2026-09-29 |
+
+## 4. Decisions: one per file
+
+| Page | What it says | Updated |
+| --- | --- | --- |
+| [decisions/0001-repo-shape.md](decisions/0001-repo-shape.md) | One folder, one instruction at the root | 2026-09-28 |
+| [decisions/0002-spacetimedb.md](decisions/0002-spacetimedb.md) | SpacetimeDB for the live layer | 2026-09-28 |
+| [decisions/0003-openrouter-router.md](decisions/0003-openrouter-router.md) | One router holding one OpenRouter key | 2026-09-28 |
+| [decisions/0004-dialect-v0.md](decisions/0004-dialect-v0.md) | The plain-language house dialect, v0 | 2026-09-28 |
+| [decisions/0005-homepage.md](decisions/0005-homepage.md) | Homepage follows the Excalidraw pattern | 2026-09-28 |
+| [decisions/0006-hosting.md](decisions/0006-hosting.md) | GitHub Pages plus Actions; a Worker-ready router | 2026-09-28 |
+| [decisions/0007-auth.md](decisions/0007-auth.md) | Clerk behind a seam | 2026-09-28 |
+| [decisions/0008-ledger.md](decisions/0008-ledger.md) | A ledger at the core; the simplest chain | 2026-09-28 |
+| [decisions/0009-themes.md](decisions/0009-themes.md) | Themes as records in the dialect | 2026-09-28 |
+| [decisions/0010-starters-and-reveal.md](decisions/0010-starters-and-reveal.md) | Starters as records; reveal as motion | 2026-09-28 |
+| [decisions/0011-master-canvas.md](decisions/0011-master-canvas.md) | Pages ship on GitHub Pages; everything lands on the master canvas | 2026-09-29 |
+| [decisions/0012-two-ways-to-pay.md](decisions/0012-two-ways-to-pay.md) | Our key with pass-through cost, or your own key in the browser | 2026-09-29 |
+| [decisions/0013-model-tiers.md](decisions/0013-model-tiers.md) | Model tiers, checked against OpenRouter's model list | 2026-09-29 |
+| [decisions/0014-voice.md](decisions/0014-voice.md) | Realtime voice behind a provider seam | 2026-09-29 |
+| [decisions/0015-router-deploy.md](decisions/0015-router-deploy.md) | Router deploy and the "no router" state | 2026-09-29 |
+| [decisions/0016-self-editing.md](decisions/0016-self-editing.md) | The interface is data, changed only by undoable ops | 2026-09-29 |
+| [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md) | Chip types you can set, a glossary per box, structured replies | 2026-09-29 |
+
+## 5. Changelog: what shipped per pass
+
+| Page | What it says | Updated |
+| --- | --- | --- |
+| [changelog/0001.md](changelog/0001.md) | Pass 1: terminal, shell, dialect, router, ledger, themes, canvas | 2026-09-28 |
+| [changelog/0002.md](changelog/0002.md) | Pass 2: two ways to pay, Jev routing, tagger tier, library, koi pond v1 | 2026-09-29 |
+| [changelog/0003.md](changelog/0003.md) | Pass 3: voice with live transcript, router health, router live on Cloudflare | 2026-09-29 |
+| [changelog/0004.md](changelog/0004.md) | Pass 4: the terminal edits itself, chips v2, structured replies, koi pond v2, the Canon, this wiki | 2026-09-29 |
+
+## 6. Reference
+
+| Page | What it says | Updated |
+| --- | --- | --- |
+| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API, ops as tools, `window.pond`, SpacetimeDB, CLI, MCP | 2026-09-29 |
+| [pages/landing.md](pages/landing.md) | Page spec: landing (`/`) | 2026-09-29 |
+| [pages/box.md](pages/box.md) | Page spec: a box (`/box/:id`), with pass 4's menu, edits and chips | 2026-09-29 |
+| [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas (`/canvas`) | 2026-09-28 |
+| [qa/responsive-latest.md](qa/responsive-latest.md) | The latest responsive check: 21 pages and widths, 360 to 3840 | 2026-09-29 |
+
+Data files: [canvas/cards.json](canvas/cards.json) (master canvas seed; add with `pnpm -C terminal canvas:add`), [prompts/starters.json](prompts/starters.json) (starter prompts), `qa/*.png` (screenshots), [qa/ledger-sample.json](qa/ledger-sample.json).
+
+## Code map (all under `terminal/`)
+
+- `app/` Vite + React 19 + TypeScript + Tailwind 4. `src/shell` (five regions, menu tree), `src/terminal` (composer, chips, chip popover, transcript, structured replies), `src/pages` (pages from blocks), `src/dev` (dev panel, PM viewer), `src/store` (local store + SpacetimeDB seam), `src/auth` (anonymous now, Clerk stub), `src/actions/registry.ts`, `src/i18n`.
 - `shared/` the dialects and core types: layout dialect v0 (with `mergeDialect`), billing dialect, theme records, chip tagger and merge, ledger (integer micro-dollars, hash chain, sha256), product name constant. Pass 4: `ui/` (menu, pages, box UI, glossary), `ops/` (op schemas, engine, tool definitions), `reply/` (structured reply blocks), `agent/` (OpenRouter streaming, snapshot, prompt, `runTurn`).
-- `router/` Hono router: route table, OpenRouter streaming, one charge entry per call. Node and Cloudflare Worker entries.
+- `router/` Hono router: route table, Jev routing, tool calling, one charge entry per turn. Node and Cloudflare Worker entries.
 - `module/` SpacetimeDB TypeScript module: tables and reducers. Type-checked, not yet published.
-- `scripts/` responsive check, SPA fallback, chain verifier, ledger sample.
+- `scripts/` responsive check, SPA fallback, wiki build, chain verifier, ledger sample, canvas card adder.
 
-Rules that hold across passes: the interface changes only through ops (undoable, ledgered); one folder and one instruction at the repo root; push to `main`; git is the record, not the workflow; nothing pretends to work (placeholders say "not wired yet"); money is integers; unknown dialect words are reported, never guessed.
+Rules that hold across passes: the interface changes only through ops (undoable, ledgered); one folder and one instruction at the repo root; push to `main`; git is the record, not the workflow; nothing pretends to work (placeholders say "not wired yet"); money is integers; unknown dialect words are reported, never guessed; the wiki and the Canon are updated in the same commit as the work.

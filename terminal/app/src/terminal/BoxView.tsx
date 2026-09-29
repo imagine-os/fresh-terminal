@@ -404,7 +404,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             <a className="btn" data-variant="ghost" href={REPO_URL} rel="noreferrer">
               {t('footer.source')}
             </a>
-            <a className="btn" data-variant="ghost" href={`${REPO_URL}/tree/main/terminal/docs`} rel="noreferrer">
+            <a className="btn" data-variant="ghost" href={`${import.meta.env.BASE_URL}wiki/`}>
               {t('footer.docs')}
             </a>
           </span>

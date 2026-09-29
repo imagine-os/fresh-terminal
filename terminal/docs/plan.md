@@ -36,3 +36,18 @@ Model routing: **Fable 5.1** for judgment, architecture, shell and shared code; 
 
 - Voice controller over the actions registry; TV remote / gamepad d-pad navigation (Opus 5).
 - Repeated polish passes on legibility at 10 feet and up close on 4K.
+
+## Pass 4 — the terminal edits itself (shipped 2026-09-29, Opus 5.5)
+
+Model note, 2026-09-29: pass 4 onward runs on **Opus 5.5** at Justin's request (Canon C-026b). Routing inside the product is separate: chat on Haiku 4.5, edit escalation and retries on Sonnet 5.5, chips on Gemini 2.5 Flash-Lite, decisions on Jev.
+
+1. UI as data: menu tree, pages from blocks, per-box layout/theme/style, glossary (`ui-as-data`).
+2. Op language with inverses and undo (`op-language`).
+3. Router tool calling with dry-run validation, one retry and escalation; the own-key path shares the turn (`router-tool-calls`, `own-key-tools`).
+4. Menu tree, pages, chips v2, glossary, chip popover, super-CLI replies (`nav-tree`, `page-blocks`, `chips-v2`, `glossary`, `chip-popover`, `super-cli-replies`).
+5. Koi pond v2, the Canon, the wiki (`koi-v2`, `canon`, `wiki`).
+6. Standing: keep the Canon and the wiki current every pass (`canon-current`).
+
+## Pass 5 — skins, materials and the refine loop (queued; starts after pass 4 is live)
+
+`skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui`; `pond-ops` (wire `window.pond` to ops); `koi-realism`. See prompt 0013.

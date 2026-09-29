@@ -836,10 +836,11 @@
     },
     {
       "id": "canon-current",
-      "title": "Keep the Canon current every pass: owned by whoever ships the pass, updated in the same commit, newer facts win and older ones are marked superseded",
+      "title": "Keep the Canon and the wiki current every pass: owned by whoever ships the pass, updated in the same commit, newer facts win and older ones are marked superseded, each page links to its Slack message",
       "status": "doing",
       "depends_on": [
-        "canon"
+        "canon",
+        "wiki"
       ],
       "model": "Opus 5.5",
       "pass": 4
@@ -906,6 +907,16 @@
       ],
       "model": "Opus 5.5",
       "pass": 5
+    },
+    {
+      "id": "wiki",
+      "title": "Docs wiki: one start-here index with a summary and date per page, llms.txt for AI readers, rendered at /wiki/ on the site",
+      "status": "done",
+      "depends_on": [
+        "canon"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
     }
   ]
 }

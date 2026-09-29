@@ -4,6 +4,8 @@ A prompt-first terminal. You land in a working box, type (or speak), and what yo
 
 **[Canon: what is true now, and how it got there](terminal/docs/canon/README.md).**
 
+**Rule: every pass updates the wiki ([`terminal/docs`](terminal/docs/README.md), rendered at https://imagine-os.github.io/fresh-terminal/wiki/) and the Canon in the same commit as the work.** Plain dated lines, superseded lines kept and marked, each page linked to the Slack message that caused it (Justin, 2026-09-29).
+
 **Everything lives in [`terminal/`](terminal/).** This file is the only instruction at the root. Docs live in [`terminal/docs`](terminal/docs/README.md), starting with [`terminal/docs/README.md`](terminal/docs/README.md).
 
 ## Run
