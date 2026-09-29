@@ -13,6 +13,7 @@ describe('canvas cards', () => {
       'koi-pond',
       'canon',
       'freshstack',
+      'brand-marks',
     ]);
     for (const card of SEED_CARDS) {
       expect(cardSchema.safeParse(card).success).toBe(true);
