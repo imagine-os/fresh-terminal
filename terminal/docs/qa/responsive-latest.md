@@ -1,6 +1,6 @@
 # Responsive check (latest)
 
-Run: 2026-09-29T05:31:47.108Z. Widths: 360, 390, 768, 1280, 1920, 2560, 3840. Pages: /, /box/demo, /canvas, /box/demo/play, /about, /pricing, /faq.
+Run: 2026-09-29T05:37:37.084Z. Widths: 360, 390, 768, 1280, 1920, 2560, 3840. Pages: /, /box/demo, /canvas, /box/demo/play, /about, /pricing, /faq.
 Asserts: no horizontal overflow, composer visible, interactive targets >= 44px.
 
 | page | width | overflow | composer | small targets | screenshot |

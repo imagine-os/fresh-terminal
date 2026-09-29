@@ -3798,3 +3798,87 @@ textarea.field-input {
   white-space: nowrap;
   flex: none;
 }
+
+/* ---------- C-094: click to rename a stage ---------- */
+.inline-name {
+  border: 0;
+  background: none;
+  padding: 0 0.25rem;
+  min-height: var(--target);
+  font: inherit;
+  color: inherit;
+  cursor: text;
+  border-radius: var(--radius);
+  text-align: left;
+}
+.inline-name:hover {
+  background: var(--surface-hover);
+}
+.inline-name:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.inline-name-input {
+  min-height: calc(var(--target) - 0.4rem);
+  padding: 0 0.3rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  width: min(18rem, 60vw);
+}
+.tagline .inline-name {
+  color: var(--fg-muted);
+}
+.box-row .inline-name {
+  min-height: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.box-row .inline-name:hover {
+  background: none;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.15em;
+}
+.box-row .inline-name-input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* ---------- C-094: a very light perspective grid going into the distance (Justin) ---------- */
+.region-stage {
+  position: relative;
+  isolation: isolate;
+}
+.region-stage::before {
+  content: '';
+  position: absolute;
+  left: -60%;
+  right: -60%;
+  top: 38%;
+  bottom: -10%;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--fg) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--fg) 7%, transparent) 1px, transparent 1px);
+  background-size: 5.5rem 5.5rem;
+  transform: perspective(52rem) rotateX(64deg);
+  transform-origin: 50% 0;
+  mask-image: linear-gradient(to bottom, transparent 0, black 22%, black 80%, transparent 100%);
+  opacity: 0.8;
+}
+.region-stage[data-skinned]::before,
+.shell[data-material='paper'] .region-stage::before {
+  display: none;
+}
+.region-stage > * {
+  position: relative;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .region-stage::before {
+    transition: opacity 400ms ease;
+  }
+}

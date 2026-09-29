@@ -10,12 +10,12 @@
   'use strict';
 
   /**
-   * Pricing numbers the copy depends on, in one place. The fee over model cost
-   * is undecided (margin 0 in the route table), so the pages say "at cost for
-   * now" and show no percentage; set percent and add a [data-fee] element to show one.
+   * Pricing numbers the copy depends on, in one place. The markup on paid free
+   * usage after the $5 starter kit is 10% (Justin, 2026-09-29): model cost + 10%,
+   * no account fees. Every [data-fee] element shows it. Your key: 0%.
    * Storage matches STORAGE_PRICING in shared/src/credits/storage.ts (not final, not billed).
    */
-  var PAYG_FEE = { percent: null, final: false };
+  var PAYG_FEE = { percent: 10, final: true };
   var STORAGE = { freeMb: 100, usdPerGbMonth: 0.05, final: false };
 
   var PREFS = 'fresh-terminal.prefs';

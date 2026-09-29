@@ -177,6 +177,13 @@ export class LocalStore implements Store {
     return box;
   }
 
+  renameBox(id: string, name: string): void {
+    const clean = name.trim().slice(0, 80);
+    if (clean.length === 0) return;
+    const now = Date.now();
+    this.commit({ boxes: this.snapshot.boxes.map((box) => (box.id === id ? { ...box, name: clean, updated_at: now } : box)) });
+  }
+
   removeBox(id: string): void {
     const gone = (record: { box_id: string }) => record.box_id !== id;
     this.commit({

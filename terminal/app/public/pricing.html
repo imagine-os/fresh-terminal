@@ -22,7 +22,7 @@
 <meta name="theme-color" content="#000000" />
 <!-- share:end -->
 <title data-i18n-title="pricing.title">Pricing · Fresh Terminal</title>
-<meta name="description" content="Free to try with no sign-up. Sign in for $5 of usage on us. Then pay what the models cost, at cost for now, or bring your own key and pay us nothing for models.">
+<meta name="description" content="Free to try with no sign-up. Sign in for $5 of usage on us. Then model cost + 10%, with no account fees, or bring your own key and pay us nothing for models.">
 <meta name="color-scheme" content="dark">
 <link rel="canonical" href="https://freshterminal.ai/pricing">
 <link rel="alternate" hreflang="en" href="https://freshterminal.ai/pricing">
@@ -38,7 +38,7 @@
     { "id": "sales.start", "intent": "start free, no sign-up", "permission": "anyone", "target": "a[data-action='sales.start']" },
     { "id": "sales.signin", "intent": "sign in for the $5 starter kit", "permission": "anyone", "target": "a[data-action='sales.signin']" },
     { "id": "sales.key.use", "intent": "use my own OpenRouter key", "permission": "anyone", "target": "a[data-action='sales.key.use']" },
-    { "id": "sales.payment.add", "intent": "add a payment method for pay as you go", "permission": "signed-in", "notWired": true, "target": "button[data-action='sales.payment.add']" },
+    { "id": "sales.payment.add", "intent": "buy credits (refill packs of $5, $10 or $25)", "permission": "signed-in", "notWired": true, "target": "button[data-action='sales.payment.add']" },
     { "id": "sales.teams.notify", "intent": "tell me when teams and self-host are ready", "permission": "anyone", "notWired": true, "target": "button[data-action='sales.teams.notify']" },
     { "id": "sales.nav", "intent": "go to about, pricing or the FAQ", "permission": "anyone", "target": ".nav a" },
     { "id": "sales.lang.toggle", "intent": "switch between English and Spanish", "permission": "anyone", "target": ".lang button" },
@@ -89,17 +89,17 @@
         </div>
         <div class="plan">
           <h3><span data-i18n="plan.payg">Pay as you go</span> <span class="tag" data-status="not-wired" data-i18n="tag.notWired">Not wired yet</span></h3>
-          <div class="price" data-i18n="plan.cost">At cost</div>
+          <div class="price"><span data-i18n="plan.cost">Cost</span> + <span data-fee>10%</span></div>
           <p class="for" data-i18n="plan.payg.for">After the starter kit.</p>
           <ul>
-            <li data-i18n="plan.payg.1">You pay what the models cost, at cost for now</li>
-            <li><span data-i18n="plan.payg.2">Monthly refill plans: $5, $10 or $25</span> <span class="tag" data-status="soon" data-i18n="tag.soon">Coming soon</span></li>
+            <li><span data-i18n="plan.payg.1">Model cost +</span> <span data-fee>10%</span><span data-i18n="plan.payg.1b">. No account fees.</span></li>
+            <li><span data-i18n="plan.payg.2">Buy credits first: refill packs of $5, $10 or $25 that renew on their own</span> <span class="tag" data-status="soon" data-i18n="tag.soon">Coming soon</span></li>
             <li data-i18n="plan.payg.3">Every cost shown: model, time, cents</li>
           </ul>
           <div class="ctas"><button type="button" class="btn" data-action="sales.payment.add" data-not-wired
-            data-tip="Not wired yet: payments are still being set up. Until then, the starter kit and your key both work."
-            data-toast="Add payment is not wired yet. Payments are still being set up; until then use the $5 starter kit or your own key."
-            data-i18n-attr="data-tip:payg.tip;data-toast:payg.toast;aria-label:payg.aria" aria-label="Add payment (not wired yet)" data-i18n="plan.payg.cta">Add payment</button></div>
+            data-tip="Not wired yet: refill packs through Clerk are coming soon. Until then, the starter kit and your key both work."
+            data-toast="Buy credits is not wired yet. Refill packs are coming soon; until then use the $5 starter kit or your own key."
+            data-i18n-attr="data-tip:payg.tip;data-toast:payg.toast;aria-label:payg.aria" aria-label="Buy credits (not wired yet)" data-i18n="plan.payg.cta">Buy credits</button></div>
         </div>
         <div class="plan">
           <h3 data-i18n="plan.key">Your key</h3>
@@ -135,7 +135,7 @@
       <ol class="steps">
         <li><span class="n">01</span><h3 data-i18n="hp.1.t">Try it</h3><p data-i18n="hp.1.p">Open the terminal and type. A little free usage is on us, no sign-up.</p></li>
         <li><span class="n">02</span><h3 data-i18n="hp.2.t">Sign in</h3><p data-i18n="hp.2.p">Get the $5 starter kit and cloud save. GitHub, Google or email; no card.</p></li>
-        <li><span class="n">03</span><h3 data-i18n="hp.3.t">Keep going</h3><p data-i18n="hp.3.p">Pay what the models cost, at cost for now, or switch to your own key any time. Your key is never blocked.</p></li>
+        <li><span class="n">03</span><h3 data-i18n="hp.3.t">Keep going</h3><p data-i18n="hp.3.p">Buy credits and pay model cost + 10%, with no account fees, or switch to your own key any time. Your key is never blocked.</p></li>
       </ol>
       <p class="fine" style="margin-top:1.4rem" data-i18n="howpay.fine">Numbers marked “not final” can change before billing opens. Paying is not wired yet: until it is, free usage ends when the starter kit is spent, and your key keeps working.</p>
       <div class="ctas" style="margin-top:1.6rem"><a class="btn" href="faq" data-i18n="howpay.cta">Questions? Read the FAQ</a></div>

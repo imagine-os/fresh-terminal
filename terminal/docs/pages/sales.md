@@ -1,6 +1,6 @@
 # Sales pages: /about, /pricing, /faq
 
-Written 2026-09-29 (C-094, Opus 5.5). Live: https://freshterminal.ai/about, https://freshterminal.ai/pricing, https://freshterminal.ai/faq. Pages copy: https://imagine-os.github.io/fresh-terminal/about (and /pricing, /faq).
+Written 2026-09-29 (C-095, Opus 5.5). Live: https://freshterminal.ai/about, https://freshterminal.ai/pricing, https://freshterminal.ai/faq. Pages copy: https://imagine-os.github.io/fresh-terminal/about (and /pricing, /faq).
 
 ## Files
 

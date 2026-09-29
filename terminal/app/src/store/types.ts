@@ -121,6 +121,8 @@ export interface Store {
   createBox(name: string): Box;
   /** Deletes a box with its lines, sessions, menu, pages, edits and box UI. Ledger entries stay (the chain is append-only). */
   removeBox(id: string): void;
+  /** Click-to-edit name in the top bar or sidebar (C-094). Blank names are ignored. */
+  renameBox(id: string, name: string): void;
   /** Rebuilds a box from an exported session file's final state (new ids; edits and ledger stay in the file). */
   importSession(file: { box: Box | null; timeline: { lines: Array<{ kind: LineKind; text: string; chips_json?: string; component?: string; reveal?: string; blocks_json?: string; created_at: number }> }; ui: UiState }): Box;
   openSession(boxId: string): Session;

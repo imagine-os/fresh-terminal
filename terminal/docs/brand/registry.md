@@ -48,7 +48,7 @@ One line per asset, per `terminal/skills/logos-and-icons/SKILL.md`. Source order
 | Webflow | `app/public/brand/webflow/webflow.svg` | https://simpleicons.org/?q=webflow (cdn.simpleicons.org/webflow) | Simple Icons collection CC0-1.0; Webflow trademark belongs to its owner | 2026-09-29 | colour source; generated set `-mono` `-light` `-dark` `-wide` `-stacked` (see Configurations) |
 | Vercel | `app/public/brand/vercel/vercel.svg` | https://simpleicons.org/?q=vercel (cdn.simpleicons.org/vercel) | Simple Icons collection CC0-1.0; Vercel trademark belongs to its owner | 2026-09-29 | colour source; generated set `-mono` `-light` `-dark` `-wide` `-stacked` (see Configurations) |
 
-## Our own mark (2026-09-29, C-094)
+## Our own mark (2026-09-29, C-095)
 
 | Mark | Files | Source | Terms | Checked | Notes |
 | --- | --- | --- | --- | --- | --- |
