@@ -49,7 +49,7 @@ Honest status: most of this is planned. What exists is listed as such.
 
 ## CLI
 
-- **Exists:** `pnpm dev`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm check:responsive`, `pnpm -C terminal verify:chain [file]`, `pnpm -C terminal ledger:sample`, `pnpm -C terminal start:router`, `pnpm -C terminal canvas:add --title --href --kind [--thickness]`.
+- **Exists:** `pnpm dev`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm check:responsive`, `pnpm -C terminal check:clerk` (Clerk sign-in and account window at seven widths, C-099; workflow `clerk-modal`), `pnpm -C terminal verify:chain [file]`, `pnpm -C terminal ledger:sample`, `pnpm -C terminal start:router`, `pnpm -C terminal canvas:add --title --href --kind [--thickness]`.
 - **Planned:** a `fresh` CLI that speaks the dialect (`fresh do "…"`, `fresh shell "Left sidebar: rail on laptop"`; proposed in Canon C-055), and `spacetime publish` / `generate` wired into scripts once the module is published.
 
 ## MCP (server)

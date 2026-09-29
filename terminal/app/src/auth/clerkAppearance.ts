@@ -139,9 +139,43 @@ export const TARGET = 'max(2.75rem, 3.1em)';
 /** Type and spacing that stay 14px / 16px on phones and laptops and grow for 10-foot viewing on 4K. */
 export const FONT_SIZE = 'clamp(0.875rem, 0.6rem + 0.35vw, 1.5rem)';
 export const SPACING = 'clamp(1rem, 0.75rem + 0.3vw, 1.75rem)';
+/**
+ * Sign-in and sign-up width: one column, a comfortable reading width that grows for 4K.
+ * Only for those two. The account window (UserProfile) has a side nav and a
+ * page next to it, so this width squeezed its page to ~200px at 1908px wide
+ * (Justin's screenshot, 2026-09-29, C-099); it has its own sizes below.
+ */
 export const CARD_WIDTH = 'min(calc(100vw - 2rem), clamp(25rem, 16rem + 10vw, 46rem))';
 
 type Styles = Record<string, unknown>;
+
+/** The one-column sign-in and sign-up card. Never on the global cardBox (see CARD_WIDTH). */
+export const AUTH_CARD: Styles = { width: CARD_WIDTH, maxWidth: CARD_WIDTH };
+
+/**
+ * The account window (UserProfile, opened from the avatar): a nav and a page
+ * side by side. Clerk's own size is 55rem x 44rem; ours is in em of the card's
+ * type (and at least half the screen on 4K), so it grows with our larger type instead of clipping, and it never
+ * leaves the viewport (1rem gutter at the sides, 1.5rem top and bottom).
+ * On phones Clerk folds the nav into a menu and the page scrolls inside.
+ */
+export const PROFILE_CARD_WIDTH = 'min(calc(100vw - 2rem), max(64em, 50vw))';
+export const PROFILE_CARD_HEIGHT = 'min(calc(100dvh - 3rem), 48em)';
+export const PROFILE_CARD: Styles = {
+  width: PROFILE_CARD_WIDTH,
+  maxWidth: 'calc(100vw - 2rem)',
+  height: PROFILE_CARD_HEIGHT,
+  maxHeight: 'calc(100dvh - 3rem)',
+};
+/**
+ * Clerk's modal box is fixed at min(44rem, 100% - 3rem) tall; it follows the
+ * card instead, so the card's own height (above) is the one that counts.
+ */
+export const PROFILE_ELEMENTS = {
+  modalContent: { height: 'auto', maxHeight: 'calc(100% - 3rem)' },
+  rootBox: { borderRadius: 0, height: 'auto', maxWidth: '100%' },
+  cardBox: PROFILE_CARD,
+};
 
 /**
  * The `appearance` object for ClerkProvider, openSignIn and UserButton. Plain
@@ -185,7 +219,7 @@ export function clerkAppearance(tokens: ThemeTokens = VOID_TOKENS) {
     },
     elements: {
       rootBox: { borderRadius: 0 },
-      cardBox: { borderRadius: 0, boxShadow: 'none', border: `1px solid ${border}`, width: CARD_WIDTH, maxWidth: CARD_WIDTH },
+      cardBox: { borderRadius: 0, boxShadow: 'none', border: `1px solid ${border}` },
       card: { borderRadius: 0, boxShadow: 'none', background: card },
       footer: { background: card, borderTop: `1px solid ${solid(tokens.border, card)}`, ...meta },
       footerAction: { ...meta, alignItems: 'center', gap: '0.25rem' },
@@ -228,7 +262,22 @@ export function clerkAppearance(tokens: ThemeTokens = VOID_TOKENS) {
       userButtonPopoverActionButton: target,
       userButtonPopoverFooter: { background: card, ...meta },
       userPreviewSecondaryIdentifier: meta,
+      // The account window (C-099): its nav, section buttons and "..." menus get the same 44px targets and focus.
+      navbarButton: target,
+      navbarMobileMenuButton: { ...target, minWidth: TARGET },
+      profileSectionPrimaryButton: target,
+      menuButton: target,
+      menuButtonEllipsis: { ...target, minWidth: TARGET, borderRadius: 0 },
+      menuItem: target,
+      // Long email addresses and names wrap instead of ending in "..." (the values must always be readable).
+      profileSectionItem: { '& p': { whiteSpace: 'normal', overflowWrap: 'anywhere', textOverflow: 'clip' } },
+      userPreviewTextContainer: { '& p, & span': { whiteSpace: 'normal', overflowWrap: 'anywhere', textOverflow: 'clip' } },
+      formFieldInputShowPasswordButton: { minWidth: TARGET, minHeight: TARGET, borderRadius: 0, ...focusRing },
     },
+    signIn: { elements: { cardBox: AUTH_CARD } },
+    signUp: { elements: { cardBox: AUTH_CARD } },
+    userProfile: { elements: PROFILE_ELEMENTS },
+    organizationProfile: { elements: PROFILE_ELEMENTS },
     options: {
       socialButtonsVariant: 'blockButton' as const,
       logoPlacement: 'none' as const,

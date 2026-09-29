@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SEED_THEMES } from '@shared/themes';
-import { TARGET, VOID_TOKENS, clerkAppearance, isDark, parseColor, solid, type ThemeTokens } from './clerkAppearance';
+import { CARD_WIDTH, PROFILE_CARD_HEIGHT, PROFILE_CARD_WIDTH, TARGET, VOID_TOKENS, clerkAppearance, isDark, parseColor, solid, type ThemeTokens } from './clerkAppearance';
 
 function tokensFor(id: string): ThemeTokens {
   const theme = SEED_THEMES.find((candidate) => candidate.id === id);
@@ -65,6 +65,34 @@ describe('clerkAppearance', () => {
     }
     const focus = (a.elements.formButtonPrimary as Record<string, Record<string, string>>)['&:focus-visible'];
     expect(focus?.outline).toBe('2px solid #33ff66');
+  });
+
+  // C-099: the sign-in width once sat on the global cardBox and squeezed the account window to ~450px.
+  it('the sign-in width stays on sign-in and sign-up; the account window gets its own size', () => {
+    const a = clerkAppearance();
+    const card = a.elements.cardBox as Record<string, unknown>;
+    expect(card.width).toBeUndefined();
+    expect(card.maxWidth).toBeUndefined();
+    for (const key of ['rootBox', 'modalContent'] as const) {
+      expect((a.elements as Record<string, Record<string, unknown> | undefined>)[key]?.width, key).toBeUndefined();
+    }
+    expect(a.signIn.elements.cardBox).toMatchObject({ width: CARD_WIDTH, maxWidth: CARD_WIDTH });
+    expect(a.signUp.elements.cardBox).toMatchObject({ width: CARD_WIDTH, maxWidth: CARD_WIDTH });
+    const profile = a.userProfile.elements;
+    expect(profile.cardBox).toMatchObject({ width: PROFILE_CARD_WIDTH, height: PROFILE_CARD_HEIGHT, maxWidth: 'calc(100vw - 2rem)' });
+    expect(PROFILE_CARD_WIDTH).toContain('64em');
+    expect(PROFILE_CARD_WIDTH).toContain('100vw - 2rem');
+    expect(PROFILE_CARD_HEIGHT).toContain('100dvh - 3rem');
+    expect(profile.modalContent).toMatchObject({ height: 'auto' });
+    expect(profile.rootBox).toMatchObject({ height: 'auto', borderRadius: 0 });
+  });
+
+  it('the account window keeps 44px targets: nav, section buttons, menus, show password', () => {
+    const a = clerkAppearance();
+    for (const key of ['navbarButton', 'profileSectionPrimaryButton', 'menuButton', 'menuButtonEllipsis', 'formFieldInputShowPasswordButton'] as const) {
+      expect((a.elements[key] as Record<string, unknown>).minHeight, key).toBe(TARGET);
+    }
+    expect((a.elements.menuButtonEllipsis as Record<string, unknown>).minWidth).toBe(TARGET);
   });
 
   it('parses and flattens colours', () => {

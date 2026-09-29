@@ -104,6 +104,7 @@ Read this first.
 | [changelog/0012.md](changelog/0012.md) | Koi pond v3 and canvas v2 redo, best-of-3 rounds, before/after screenshots, live check | 2026-09-29 |
 | [changelog/0013.md](changelog/0013.md) | The sign-in matches the theme (Clerk appearance), before/after at 390, 1280, 3840 | 2026-09-29 |
 | [changelog/0016.md](changelog/0016.md) | The sales site at /about, /pricing and /faq, share cards on every public page, our own brand mark, with the live check | 2026-09-29 |
+| [changelog/0017.md](changelog/0017.md) | The account window (Clerk UserProfile) fits from phone to 4K; the sign-in width stays on sign-in; `pnpm check:clerk` | 2026-09-29 |
 | [changelog/0014.md](changelog/0014.md) | The $5 pass-through gate, friend credits and invite codes, the hub at freshterminal.ai/hub, with the live check | 2026-09-29 |
 | [changelog/0015.md](changelog/0015.md) | Actions: model and cost from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, typed undo; our plan moved to `docs/plan/` (C-095) | 2026-09-29 |
 
@@ -119,6 +120,7 @@ Read this first.
 | [pages/actions.md](pages/actions.md) | Page doc: Actions (`/actions`): rows, statuses, model and cost from the ledger, filters, sort, views, the resizable timeline column, typed undo | 2026-09-29 |
 | [pages/tags.md](pages/tags.md) | Page doc: Tags (`/tags`): every tag the person typed as a graph (default), table, list, board and timeline; filters, sort, graph options | 2026-09-29 |
 | [pages/sales.md](pages/sales.md) | Page doc: the sales pages (/about, /pricing, /faq): sections, pricing, actions, languages, share tags, how to change them | 2026-09-29 |
+| [pages/auth.md](pages/auth.md) | Page doc: sign-in and the account window (Clerk): where they open, sizes per width, targets, checks | 2026-09-29 |
 | [pages/hub.md](pages/hub.md) | Page doc: the hub (`/hub`): who can see it, how the server checks, sections, data, actions, local preview | 2026-09-29 |
 | [pages/producthunt.md](pages/producthunt.md) | Page doc: the Product Hunt strategy (`/pages/producthunt.html`): the call, pitch pick, readiness, costs; proposed | 2026-09-29 |
 | [brand/registry.md](brand/registry.md) | Every brand mark in the repo: file, source, licence, date checked; what is still missing | 2026-09-29 |

@@ -34,6 +34,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [pages/sales.md](pages/sales.md): the sales pages doc (sections, actions, EN/ES, share tags)
 - [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md): Clerk Billing checked (subscriptions only, no usage billing), the $5 pass-through threshold (402 payment_required), Stripe Checkout top-ups proposed, friend credits and invite codes, the admin API, the hub at freshterminal.ai/hub, costs
 - [pages/actions.md](pages/actions.md): the Actions page doc (the person's activity; model and cost from the ledger; filters by status, stage, model, words; sort by cost; timeline arrows)
+- [pages/auth.md](pages/auth.md): sign-in and the account window (Clerk): sizes phone to 4K, targets, `pnpm check:clerk`
 - [pages/tags.md](pages/tags.md): the Tags page doc (every tag the person typed; graph by default with layout, size, link and label options; table, list, board, timeline)
 - [pages/hub.md](pages/hub.md): the hub page doc (admins only, server-checked; work items, prompt/response library, Canon, wiki, plan, credits, secrets checklist)
 - [decisions/0023-signin-style.md](decisions/0023-signin-style.md): Clerk sign-in themed from the active theme (square, our fonts, accent button, no shadow, 44px targets, visible focus); Clerk branding and the dev notice stay
@@ -53,6 +54,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0017.md](changelog/0017.md): the account window fits phone to 4K (sign-in width no longer on every Clerk card)
 - [changelog/0016.md](changelog/0016.md): the sales site, share cards, our brand mark, live check
 - [changelog/0014.md](changelog/0014.md): the $5 pass-through gate, friend credits, invite codes, the hub, live check
 - [changelog/0013.md](changelog/0013.md): the sign-in matches the theme (Clerk appearance)

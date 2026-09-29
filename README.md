@@ -17,7 +17,7 @@ pnpm i && pnpm dev
 - App: http://localhost:5173 (Vite; `/api/*` is proxied to the router)
 - Router: http://localhost:8787 (Hono on Node; `GET /health`, `GET /rules`, `POST /route`)
 
-Other commands: `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm check:responsive` (Playwright, seven widths, screenshots in `terminal/docs/qa/`), `pnpm -C terminal verify:chain [ledger.json]`.
+Other commands: `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm check:responsive` (Playwright, seven widths, screenshots in `terminal/docs/qa/`), `pnpm -C terminal check:clerk` (the Clerk sign-in and account window at seven widths; needs a build with the Clerk key), `pnpm -C terminal verify:chain [ledger.json]`.
 
 ## Env
 

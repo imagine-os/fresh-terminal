@@ -1,0 +1,98 @@
+name: clerk-modal
+
+# The Clerk windows in our look at seven widths, signed out and signed in
+# (C-099): the sign-in modal and the account window (UserProfile) must sit
+# inside the viewport, keep square corners and 44px targets, and on desktop
+# the account page must be wide enough that nothing is cut off.
+# Runs `pnpm check:clerk` against a local build with a throwaway user and
+# organisation in the Clerk DEVELOPMENT instance (deleted at the end). The
+# browser never reaches our router, so no D1 rows are written; the clean-up
+# step deletes any D1 rows for those ids anyway. Prints ids only.
+# Optional inputs clean up a user made by hand for a manual check.
+
+on:
+  workflow_dispatch:
+    inputs:
+      cleanup_user_ids:
+        description: 'Extra throwaway Clerk dev user ids to delete (with their D1 rows), comma separated'
+        required: false
+        default: ''
+      cleanup_org_ids:
+        description: 'Extra throwaway Clerk dev organisation ids to delete, comma separated'
+        required: false
+        default: ''
+  workflow_run:
+    workflows: [site-deploy]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clerk-modal
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Refuse to run against a production Clerk instance
+        run: |
+          case "$CLERK_SECRET_KEY" in sk_test_*) echo "development instance: ok";; *) echo "not a development key; stopping"; exit 1;; esac
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Chromium for Playwright
+        run: pnpm -C terminal exec playwright install --with-deps chromium
+      - name: Build the app with the public Clerk key
+        run: pnpm -C terminal build:app
+        env:
+          VITE_BASE: /
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+      - name: Check the sign-in modal and the account window
+        run: |
+          set -o pipefail
+          pnpm -C terminal check:clerk 2>&1 | tee "$RUNNER_TEMP/clerk-modal.log"
+        env:
+          CLERK_QA_OUT: ${{ runner.temp }}/clerk-modal
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clerk-modal-screenshots
+          path: ${{ runner.temp }}/clerk-modal/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Clean up (Clerk users and organisations, D1 rows)
+        if: always()
+        env:
+          EXTRA_USERS: ${{ github.event.inputs.cleanup_user_ids }}
+          EXTRA_ORGS: ${{ github.event.inputs.cleanup_org_ids }}
+        run: |
+          clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY")
+          users=$( { grep -o 'throwaway user user_[A-Za-z0-9]*' "$RUNNER_TEMP/clerk-modal.log" 2>/dev/null | awk '{print $3}'; echo "$EXTRA_USERS" | tr ',' '\n'; \
+                     curl -sS "${clerk[@]}" 'https://api.clerk.com/v1/users?query=ftclerkqa&limit=50' | jq -r '.[]? | select((.username // "") | startswith("ftclerkqa")) | .id'; } | tr -d ' ' | grep '^user_' | sort -u)
+          orgs=$( { echo "$EXTRA_ORGS" | tr ',' '\n'; \
+                    curl -sS "${clerk[@]}" 'https://api.clerk.com/v1/organizations?query=ft%20clerk%20qa&limit=50' | jq -r '.data[]? | select(.name | startswith("ft clerk qa")) | .id'; } | tr -d ' ' | grep '^org_' | sort -u)
+          for org in $orgs; do echo "delete Clerk organisation $org: $(curl -sS "${clerk[@]}" -X DELETE "https://api.clerk.com/v1/organizations/$org" | jq -r '.deleted // .errors[0].code')"; done
+          cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          db=$(curl -sS "${cf[@]}" "$base?name=fresh-terminal" | jq -r '[.result[]? | select(.name=="fresh-terminal")][0].uuid // empty')
+          q() { curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "$(jq -nc --arg sql "$1" --arg p "$2" '{sql: $sql, params: [$p]}')" | jq -r '"\(.success) (\([.result[]?.meta.changes] | add // 0) rows)"'; }
+          for uid in $users; do
+            if [ -n "$db" ]; then
+              acct="acct_$uid"
+              echo "$uid D1: redemptions $(q 'DELETE FROM invite_redemptions WHERE account_id = ?' "$acct"), grants $(q 'DELETE FROM credit_grants WHERE account_id = ?' "$acct"), ledger $(q 'DELETE FROM ledger_entries WHERE account_id = ?' "$acct"), boxes $(q 'DELETE FROM boxes WHERE account_id = ?' "$acct"), spend $(q "DELETE FROM spend_daily WHERE scope = 'acct:' || ?" "$acct"), account $(q 'DELETE FROM accounts WHERE id = ?' "$acct")"
+            fi
+            echo "delete Clerk user $uid: $(curl -sS "${clerk[@]}" -X DELETE "https://api.clerk.com/v1/users/$uid" | jq -r '.deleted // .errors[0].code')"
+          done
+          [ -n "$users$orgs" ] || echo "nothing to clean up"
