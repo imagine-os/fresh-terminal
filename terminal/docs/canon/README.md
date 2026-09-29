@@ -14,7 +14,7 @@ Justin wants a plain screen with a blinking cursor that anyone can walk up to an
 | --- | --- |
 | [vision.md](vision.md) | What we're building and why: the product, the platform, the principles, in Justin's words |
 | [decisions.md](decisions.md) | Every decision with id, date, reason and status, including the ones that were reversed, and the proposals still waiting on Justin |
-| [prompts.md](prompts.md) | All 66 of Justin's messages, word for word, in order, with what happened after each |
+| [prompts.md](prompts.md) | All 68 of Justin's messages, word for word, in order, with what happened after each |
 | [glossary.md](glossary.md) | The house words: box, canvas, card, chip, dialect, Jev, ledger, refine loop and more |
 | [state.md](state.md) | What's live (with links and commits), what isn't wired yet, what's in progress |
 | [open-questions.md](open-questions.md) | What's still undecided: name, imports, Company OS, Stripe, voice keys, when Fresh Terminal replaces Slack |

@@ -215,3 +215,12 @@ export function IconPin(props: IconProps) {
     </svg>
   );
 }
+
+export function IconTopBar(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+    </svg>
+  );
+}
