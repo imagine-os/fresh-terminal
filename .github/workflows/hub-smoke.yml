@@ -66,14 +66,27 @@ jobs:
           # fd 3 is the step's real stdout, so ::add-mask:: reaches the runner while tokens stay inside $(...).
           exec 3>&1
           clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
+          # Start with the email only and add what the instance asks for (username, phone), so a change to the
+          # Clerk sign-up settings does not break the run. Clerk's error codes are printed, never its full answer.
           make_user() {
-            local tag=$1 n=$2
-            curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/users \
-              -d "{\"email_address\":[\"ft-hub-${tag}-${GITHUB_RUN_ID}@freshterminal.ai\"],\"username\":\"fthub${tag}${GITHUB_RUN_ID}\",\"phone_number\":[\"+1201555$(printf '%04d' $(( 100 + (GITHUB_RUN_ID + n) % 100 )))\"],\"skip_password_requirement\":true,\"skip_password_checks\":true}" | jq -r '.id // empty'
+            local tag=$1 n=$2 extra="" out id missing
+            for attempt in 1 2 3; do
+              out=$(curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/users \
+                -d "{\"email_address\":[\"ft-hub-${tag}-${GITHUB_RUN_ID}@freshterminal.ai\"]${extra},\"skip_password_requirement\":true,\"skip_password_checks\":true}")
+              id=$(echo "$out" | jq -r '.id // empty' 2>/dev/null)
+              if [ -n "$id" ]; then echo "$id"; return 0; fi
+              echo "create $tag (try $attempt): $(echo "$out" | jq -c '[.errors[]? | {code, param: .meta.param_name}]' 2>/dev/null || echo 'not JSON')" >&3
+              missing=$(echo "$out" | jq -r '[.errors[]? | select(.code == "form_param_missing" or .code == "form_identifier_not_found" or .code == "form_param_nil") | .meta.param_name] | join(",")' 2>/dev/null)
+              [ -n "$missing" ] || return 1
+              case ",$missing," in *,username,*) extra="$extra,\"username\":\"fthub${tag}${GITHUB_RUN_ID}\"";; esac
+              case ",$missing," in *,phone_number,*) extra="$extra,\"phone_number\":[\"+1201555$(printf '%04d' $(( 100 + (GITHUB_RUN_ID + n) % 100 )))\"]";; esac
+            done
+            return 1
           }
-          admin=$(make_user admin 37); friend=$(make_user friend 71)
-          [ -n "$admin" ] && [ -n "$friend" ] || { echo "user create failed"; exit 1; }
-          echo "admin=$admin" >> "$GITHUB_OUTPUT"; echo "friend=$friend" >> "$GITHUB_OUTPUT"
+          # Each id is written out as soon as it exists, so the clean-up step deletes a half-made pair too.
+          admin=$(make_user admin 37); echo "admin=$admin" >> "$GITHUB_OUTPUT"
+          friend=$(make_user friend 71); echo "friend=$friend" >> "$GITHUB_OUTPUT"
+          [ -n "$admin" ] && [ -n "$friend" ] || { echo "user create failed (Clerk error codes above)"; exit 1; }
           echo "throwaway admin: $admin, friend: $friend"
           session() { curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/sessions -d "{\"user_id\":\"$1\"}" | jq -r '.id // empty'; }
           sa=$(session "$admin"); sf=$(session "$friend")
@@ -154,3 +167,8 @@ jobs:
           for uid in "$ADMIN_ID" "$FRIEND_ID"; do
             [ -n "$uid" ] && echo "delete Clerk user $uid: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$uid" | jq -r '.deleted')" || true
           done
+          # Sweep: any throwaway user an earlier, broken run left behind (their addresses are ft-hub-*@freshterminal.ai).
+          curl -sS -G -H "Authorization: Bearer $CLERK_SECRET_KEY" 'https://api.clerk.com/v1/users' --data-urlencode 'query=ft-hub-' --data-urlencode 'limit=100' \
+            | jq -r '.[]? | select([.email_addresses[]?.email_address | test("^ft-hub-(admin|friend)-[0-9]+@freshterminal\\.ai$")] | any) | .id' \
+            | while read -r uid; do [ -n "$uid" ] && echo "delete leftover throwaway user $uid: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$uid" | jq -r '.deleted')"; done
+          echo "users in the instance after clean-up: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" 'https://api.clerk.com/v1/users/count' | jq -r '.total_count')"
