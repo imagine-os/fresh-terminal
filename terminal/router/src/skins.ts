@@ -238,7 +238,7 @@ export function openverseToVariant(image: OpenverseImage, round: number, index: 
     path: 'image_search',
     tokens: {},
     background: null,
-    veil: 55,
+    veil: 72,
     description: `${title} by ${creator} (${label}).`,
     image: {
       ref: image.url,
@@ -391,17 +391,27 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
           : `${OPENVERSE_URL}?${new URLSearchParams({ q: body.material, license: 'cc0,pdm,by,by-sa', page_size: '20', mature: 'false' }).toString()}`;
       let results: OpenverseImage[] = [];
       let error: string | undefined;
-      try {
-        const response = await fetchImpl(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' } });
-        if (response.ok) {
-          results = ((await response.json()) as { results?: OpenverseImage[] }).results ?? [];
-        } else {
-          error = `Openverse ${response.status}`;
+      const search = async (target: string) => {
+        try {
+          const response = await fetchImpl(target, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' } });
+          entries.push(makeEntry(body.boxId, 'skin.search', 'openverse', 0, target.slice(0, 200), now()));
+          if (!response.ok) {
+            error = `Openverse ${response.status}`;
+            return [];
+          }
+          return ((await response.json()) as { results?: OpenverseImage[] }).results ?? [];
+        } catch (caught) {
+          error = caught instanceof Error ? caught.message : String(caught);
+          return [];
         }
-      } catch (caught) {
-        error = caught instanceof Error ? caught.message : String(caught);
+      };
+      results = await search(url);
+      // "Related" can 404 or run dry; fall back to the next page of the plain search.
+      const usable = results.filter((image) => ALLOWED_LICENSES.has((image.license ?? '').toLowerCase()) && !exclude.has(image.id));
+      if (usable.length < body.n && url.includes('/related/')) {
+        results = [...results, ...(await search(`${OPENVERSE_URL}?${new URLSearchParams({ q: body.material, license: 'cc0,pdm,by,by-sa', page_size: '20', page: String(Math.min(body.round, 10)), mature: 'false' }).toString()}`))];
+        error = undefined;
       }
-      entries.push(makeEntry(body.boxId, 'skin.search', 'openverse', 0, url.slice(0, 200), now()));
       const variants = results
         .map((image, index) => openverseToVariant(image, body.round, index))
         .filter((variant): variant is VariantOut => variant !== null && !exclude.has(variant.openverse_id ?? '') && !exclude.has(variant.id))
@@ -445,7 +455,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
           path: 'image_generate',
           tokens: {},
           background: null,
-          veil: 55,
+          veil: 72,
           description: `Generated image of ${body.material}.`,
           image: {
             title: body.material.slice(0, 200),
