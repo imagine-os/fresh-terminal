@@ -16,8 +16,15 @@ export const CHIP_ICONS: Record<ChipKind, string> = {
   page: '▭',
   nav: '☰',
   theme: '◐',
+  mood: '☹',
   entity: '◆',
 };
+
+/** Mood shows its face: ☹ negative, ☺ positive. */
+export function chipIcon(chip: Pick<Chip, 'kind' | 'value'>): string {
+  if (chip.kind === 'mood') return chip.value === 'positive' ? '☺' : '☹';
+  return CHIP_ICONS[chip.kind];
+}
 
 interface Props {
   text: string;
@@ -53,7 +60,7 @@ export function ChipText({ text, chips, cursor = false }: Props) {
             title={chipTitle(part.chip)}
           >
             <span className="chip-icon" aria-hidden="true">
-              {CHIP_ICONS[part.chip.kind]}
+              {chipIcon(part.chip)}
             </span>
             {part.chip.text}
             {isAmbiguous(part.chip) ? (

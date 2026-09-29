@@ -18,6 +18,7 @@ export const CHIP_KIND_DESCRIPTIONS: Record<ChipKind, string> = {
   page: 'a page in this box',
   nav: 'a sidebar menu item in this box',
   theme: 'a theme of this terminal',
+  mood: 'a feeling about the work: negative or positive',
   entity: 'a proper noun of unknown kind',
 };
 

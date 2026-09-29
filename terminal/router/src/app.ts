@@ -99,6 +99,14 @@ const routeBodySchema = z.object({
     .array(z.object({ role: z.enum(['user', 'assistant', 'system']), content: z.string() }))
     .max(40)
     .default([]),
+  /** What the person sees right now, so the model can talk about the screen (C-081). */
+  screen: z
+    .object({
+      open_page: z.string().max(200).nullable().optional(),
+      visible: z.array(z.string().max(40)).max(8).optional(),
+      recent_edits: z.array(z.string().max(300)).max(6).optional(),
+    })
+    .optional(),
 });
 
 export type RouteBody = z.infer<typeof routeBodySchema>;
@@ -400,7 +408,7 @@ export function createApp(options: CreateAppOptions) {
         snapshot.pages.length > escalation.max_pages);
     const chips = typedChips(body.chips);
     const messages: ChatMessage[] = [
-      { role: 'system', content: systemMessages(snapshot) },
+      { role: 'system', content: systemMessages(snapshot, { intent: routing.intent, ...(body.screen ? { screen: body.screen } : {}) }) },
       ...body.history.map((message): ChatMessage =>
         message.role === 'assistant' ? { role: 'assistant', content: message.content } : { role: message.role === 'system' ? 'user' : message.role, content: message.content },
       ),

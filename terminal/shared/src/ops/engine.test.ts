@@ -167,3 +167,34 @@ describe('tools', () => {
     expect(parsed.ok && parsed.kind === 'respond' ? parsed.dropped.length : 0).toBe(1);
   });
 });
+
+describe('no-op edits are rejected, names not ids (C-081)', () => {
+  function stateWithPage(): { state: UiState; ctx: EngineContext } {
+    const boxUi = defaultBoxUi('b1', 0);
+    const page = { id: 'page-1', box_id: 'b1', title: 'Theme Gallery', blocks: [], created_at: 0, updated_at: 0 };
+    const item: NavItem = { id: 'nav-1', box_id: 'b1', parent_id: null, label: 'Theme Gallery', target: { kind: 'page', ref: 'page-1' }, order: 0, created_at: 0, updated_at: 0 };
+    const state: UiState = { nav: [item], pages: [page], boxUi, glossary: [{ id: 'term-1', box_id: 'b1', text: 'Bad', type: 'entity', note: '', case_sensitive: true, created_at: 0 }], starters: [] } as UiState;
+    let n = 0;
+    const ctx: EngineContext = { boxId: 'b1', now: () => 1, newId: (prefix) => `${prefix}-${(n += 1)}`, themeIds: ['void', 'blank-page'], actionIds: [], siteUrls: [] } as unknown as EngineContext;
+    return { state, ctx };
+  }
+  it('refuses to point a menu item where it already points, and names the page', () => {
+    const { state, ctx } = stateWithPage();
+    const result = applyOps(state, [{ op: 'nav.retarget', item: 'Theme Gallery', target: { kind: 'page', ref: 'page-1' } }], ctx);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toContain("the page 'Theme Gallery'");
+  });
+  it('refuses to teach a word it already knows the same way', () => {
+    const { state, ctx } = stateWithPage();
+    const same = applyOps(state, [{ op: 'glossary.add', text: 'Bad', type: 'entity' }], ctx);
+    expect(same.ok).toBe(false);
+    const changed = applyOps(state, [{ op: 'glossary.add', text: 'Bad', type: 'mood', note: 'negative' }], ctx);
+    expect(changed.ok).toBe(true);
+  });
+  it('refuses to set the theme that is already on', () => {
+    const { state, ctx } = stateWithPage();
+    const current = state.boxUi.theme_id;
+    const result = applyOps(state, [{ op: 'theme.set', theme_id: current }], ctx);
+    expect(result.ok).toBe(false);
+  });
+});

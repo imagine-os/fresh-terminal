@@ -100,7 +100,8 @@ As of 2026-09-29:
 | **Logos and icons skill** | Added 2026-09-29 02:25 UTC at `terminal/skills/logos-and-icons/SKILL.md`: source order (official → official repo → Simple Icons → text mark), licence check, sizes, registry at `docs/brand/registry.md`, generate only for our own marks. First use: marks on the FreshStack cards and brand chips. Assets not gathered yet. |
 | **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 157 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
-| **No silent turns, smarter tagger, tiles, stage** (C-080) | Shipped 2026-09-29 04:20 UTC. Next: the review pass (C-081): no-op edit turns, raw ids, Undo bars, open created pages. |
+| **Review pass** (C-081) | Shipped 2026-09-29 04:45 UTC: no-op edits refused, names not ids, one Undo bar, created pages open, screen context, mood tags. |
+| **No silent turns, smarter tagger, tiles, stage** (C-080) | Shipped 2026-09-29 04:20 UTC. |
 | **Tighter start** (C-078) | Shipped 2026-09-29 04:00 UTC: square corners, one bottom row, centered prompt on an empty box, tags. |
 | **Branded export, import, live credits** (C-076) | Shipped 2026-09-29 03:50 UTC. |
 | **Clean start** (C-075) | Shipped 2026-09-29 03:40 UTC: Alt+key shortcuts while typing, free usage label, sidebar hidden with top-left icon and settings, starters and hints behind switches, calmer tray. |

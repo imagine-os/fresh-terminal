@@ -2930,3 +2930,31 @@ textarea.field-input {
     margin-bottom: 0;
   }
 }
+
+/* ---------- C-081: mood tags, one Undo bar ---------- */
+.chip[data-kind='mood'] {
+  --chip: var(--chip-mood);
+}
+.chip[data-kind='org'],
+.chip[data-kind='person'],
+.chip[data-kind='place'] {
+  --chip: var(--chip-entity);
+}
+/* only the newest edit gets the wide bar; earlier ones are one quiet line */
+.rb-edits[data-compact='true'] {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg-faint);
+  font-size: var(--type-whisper);
+}
+.rb-edits[data-compact='true'] .rb-undo {
+  min-height: 0;
+  padding: 0 0.3rem;
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+  text-decoration: underline;
+}

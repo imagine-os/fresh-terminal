@@ -21,6 +21,7 @@ export const CHIP_KINDS = [
   'page',
   'nav',
   'theme',
+  'mood',
   'entity',
 ] as const;
 export type ChipKind = (typeof CHIP_KINDS)[number];

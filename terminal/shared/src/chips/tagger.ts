@@ -123,6 +123,13 @@ const ORDINAL_RANK: Record<string, number> = {
   '6th': 6, sixth: 6, '7th': 7, seventh: 7, '8th': 8, eighth: 8, '9th': 9, ninth: 9, '10th': 10, tenth: 10,
 };
 
+/** Feeling words about the work (C-081). Whole words only, so "badass" never reads as "bad". */
+const MOOD_NEGATIVE = 'bad|awful|terrible|horrible|ugly|annoying|annoyed|broken|worse|worst|hate|hated|wrong|useless|confusing|frustrating|slow|sucks|meh|malo|mala|feo|fea|horrible|pésimo|pesimo|molesto|odio';
+const MOOD_POSITIVE = 'good|great|awesome|amazing|love|loved|like it|nice|perfect|beautiful|excellent|better|best|badass|cool|wonderful|fantastic|bueno|buena|genial|perfecto|hermoso|excelente|mejor|increíble|increible';
+const MOOD = new RegExp(`\\b(${MOOD_NEGATIVE}|${MOOD_POSITIVE})\\b`, 'gi');
+const NEGATIVE_SET = new Set(MOOD_NEGATIVE.split('|'));
+const NEGATION_BEFORE = /\b(?:not|never|no|isn't|isnt|wasn't|doesn't|dont|don't|ain't|nunca|tampoco)\s+(?:so|that|very|too|really|tan|muy)?\s*$/i;
+
 function isStopword(word: string): boolean {
   return STOPWORDS.has(word.toLowerCase());
 }
@@ -437,6 +444,31 @@ export class LocalTagger implements ChipTagger {
       const start = entity.index + trimmed.offset;
       pushIfFree(chips, { kind: 'entity', start, end: start + trimmed.text.length, text: trimmed.text, p: 0.6, source: 'local' });
     }
+
+    // Mood: "you're doing a bad job" is feedback, not a thing to learn. Negation flips it: "not bad" leans positive.
+    scan(MOOD, text, (match) => {
+      const word = match[0];
+      const before = text.slice(Math.max(0, match.index - 24), match.index);
+      // "Bad is an adjective" talks about the word; "a bad job" and "that's bad" feel it.
+      if (/^\s+(?:is|es|means|significa)\b/.test(text.slice(match.index + word.length, match.index + word.length + 12))) return;
+      let negative = NEGATIVE_SET.has(word.toLowerCase());
+      let p = 0.6;
+      if (NEGATION_BEFORE.test(before)) {
+        negative = !negative;
+        p = 0.55;
+      }
+      const value = negative ? 'negative' : 'positive';
+      pushIfFree(chips, {
+        kind: 'mood',
+        start: match.index,
+        end: match.index + word.length,
+        text: word,
+        value,
+        p,
+        alternatives: [{ kind: 'mood', value: negative ? 'positive' : 'negative', p: 1 - p }],
+        source: 'local',
+      });
+    });
 
     scan(NUMBER, text, (match) => {
       const chip: Chip = { kind: 'number', start: match.index, end: match.index + match[0].length, text: match[0], value: match[0], p: 0.8, source: 'local' };

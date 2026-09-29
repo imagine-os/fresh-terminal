@@ -68,7 +68,7 @@ function taggerPrompt(glossary: GlossaryHint[]): string {
   const taught = glossary.length
     ? `\nThis box has taught you these words (treat them exactly so): ${JSON.stringify(glossary)}`
     : '';
-  return `You tag spans in the user's text. Kinds: action (leading verb), date (days, "today", "hoy" in Spanish when it means today), time (3pm, 15:00, "a las 3"), person, org (company or brand), place, object (a named thing, often quoted), variable ($name), list (list marker), number, money, url, page/nav/theme (names of this app's pages, menu items, themes), entity (proper noun of unknown kind).
+  return `You tag spans in the user's text. Kinds: action (leading verb), date (days, "today", "hoy" in Spanish when it means today), time (3pm, 15:00, "a las 3"), person, org (company or brand), place, object (a named thing, often quoted), variable ($name), list (list marker), number, money, url, page/nav/theme (names of this app's pages, menu items, themes), mood (a feeling word about the work: "bad", "annoying", "love it"; value "negative" or "positive"; "badass" is positive), entity (proper noun of unknown kind).
 Return only spans you can locate exactly: start/end are character offsets [start, end) into the text and text must equal the covered substring. p is your probability for kind. If a span could be another kind, list it in alternatives with its probability (e.g. "Hoy" can be org or date). Use context: "Hoy's new logo" is org; "hoy a las 3" is date. value is a normalised value or "". When unsure a span is anything, leave it out.${taught}`;
 }
 
