@@ -16,8 +16,8 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-101) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
-| [canon/prompts.md](canon/prompts.md) | All 100 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-102) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 101 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
 | [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, replay, step, wiki and more | 2026-09-29 |
@@ -103,6 +103,7 @@ Read this first.
 | [changelog/0010.md](changelog/0010.md) | Readable text over photo and material skins: sampled scrim, AA text, neutral small text | 2026-09-29 |
 | [changelog/0012.md](changelog/0012.md) | Koi pond v3 and canvas v2 redo, best-of-3 rounds, before/after screenshots, live check | 2026-09-29 |
 | [changelog/0013.md](changelog/0013.md) | The sign-in matches the theme (Clerk appearance), before/after at 390, 1280, 3840 | 2026-09-29 |
+| [changelog/0019.md](changelog/0019.md) | A share preview for every public page, rebuilt on every publish (build step, CI-enforced) | 2026-09-29 |
 | [changelog/0018.md](changelog/0018.md) | The sales pages in FreshStack's look, screenshots from the current app by script (CI-checked), the first-sign-up $5 offer, pay what you want | 2026-09-29 |
 | [changelog/0016.md](changelog/0016.md) | The sales site at /about, /pricing and /faq, share cards on every public page, our own brand mark, with the live check | 2026-09-29 |
 | [changelog/0017.md](changelog/0017.md) | The account window (Clerk UserProfile) fits from phone to 4K; the sign-in width stays on sign-in; `pnpm check:clerk` | 2026-09-29 |
@@ -120,6 +121,7 @@ Read this first.
 | [pages/koi.md](pages/koi.md) | Page spec: koi pond v3 (`/pages/koi.html`): views, controls, URL options, versions | 2026-09-29 |
 | [pages/actions.md](pages/actions.md) | Page doc: Actions (`/actions`): rows, statuses, model and cost from the ledger, filters, sort, views, the resizable timeline column, typed undo | 2026-09-29 |
 | [pages/tags.md](pages/tags.md) | Page doc: Tags (`/tags`): every tag the person typed as a graph (default), table, list, board and timeline; filters, sort, graph options | 2026-09-29 |
+| [reference/share-previews.md](reference/share-previews.md) | Share previews: every public page gets tags and its own card on every build; how a new page gets one | 2026-09-29 |
 | [pages/sales.md](pages/sales.md) | Page doc: the sales pages (/about, /pricing, /faq): sections, pricing, actions, languages, share tags, how to change them | 2026-09-29 |
 | [pages/auth.md](pages/auth.md) | Page doc: sign-in and the account window (Clerk): where they open, sizes per width, targets, checks | 2026-09-29 |
 | [pages/hub.md](pages/hub.md) | Page doc: the hub (`/hub`): who can see it, how the server checks, sections, data, actions, local preview | 2026-09-29 |

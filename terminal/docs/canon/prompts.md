@@ -879,3 +879,11 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** (With a screenshot of the How it works section.) C-101: step 01 shows a real 2x screenshot of the prompt with "make a page called Projects" tagged (action, page) and "It auto-tags what you type"; step 03 reads "Replay the whole session, undo, redo and branch freely, step by step." with "Merge is coming soon." because merge is not built.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790662628273119?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790662628.273119
+
+## 101. Tue Sep 29, 12:56 AM CDT · 2026-09-29 05:56:31 UTC (recorded after 100)
+
+> by default any page needs share preview that updates each publish
+
+**What happened:** C-102 (Opus 5.5): a standing rule. `scripts/share-pages.ts` runs in every build (so every publish): each public page (the app root, /about, /pricing, /faq, every pages/*.html, the wiki, /canvas, /actions, /tags) gets og:, twitter: and canonical tags from its own title and description, and its own 1200×630 card rendered from a template into /og/<page>.png. The hub gets a generic noindex card. The build fails when a public page has no tags or card. Rule written into the root README, the Canon and docs/reference/share-previews.md.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661391091509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661391.091509
+

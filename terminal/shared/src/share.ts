@@ -21,7 +21,18 @@ export const SHARE = {
   themeColor: '#000000',
 } as const;
 
-/** Every page that carries the share tags: file (relative to terminal/app) and its public path. */
+/**
+ * App routes that are public pages of their own (they are the SPA underneath).
+ * The build writes app/dist/<name>.html for each, a copy of index.html with its own share tags
+ * (scripts/share-pages.ts). Every other public page gets its preview from its own <title> and description.
+ */
+export const SPA_SHARE_PAGES = [
+  { name: 'canvas', path: '/canvas', title: 'Canvas · Fresh Terminal', description: 'Every page and deliverable of Fresh Terminal on one zoomable canvas, in hand-drawn sections.', line: 'Everything on one canvas' },
+  { name: 'actions', path: '/actions', title: 'Actions · Fresh Terminal', description: 'Everything you asked and everything the terminal did, with status, model and cost. List, table, board or timeline.', line: 'Everything you did, with its cost' },
+  { name: 'tags', path: '/tags', title: 'Tags · Fresh Terminal', description: 'Every tag from what you typed, as a graph, table, list, board or timeline.', line: 'Your words, as a graph' },
+] as const;
+
+/** Every page that carries the share tags in its source: file (relative to terminal/app) and its public path. */
 export const SHARE_PAGES = [
   { file: 'index.html', path: '/' },
   { file: 'public/about.html', path: '/about' },

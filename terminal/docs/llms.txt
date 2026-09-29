@@ -11,13 +11,13 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-101 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-102 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
 
 - [canon/vision.md](canon/vision.md): what we are building and why, in Justin's words
-- [canon/prompts.md](canon/prompts.md): all 100 of Justin's messages verbatim with outcomes
+- [canon/prompts.md](canon/prompts.md): all 101 of Justin's messages verbatim with outcomes
 - [canon/glossary.md](canon/glossary.md): house words (box, chip, dialect, Jev, recipe, wiki)
 - [canon/people-and-access.md](canon/people-and-access.md): people, repos, secret names
 
@@ -55,6 +55,8 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Changelog
 
 - [changelog/0017.md](changelog/0017.md): the account window fits phone to 4K (sign-in width no longer on every Clerk card)
+- [changelog/0019.md](changelog/0019.md): share previews for every public page on every publish
+- [reference/share-previews.md](reference/share-previews.md): how share previews are built and checked
 - [changelog/0018.md](changelog/0018.md): sales pages match FreshStack, screenshots by script, the $5 offer, pay what you want
 - [changelog/0016.md](changelog/0016.md): the sales site, share cards, our brand mark, live check
 - [changelog/0014.md](changelog/0014.md): the $5 pass-through gate, friend credits, invite codes, the hub, live check

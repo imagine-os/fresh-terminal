@@ -6,6 +6,8 @@ A prompt-first terminal. You land in a working box, type (or speak), and what yo
 
 **Rule: every pass updates the wiki ([`terminal/docs`](terminal/docs/README.md), rendered at https://imagine-os.github.io/fresh-terminal/wiki/) and the Canon in the same commit as the work.** Plain dated lines, superseded lines kept and marked, each page linked to the Slack message that caused it (Justin, 2026-09-29).
 
+**Rule: every public page has a share preview that updates on each publish** (Justin, 2026-09-29, Canon C-102). The build (`scripts/share-pages.ts`) gives each page og/twitter/canonical tags from its own `<title>` and description and its own 1200×630 card, and fails if a public page has none; pages behind sign-in get a generic noindex card. See [`terminal/docs/reference/share-previews.md`](terminal/docs/reference/share-previews.md).
+
 **Everything lives in [`terminal/`](terminal/).** This file is the only instruction at the root. Docs live in [`terminal/docs`](terminal/docs/README.md), starting with [`terminal/docs/README.md`](terminal/docs/README.md).
 
 ## Run
