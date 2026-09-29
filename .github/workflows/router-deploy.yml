@@ -115,6 +115,28 @@ jobs:
             openssl rand -base64 48 | tr -d '\n' | pnpm dlx wrangler@4 secret put DEVICE_SIGNING_KEY > /dev/null
             echo "set DEVICE_SIGNING_KEY (new, random)"
           fi
+          # Invisible Turnstile widget "fresh-terminal": found or created, then its secret and site key go to the Worker.
+          tbase="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/challenges/widgets"
+          tauth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          sitekey=$(curl -sS "${tauth[@]}" "$tbase?per_page=50" | jq -r '[.result[]? | select(.name == "fresh-terminal")][0].sitekey // empty')
+          if [ -z "$sitekey" ]; then
+            created=$(curl -sS "${tauth[@]}" -X POST "$tbase" -d '{"name":"fresh-terminal","mode":"invisible","domains":["freshterminal.ai","www.freshterminal.ai","imagine-os.github.io","fresh-terminal-app.jmassion.workers.dev"]}')
+            sitekey=$(echo "$created" | jq -r '.result.sitekey // empty')
+            [ -n "$sitekey" ] && echo "Turnstile widget: created" || echo "Turnstile widget: not created ($(echo "$created" | jq -c '[.errors[]?.message]')); free credits run without it"
+          else
+            echo "Turnstile widget: exists"
+          fi
+          if [ -n "$sitekey" ]; then
+            tsecret=$(curl -sS "${tauth[@]}" "$tbase/$sitekey" | jq -r '.result.secret // empty')
+            if [ -n "$tsecret" ]; then
+              echo "::add-mask::$tsecret"
+              printf '%s' "$tsecret" | pnpm dlx wrangler@4 secret put TURNSTILE_SECRET > /dev/null
+              printf '%s' "$sitekey" | pnpm dlx wrangler@4 secret put TURNSTILE_SITEKEY > /dev/null
+              echo "set TURNSTILE_SECRET and TURNSTILE_SITEKEY"
+            else
+              echo "Turnstile secret not readable; skipped"
+            fi
+          fi
           # Networkless session checks: the instance's public signing key as PEM, from the Clerk JWKS.
           if [ -n "$CLERK_SECRET_KEY" ]; then
             curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" https://api.clerk.com/v1/jwks > "$RUNNER_TEMP/jwks.json"

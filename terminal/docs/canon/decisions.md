@@ -494,9 +494,9 @@ These are plans Claude answered with. Justin has not decided them, and none is b
   - **2 soft prompts**: each time the credits run out, the call still goes through with about 5¢ more and a line says "sign in to keep going ... (1 of 2)". The third time, a paid call needs sign-in. (The coordinator proposed 3; Justin said "1 or 2 chances", so 2.)
   - **$1 per signed-in account**; boxes made signed out move to D1 on the first sign-in.
   - **$2 per UTC day** of provider cost across all signed-out use, then signed-out paid calls stop for the day.
-  - Abuse brakes: 3 new devices per IP and 10 per /24 network per day get a grant; 30 paid calls a minute per IP, 120 per network; signed out means default models, no escalation, requests under 60 KB.
+  - Abuse brakes: invisible Turnstile before a new device; 3 new devices per IP and 10 per /24 network per day get a grant; 30 paid calls a minute per IP, 120 per network; signed out means default models, no escalation, requests under 60 KB.
   - Own key (BYOK) is never blocked.
   - Names people see: "free usage" for the router-paid mode, "your key" for bring-your-own (Justin, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)); internal ids unchanged.
 - Cost estimates: one chat turn ≈ 0.6¢ (fairly sure, measured live), so 25¢ ≈ 40 turns; one device at most ≈ 37¢ (fairly sure); all signed-out use at most $2 a day, ≈ $60 a month (sure for the cap, rough guess for how fast it fills); signed-in at most $100 in total on the development instance (sure).
-- Not wired: Turnstile (the token has no Turnstile permission), buying more credits, a daily cap for signed-in accounts (needed before production).
+- Turnstile: an invisible check before a browser gets its device id, set up by the deploy through the Cloudflare API (live status in changelog 0008). Not wired: buying more credits, a daily cap for signed-in accounts (needed before production).
 - Status: current. Repo: [0021-free-credits.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0021-free-credits.md), changelog 0008. The tray shows these numbers through `GET /credits` and `useCredits()` (Justin's session, C-071, C-072).

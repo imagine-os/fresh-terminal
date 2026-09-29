@@ -20,8 +20,10 @@ export interface CreditsStatus {
   limited: boolean;
   /** The global daily cap on anonymous spend is reached for today (UTC). */
   daily_cap_reached: boolean;
-  /** Bot check before the first paid call. */
+  /** Bot check before the first paid call (on POST /credits/device). */
   turnstile: 'on' | 'not-wired';
+  /** Public Turnstile site key when the check is on. */
+  turnstile_sitekey?: string;
 }
 
 /** Error codes a paid endpoint answers with (HTTP 401/402/403/413/429). */
@@ -32,7 +34,8 @@ export type CreditsErrorCode =
   | 'account_credits_exhausted'
   | 'rate_limited'
   | 'too_large'
-  | 'model_needs_sign_in';
+  | 'model_needs_sign_in'
+  | 'turnstile_failed';
 
 export interface CreditsError {
   error: string;
