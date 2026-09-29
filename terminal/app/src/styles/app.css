@@ -1981,6 +1981,12 @@ textarea.field-input {
   font-size: var(--type-whisper);
   color: var(--fg-faint);
 }
+.rf-estimate {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg);
+}
 .rf-stop {
   min-height: var(--target);
   margin-inline-start: auto;
@@ -2303,4 +2309,194 @@ textarea.field-input {
 }
 .shell[data-left='rail'] .box-remove {
   display: none;
+}
+
+/* ---------- top bar: tools tray and pinned tools (C-071) ---------- */
+
+.topbar-pins {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0.5rem;
+  min-height: var(--target);
+  border-radius: var(--radius);
+}
+.topbar-pins[data-dropping='true'] {
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+  min-width: var(--target);
+}
+.tray-anchor {
+  position: relative;
+  display: inline-flex;
+}
+.tray {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 40;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(70vh, 34rem);
+  overflow: auto;
+  display: grid;
+  gap: var(--space-cozy);
+  padding: 0.6rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: calc(var(--radius) + 0.2rem);
+  box-shadow: var(--shadow);
+}
+.tray-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.tray-hint {
+  font-weight: 400;
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+}
+.tray-section {
+  display: grid;
+  gap: 0.3rem;
+}
+.tray-label {
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+  padding-inline: 0.25rem;
+}
+.tray-tools {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+.tray-tool {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-radius: var(--radius);
+  cursor: grab;
+}
+.tray-tool:hover {
+  background: var(--surface-hover);
+}
+.tray-tool[data-pinned='true'] .tray-pin {
+  color: var(--accent);
+}
+.tray-tool-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.tray-tool-main .btn {
+  justify-content: flex-start;
+  min-width: 0;
+}
+.tray-tool-main .btn-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tray-tool .kbd {
+  color: var(--fg-faint);
+}
+
+/* ---------- draft page above the writing pad ---------- */
+
+.draft-page {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem 1.1rem 1rem;
+  margin-bottom: 0.4rem;
+  max-height: 40vh;
+  overflow: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 0.3rem);
+  box-shadow: var(--shadow);
+}
+.shell[data-material='paper'] .draft-page {
+  background: var(--surface);
+}
+.draft-page-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.draft-page-hint {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.draft-paragraph {
+  margin: 0;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
+  border-radius: var(--radius);
+}
+.draft-paragraph:hover {
+  box-shadow: inset 3px 0 0 var(--accent);
+  padding-left: 0.6rem;
+  margin-left: -0.6rem;
+}
+
+/* ---------- first-run line, show-bar chip, inline reply meta (C-072) ---------- */
+
+.first-run {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  margin-bottom: var(--space-cozy);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg-muted);
+  font-size: var(--type-whisper);
+}
+.first-run-text b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.first-run-credits {
+  color: var(--fg-faint);
+  text-decoration: underline dotted;
+}
+.first-run-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: none;
+}
+.show-bar {
+  position: fixed;
+  top: 0.4rem;
+  right: 0.6rem;
+  z-index: 30;
+  font-size: var(--type-whisper);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+.rb-header-inline {
+  margin-bottom: 0.15rem;
 }

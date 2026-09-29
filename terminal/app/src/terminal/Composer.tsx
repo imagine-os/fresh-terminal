@@ -11,6 +11,8 @@ import type { VoiceControls } from '../voice/useVoice';
 import { ChipPopover, type ChipDecision, type ChipRecords } from './ChipPopover';
 import { ChipText } from './ChipText';
 import { ChipTray } from './ChipTray';
+import { DraftPage } from './DraftPage';
+import { wantsPage } from './format';
 import { SuggestionStrip } from './SuggestionStrip';
 
 interface Props {
@@ -185,6 +187,19 @@ export function Composer({
 
   return (
     <div className="composer" data-testid="composer">
+      {wantsPage(text) ? (
+        <DraftPage
+          text={text}
+          chips={chips}
+          onJump={(offset) => {
+            const element = textareaRef.current;
+            if (!element) return;
+            element.focus();
+            element.setSelectionRange(offset, offset);
+            trackCaret(element);
+          }}
+        />
+      ) : null}
       <SuggestionStrip
         visible={showSuggestions}
         hasBoxes={hasBoxes}

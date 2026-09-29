@@ -126,3 +126,17 @@ describe('chip merge, glossary and overrides', () => {
     expect(isAmbiguous(next.find((chip) => chip.text === 'Hoy')!)).toBe(false);
   });
 });
+
+describe('phrases and teaching verbs (2026-09-29)', () => {
+  it('reads "make sure" as one action chip instead of make + a quote', () => {
+    const chips = localTagger.tag('make sure i can drag tools back');
+    const first = chips.find((chip) => chip.start === 0);
+    expect(first?.kind).toBe('action');
+    expect(first?.text).toBe('make sure');
+    expect(chips.some((chip) => chip.text === 'make' && chip.end === 4)).toBe(false);
+  });
+  it('tags learn and tagged wherever they appear', () => {
+    const chips = localTagger.tag('Even the word tagged could learn a recipe');
+    expect(chips.filter((chip) => chip.kind === 'action').map((chip) => chip.text)).toEqual(['tagged', 'learn']);
+  });
+});

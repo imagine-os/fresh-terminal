@@ -25,6 +25,11 @@ figcaption{font-size:.9rem;display:grid}figcaption small{color:var(--muted);font
 .sizes{display:flex;gap:.5rem;align-items:center;color:var(--fg)}.sizes img{display:block}
 h2{margin:1rem 0 0;font-size:1.2rem;font-weight:600}
 .foot{font-size:.9rem}
+.estimate{display:grid;gap:.8rem;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);max-width:62rem}
+.estimate-row{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.estimate-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.4rem 1rem;margin:0}.estimate-grid dt{color:var(--muted);font:600 .74rem ui-monospace,monospace;text-transform:uppercase;padding-top:.2rem}.estimate-grid dd{margin:0;color:var(--fg)}.estimate-grid b{color:var(--fg)}
+.estimate-actions{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}.cta{display:inline-flex;align-items:center;min-height:44px;padding:0 1.1rem;border-radius:999px;background:var(--fg);color:var(--bg);text-decoration:none;font-weight:600}.estimate-note{font-size:.85rem;color:var(--muted);max-width:40rem}
+@media (max-width:40rem){.estimate-grid{grid-template-columns:1fr}}
 </style></head><body><div class="wrap">
 <nav><a href="../">Fresh Terminal</a> / <a href="library.html">Library</a> / Brand marks</nav>
 <h1>Brand marks</h1>
@@ -47,6 +52,19 @@ h2{margin:1rem 0 0;font-size:1.2rem;font-weight:600}
 <div class="grid" id="grid" data-variant="colour"></div>
 <h2>Not gathered yet (text marks)</h2>
 <p>Not in Simple Icons; the registry names the official source to try for each. Shown as a letter until then.</p>
+<div class="estimate" id="estimate">
+  <div class="estimate-row"><strong>Finish these 12 from official sources</strong><span class="pill">estimate</span></div>
+  <dl class="estimate-grid">
+    <dt>Money</dt><dd>about <b>$0.40</b> in model calls (12 marks × one page read and one licence check each, Claude via OpenRouter) and <b>$0</b> in vendor fees. Sure: these marks are free to download from their owners.</dd>
+    <dt>Time</dt><dd>about <b>15 minutes</b> of agent work in one pass, plus the usual checks and push.</dd>
+    <dt>How sure</dt><dd><b>Likely (about 90%)</b> for the 9 with a public repo or brand page: SpacetimeDB, Hyperbeam, Browserbase, Playwright, Liveblocks, Colyseus, Puck, Yjs, Electric SQL. <b>Unsure (about 60%)</b> for OpenAI, Slack and W3C: their brand terms may only allow the text mark, in which case the text mark stays and the registry says why.</dd>
+    <dt>Then</dt><dd>each new mark gets the six configurations automatically; the count above changes on the next deploy.</dd>
+  </dl>
+  <div class="estimate-actions">
+    <a class="cta" id="start" href="../?prompt=Gather%20the%2012%20missing%20brand%20marks%20(SpacetimeDB%2C%20OpenAI%2C%20Hyperbeam%2C%20Browserbase%2C%20Playwright%2C%20Slack%2C%20Liveblocks%2C%20Colyseus%2C%20W3C%2C%20Puck%2C%20Yjs%2C%20Electric%20SQL)%20from%20their%20official%20brand%20pages%20or%20repos%2C%20per%20terminal%2Fskills%2Flogos-and-icons%2FSKILL.md%3A%20read%20the%20terms%2C%20store%20the%20SVG%2C%20add%20the%20registry%20line%2C%20run%20brand-variants%2C%20and%20report%20cost%20and%20certainty.">Start in the terminal</a>
+    <span class="estimate-note">Puts the request in your prompt box with the plan attached. Today the terminal records it and answers with the plan; the gathering itself runs as an agent pass on the repo, and its real cost lands on the ledger. Running it from the page directly is not wired yet.</span>
+  </div>
+</div>
 <div class="grid" id="text"></div>
 <h2>Sizes</h2>
 <p>Every mark is checked at 16, 24, 48 and 128 px on both page themes. This row shows the mono configuration of the first mark at each size.</p>

@@ -17,8 +17,23 @@ export interface TagContext {
   themes?: Array<{ id: string; name: string }>;
 }
 
+/** Multi-word verbs read as one action chip ("make sure", not "make" + a quote). Longest first. */
+export const ACTION_PHRASES = ['make sure', 'set up', 'sign in', 'log in', 'figure out', 'check out', 'clean up', 'turn on', 'turn off'] as const;
+
+/** Verbs about teaching the terminal; tagged wherever they appear, not only at a sentence start. */
+export const TEACHING_VERBS = ['learn', 'tag', 'tagged', 'teach', 'remember'] as const;
+
 export const ACTION_VERBS = [
   'make',
+  'learn',
+  'tag',
+  'create',
+  'rename',
+  'switch',
+  'draw',
+  'hide',
+  'move',
+  'fix',
   'build',
   'show',
   'list',
@@ -226,6 +241,12 @@ export class LocalTagger implements ChipTagger {
 
     for (const start of sentenceStarts(text)) {
       const rest = text.slice(start);
+      const lower = rest.toLowerCase();
+      const phrase = ACTION_PHRASES.find((candidate) => lower.startsWith(candidate) && !/[A-Za-z]/.test(lower.charAt(candidate.length)));
+      if (phrase) {
+        pushIfFree(chips, { kind: 'action', start, end: start + phrase.length, text: rest.slice(0, phrase.length), value: phrase });
+        continue;
+      }
       const word = /^([A-Za-z]+)\b/.exec(rest);
       if (word === null) {
         continue;
@@ -240,6 +261,13 @@ export class LocalTagger implements ChipTagger {
           value: verb,
         });
       }
+    }
+
+    const teaching = new RegExp(`\\b(${TEACHING_VERBS.join('|')})\\b`, 'gi');
+    let taught: RegExpExecArray | null;
+    while ((taught = teaching.exec(text)) !== null) {
+      const word = taught[1] ?? '';
+      pushIfFree(chips, { kind: 'action', start: taught.index, end: taught.index + word.length, text: word, value: word.toLowerCase() });
     }
 
     ENTITY.lastIndex = 0;

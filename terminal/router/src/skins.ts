@@ -358,7 +358,19 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
       path = ranked[0]?.[0] ?? (from === 'image_generate' ? 'image_search' : 'procedural_code');
       note = `${from === 'image_generate' ? 'Image generation' : from} costs about ${(estimate(from) / 10_000).toFixed(1)}¢ per version, over the ${(params.cap_micro / 10_000).toFixed(0)}¢ cap, so this run uses ${path.replace('_', ' ')} instead. Raise refine.cap_micro in the route table to allow it.`;
     }
-    return c.json({ target, material, path, source, confidence, probabilities, params, entries, note });
+    // Expected spend, shown before the rounds start (Justin's rule: estimates with a certainty).
+    const perRound = estimate(path) * params.variants;
+    const spentPlan = entries.reduce((sum, entry) => sum + entry.price_micro, 0);
+    const typical = params.typical_rounds ?? 3;
+    const clampCap = (value: number) => Math.min(params.cap_micro, Math.round(value));
+    const measured = params.measured?.[path] === true;
+    const costEstimate = {
+      micro: clampCap(spentPlan + perRound * typical),
+      low_micro: clampCap(spentPlan + perRound),
+      high_micro: clampCap(spentPlan + perRound * params.max_rounds),
+      certainty: path === 'library' ? 'sure' : measured ? 'fairly sure' : 'rough guess',
+    };
+    return c.json({ target, material, path, source, confidence, probabilities, params, entries, note, estimate: costEstimate });
   });
 
   app.post('/skin/variants', async (c) => {
