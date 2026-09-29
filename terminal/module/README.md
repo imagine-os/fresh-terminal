@@ -2,7 +2,7 @@
 
 TypeScript server module written against `spacetimedb@2.10.1` (`spacetimedb/server`).
 
-Status: type-checks locally (`pnpm typecheck` at `terminal/`) and bundles with `spacetime build`. Published by `.github/workflows/spacetime-publish.yml` on every push that touches this folder; see the run log for the confirmed result. The app runs on a local in-memory/localStorage store until this is published and bindings are generated.
+Status: type-checks locally (`pnpm typecheck` at `terminal/`) and bundles with `spacetime build`. Published to Maincloud as `fresh-terminal` by `.github/workflows/spacetime-publish.yml` on every push that touches this folder (first successful publish 2026-09-29 05:39 UTC, run 4). Bindings land in `app/src/module_bindings/`. The app runs on a local in-memory/localStorage store until this is published and bindings are generated.
 
 ## Tables
 
