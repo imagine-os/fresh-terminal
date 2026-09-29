@@ -3799,7 +3799,7 @@ textarea.field-input {
   flex: none;
 }
 
-/* ---------- C-091: click to rename a stage ---------- */
+/* ---------- C-094: click to rename a stage ---------- */
 .inline-name {
   border: 0;
   background: none;
@@ -3846,7 +3846,7 @@ textarea.field-input {
   min-width: 0;
 }
 
-/* ---------- C-091: a very light perspective grid going into the distance (Justin) ---------- */
+/* ---------- C-094: a very light perspective grid going into the distance (Justin) ---------- */
 .region-stage {
   position: relative;
   isolation: isolate;

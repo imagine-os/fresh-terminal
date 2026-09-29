@@ -16,7 +16,7 @@ interface Props {
   onNew: () => void;
   onNavigate: (target: NavTarget, item: NavItem) => void;
   onRemove?: (id: string) => void;
-  /** Double-click a stage name to rename it (C-091). */
+  /** Double-click a stage name to rename it (C-094). */
   onRename?: (id: string, name: string) => void;
   /** The menu moved to the top-bar tray (C-071); the sidebar shows it only when asked. */
   showMenu?: boolean;

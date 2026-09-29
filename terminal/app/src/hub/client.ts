@@ -5,6 +5,7 @@ export interface HubClient {
   data<T>(name: string): Promise<T>;
   get<T>(path: string): Promise<T>;
   post<T>(path: string, body: unknown): Promise<T>;
+  put<T>(path: string, body: unknown): Promise<T>;
 }
 
 export function liveClient(token: TokenFn): HubClient {
@@ -12,6 +13,7 @@ export function liveClient(token: TokenFn): HubClient {
     data: (name) => hubData(name, token),
     get: (path) => admin(path, token),
     post: (path, body) => admin(path, token, body),
+    put: (path, body) => admin(path, token, body, 'PUT'),
   };
 }
 
@@ -37,12 +39,14 @@ export function sampleClient(): HubClient {
     { account_id: 'acct_user_friend_a', id: 'srv_grant_sample_1', kind: 'credit', what: 'credit.grant', model: '', cost_micro: 0, price_micro: 10_000_000, created_at: now - 7_200_000 },
   ];
   const answer = async <T,>(value: unknown) => value as T;
+  let sampleShare = false;
   return {
     data: async <T,>(name: string) => (await (await fetch(`/hub/data/${name}.json`)).json()) as T,
     get: async <T,>(path: string) => {
       if (path.startsWith('/admin/overview'))
         return answer<T>({
           accounts: { n: 7, spent: 2_340_000, cost: 1_950_000, needs_payment: 1, active: 0 },
+          privacy: { sharing: 1, stored_bytes: 1_840_000 },
           grants: { n: grants.length, total: grants.reduce((sum, row) => sum + Number(row.amount_micro), 0) },
           invites: { n: invites.length, open: 1 },
           devices: { n: 41, spent: 3_100_000, cost: 2_600_000 },
@@ -52,8 +56,13 @@ export function sampleClient(): HubClient {
         });
       if (path.startsWith('/admin/grants')) return answer<T>({ grants });
       if (path.startsWith('/admin/invites')) return answer<T>({ invites });
-      if (path.startsWith('/admin/ledger')) return answer<T>({ entries: ledger });
+      if (path.startsWith('/admin/ledger')) return answer<T>({ entries: ledger.filter((entry) => entry.kind === 'credit'), private_totals: [{ account_id: 'acct_user_friend_a', entries: 14, cost_micro: 71_000, price_micro: 84_000, last_at: now - 3_000_000 }] });
+      if (path.startsWith('/me/privacy')) return answer<T>({ share_data: sampleShare, label: 'Share my data with Fresh Terminal to improve it (off by default)', grants: [] });
       return answer<T>({});
+    },
+    put: async <T,>(_path: string, body: unknown) => {
+      sampleShare = Boolean((body as Row | null)?.share_data);
+      return answer<T>({ share_data: sampleShare, grants: [] });
     },
     post: async <T,>(path: string, body: unknown) => {
       const input = (body ?? {}) as Row;

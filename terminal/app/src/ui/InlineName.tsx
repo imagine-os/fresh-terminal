@@ -12,7 +12,7 @@ interface Props {
 }
 
 /**
- * A name you click to edit in place (C-091). Enter saves, Escape cancels,
+ * A name you click to edit in place (C-094). Enter saves, Escape cancels,
  * blur saves. Blank stays as it was. Nothing else on screen moves.
  */
 export function InlineName({ value, onCommit, label, activateOn = 'click', className = '', testId }: Props) {

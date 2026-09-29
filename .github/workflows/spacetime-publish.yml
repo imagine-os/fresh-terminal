@@ -3,7 +3,7 @@ name: spacetime-publish
 # Publishes the Fresh Terminal module to SpacetimeDB Maincloud and regenerates
 # the TypeScript client bindings. Needs the SPACETIMEDB_TOKEN repository secret
 # (minted with `spacetime login show --token` on a signed-in machine). The
-# token is never printed. C-091.
+# token is never printed. C-094.
 on:
   workflow_dispatch:
     inputs:

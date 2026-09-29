@@ -738,6 +738,7 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 > they can have a cehckbox to share their data with us or not. But of course they need to be able to have that checked off by default and know their data is private from us unless chosen to share. Unless we add them personally as a client, then we shouldnt have acess to their data unless they grant it to us.
 
 **What happened:** The offline prompt queue landed in C-090 (a line typed offline is held, marked, and sent, edited or discarded when the connection is back; stale after 10 min). The cap, storage costs, the privacy checkbox and SpacetimeDB live sync went to the other session.
+**Billing build (Opus 5.5):** C-091 and C-092 (Opus 5.5, changelog 0014). No per-account daily cap: $5 on us, then pay as you go; the all-accounts cap stays only as a hidden $25/day breaker Justin can remove. Your key pays $0 for models, and storage above 100 MB per account is metered (about $0.05/GB-month, not final, not billed yet). `share_data` is off by default with a toggle in Settings and the hub; access grants cover "add as a client"; admin endpoints show totals only unless the person shares or grants. The realtime sync and offline-prompt points went to open question 19's neighbours and Justin's session (SpacetimeDB is still waiting on its token).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658094.470499
 
 ## 84. Tue Sep 29, 12:03 AM CDT · 2026-09-29 05:03:40 UTC
@@ -747,44 +748,51 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** Taken by the other session with its sales-site build (card, og tags on the app and the site). This session suggested the copy: card "A terminal that adapts to you."; share title "Fresh Terminal — the terminal for everyone"; description "If computers had started smart, the terminal would look like this. Type or talk; it builds itself around you."
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658220851259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658220.851259
 
-## 85. Tue Sep 29, 12:16 AM CDT · 2026-09-29 05:16:14 UTC
+## 85. Tue Sep 29, 12:09 AM CDT · 2026-09-29 05:09:13 UTC (recorded after 84)
+
+> can we use clerk billing please? or is stripe already necessary for this
+
+**What happened:** C-093 (Opus 5.5, changelog 0014). Checked on Clerk's pages: yes, Clerk Billing, and a Stripe account is still needed for real money (Clerk uses Stripe only for processing; you connect it once inside Clerk; development runs on Clerk's shared test gateway with no Stripe account). Clerk Billing sells plans, not one-off top-ups, so pass-through runs as monthly "credit" refill plans: each paid charge lands on the ledger through the Clerk webhook. Built, not wired until the webhook secret exists.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658553862549?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658553.862549
+
+## 86. Tue Sep 29, 12:16 AM CDT · 2026-09-29 05:16:14 UTC
 
 > we should be able to click to edit stage name in top bar or in the sidebar, etc.
 
-**What happened:** C-091: click the name in the top bar, double-click it in the sidebar.
+**What happened:** C-094: click the name in the top bar, double-click it in the sidebar.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658974849059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658974.849059
 
-## 86. Tue Sep 29, 12:17 AM CDT · 2026-09-29 05:17:32 UTC
+## 87. Tue Sep 29, 12:17 AM CDT · 2026-09-29 05:17:32 UTC
 
 > `SPACETIMEDB_TOKEN confirm this is in github action secrets`
 
-**What happened:** C-091: the publish workflow checks the name is set (never the value) and publishes from Actions.
+**What happened:** C-094: the publish workflow checks the name is set (never the value) and publishes from Actions.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659052054369?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659052.054369
 
-## 87. Tue Sep 29, 12:19 AM CDT · 2026-09-29 05:19:45 UTC
+## 88. Tue Sep 29, 12:19 AM CDT · 2026-09-29 05:19:45 UTC
 
 > watching terminal talk draft, and then ebing able to edit and work on it together before giving it to the terminal is cool. and then reviewing the repsonse together also cool.
 
-**What happened:** C-091: written into docs/voice-experience.md as the co-drafting rule.
+**What happened:** C-094: written into docs/voice-experience.md as the co-drafting rule.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659185882119?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659185.882119
 
-## 88. Tue Sep 29, 12:20 AM CDT · 2026-09-29 05:20:33 UTC
+## 89. Tue Sep 29, 12:20 AM CDT · 2026-09-29 05:20:33 UTC
 
 > try one thing... give me a very light hint of a perspective grid going into the distance in the stage. please
 
-**What happened:** C-091: a faint grid in perspective behind the stage.
+**What happened:** C-094: a faint grid in perspective behind the stage.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659233955079?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659233.955079
 
-## 89. Tue Sep 29, 12:21 AM CDT · 2026-09-29 05:21:55 UTC
+## 90. Tue Sep 29, 12:21 AM CDT · 2026-09-29 05:21:55 UTC
 
 > I think soon wee need to start making real objects that have little object previews or icons, that when we open it, we can use it. We will also need to learn about GenUI or generativeUI concepts .for genreating ui on the fly and building a library of in chat or in terminal uis
 
-**What happened:** Recorded as the next design thread in C-091 (objects with previews; generative UI as a library of in-terminal pieces the model composes). Estimate in the reply.
+**What happened:** Recorded as the next design thread in C-094 (objects with previews; generative UI as a library of in-terminal pieces the model composes). Estimate in the reply.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659315639489?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659315.639489
 
-## 90. Tue Sep 29, 12:23 AM CDT · 2026-09-29 05:23:28 UTC
+## 91. Tue Sep 29, 12:23 AM CDT · 2026-09-29 05:23:28 UTC
 
 > terminal talk can be experimental. as well as the replay tool. thats all it needs to say. let me know when terminal talk is ready to demo.
 
-**What happened:** C-091: both tray entries say "experimental". Terminal-talk demo readiness is reported when the agent lands.
+**What happened:** C-094: both tray entries say "experimental". Terminal-talk demo readiness is reported when the agent lands.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659408153209?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659408.153209

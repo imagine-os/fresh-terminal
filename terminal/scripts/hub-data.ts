@@ -148,6 +148,7 @@ export const SECRET_NAMES: Array<Omit<SecretState, 'state'>> = [
   { name: 'CLERK_PUBLISHABLE_KEY', where: 'GitHub Actions secret', for: 'Sign-in in the app and the hub (public by design)' },
   { name: 'CLERK_SECRET_KEY', where: 'GitHub Actions secret', for: 'Router: sessions, admin email check, user lookup' },
   { name: 'ADMIN_EMAILS', where: 'GitHub Actions secret', for: 'Optional: hub admins by verified email (kept out of the public repo)' },
+  { name: 'CLERK_WEBHOOK_SIGNING_SECRET', where: 'GitHub Actions secret', for: 'Clerk Billing refill plans credit the ledger (C-093). Not wired yet' },
   { name: 'STRIPE_SECRET_KEY', where: 'GitHub Actions secret', for: 'Top up / add payment (Stripe Checkout). Not wired yet' },
   { name: 'STRIPE_WEBHOOK_SECRET', where: 'GitHub Actions secret', for: 'Credits a paid top-up (Stripe webhook). Not wired yet' },
   { name: 'OPENAI_API_KEY', where: 'GitHub Actions secret', for: 'Optional: spoken replies (Justin: not needed)' },

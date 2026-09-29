@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { store } from '../store';
 
-describe('renameBox (C-091)', () => {
+describe('renameBox (C-094)', () => {
   it('renames a stage, trims it, and ignores blank names', () => {
     const box = store.createBox('Untitled stage');
     store.renameBox(box.id, '  Travel notes  ');

@@ -55,7 +55,7 @@ interface Props {
   onToggleTalk: () => void;
   onActions: () => void;
   onPlan: () => void;
-  /** When set, the stage name in the bar is click-to-edit (C-091). */
+  /** When set, the stage name in the bar is click-to-edit (C-094). */
   onRenameBox?: (name: string) => void;
 }
 
@@ -76,7 +76,7 @@ export function TopBar(props: Props) {
   // Fewer tools, one list (C-090): Look is gone, Library and Canvas live on their own pages.
   const { toast } = useToast();
   // C-086: wired only when the router says a payment provider is connected.
-  const paymentsWired = credits.status?.billing?.provider === 'stripe';
+  const paymentsWired = credits.status?.billing?.provider === 'stripe' || credits.status?.billing?.provider === 'clerk';
   const onTopUp = async () => {
     if (!account.signedIn) {
       toast(t('billing.signInFirst'));
@@ -86,7 +86,8 @@ export function TopBar(props: Props) {
     if (result.kind === 'redirect') {
       toast(t('billing.opening'));
       window.location.assign(result.url);
-    } else if (result.kind === 'not-wired') toast(t('billing.notWired'));
+    } else if (result.kind === 'clerk') window.dispatchEvent(new CustomEvent('ft:action', { detail: { id: 'billing.open' } }));
+    else if (result.kind === 'not-wired') toast(t('billing.notWired'));
     else if (result.kind === 'sign-in') toast(t('billing.signInFirst'));
     else toast(result.message);
   };
@@ -107,17 +108,6 @@ export function TopBar(props: Props) {
     { id: 'lang.toggle', group: 'session', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
     { id: 'session.export', group: 'session', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
     { id: 'session.import', group: 'session', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
-    {
-      id: 'billing.topup',
-      group: 'session',
-      label: paymentsWired ? t('billing.topup') : t('billing.topupNotWired'),
-      short: t('tool.topup'),
-      detail: paymentsWired ? undefined : t('notWired'),
-      icon: <IconKey />,
-      onClick: () => void onTopUp(),
-      testId: 'billing-topup',
-    },
-    { id: 'invite.redeem', group: 'session', label: t('invite.label'), short: t('tool.invite'), icon: <IconSpark />, onClick: () => void onInvite(), testId: 'invite-redeem' },
     {
       id: 'billing.topup',
       group: 'session',
