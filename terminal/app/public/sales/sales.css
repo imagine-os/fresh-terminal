@@ -153,7 +153,7 @@ figcaption { color: var(--faint); font-size: 0.85rem; font-family: var(--mono); 
 .plan { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.7rem 1.5rem 1.8rem; display: flex; flex-direction: column; gap: 1rem; }
 .plan[data-highlight] { background: var(--bg-2); box-shadow: inset 0 3px 0 var(--accent); }
 .plan h3 { font-size: 1.2rem; display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
-.price { font-family: var(--mono); font-size: clamp(2rem, 1.4rem + 1.2vw, 2.8rem); font-weight: 700; line-height: 1; }
+.price { font-family: var(--mono); font-size: clamp(1.8rem, 1rem + 1.3vw, 2.3rem); font-weight: 700; line-height: 1; white-space: nowrap; }
 .price small { font-size: 0.95rem; font-weight: 400; color: var(--muted); margin-left: 0.4rem; }
 .plan .for { color: var(--muted); }
 .plan ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
