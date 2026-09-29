@@ -1936,6 +1936,148 @@ textarea.field-input {
   background: var(--surface);
 }
 
+/* ---------- pass 5: skins ---------- */
+
+[data-skinned].region,
+.shell > .region-stage[data-skinned] {
+  background-color: var(--bg-elevated, var(--bg));
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent), color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent)),
+    var(--skin-layers, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: local;
+  color: var(--fg);
+}
+.region-stage[data-skinned] {
+  background-color: var(--bg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-skinned].region {
+    transition: background-color 400ms ease;
+  }
+}
+
+.rf {
+  display: grid;
+  gap: 0.5rem;
+}
+.rf-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+.rf-status > span:first-child {
+  font-weight: 600;
+}
+.rf-meta {
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+}
+.rf-stop {
+  min-height: var(--target);
+  margin-inline-start: auto;
+}
+.rf-row {
+  display: grid;
+  grid-template-columns: 5.5rem repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.rf-row[data-kind='draft'] {
+  grid-template-columns: 5.5rem minmax(0, 12rem);
+}
+.rf-round {
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+}
+.rf-variant {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 0.25rem;
+  min-height: var(--target);
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+.rf-variant[data-winner='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.rf-variant[aria-pressed='true']::after {
+  content: '✓';
+  position: absolute;
+  top: 0.35rem;
+  left: 0.45rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 3px #000;
+}
+.rf-variant:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.rf-swatch {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--radius) * 0.7);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.rf-swatch-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.rf-name {
+  font-size: var(--type-whisper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline-end: 2.2rem;
+}
+.rf-score {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  font-weight: 700;
+}
+.rf-licenses {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+}
+.rf-licenses a {
+  color: inherit;
+}
+@container shell (max-width: 34rem) {
+  .rf-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .rf-row[data-kind='draft'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rf-round {
+    grid-column: 1 / -1;
+  }
+}
+
 /* ---------- replay: scrubber and banner ---------- */
 
 .replay-banner {
@@ -2130,147 +2272,5 @@ textarea.field-input {
   }
   .scrubber-tools .btn-label {
     display: none;
-  }
-}
-
-/* ---------- pass 5: skins ---------- */
-
-[data-skinned].region,
-.shell > .region-stage[data-skinned] {
-  background-color: var(--bg-elevated, var(--bg));
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent), color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent)),
-    var(--skin-layers, none);
-  background-size: cover;
-  background-position: center;
-  background-attachment: local;
-  color: var(--fg);
-}
-.region-stage[data-skinned] {
-  background-color: var(--bg);
-}
-@media (prefers-reduced-motion: no-preference) {
-  [data-skinned].region {
-    transition: background-color 400ms ease;
-  }
-}
-
-.rf {
-  display: grid;
-  gap: 0.5rem;
-}
-.rf-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.75rem;
-}
-.rf-status > span:first-child {
-  font-weight: 600;
-}
-.rf-meta {
-  font-family: var(--font-mono);
-  font-size: var(--type-whisper);
-  color: var(--fg-faint);
-}
-.rf-stop {
-  min-height: var(--target);
-  margin-inline-start: auto;
-}
-.rf-row {
-  display: grid;
-  grid-template-columns: 5.5rem repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-  align-items: stretch;
-}
-.rf-row[data-kind='draft'] {
-  grid-template-columns: 5.5rem minmax(0, 12rem);
-}
-.rf-round {
-  align-self: center;
-  font-family: var(--font-mono);
-  font-size: var(--type-whisper);
-  color: var(--fg-faint);
-}
-.rf-variant {
-  position: relative;
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: 0.25rem;
-  min-height: var(--target);
-  padding: 0.25rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--fg);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  min-width: 0;
-}
-.rf-variant[data-winner='true'] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
-}
-.rf-variant[aria-pressed='true']::after {
-  content: '✓';
-  position: absolute;
-  top: 0.35rem;
-  left: 0.45rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-shadow: 0 0 3px #000;
-}
-.rf-variant:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-.rf-swatch {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 16 / 9;
-  border-radius: calc(var(--radius) * 0.7);
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-}
-.rf-swatch-text {
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-.rf-name {
-  font-size: var(--type-whisper);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-inline-end: 2.2rem;
-}
-.rf-score {
-  position: absolute;
-  right: 0.4rem;
-  bottom: 0.3rem;
-  font-family: var(--font-mono);
-  font-size: var(--type-whisper);
-  font-weight: 700;
-}
-.rf-licenses {
-  margin: 0;
-  padding-inline-start: 1.1rem;
-  font-size: var(--type-whisper);
-  color: var(--fg-faint);
-}
-.rf-licenses a {
-  color: inherit;
-}
-@container shell (max-width: 34rem) {
-  .rf-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .rf-row[data-kind='draft'] {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .rf-round {
-    grid-column: 1 / -1;
   }
 }

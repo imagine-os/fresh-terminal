@@ -583,7 +583,7 @@
     },
     {
       "id": "clerk-production",
-      "title": "Clerk production instance on freshterminal.ai (Justin: steps in Canon C-061; DNS by site-deploy)",
+      "title": "Clerk production instance on freshterminal.ai (Justin: steps in Canon C-065; DNS by site-deploy)",
       "status": "todo",
       "depends_on": [
         "clerk-dev"

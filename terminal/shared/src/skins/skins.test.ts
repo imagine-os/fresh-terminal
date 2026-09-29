@@ -39,7 +39,7 @@ describe('skins', () => {
   it('drafts instantly: library hit, colour tint, or a labelled stand-in', () => {
     expect(rankLibrary('old brass door')[0]?.material.id).toBe('brass');
     expect(draftSkin('brass', 'stage', 's1', 1).name).toBe('Draft: Brushed brass');
-    expect(draftSkin('something orange and fluffy', 'stage', 's2', 1).name).toBe('Draft: colour tint');
+    expect(draftSkin('something teal and fluffy', 'stage', 's2', 1).name).toBe('Draft: colour tint');
     expect(draftSkin('zorblax', 'stage', 's3', 1).name).toBe('Draft: working on it');
     expect(skinSchema.safeParse(draftSkin('zorblax', 'stage', 's3', 1)).success).toBe(true);
   });

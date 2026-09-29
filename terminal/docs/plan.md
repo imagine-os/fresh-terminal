@@ -54,4 +54,4 @@ Done: `skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui` (de
 
 ## Infra — freshterminal.ai, sign-in, D1 (shipped 2026-09-29, Opus 5.5; tasks tagged pass 6 in plan.json)
 
-Done: `infra-verify` → `domain-workers` → `clerk-dev` → `d1-sync` (decision 0020, changelog 0007, Canon C-060 to C-062). Still to do: `clerk-production` (Justin creates the production instance and OAuth apps; the deploy adds the DNS records), transcript lines in sync, realtime sync (SpacetimeDB or Durable Objects, C-049). See prompt 0017.
+Done: `infra-verify` → `domain-workers` → `clerk-dev` → `d1-sync` (decision 0020, changelog 0007, Canon C-064 to C-066). Still to do: `clerk-production` (Justin creates the production instance and OAuth apps; the deploy adds the DNS records), transcript lines in sync, realtime sync (SpacetimeDB or Durable Objects, C-049). See prompt 0017.

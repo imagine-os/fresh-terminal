@@ -1,6 +1,6 @@
 # 0020 — freshterminal.ai on Workers, Clerk anonymous-first, accounts in D1
 
-Date: 2026-09-29. Model: Opus 5.5. Prompt: 0017. Canon: C-045 to C-048 (now built), C-060 to C-062.
+Date: 2026-09-29. Model: Opus 5.5. Prompt: 0017. Canon: C-045 to C-048 (now built), C-064 to C-066.
 
 ## Verified before building (workflow `infra-verify`, run 36512972684, 2026-09-29 02:31 UTC)
 
@@ -21,7 +21,7 @@ Date: 2026-09-29. Model: Opus 5.5. Prompt: 0017. Canon: C-045 to C-048 (now buil
 
 ## Limits, stated plainly
 
-- **Clerk development instance on a real domain.** Clerk's docs (checked 2026-09-29): a development instance's Frontend API lives on `*.accounts.dev` and works cross-origin from any domain, including freshterminal.ai; it shows a "Development mode" badge, is capped at 100 users, uses a dev-browser token in the URL instead of first-party cookies, and Clerk says not to run production traffic on it. Development user data cannot be moved to production. Fine for Justin's own account now; a production instance is needed before inviting people. Steps are in Canon C-061.
+- **Clerk development instance on a real domain.** Clerk's docs (checked 2026-09-29): a development instance's Frontend API lives on `*.accounts.dev` and works cross-origin from any domain, including freshterminal.ai; it shows a "Development mode" badge, is capped at 100 users, uses a dev-browser token in the URL instead of first-party cookies, and Clerk says not to run production traffic on it. Development user data cannot be moved to production. Fine for Justin's own account now; a production instance is needed before inviting people. Steps are in Canon C-065.
 - The site deploy can create the Clerk production CNAMEs itself once the live secret key (`sk_live_`) is in `CLERK_SECRET_KEY` (step "Clerk production DNS", reads `cname_targets` from the Clerk Backend API; not exercised yet).
 - Clerk's sign-in screens are English only here (no Clerk localization loaded).
 - Sync is not realtime: last writer wins per box, no merge inside a box. SpacetimeDB (or Durable Objects) is still the plan for live multiplayer (C-047, C-049).

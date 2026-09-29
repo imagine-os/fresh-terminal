@@ -249,7 +249,7 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Justin bought freshterminal.ai on Cloudflare Registrar for 2 years ("OK i paid $160 for 2 years freshterminal.ai on cloudflair").
 - Plan: freshterminal.ai serves the app from a Cloudflare Worker with static assets. api.freshterminal.ai serves the router. GitHub Pages stays as a mirror.
 - Status: current as the decision; **not live yet**. Supersedes C-033b; partly supersedes C-010.
-- 2026-09-29: **built** (C-060): app Worker `fresh-terminal-app` on freshterminal.ai (www redirects), router on api.freshterminal.ai, GitHub Pages kept as the fallback. Live status in [state.md](state.md).
+- 2026-09-29: **built** (C-064): app Worker `fresh-terminal-app` on freshterminal.ai (www redirects), router on api.freshterminal.ai, GitHub Pages kept as the fallback. Live status in [state.md](state.md).
 
 **C-046 · 2026-09-29 · Cloudflare automation runs from CI with an API token**
 - Decided: automation uses a Cloudflare API token held as a CI secret, not the laptop OAuth MCP setup, so Justin never has to open Cloudflare ("Make it so i dont need to go to cloudflare and you can do everything please").
@@ -263,14 +263,14 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Why: avoids another sign-up; the router already runs on Cloudflare.
 - SpacetimeDB stays the plan for live multiplayer and presence.
 - Status: current, and Justin can override it. Partly supersedes C-004c. Not built yet.
-- 2026-09-29: **built** (C-062): D1 database `fresh-terminal`, accounts, boxes and a ledger mirror, synced for signed-in people only.
+- 2026-09-29: **built** (C-066): D1 database `fresh-terminal`, accounts, boxes and a ledger mirror, synced for signed-in people only.
 
 **C-048 · 2026-09-29 · Auth is Clerk, starting on development instance keys**
 - Decided: start with the Clerk development instance. Keys are held as the secrets `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` (names only; values never in the repo or Slack).
 - Moving to production later is one click in the Clerk dashboard, plus DNS records we add through the Cloudflare token (C-046).
 - Why: Justin wants to use his own Fresh Terminal account personally and start connecting it to things ("i'd like to start using my terminal account personally").
 - Status: current. Wiring not built yet. Builds on C-009.
-- 2026-09-29: **built** on the development instance (C-061). Verified 02:31 UTC: `pk_test_` / `sk_test_`, Frontend API relevant-flea-5813.clerk.accounts.dev, JWKS reachable, 0 users. "Moving to production is one click" was too short: it also needs Google and GitHub OAuth credentials of our own; steps in C-061.
+- 2026-09-29: **built** on the development instance (C-065). Verified 02:31 UTC: `pk_test_` / `sk_test_`, Frontend API relevant-flea-5813.clerk.accounts.dev, JWKS reachable, 0 users. "Moving to production is one click" was too short: it also needs Google and GitHub OAuth credentials of our own; steps in C-065.
 
 **C-049 · 2026-09-29 · No Liveblocks, no Colyseus: SpacetimeDB plus our own house rules**
 - Justin asked: "do we need liveblocks or colyseus for this? or does spacetimedb handle realtime, and the rest of the rules we can study other tools like liveblocks and make our own simpler cleaner rules?"
@@ -336,14 +336,14 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 
 ## Domain, sign-in and accounts (2026-09-29, infra pass)
 
-**C-060 · 2026-09-29 02:50 · freshterminal.ai runs on a Worker; the router answers on api.freshterminal.ai**
+**C-064 · 2026-09-29 02:50 · freshterminal.ai runs on a Worker; the router answers on api.freshterminal.ai**
 - Justin, 02:28 UTC: "i already did cloudflare clerk" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648903521149?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
 - Decided: the app is Worker `fresh-terminal-app` (`terminal/site`) with static assets and SPA fallback, on custom domains freshterminal.ai and www.freshterminal.ai; the Worker sends www to the apex with a 301. The router Worker adds custom domain api.freshterminal.ai. Custom domains make Cloudflare create the DNS records and certificates, so there is no DNS step. Both keep their workers.dev URLs; GitHub Pages keeps its own build as the fallback.
 - The app picks its router by where it is served from: api.freshterminal.ai on the domain, the workers.dev router everywhere else, so Pages is not moved until the domain is proven.
 - Deploys: `site-deploy.yml` (app) and `router-deploy.yml` (router) on push to main and on demand, from GitHub Actions with `CLOUDFLARE_API_TOKEN`.
 - Status: current. Repo: [0020-domain-clerk-d1.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0020-domain-clerk-d1.md). Builds C-045 and C-046.
 
-**C-061 · 2026-09-29 02:50 · Sign-in is Clerk, anonymous-first, on the development instance for now**
+**C-065 · 2026-09-29 02:50 · Sign-in is Clerk, anonymous-first, on the development instance for now**
 - Decided: everyone starts signed out and everything works as before. A **Sign in** button in the header opens Clerk; signed in adds cloud sync. The app uses `@clerk/react` (Clerk's current React package). The router checks the Clerk session token itself, without a network call (the instance's public key is pushed as `CLERK_JWT_KEY` by the deploy; `CLERK_SECRET_KEY` is the fallback). Only `/me` and `/sync/*` need a session.
 - Limit (Clerk docs, read 2026-09-29): a development instance works from any domain, including freshterminal.ai, but shows a "Development mode" badge, holds at most 100 users, and should not carry real users. Its users cannot be moved to production.
 - Before inviting anyone, Justin does these steps once (about 15 minutes):
@@ -355,7 +355,7 @@ These are plans Claude answered with. Justin has not decided them, and none is b
   6. Back in the Clerk dashboard: wait for the **Domains** checks to pass, then press **Deploy certificates**.
 - Status: current. Development instance live; production not started (waiting on Justin). Builds C-048 and C-009.
 
-**C-062 · 2026-09-29 02:50 · Signed-in accounts, boxes and a ledger mirror live in D1; signed out stays in the browser**
+**C-066 · 2026-09-29 02:50 · Signed-in accounts, boxes and a ledger mirror live in D1; signed out stays in the browser**
 - Decided: D1 database `fresh-terminal`, created by the deploy if missing. Tables: `accounts` (clerk_user_id, plan, created_at, updated_at), `boxes` (id, account_id, name, state_json, created_at, updated_at, deleted_at), `ledger_entries` (the chained entry plus account_id and updated_at). Every row keeps a stable id and `updated_at` for later multiplayer.
 - Sync rule: last writer wins per box on `updated_at`; a box edited on this device since the last sync wins over an older server copy; an untouched box takes the newer server copy. Nobody can overwrite or read another account's box. The ledger mirror is append-only.
 - What syncs: each box's name, menu, pages, layout, theme, style, skins and glossary, and the ledger. Transcript lines stay in the browser for now (not wired yet). Sync runs on sign-in, after edits and when the window gets focus; it is not realtime.
@@ -414,3 +414,27 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Justin: ""evolve as we grow" is great tagline" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), eleven seconds after the replay ask.
 - Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
 - Status: current.
+
+## Pass 5 additions (2026-09-29)
+
+**C-060 · 2026-09-29 02:46 · "Open terminal" in the library opens a new box that is already skinned**
+- Justin: "open terminal from the library should simply take us to a fresh terminal window thats arleady skinned." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649998972349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: each of the 17 library entries links to `box/new?theme=<built theme>&skin=<material>&from=<library id>` (relative, so it works under `/fresh-terminal/`). The new box opens with that theme and the material as the stage skin, with no toast and no screen in between. The mapping lives in `shared/src/skins/terminals.ts` and a test keeps the page in step with it.
+- Terminals whose look is not fully built open the closest built look with a line naming what is not wired yet: Bezel and Glass (moving bezel), You as the Camera (camera reflection), Tilt Window (phone tilt), Koi Pond (the live 3D pond inside a box; its own page stays linked), Night Sky (drifting stars).
+- Status: current. Built in pass 5.
+- Found then: the old links were `/box/new?...` from the site root, which on GitHub Pages leaves `/fresh-terminal/` and cannot open the app.
+
+**C-061 · 2026-09-29 02:47 · Ontology: one edge per relation, named both ways**
+- Asked: "ontology should be a big part of how you think. often 2 way connections have different meaning in each direction" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: each relation is stored once as an edge with a forward label and an inverse label ("Hoy employs Sergio" / "Sergio works at Hoy"). Some relations are symmetric ("partners with"). Every edge carries its source and date. Chips and Jev share one list of types.
+- Status: proposed.
+
+**C-062 · 2026-09-29 02:47 · Connectors: one managed OAuth layer that can also be self-hosted**
+- Asked: "How will we handle connectors for thingsl ike dropbox, google drive, email, whatsapp, sms, etc." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: one managed OAuth connector layer that can also be self-hosted (so it fits ours, your keys and self-host), chosen after verifying the options. First set: Google Drive, Dropbox and email over IMAP. WhatsApp and restricted Gmail scopes need vendor approval (Meta, Google) and come later.
+- Status: proposed. No connector layer chosen or verified yet.
+
+**C-063 · 2026-09-29 02:47 · Migration: originals kept, records mapped with source ids, duplicates flagged**
+- Asked: "migration is a huge ability we need to build out" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: raw originals go to storage untouched. Records are mapped onto the ontology (C-061) with their source ids, so an import can be re-run. Possible duplicates are flagged for review, never merged silently. First formats: Google Takeout, Dropbox, mbox email and WhatsApp chat export. Between Gigs and Company OS are the first real imports.
+- Status: proposed.

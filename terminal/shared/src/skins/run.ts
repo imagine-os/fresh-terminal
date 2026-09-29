@@ -26,6 +26,8 @@ export const skinRunSchema = z.object({
   status: z.enum(RUN_STATUSES),
   reason: z.string().max(40).nullable(),
   error: z.string().max(400).nullable(),
+  /** A plain note from the plan, e.g. why a costlier path was not used. */
+  note: z.string().max(400).nullable().default(null),
   spent_micro: z.number().int().min(0),
   cap_micro: z.number().int().min(0),
   draft: skinSchema.nullable(),
