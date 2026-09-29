@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultBoxUi } from '../ui/types';
 import type { Snapshot } from './snapshot';
+import { readableError } from './openrouter';
 import { runTurn, turnCostMicro } from './turn';
 
 function snapshot(): Snapshot {
@@ -122,5 +123,61 @@ describe('runTurn', () => {
     const result = await runTurn({ apiKey: 'k', model: 'm', messages: [{ role: 'user', content: 'hi' }], snapshot: snapshot(), fetchImpl: fakeFetch });
     expect(result.ok).toBe(true);
     expect(result.blocks).toEqual([{ kind: 'summary', text: 'Hello there.' }, { kind: 'text', text: 'Second line.' }]);
+  });
+
+  it('falls back to tool_choice auto when the provider refuses "required"', async () => {
+    const choices: unknown[] = [];
+    const refusal = JSON.stringify({
+      error: {
+        message: 'Provider returned error',
+        code: 400,
+        metadata: { raw: JSON.stringify({ message: 'tool_choice: type "tool" and "any" are not supported for this model.' }), provider_name: 'Amazon Bedrock' },
+      },
+    });
+    const fakeFetch: typeof fetch = async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as { tool_choice: unknown };
+      choices.push(body.tool_choice);
+      return body.tool_choice === 'required' ? new Response(refusal, { status: 400 }) : toolStream(nested, 'anthropic/claude-sonnet-5.5');
+    };
+    const result = await runTurn({
+      apiKey: 'k',
+      model: 'anthropic/claude-sonnet-5.5',
+      messages: [{ role: 'user', content: 'Add a Projects menu' }],
+      snapshot: snapshot(),
+      fetchImpl: fakeFetch,
+      now: () => 5,
+    });
+    expect(choices).toEqual(['required', 'auto']);
+    expect(result.ok).toBe(true);
+    expect(result.ops).toHaveLength(3);
+  });
+
+  it('reports the first try\'s problems, not a provider dump, when the retry itself fails', async () => {
+    let call = 0;
+    const fakeFetch: typeof fetch = async () => {
+      call += 1;
+      if (call === 1) return toolStream([{ name: 'nav_add', args: { label: 'Orphan', parent: 'Nowhere' } }]);
+      return new Response(JSON.stringify({ error: { message: 'Overloaded' } }), { status: 529 });
+    };
+    const result = await runTurn({
+      apiKey: 'k',
+      model: 'anthropic/claude-haiku-4.5',
+      escalateModel: 'anthropic/claude-sonnet-5.5',
+      messages: [{ role: 'user', content: 'Add Orphan under Nowhere' }],
+      snapshot: snapshot(),
+      fetchImpl: fakeFetch,
+      now: () => 5,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeNull();
+    expect(result.blocks.map((block) => block.kind)).toEqual(['summary', 'error', 'note']);
+    expect(result.rounds).toHaveLength(2);
+    expect(turnCostMicro(result.rounds)).toBe(200);
+  });
+
+  it('reads the provider message out of an OpenRouter error body', () => {
+    const body = JSON.stringify({ error: { message: 'Provider returned error', metadata: { raw: '{"message":"bad tool_choice"}', provider_name: 'Amazon Bedrock' } } });
+    expect(readableError(body)).toBe('Provider returned error: bad tool_choice (Amazon Bedrock)');
+    expect(readableError('plain text')).toBe('plain text');
   });
 });

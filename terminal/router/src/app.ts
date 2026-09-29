@@ -361,7 +361,8 @@ export function createApp(options: CreateAppOptions) {
           routing,
           rounds: rounds.map((round) => ({ round: round.round, model: round.model, served_model: round.servedModel, tool_calls: round.toolCalls, rejected: round.rejected })),
           costSource: source,
-          entry: failed ? null : entry,
+          // The provider bills rounds that ran even when the turn failed, so they are ledgered too.
+          entry: failed && costMicro === routing.costMicro ? null : entry,
           ms: (options.now ?? Date.now)() - started,
         }),
       });

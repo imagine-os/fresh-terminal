@@ -124,7 +124,7 @@ export async function* streamChat(options: StreamChatOptions): AsyncGenerator<St
   }
   if (!response.ok || response.body === null) {
     const text = await response.text().catch(() => '');
-    yield { type: 'error', message: `OpenRouter ${response.status}: ${text.slice(0, 300)}` };
+    yield { type: 'error', message: `OpenRouter ${response.status}: ${readableError(text).slice(0, 300)}` };
     return;
   }
 
@@ -185,5 +185,27 @@ export async function* streamChat(options: StreamChatOptions): AsyncGenerator<St
         yield { type: 'usage', usage: chunk.usage };
       }
     }
+  }
+}
+
+/** Pulls the provider's own message out of an OpenRouter error body (raw JSON is hard to read). */
+export function readableError(body: string): string {
+  try {
+    const parsed = JSON.parse(body) as { error?: { message?: string; metadata?: { raw?: string; provider_name?: string } } };
+    const outer = parsed.error?.message ?? '';
+    const raw = parsed.error?.metadata?.raw;
+    let inner = '';
+    if (raw) {
+      try {
+        inner = (JSON.parse(raw) as { message?: string; error?: { message?: string } }).message ?? '';
+      } catch {
+        inner = raw;
+      }
+    }
+    const provider = parsed.error?.metadata?.provider_name;
+    const text = [outer, inner].filter(Boolean).join(': ');
+    return text ? (provider ? `${text} (${provider})` : text) : body;
+  } catch {
+    return body;
   }
 }

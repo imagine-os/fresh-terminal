@@ -55,36 +55,44 @@ async function runRound(options: TurnOptions, model: string, messages: ChatMessa
   let generationId = '';
   let error: string | null = null;
 
-  const streamOptions: Parameters<typeof streamChat>[0] = {
-    apiKey: options.apiKey,
-    model,
-    messages,
-    tools: ALL_TOOLS,
-    toolChoice: 'required',
-  };
-  if (options.fetchImpl) streamOptions.fetchImpl = options.fetchImpl;
-  if (options.referer) streamOptions.referer = options.referer;
-  if (options.title) streamOptions.title = options.title;
+  // "required" makes the model call tools. Some providers refuse it for some
+  // models (Bedrock: 'tool_choice: type "tool" and "any" are not supported');
+  // then the same request goes again with "auto" and the prompt does the work.
+  for (const toolChoice of ['required', 'auto'] as const) {
+    const streamOptions: Parameters<typeof streamChat>[0] = {
+      apiKey: options.apiKey,
+      model,
+      messages,
+      tools: ALL_TOOLS,
+      toolChoice,
+    };
+    if (options.fetchImpl) streamOptions.fetchImpl = options.fetchImpl;
+    if (options.referer) streamOptions.referer = options.referer;
+    if (options.title) streamOptions.title = options.title;
+    error = null;
 
-  for await (const event of streamChat(streamOptions)) {
-    if (event.type === 'delta' && event.text) {
-      text += event.text;
-      options.onDelta?.(event.text);
-    } else if (event.type === 'tool_call' && event.index !== undefined) {
-      const call = calls.get(event.index) ?? { id: '', name: '', args: '' };
-      if (event.id) call.id = event.id;
-      if (event.name) call.name += event.name;
-      if (event.argumentsDelta) call.args += event.argumentsDelta;
-      calls.set(event.index, call);
-    } else if (event.type === 'usage' && event.usage) {
-      usage = event.usage;
-    } else if (event.type === 'model' && event.model) {
-      servedModel = event.model;
-    } else if (event.type === 'id' && event.id) {
-      generationId = event.id;
-    } else if (event.type === 'error') {
-      error = event.message ?? 'model error';
+    for await (const event of streamChat(streamOptions)) {
+      if (event.type === 'delta' && event.text) {
+        text += event.text;
+        options.onDelta?.(event.text);
+      } else if (event.type === 'tool_call' && event.index !== undefined) {
+        const call = calls.get(event.index) ?? { id: '', name: '', args: '' };
+        if (event.id) call.id = event.id;
+        if (event.name) call.name += event.name;
+        if (event.argumentsDelta) call.args += event.argumentsDelta;
+        calls.set(event.index, call);
+      } else if (event.type === 'usage' && event.usage) {
+        usage = event.usage;
+      } else if (event.type === 'model' && event.model) {
+        servedModel = event.model;
+      } else if (event.type === 'id' && event.id) {
+        generationId = event.id;
+      } else if (event.type === 'error') {
+        error = event.message ?? 'model error';
+      }
     }
+    const refusedChoice = error !== null && /tool_choice/i.test(error) && calls.size === 0 && text === '';
+    if (!refusedChoice) break;
   }
   const ordered = [...calls.entries()].sort((a, b) => a[0] - b[0]).map(([index, call]) => ({ ...call, id: call.id || `call_${index}` }));
   return { calls: ordered, text, usage, servedModel: servedModel || model, generationId, error };
@@ -149,6 +157,24 @@ export async function runTurn(options: TurnOptions): Promise<TurnResult> {
     text += result.text;
     if (result.error && result.calls.length === 0) {
       rounds.push({ round, model, servedModel: result.servedModel, toolCalls: 0, rejected: [], usage: result.usage, generationId: result.generationId });
+      const earlier = rounds[rounds.length - 2];
+      if (earlier && earlier.rejected.length > 0) {
+        // The retry itself failed: report what was wrong with the first try, not a provider dump.
+        return {
+          ok: false,
+          text,
+          blocks: [
+            { kind: 'summary', text: 'I could not make that change.' },
+            { kind: 'error', text: earlier.rejected.join('; ').slice(0, 600) },
+            { kind: 'note', text: `The retry on ${model} failed: ${result.error.slice(0, 200)}` },
+          ],
+          ops: [],
+          changes: [],
+          rejected: earlier.rejected,
+          rounds,
+          error: null,
+        };
+      }
       return { ok: false, text, blocks: textToBlocks(text), ops: [], changes: [], rejected: [], rounds, error: result.error };
     }
     const checked = validate(result.calls, options.snapshot, now);
