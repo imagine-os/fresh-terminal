@@ -107,7 +107,7 @@ As of 2026-09-29:
 | **Actions: ledger cost, filters, arrows; plan to docs/plan** (C-095) | 2026-09-29 (Opus 5.5): model and cost per row from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, a remembered and keyboard-resizable label column, typed undo; our build plan moved to `docs/plan/` (hub and wiki), `/plan` stays the dev viewer. Live check in changelog 0015. |
 | **Tighter tools menu** (C-096) | Shipped 2026-09-29 05:40 UTC. |
 | **Sales site and share cards** (C-097) | Shipped 2026-09-29 05:30 UTC (Opus 5.5). Not wired yet: "Buy credits" (pay as you go, model cost + 10%) and "Tell me when" (teams and self-host). Coming soon on the site: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, encryption with your own key, teams and self-host. |
-| **Rename in place, perspective grid, publish workflow** (C-094) | Shipped 2026-09-29 05:30 UTC. First SpacetimeDB publish run from Actions: see the thread; live store still pending. |
+| **Rename in place, perspective grid, publish workflow** (C-094) | Shipped 2026-09-29 05:30 UTC. `fresh-terminal` published to SpacetimeDB Maincloud 05:39 UTC (run 4; 14 tables, 19 reducers), bindings committed. Live store (`createSpacetimeStore`) still pending. |
 | **Uniform bar, minimal tray, Actions, voice fails once** (C-090) | Shipped 2026-09-29 05:10 UTC. Terminal-talk is a switch + demo; the voice agent is next after SpacetimeDB. |
 | **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |
 | **Review pass** (C-081) | Shipped 2026-09-29 04:45 UTC: no-op edits refused, names not ids, one Undo bar, created pages open, screen context, mood tags. |
