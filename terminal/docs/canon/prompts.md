@@ -746,3 +746,45 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** Taken by the other session with its sales-site build (card, og tags on the app and the site). This session suggested the copy: card "A terminal that adapts to you."; share title "Fresh Terminal — the terminal for everyone"; description "If computers had started smart, the terminal would look like this. Type or talk; it builds itself around you."
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658220851259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658220.851259
+
+## 85. Tue Sep 29, 12:16 AM CDT · 2026-09-29 05:16:14 UTC
+
+> we should be able to click to edit stage name in top bar or in the sidebar, etc.
+
+**What happened:** C-091: click the name in the top bar, double-click it in the sidebar.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658974849059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658974.849059
+
+## 86. Tue Sep 29, 12:17 AM CDT · 2026-09-29 05:17:32 UTC
+
+> `SPACETIMEDB_TOKEN confirm this is in github action secrets`
+
+**What happened:** C-091: the publish workflow checks the name is set (never the value) and publishes from Actions.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659052054369?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659052.054369
+
+## 87. Tue Sep 29, 12:19 AM CDT · 2026-09-29 05:19:45 UTC
+
+> watching terminal talk draft, and then ebing able to edit and work on it together before giving it to the terminal is cool. and then reviewing the repsonse together also cool.
+
+**What happened:** C-091: written into docs/voice-experience.md as the co-drafting rule.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659185882119?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659185.882119
+
+## 88. Tue Sep 29, 12:20 AM CDT · 2026-09-29 05:20:33 UTC
+
+> try one thing... give me a very light hint of a perspective grid going into the distance in the stage. please
+
+**What happened:** C-091: a faint grid in perspective behind the stage.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659233955079?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659233.955079
+
+## 89. Tue Sep 29, 12:21 AM CDT · 2026-09-29 05:21:55 UTC
+
+> I think soon wee need to start making real objects that have little object previews or icons, that when we open it, we can use it. We will also need to learn about GenUI or generativeUI concepts .for genreating ui on the fly and building a library of in chat or in terminal uis
+
+**What happened:** Recorded as the next design thread in C-091 (objects with previews; generative UI as a library of in-terminal pieces the model composes). Estimate in the reply.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659315639489?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659315.639489
+
+## 90. Tue Sep 29, 12:23 AM CDT · 2026-09-29 05:23:28 UTC
+
+> terminal talk can be experimental. as well as the replay tool. thats all it needs to say. let me know when terminal talk is ready to demo.
+
+**What happened:** C-091: both tray entries say "experimental". Terminal-talk demo readiness is reported when the agent lands.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659408153209?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659408.153209

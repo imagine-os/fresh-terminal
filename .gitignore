@@ -7,4 +7,3 @@ dist/
 .DS_Store
 .wrangler/
 terminal/module/module_bindings/
-terminal/app/src/module_bindings/

@@ -14,6 +14,7 @@ import { useToast } from '../ui/Toast';
 import { AccountButton } from './AccountButton';
 import { useAccount } from '../auth/Account';
 import { Tray, type Tool } from './Tray';
+import { InlineName } from '../ui/InlineName';
 
 interface Props {
   boxName: string;
@@ -54,6 +55,8 @@ interface Props {
   onToggleTalk: () => void;
   onActions: () => void;
   onPlan: () => void;
+  /** When set, the stage name in the bar is click-to-edit (C-091). */
+  onRenameBox?: (name: string) => void;
 }
 
 function key(id: string): string {
@@ -100,7 +103,7 @@ export function TopBar(props: Props) {
   const tools: Tool[] = [
     { id: 'box.new', group: 'go', label: t('topbar.newBox'), short: t('tool.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
     { id: 'actions.open', group: 'go', label: t('topbar.actions'), short: t('tool.actions'), icon: <IconList />, onClick: props.onActions, testId: 'actions-link' },
-    { id: 'play.open', group: 'go', label: t('topbar.replay'), short: t('tool.replay'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
+    { id: 'play.open', group: 'go', label: t('topbar.replay'), short: t('tool.replay'), detail: t('tray.experimental'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
     { id: 'lang.toggle', group: 'session', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
     { id: 'session.export', group: 'session', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
     { id: 'session.import', group: 'session', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
@@ -153,7 +156,12 @@ export function TopBar(props: Props) {
           <span>{PRODUCT_NAME}</span>
         </a>
       </Tooltip>
-      {props.boxName ? <span className="tagline">/ {props.boxName}</span> : null}
+      {props.boxName ? (
+        <span className="tagline">
+          /{' '}
+          {props.onRenameBox ? <InlineName value={props.boxName} onCommit={props.onRenameBox} label={t('box.rename')} testId="stage-name" /> : props.boxName}
+        </span>
+      ) : null}
       <span className="topbar-spacer" />
       {/* Where your work lives, one line, top center (C-085). */}
       <span className="topbar-note" data-testid="topbar-note">
