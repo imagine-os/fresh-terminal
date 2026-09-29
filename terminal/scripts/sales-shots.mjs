@@ -130,6 +130,25 @@ const SCENES = [
     },
   },
   {
+    name: 'tags', viewport: DESK,
+    alt: 'The Tags page as a graph: every tag from what was typed, sized by how often it appears and coloured by kind, linked when two tags shared a line.',
+    run: async (page) => {
+      await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+      await must(page, '[data-testid="composer"]', 'the prompt');
+      for (const line of [
+        'Remind Ana about the Lisbon trip on Friday at 3pm',
+        'Call Ana on Friday about the Lisbon hotel',
+        'Add the Lisbon trip to my list for Friday',
+        'Pay the $120 hotel deposit for Lisbon by Monday',
+        'Ask Sam about the budget list on Monday at 10am',
+      ]) await typeInto(page, line, true);
+      await page.goto(`${BASE}/tags`, { waitUntil: 'networkidle' });
+      await must(page, '[data-testid="tags-graph"]', 'the tags graph');
+      await must(page, '[data-testid="tag-node"]', 'tag nodes in the graph');
+      await page.waitForTimeout(1200);
+    },
+  },
+  {
     name: 'offline', viewport: DESK,
     alt: 'A prompt typed with no connection waits on the stage, marked as queued, with Send now and Discard.',
     run: async (page, context) => {

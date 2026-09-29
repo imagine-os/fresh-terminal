@@ -1,6 +1,6 @@
 {
   "$comment": "Written by scripts/sales-shots.mjs. Do not edit by hand.",
-  "generated": "2026-09-29T06:21:15.272Z",
+  "generated": "2026-09-29T06:45:17.245Z",
   "commit": null,
   "shots": {
     "start": {
@@ -15,70 +15,77 @@
       "width": 1752,
       "height": 249,
       "alt": "The prompt with “make a page called Projects” typed: “make” is tagged as an action and “Projects” as a page.",
-      "bytes": 33853
+      "bytes": 33860
     },
     "edit": {
       "file": "edit.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "A stage after two prompts: it made the page “Trip plan” and put it in the menu, says what changed with one Undo, and shows a light perspective grid behind the stage; the next prompt is lighting up with tags.",
-      "bytes": 155065
+      "bytes": 155070
     },
     "rename": {
       "file": "rename.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "Renaming a stage by clicking its name in the top bar: the name is an input with “Lisbon trip” typed in.",
-      "bytes": 142292
+      "bytes": 142273
     },
     "tools": {
       "file": "tools.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "The one-row top bar with the tools menu open: New stage, Actions, Replay (experimental), Language, Export and Import, Buy credits, Invite code, Settings and Terminal-talk (experimental).",
-      "bytes": 168148
+      "bytes": 168425
     },
     "actions": {
       "file": "actions.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "Actions as a timeline: every prompt, reply and edit on this stage as a row with its status, model and cost, and arrows to what each one follows.",
-      "bytes": 133038
+      "bytes": 132788
     },
     "actions-board": {
       "file": "actions-board.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "Actions as a board, one column per status.",
-      "bytes": 149623
+      "bytes": 149789
+    },
+    "tags": {
+      "file": "tags.jpg",
+      "width": 2160,
+      "height": 1350,
+      "alt": "The Tags page as a graph: every tag from what was typed, sized by how often it appears and coloured by kind, linked when two tags shared a line.",
+      "bytes": 142014
     },
     "offline": {
       "file": "offline.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "A prompt typed with no connection waits on the stage, marked as queued, with Send now and Discard.",
-      "bytes": 170634
+      "bytes": 170650
     },
     "library": {
       "file": "library.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "A skinned terminal from the library, Paper and Typewriter: today’s date, a theme switched and undone, and the next prompt with tags.",
-      "bytes": 145290
+      "bytes": 145323
     },
     "replay": {
       "file": "replay.jpg",
       "width": 2160,
       "height": 1350,
       "alt": "Replay (experimental): the stage rebuilt at one step of the session, with a scrubber to move through every step.",
-      "bytes": 134529
+      "bytes": 134548
     },
     "phone": {
       "file": "phone.jpg",
       "width": 780,
       "height": 1688,
       "alt": "Fresh Terminal on a phone: the stage with a new page and one Undo, and the prompt at the bottom with tags.",
-      "bytes": 120328
+      "bytes": 120322
     }
   }
 }
