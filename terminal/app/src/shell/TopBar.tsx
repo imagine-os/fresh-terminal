@@ -1,4 +1,4 @@
-import { PRODUCT_NAME } from '@shared/brand';
+import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
 import { formatMicro } from '@shared/ledger';
 import type { Theme } from '@shared/themes';
 import type { NavItem, NavTarget } from '@shared/ui';
@@ -83,6 +83,7 @@ export function TopBar(props: Props) {
             &gt;_
           </span>
           <span>{PRODUCT_NAME}</span>
+          <span className="version" data-testid="version">v{PRODUCT_VERSION}</span>
         </a>
       </Tooltip>
       <span className="tagline">{props.boxName ? `/ ${props.boxName}` : t('landing.tagline')}</span>
@@ -91,7 +92,17 @@ export function TopBar(props: Props) {
         {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
       </span>
       <span className="topbar-group">
-        <Tray tools={tools} pinned={props.pinned} onPinned={props.onPinned} nav={props.nav} onNavigate={props.onNavigate} />
+        <Tray
+          tools={tools}
+          pinned={props.pinned}
+          onPinned={props.onPinned}
+          nav={props.nav}
+          onNavigate={props.onNavigate}
+          links={[
+            { label: t('footer.source'), href: REPO_URL },
+            { label: t('footer.docs'), href: `${import.meta.env.BASE_URL}wiki/` },
+          ]}
+        />
         <AccountButton />
       </span>
     </>

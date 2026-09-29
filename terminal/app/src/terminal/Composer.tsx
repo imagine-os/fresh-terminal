@@ -6,7 +6,7 @@ import { useI18n } from '../i18n';
 import { tagRemote, type RemoteTagResult } from '../lib/modelTagger';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconMic, IconSend } from '../ui/icons';
+import { IconHint, IconMic, IconSend, IconSpark } from '../ui/icons';
 import type { VoiceControls } from '../voice/useVoice';
 import { ChipPopover, type ChipDecision, type ChipRecords } from './ChipPopover';
 import { ChipText } from './ChipText';
@@ -260,6 +260,20 @@ export function Composer({
           />
         </div>
         <div className="composer-tools">
+          {onToggleStarters ? (
+            <Tooltip label={t('composer.startersTip')} side="top" align="end">
+              <Button icon variant="ghost" aria-pressed={showStarters} aria-label={t('composer.starters')} onClick={onToggleStarters} data-testid="switch-starters">
+                <IconSpark />
+              </Button>
+            </Tooltip>
+          ) : null}
+          {onToggleHints ? (
+            <Tooltip label={t('composer.hintsTip')} side="top" align="end">
+              <Button icon variant="ghost" aria-pressed={showHints} aria-label={t('composer.hints')} onClick={onToggleHints} data-testid="switch-hints">
+                <IconHint />
+              </Button>
+            </Tooltip>
+          ) : null}
           {voice.active ? <Waveform level={voice.level} state={voice.state} /> : null}
           {voiceAvailable ? (
             <Tooltip
@@ -336,24 +350,6 @@ export function Composer({
         />
       ) : null}
       <audio ref={voice.audioRef} autoPlay data-testid="assistant-audio" />
-      <div className="composer-hint">
-        <span>{voice.active ? t(voice.state === 'connecting' ? 'voice.connecting' : voice.state === 'speaking' ? 'voice.speaking' : 'voice.listening') : t('composer.hint')}</span>
-        <span className="composer-switches">
-          {onToggleStarters ? (
-            <button type="button" className="switch" aria-pressed={showStarters} title={t('composer.startersTip')} onClick={onToggleStarters} data-testid="switch-starters">
-              {t('composer.starters')}
-            </button>
-          ) : null}
-          {onToggleHints ? (
-            <button type="button" className="switch" aria-pressed={showHints} title={t('composer.hintsTip')} onClick={onToggleHints} data-testid="switch-hints">
-              {t('composer.hints')}
-            </button>
-          ) : null}
-          <span>
-            {chips.length} {t('composer.chips')}
-          </span>
-        </span>
-      </div>
     </div>
   );
 }

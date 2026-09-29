@@ -143,6 +143,9 @@ function Product() {
     return stateAt(steps, playback.index, store.uiState(currentBox.id), snapshot.edits, ctx);
   }, [replaying, currentBox, steps, playback.index, snapshot]);
   const boxUi = replayView?.state.boxUi ?? liveBoxUi;
+  // An empty box shows the prompt in the middle of the stage; the bottom bar waits for the first line (C-077).
+  const composerCentered =
+    !!currentBox && (route.name === 'landing' || route.name === 'box') && !snapshot.lines.some((line) => line.box_id === currentBox.id);
 
   // Keep ?step= in the address so a replay position can be shared.
   useEffect(() => {
@@ -525,6 +528,7 @@ function Product() {
       onSize={setSize}
       styleOverrides={boxUi?.style}
       hideTopBar={prefs.topBarHidden}
+      hideBottomBar={composerCentered}
       skins={boxUi?.skins}
       slots={{
         topBar: (
