@@ -12,6 +12,7 @@ describe('canvas cards', () => {
       'first-box',
       'koi-pond',
       'canon',
+      'freshstack',
     ]);
     for (const card of SEED_CARDS) {
       expect(cardSchema.safeParse(card).success).toBe(true);

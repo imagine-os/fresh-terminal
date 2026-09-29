@@ -353,3 +353,18 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 **C-025b · 2026-09-29 01:13 · Router address baked into the app**
 - Decided: the Worker address is a public constant, `DEFAULT_ROUTER_URL`; `VITE_ROUTER_URL` can override it. No variable for Justin to set.
 - Status: current (commit 1d77c83).
+
+## Stack and its exits (2026-09-29)
+
+**C-050 · 2026-09-29 02:20 · FreshStack: the default stack is a page with an exit per piece**
+- Justin: "Make a little page or component that shows the items we're using in freshterminal by default ... This is our FreshStack. the goal is that this becomes the most popular, best starter kit on the internet. until we get rid of the dependencies on those things too."
+- Decided: `pages/freshstack.html` lists every default dependency (GitHub, Cloudflare, OpenRouter, Jev, SpacetimeDB, LiveKit, OpenAI Realtime, Clerk, Stripe, streamed browser, Vite+React+TypeScript, Hono, Playwright) with its job, its status (live / written, not wired / planned), how it behaves in each of the three modes (ours, your keys, self-host), and its exit. The stack is a data array in the page; agents edit the array. A canvas card `freshstack` points at it.
+- Rule: a dependency may be added only with all four fields filled in, exit included. The list is meant to get shorter.
+- Status: current. Page and card in the repo (this commit); live on the next Pages deploy.
+
+**C-051 · 2026-09-29 02:20 · LiveKit for realtime voice, video and agents, wired so the owner does one step**
+- Justin: "I'm building with LiveKit ... setup the mcp or cli or whatever tools you want. tell me how to get it registered so you can use it without me."
+- Decided: LiveKit Agents (Python; the Node SDK does not have MCP yet) with `mcp.MCPToolset(mcp.MCPServerHTTP(<fresh-terminal router>/mcp))` so the voice agent calls the same actions as the prompt box. Deploy from GitHub Actions with `livekit/deploy-action@v2` (`create` once, then `deploy` on push) using repo secrets `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`. Coding agents get the LiveKit docs MCP (`https://docs.livekit.io/mcp`) and `npx skills add livekit/agent-skills`.
+- Owner's one-time step: install `lk`, run `lk cloud auth` (browser sign-in, picks the project, mints a key), then copy the three values into the repo secrets. After that no dashboard visits are needed.
+- Status: decided, not started. Depends on the router exposing `/mcp` (see the integrations plan in the thread, 02:07 UTC).
+
