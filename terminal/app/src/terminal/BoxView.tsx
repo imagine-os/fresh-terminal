@@ -37,6 +37,10 @@ export interface AppCommands {
   modelTagger: boolean;
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
   voiceMode: 'toggle' | 'hold';
+  showStarters: boolean;
+  showHints: boolean;
+  toggleStarters: () => void;
+  toggleHints: () => void;
   openSettings: () => void;
   realtimePrice: (provider: 'openai' | 'gemini') => { audio_in_micro_per_minute: number; audio_out_micro_per_minute: number } | null;
 }
@@ -431,6 +435,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
                 {t('landing.headline').split(' ').slice(0, -3).join(' ')}{' '}
                 <em>{t('landing.headline').split(' ').slice(-3).join(' ')}</em>
               </h1>
+              {commands.showHints ? (
               <ol className="how">
                 <li>
                   <b>{t('landing.how.1.title')}</b>
@@ -445,9 +450,10 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
                   {t('landing.how.3.body')}
                 </li>
               </ol>
+              ) : null}
             </>
           ) : null}
-          <Doodles fading={fading} showNewBox={showNewBoxDoodle} />
+          {commands.showHints ? <Doodles fading={fading} showNewBox={showNewBoxDoodle} /> : null}
         </section>
       ) : (
         <Transcript lines={lines} />
@@ -490,6 +496,10 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         voiceAvailable={voiceAvailable}
         voiceAppend={voiceAppend}
         onVoiceAppendConsumed={() => setVoiceAppend(null)}
+        showStarters={commands.showStarters}
+        showHints={commands.showHints}
+        onToggleStarters={commands.toggleStarters}
+        onToggleHints={commands.toggleHints}
       />
     </>
   );
@@ -514,6 +524,10 @@ function ComposerSlot(props: {
   voiceAvailable: boolean;
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
+  showStarters: boolean;
+  showHints: boolean;
+  onToggleStarters: () => void;
+  onToggleHints: () => void;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -540,6 +554,10 @@ function ComposerSlot(props: {
       voiceAvailable={props.voiceAvailable}
       voiceAppend={props.voiceAppend}
       onVoiceAppendConsumed={props.onVoiceAppendConsumed}
+      showStarters={props.showStarters}
+      showHints={props.showHints}
+      onToggleStarters={props.onToggleStarters}
+      onToggleHints={props.onToggleHints}
       hasBoxes={props.hasBoxes}
       hasLines={props.hasLines}
       busy={props.busy}
