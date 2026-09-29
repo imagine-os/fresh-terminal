@@ -144,3 +144,18 @@ describe('pay what you want (C-105)', () => {
   });
 });
 
+
+describe('sign-in messages say what each endpoint does', () => {
+  it('asks to sign in to set a markup, see a referral link, use a referral code, or change privacy', async () => {
+    const app = createApp({ bindings: () => ({ CLERK_JWT_KEY: 'x' }), resources: () => ({ DB: fakeD1() }) });
+    const ask = async (method: string, path: string) => {
+      const response = await app.request(path, { method, headers: { 'Content-Type': 'application/json' }, ...(method === 'GET' ? {} : { body: '{}' }) });
+      return { status: response.status, error: ((await response.json()) as { error: string }).error };
+    };
+    expect(await ask('GET', '/me/markup')).toEqual({ status: 401, error: 'Sign in to set your markup.' });
+    expect(await ask('PUT', '/me/markup')).toEqual({ status: 401, error: 'Sign in to set your markup.' });
+    expect(await ask('GET', '/me/referral')).toEqual({ status: 401, error: 'Sign in to see your referral link.' });
+    expect(await ask('POST', '/me/referral')).toEqual({ status: 401, error: 'Sign in to use a referral code.' });
+    expect(await ask('GET', '/me/privacy')).toEqual({ status: 401, error: 'Sign in to change your privacy settings.' });
+  });
+});

@@ -892,3 +892,4 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 > Give me another example of a much larger tag graph,  something eay more complete for someone using this as a full harness for multi tenant companh os and personal and family life stuff too all in one.  Make this a demo that lives at  /demo/demoname
 
 **What happened:** C-108: `/demo/harness` shipped, a year of made-up lines across five stages with a few hundred tags, and the graph tuned for that size.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790664132090239?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790664132.090239

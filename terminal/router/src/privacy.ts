@@ -52,9 +52,9 @@ const grantSchema = z.object({
 });
 
 export function mountPrivacyRoutes(app: Hono<any>, options: AdminOptions): void {
-  async function me(c: Context): Promise<{ ok: true; userId: string; db: D1Database } | { ok: false; response: Response }> {
+  async function me(c: Context, signIn = 'Sign in to change your privacy settings.'): Promise<{ ok: true; userId: string; db: D1Database } | { ok: false; response: Response }> {
     const auth = await authenticate(c.req.header('Authorization'), options.bindings(c.env), options.authorizedParties(c.env), options.verifier);
-    if (auth.state !== 'signed-in') return { ok: false, response: c.json({ error: 'Sign in to change your privacy settings.', code: 'sign_in_required' }, 401) };
+    if (auth.state !== 'signed-in') return { ok: false, response: c.json({ error: signIn, code: 'sign_in_required' }, 401) };
     const db = options.resources(c.env).DB;
     if (!db) return { ok: false, response: c.json({ error: 'No D1 database is bound to this router' }, 503) };
     await ensureAccount(db, auth.userId, options.now());
@@ -133,13 +133,13 @@ export function mountPrivacyRoutes(app: Hono<any>, options: AdminOptions): void 
   }
 
   app.get('/me/markup', async (c) => {
-    const who = await me(c);
+    const who = await me(c, 'Sign in to set your markup.');
     if (!who.ok) return who.response;
     return c.json(await markupView(who.db, accountIdFor(who.userId)));
   });
 
   app.put('/me/markup', async (c) => {
-    const who = await me(c);
+    const who = await me(c, 'Sign in to set your markup.');
     if (!who.ok) return who.response;
     const body = (await c.req.json().catch(() => ({}))) as { markup_bp?: unknown };
     // null goes back to the default; anything else must be a whole number of basis points in range.
@@ -152,7 +152,7 @@ export function mountPrivacyRoutes(app: Hono<any>, options: AdminOptions): void 
 
   // Referrals (C-107): your link and what it earned; a friend claims a code after signing up.
   app.get('/me/referral', async (c) => {
-    const who = await me(c);
+    const who = await me(c, 'Sign in to see your referral link.');
     if (!who.ok) return who.response;
     const site = (options.bindings(c.env) as { SITE_URL?: string }).SITE_URL ?? 'https://freshterminal.ai';
     const row = await accountForRequest(c, options as never, who.db, who.userId);
@@ -160,7 +160,7 @@ export function mountPrivacyRoutes(app: Hono<any>, options: AdminOptions): void 
   });
 
   app.post('/me/referral', async (c) => {
-    const who = await me(c);
+    const who = await me(c, 'Sign in to use a referral code.');
     if (!who.ok) return who.response;
     const body = (await c.req.json().catch(() => ({}))) as { code?: unknown };
     if (typeof body.code !== 'string' || normalizeReferralCode(body.code).length < 6 || body.code.length > 40) return c.json({ error: 'Send {code}', code: 'referral_unknown' }, 400);
