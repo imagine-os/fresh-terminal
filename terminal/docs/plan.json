@@ -604,7 +604,7 @@
     },
     {
       "id": "turnstile",
-      "title": "Turnstile before the first free call (needs Account Turnstile Edit on the Cloudflare token)",
+      "title": "Turnstile before a new free-credit device: code in; switch on needs Account Turnstile Edit on the Cloudflare token (deploy said Authentication error)",
       "status": "todo",
       "depends_on": [
         "free-credits"

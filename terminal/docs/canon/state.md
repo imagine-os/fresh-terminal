@@ -67,6 +67,7 @@ As of 2026-09-29:
 - ~~Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.~~ Superseded 2026-09-29 (C-065): sign-in is wired on the Clerk development instance. Still not wired: the Clerk production instance (steps in C-065), Clerk screens in Spanish, transcript lines in sync, realtime sync between devices.
 - Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.)
 - A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).
+- Turnstile before a new free-credit device: built, not switched on; the Cloudflare token needs Account → Turnstile → Edit (C-074).
 - Shared chain beyond the browser, and the server re-checking hashes.
 - Jev permission checks: they exist but aren't enforced (no signed-in owners on the server yet).
 - Model-generated "Draw" layouts (demos only).
