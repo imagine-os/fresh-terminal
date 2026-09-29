@@ -1,0 +1,34 @@
+name: qa-clerk-modal-user
+
+# Temporary (branch qa/clerk-modal-user only): makes one throwaway user in the
+# Clerk DEVELOPMENT instance so the account modal can be checked signed in.
+# The user signs in with a Clerk test phone number (code 424242) and is
+# deleted when the check is done. Prints the user id and test phone only.
+
+on:
+  push:
+    branches: ['qa/clerk-modal-user']
+
+permissions:
+  contents: read
+
+jobs:
+  user:
+    runs-on: ubuntu-latest
+    env:
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+    steps:
+      - name: Refuse to run against a production Clerk instance
+        run: |
+          case "$CLERK_SECRET_KEY" in sk_test_*) echo "development instance: ok";; *) echo "not a development key; stopping"; exit 1;; esac
+      - name: Make the throwaway user
+        run: |
+          for n in 43 57 61 68 74 83 89 92 96 99; do
+            phone="+120155501$n"
+            out=$(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json' -X POST https://api.clerk.com/v1/users \
+              -d "{\"email_address\":[\"ft-modal-${GITHUB_RUN_ID}+clerk_test@example.com\"],\"username\":\"ftmodal${GITHUB_RUN_ID}\",\"first_name\":\"Modal\",\"last_name\":\"Check\",\"phone_number\":[\"$phone\"],\"skip_password_requirement\":true,\"skip_password_checks\":true}")
+            id=$(echo "$out" | jq -r '.id // empty')
+            if [ -n "$id" ]; then echo "throwaway user $id, test phone $phone, email ft-modal-${GITHUB_RUN_ID}+clerk_test@example.com"; exit 0; fi
+            echo "phone $phone: $(echo "$out" | jq -r '[.errors[]?.code] | join(",")')"
+          done
+          exit 1
