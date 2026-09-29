@@ -104,7 +104,8 @@ As of 2026-09-29:
 | **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 157 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
 | **Actions: ledger cost, filters, arrows; plan to docs/plan** (C-095) | 2026-09-29 (Opus 5.5): model and cost per row from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, a remembered and keyboard-resizable label column, typed undo; our build plan moved to `docs/plan/` (hub and wiki), `/plan` stays the dev viewer. Live check in changelog 0015. |
-| **Rename in place, perspective grid, publish workflow** (C-094) | Shipped 2026-09-29 05:30 UTC. First SpacetimeDB publish run from Actions: see the thread; live store still pending. |
+| **Tighter tools menu** (C-096) | Shipped 2026-09-29 05:40 UTC. |
+| **Rename in place, perspective grid, publish workflow** (C-094) | Shipped 2026-09-29 05:30 UTC. `fresh-terminal` published to SpacetimeDB Maincloud 05:39 UTC (run 4; 14 tables, 19 reducers), bindings committed. Live store (`createSpacetimeStore`) still pending. |
 | **Uniform bar, minimal tray, Actions, voice fails once** (C-090) | Shipped 2026-09-29 05:10 UTC. Terminal-talk is a switch + demo; the voice agent is next after SpacetimeDB. |
 | **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |
 | **Review pass** (C-081) | Shipped 2026-09-29 04:45 UTC: no-op edits refused, names not ids, one Undo bar, created pages open, screen context, mood tags. |

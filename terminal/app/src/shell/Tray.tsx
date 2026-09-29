@@ -16,6 +16,8 @@ export interface Tool {
   short?: string;
   /** Current value under the tile label ("Void", "EN"). */
   detail?: string;
+  /** Tools sharing a pair id sit side by side on one row (Import | Export). */
+  pair?: string;
   icon: ReactNode;
   onClick: () => void;
   shortcut?: string;
@@ -173,7 +175,10 @@ export function Tray({ tools, pinned, onPinned, links = [], foot }: Props) {
               return (
                 <section className="tray-section" key={group.id}>
                   <ul className="tray-list">
-                    {members.map((tool) => {
+                    {members.map((tool, index) => {
+                      // A paired tool renders inside its partner's row; the first of the pair owns the row.
+                      const partner = tool.pair ? members.find((candidate, at) => candidate.pair === tool.pair && at !== index) : undefined;
+                      if (partner && members.indexOf(partner) < index) return null;
                       const isPinned = pinned.includes(tool.id);
                       const common = {
                         'aria-label': tool.label,
@@ -196,6 +201,7 @@ export function Tray({ tools, pinned, onPinned, links = [], foot }: Props) {
                         <li
                           key={tool.id}
                           className="tray-tool row"
+                          data-pair={partner ? 'true' : undefined}
                           data-pinned={isPinned}
                           draggable
                           onDragStart={(event) => {
@@ -220,6 +226,23 @@ export function Tray({ tools, pinned, onPinned, links = [], foot }: Props) {
                               {body}
                             </button>
                           )}
+                          {partner ? (
+                            partner.href ? (
+                              <a className="row-button" href={partner.href} aria-label={partner.label} data-testid={partner.testId} data-tool={partner.id} title={partner.label}>
+                                <span className="row-icon" aria-hidden="true">
+                                  {partner.icon}
+                                </span>
+                                <span className="row-label">{partner.short ?? partner.label}</span>
+                              </a>
+                            ) : (
+                              <button type="button" className="row-button" aria-label={partner.label} aria-pressed={partner.pressed} data-testid={partner.testId} data-tool={partner.id} title={partner.label} onClick={() => { partner.onClick(); setOpen(false); }}>
+                                <span className="row-icon" aria-hidden="true">
+                                  {partner.icon}
+                                </span>
+                                <span className="row-label">{partner.short ?? partner.label}</span>
+                              </button>
+                            )
+                          ) : null}
                           <Tooltip label={isPinned ? t('tray.unpin') : t('tray.pin')} align="end">
                             <Button
                               icon

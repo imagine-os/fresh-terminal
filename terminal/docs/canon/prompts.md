@@ -798,3 +798,12 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-094: both tray entries say "experimental". Terminal-talk demo readiness is reported when the agent lands.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659408153209?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659408.153209
+
+## 92. Tue Sep 29, 12:27 AM CDT · 2026-09-29 05:27:23 UTC
+
+> import | export can be 2 buttons on 1 row. dropdown menu can be a bit more compact in spacing, its super wide spacing right now unnecessarily.  no scroll in the tool menu please. I like Top up, but it should be a money or credit icon and maybe be more clear that its to buy more credits
+>
+> One thing you can do is color code nounds, verbs, adjectives by default.
+
+**What happened:** C-096: the tighter menu shipped; parts of speech in colour is proposed with an estimate.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659643321609?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659643.321609
