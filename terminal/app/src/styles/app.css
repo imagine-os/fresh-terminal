@@ -1952,42 +1952,6 @@ textarea.field-input {
   min-height: 0.9rem;
 }
 .scrubber-lane-name {
-/* ---------- pass 5: skins ---------- */
-
-[data-skinned].region,
-.shell > .region-stage[data-skinned] {
-  background-color: var(--bg-elevated, var(--bg));
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent), color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent)),
-    var(--skin-layers, none);
-  background-size: cover;
-  background-position: center;
-  background-attachment: local;
-  color: var(--fg);
-}
-.region-stage[data-skinned] {
-  background-color: var(--bg);
-}
-@media (prefers-reduced-motion: no-preference) {
-  [data-skinned].region {
-    transition: background-color 400ms ease;
-  }
-}
-
-.rf {
-  display: grid;
-  gap: 0.5rem;
-}
-.rf-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.75rem;
-}
-.rf-status > span:first-child {
-  font-weight: 600;
-}
-.rf-meta {
   font-family: var(--font-mono);
   font-size: var(--type-whisper);
   color: var(--fg-faint);
@@ -2114,6 +2078,49 @@ textarea.field-input {
   }
   .scrubber-tools .btn-label {
     display: none;
+  }
+}
+
+/* ---------- pass 5: skins ---------- */
+
+[data-skinned].region,
+.shell > .region-stage[data-skinned] {
+  background-color: var(--bg-elevated, var(--bg));
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent), color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent)),
+    var(--skin-layers, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: local;
+  color: var(--fg);
+}
+.region-stage[data-skinned] {
+  background-color: var(--bg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-skinned].region {
+    transition: background-color 400ms ease;
+  }
+}
+
+.rf {
+  display: grid;
+  gap: 0.5rem;
+}
+.rf-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+.rf-status > span:first-child {
+  font-weight: 600;
+}
+.rf-meta {
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+}
 .rf-stop {
   min-height: var(--target);
   margin-inline-start: auto;
@@ -2214,4 +2221,29 @@ textarea.field-input {
   .rf-round {
     grid-column: 1 / -1;
   }
+}
+
+/* ---------- sidebar: box rows with a remove control ---------- */
+
+.box-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.box-row .box-remove {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.box-row:hover .box-remove,
+.box-row:focus-within .box-remove,
+.box-row .box-link[aria-current='page'] ~ * .box-remove {
+  opacity: 1;
+}
+@media (hover: none) {
+  .box-row .box-remove {
+    opacity: 1;
+  }
+}
+.shell[data-left='rail'] .box-remove {
+  display: none;
 }

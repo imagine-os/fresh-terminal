@@ -500,3 +500,34 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 
 **What happened:** Made it the tagline: "Evolve as we grow." Decision C-059.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648992.904059
+
+## 59. Mon Sep 28, 9:44 PM CDT · 2026-09-29 02:44:46 UTC
+
+> consider jev is a subset of open router if thats where its being used  . think of organizing with nesting as appropraite.
+>
+> Also ontology should be a big part of how you think. often 2 way connections have different meaning in each direction ro when noth ways etc
+>
+> How will we handle connectors for thingsl ike dropbox, google drive, email, whatsapp, sms, etc. those are things people will want fast
+>
+> By the way, consider that migration is a huge ability we need to build out. Helping to make it so people can confidently copy their data out of anywhere, and have an interface that can actually ready the data and unify it with the rest of their stuff.
+>
+> PS: we're going to need the Logo system to do lightmode and dark mode and transparent and more as well as each of the configurations of that logo like wide, icon only, etc.   we might even consider using an inexpensive vectororizer tool as needed, and or 3D .... Of course each step is a cost question, but ultimately each layer of automated enhancements and info gathering and generating stuff will be an interesting part of the system working ahead, and optimizing things behind the scenes
+
+**What happened:** Split between the two sessions. Justin's session: FreshStack nesting (Jev under OpenRouter, Gemini Live and OpenAI Realtime under LiveKit, marks on cards) and the logo configuration set with costed later layers (C-060, C-061). The thread session: ontology, connectors and migration as proposals ([reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790649886.159139
+
+## 60. Mon Sep 28, 9:54 PM CDT · 2026-09-29 02:54:29 UTC
+
+> command v is triggering the voice tool in terminal. the voice tool doesnt seem to work. I wrote the following thinking it would do something, but then nothing happened . Paste did not paste. There were issues moving the cursor around. Also i wanted to see my text spellcheck and format itself automatically, above where i'm writing. Like a type writer has the page growing taller. then i can edit text either in my rough writing pad, or the formated one above. and use the chips and stuff too.
+
+(With a screenshot of two long prompts in the live terminal that got no reply; the first asked for a tools icon in the top bar hiding everything but the money counter, noted that "make sure" was split into two chips and that "Money Counter" and "Top Bar" were tagged only in Title Case; the second asked for a timer and model line per reply in smaller letters.)
+
+**What happened:** Cmd+V and the cursor fixed (C-062); the formatted page above the pad and the tools tray queued in the same session; the two unanswered prompts are being looked at (the router was healthy at 02:57 UTC).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790650469.518959
+
+## 61. Mon Sep 28, 9:56 PM CDT · 2026-09-29 02:56:40 UTC
+
+> i cant seem to remove a box from the left side. menu should probably be in the top bar and even hidden as a tool we can add form to the top bar tray or leave hidden behind the tray menu config
+
+**What happened:** Box removal shipped (C-062). The top-bar tray with the menu and tools behind it is the next piece.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790650600.637069

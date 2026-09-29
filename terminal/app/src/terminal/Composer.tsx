@@ -69,6 +69,10 @@ export function Composer({
   const { t } = useI18n();
   const [text, setText] = useState('');
   const [focused, setFocused] = useState(false);
+  // The themed block cursor is drawn only while the caret sits at the end of the text;
+  // anywhere else the browser's own caret shows, so moving backwards is visible.
+  const [caretAtEnd, setCaretAtEnd] = useState(true);
+  const trackCaret = (element: HTMLTextAreaElement) => setCaretAtEnd(element.selectionStart === element.value.length && element.selectionEnd === element.value.length);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // A final voice transcript lands in the draft, separated by a space.
@@ -194,7 +198,7 @@ export function Composer({
       <div className="composer-frame">
         <div className="composer-stack">
           <div className="composer-mirror" aria-hidden="true" data-testid="composer-mirror">
-            {text.length > 0 ? <ChipText text={text} chips={chips} cursor={focused && !voice.interim} /> : null}
+            {text.length > 0 ? <ChipText text={text} chips={chips} cursor={focused && !voice.interim && caretAtEnd} /> : null}
             {voice.interim ? (
               <span className="interim" data-testid="interim">
                 {text.length > 0 ? ' ' : ''}
@@ -213,10 +217,16 @@ export function Composer({
             value={text}
             placeholder={t('composer.placeholder')}
             aria-label={t('composer.placeholder')}
+            style={{ caretColor: caretAtEnd ? 'transparent' : 'var(--fg)' }}
+            spellCheck
             onChange={(event) => {
               setText(event.target.value);
+              trackCaret(event.target);
               onActivity?.();
             }}
+            onSelect={(event) => trackCaret(event.currentTarget)}
+            onKeyUp={(event) => trackCaret(event.currentTarget)}
+            onClick={(event) => trackCaret(event.currentTarget)}
             onKeyDown={onKeyDown}
             onFocus={() => {
               setFocused(true);

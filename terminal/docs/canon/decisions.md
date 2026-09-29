@@ -383,3 +383,24 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Justin: ""evolve as we grow" is great tagline" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), eleven seconds after the replay ask.
 - Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
 - Status: current.
+
+## Nesting and the logo set (2026-09-29)
+
+**C-060 · 2026-09-29 02:44 · FreshStack nests a piece under what it runs through**
+- Justin: "consider jev is a subset of open router if thats where its being used . think of organizing with nesting as appropraite." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: a stack piece may name a `parent`. A child is a subset of its parent's account, key and exit, and renders inside the parent's card under "Through <parent>". Today: Jev under OpenRouter; Gemini Live (the default voice, C-023 as updated 02:29) and OpenAI Realtime (optional) under LiveKit. Cards show the piece's registered mark.
+- Status: current (this commit). The ontology behind it (links with a name per direction) is the other session's proposal from the same message.
+
+**C-061 · 2026-09-29 02:44 · Every logo ships as a set of configurations; heavier layers are costed**
+- Justin: "we're going to need the Logo system to do lightmode and dark mode and transparent and more as well as each of the configurations of that logo like wide, icon only, etc. we might even consider using an inexpensive vectororizer tool as needed, and or 3D .... each step is a cost question" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: one colour source per mark generates six transparent SVG files (colour, mono, light, dark, wide, stacked) with `scripts/brand-variants.mjs`; `app/public/brand/index.json` is the manifest chips and cards read. Wide and stacked are our own icon + name lockups, never presented as the vendor's wordmark. Later layers in cost order: raster export (free, Playwright), vectorizing raster-only logos (free potrace/vtracer first, paid Vectorizer.AI when quality matters, cost on the ledger), 3D and motion for our own marks only (best-of-3, C-031), official wordmarks and brand kits.
+- Status: current. 43 marks × 6 files generated 2026-09-29; the later layers are not automated yet (skill §4b).
+
+## Composer fixes (2026-09-29)
+
+**C-062 · 2026-09-29 02:54 · Modifier keys belong to the browser; the visible cursor follows the caret; a box can be removed**
+- Justin: "command v is triggering the voice tool in terminal. the voice tool doesnt seem to work. ... Paste did not paste. There were issues moving the cursor around." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)) and "i cant seem to remove a box from the left side." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Found: the shortcut handler let Ctrl/Cmd+key inside the composer fall through to the single-key shortcuts, so Cmd+V toggled voice and swallowed the paste. The themed block cursor was always drawn at the end of the text while the browser's caret was hidden, so moving the caret backwards was invisible.
+- Decided: Ctrl/Cmd combinations are never shortcuts of ours (Ctrl/Cmd+Z on an empty composer stays the one exception). The themed cursor shows only while the caret is at the end; anywhere else the browser's caret shows. Spell-check is on in the writing pad. Each box row in the sidebar has a remove control (with a confirm); removing a box deletes its lines, sessions, menu, pages, edits and box UI, and keeps its ledger entries (the chain is append-only).
+- Queued from the same messages: a formatted page that grows above the writing pad as you type, editable from either side; a top-bar tools tray with the menu, tools and sign-in behind it, draggable back; multi-word phrase chips ("make sure"), tagging "learn" and "tagged"; a small timer and model line per reply (the structured header already shows model, seconds and cost for edit and schedule replies).
+- Status: fixes shipped 2026-09-29 (this commit). Queued items: in progress, Justin's session.

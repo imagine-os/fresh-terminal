@@ -4,7 +4,8 @@ import { useI18n } from '../i18n';
 import { useStoreSnapshot, type Box } from '../store';
 import { Button } from '../ui/Button';
 import { Reveal } from '../ui/Reveal';
-import { IconPlus } from '../ui/icons';
+import { IconClose, IconPlus } from '../ui/icons';
+import { Tooltip } from '../ui/Tooltip';
 import { NavTree } from './NavTree';
 
 interface Props {
@@ -13,11 +14,12 @@ interface Props {
   onOpen: (id: string) => void;
   onNew: () => void;
   onNavigate: (target: NavTarget, item: NavItem) => void;
+  onRemove?: (id: string) => void;
   /** Replay: the menu as it was at the chosen step, instead of the live one. */
   navOverride?: NavItem[] | null;
 }
 
-export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, navOverride = null }: Props) {
+export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove, navOverride = null }: Props) {
   const { t } = useI18n();
   const snapshot = useStoreSnapshot();
   const mountedAt = useRef(Date.now());
@@ -42,19 +44,36 @@ export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, navOverri
       ) : null}
       <div className="sidebar-title">{t('sidebar.boxes')}</div>
       {boxes.map((box, index) => (
-        <button
-          key={box.id}
-          type="button"
-          className="box-link"
-          aria-current={box.id === currentId ? 'page' : undefined}
-          onClick={() => onOpen(box.id)}
-          title={box.name}
-        >
-          <span className="box-glyph" aria-hidden="true">
-            {index + 1}
-          </span>
-          <span className="box-name">{box.name}</span>
-        </button>
+        <div key={box.id} className="box-row">
+          <button
+            type="button"
+            className="box-link"
+            aria-current={box.id === currentId ? 'page' : undefined}
+            onClick={() => onOpen(box.id)}
+            title={box.name}
+          >
+            <span className="box-glyph" aria-hidden="true">
+              {index + 1}
+            </span>
+            <span className="box-name">{box.name}</span>
+          </button>
+          {onRemove ? (
+            <Tooltip label={t('box.remove', { name: box.name })} align="end">
+              <Button
+                icon
+                variant="ghost"
+                className="box-remove"
+                aria-label={t('box.remove', { name: box.name })}
+                onClick={() => {
+                  if (window.confirm(t('box.removeConfirm', { name: box.name }))) onRemove(box.id);
+                }}
+                data-testid={`remove-box-${index + 1}`}
+              >
+                <IconClose />
+              </Button>
+            </Tooltip>
+          ) : null}
+        </div>
       ))}
       <Button variant="ghost" onClick={onNew} aria-label={t('sidebar.newBox')} style={{ justifyContent: 'flex-start' }}>
         <IconPlus />

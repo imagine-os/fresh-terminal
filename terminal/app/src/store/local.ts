@@ -172,6 +172,21 @@ export class LocalStore implements Store {
     return box;
   }
 
+  removeBox(id: string): void {
+    const gone = (record: { box_id: string }) => record.box_id !== id;
+    this.commit({
+      boxes: this.snapshot.boxes.filter((box) => box.id !== id),
+      sessions: this.snapshot.sessions.filter(gone),
+      lines: this.snapshot.lines.filter(gone),
+      presence: this.snapshot.presence.filter(gone),
+      navItems: this.snapshot.navItems.filter(gone),
+      pages: this.snapshot.pages.filter(gone),
+      boxUis: this.snapshot.boxUis.filter(gone),
+      glossary: this.snapshot.glossary.filter(gone),
+      edits: this.snapshot.edits.filter(gone),
+    });
+  }
+
   openSession(boxId: string): Session {
     const session: Session = { id: newId('session'), box_id: boxId, created_at: Date.now() };
     this.commit({ sessions: [...this.snapshot.sessions.slice(-50), session] });
