@@ -12,7 +12,7 @@ try {
   page.on('pageerror', (e) => console.error('pageerror', e.message));
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
   await page.waitForSelector('[data-testid="composer"]');
-  await page.click('[data-testid="first-run-dismiss"]'); await page.waitForTimeout(300);
+  await page.waitForTimeout(300);
   console.log('inline composer:', await page.locator('#composer-inline [data-testid="composer"]').count(), 'bottom hidden:', await page.locator('.region-bottom[data-behaviour="hidden"]').count());
   await page.screenshot({ path: 'docs/qa/start-centered-1440.png' });
   await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(300);

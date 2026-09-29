@@ -670,9 +670,27 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** The mobile start landed in C-080 (prompt at the bottom, counter in the tray). The review became C-081: no-op edits refused, names not ids, one Undo bar, created pages open, the screen goes with the turn, mood tags. The other session took the sign-in appearance.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655000670529?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790655000.670529
 
-## 78. Mon Sep 28, 11:13 PM CDT · 2026-09-29 04:13:38 UTC
+**Follow-up to 77 (2026-09-29 04:30 UTC):** "signin system should match style" shipped as C-084 (Opus 5.5): Clerk themed from the active theme. Prompt file 0019.
+
+## 78. Mon Sep 28, 11:27 PM CDT · 2026-09-29 04:27:01 UTC
+
+> put savide in theis browser. Sign in to save to the coloud centered top center.  Export goes in the top right dropdown menu. . in the prompt box. ____ turns voice on and off.
+
+(With a marked-up screenshot of the start screen.)
+
+**What happened:** C-085: the banner is gone; one centered line in the top bar; Export only in the tray; the placeholder names the voice key.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790656021722259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790656021.722259
+
+## 79. Mon Sep 28, 11:29 PM CDT · 2026-09-29 04:29:10 UTC
+
+> those faces arent readable, you can use emojis when appropriate. soon we'll make our own icons and stuff.
+
+**What happened:** Folded into C-085: mood tags show 🙁 / 🙂 emoji; emoji are fine in the interface where they read better than a glyph, until our own icons exist.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790656150155999?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790656150.155999
+
+## 80. Mon Sep 28, 11:13 PM CDT · 2026-09-29 04:13:38 UTC (recorded after 78 and 79)
 
 > I think Clerk has payments so we can skip stripe for now?  We need to be able to turn on customer passthrough billing after $5 in spending for now.  and ill need a way to give friends more credit easily. Connect this to our domain on cloudflair please . Also freshterminal.ai/hub should take us to our hub system (similar to how we do it in hoy or between-gigs) though between gigs is a bit overcrowded right now. But i need a hub with each of the pages and items we're working on for this. Including all the documentation and prompt/response library from this session, etc.
 
-**What happened:** C-084, C-085, C-086 (Opus 5.5, decision 0023, changelog 0013). Clerk Billing checked on Clerk's own pages: subscriptions only, usage billing "not yet", needs a Stripe account anyway, 0.7% + Stripe's 2.9% + $0.30. So it cannot do pass-through; recommended Stripe Checkout prepaid credit packs (proposed). Built without new keys: the $5 billing threshold per account (402 `payment_required`, your key never blocked), a "Top up / add payment" hook marked not wired until the Stripe keys exist, admin credit grants and invite codes on the ledger, and the hub at https://freshterminal.ai/hub (admins only, checked by the server) with every page and item, the wiki, the Canon, a searchable prompt/response library, the plan, the credits panel and a names-only secrets checklist. The domain was already on Cloudflare (C-064); the hub is on it.
+**What happened:** C-086, C-087, C-088 (Opus 5.5, decision 0024, changelog 0014). Clerk Billing checked on Clerk's own pages: subscriptions only, usage billing "not yet", needs a Stripe account anyway, 0.7% + Stripe's 2.9% + $0.30. So it cannot do pass-through; recommended Stripe Checkout prepaid credit packs (proposed). Built without new keys: the $5 billing threshold per account (402 `payment_required`, your key never blocked), a "Top up / add payment" hook marked not wired until the Stripe keys exist, admin credit grants and invite codes on the ledger, and the hub at https://freshterminal.ai/hub (admins only, checked by the server) with every page and item, the wiki, the Canon, a searchable prompt/response library, the plan, the credits panel and a names-only secrets checklist. The domain was already on Cloudflare (C-064); the hub is on it.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655218716499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790655218.716499

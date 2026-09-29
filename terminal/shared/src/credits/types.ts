@@ -24,12 +24,12 @@ export interface CreditsStatus {
   turnstile: 'on' | 'not-wired';
   /** Public Turnstile site key when the check is on. */
   turnstile_sitekey?: string;
-  /** Signed-in accounts only: the pass-through billing gate (C-081). */
+  /** Signed-in accounts only: the pass-through billing gate (C-086). */
   billing?: AccountBilling;
 }
 
 /**
- * Pass-through billing for a signed-in account (2026-09-29, C-081). Free usage
+ * Pass-through billing for a signed-in account (2026-09-29, C-086). Free usage
  * runs up to the credit limit, min(granted, threshold); past it the account
  * needs a payment method and pays for usage at cost plus our fee. Grants,
  * invite codes and paid top-ups raise both numbers by the same amount.

@@ -1,5 +1,5 @@
 {
-  "$comment": "What the hub lists (C-086). Status words: live, in progress, not wired, planned. Edit this file when a page moves; build-hub.ts copies it into the gated hub data.",
+  "$comment": "What the hub lists (C-088). Status words: live, in progress, not wired, planned. Edit this file when a page moves; build-hub.ts copies it into the gated hub data.",
   "updated": "2026-09-29",
   "items": [
     { "id": "terminal", "name": "The terminal", "status": "live", "href": "/", "about": "The prompt-first terminal: stages, tags, free usage or your key.", "links": [{ "label": "Page doc", "href": "/wiki/pages/landing.html" }, { "label": "Stage doc", "href": "/wiki/pages/box.html" }] },
@@ -14,9 +14,9 @@
     { "id": "skins", "name": "Skins", "status": "live", "href": "/", "about": "Photo and material skins for the stage and bars, with a readability layer.", "links": [{ "label": "Decision 0018", "href": "/wiki/decisions/0018-skins-and-refine.html" }], "canon": ["C-079"] },
     { "id": "skills", "name": "Skills", "status": "live", "href": "https://github.com/imagine-os/fresh-terminal/tree/main/terminal/skills", "about": "Agent skills kept in the repo (logos and icons)." },
     { "id": "plan", "name": "Plan and kanban", "status": "live", "href": "#plan", "about": "The development plan as data, by status and dependency.", "links": [{ "label": "plan.md", "href": "/wiki/plan.html" }] },
-    { "id": "hub", "name": "Hub", "status": "live", "href": "/hub", "about": "This page: admins only, checked on the server.", "canon": ["C-086"] },
-    { "id": "friend-credits", "name": "Friend credits", "status": "live", "href": "#credits", "about": "Grants by email or user id, and invite codes worth $X for N uses.", "canon": ["C-085"] },
-    { "id": "billing", "name": "Pass-through billing", "status": "not wired", "href": "#credits", "about": "The $5 threshold is enforced (402 payment_required). Paying needs Stripe keys: not wired yet.", "canon": ["C-084"] },
+    { "id": "hub", "name": "Hub", "status": "live", "href": "/hub", "about": "This page: admins only, checked on the server.", "canon": ["C-088"] },
+    { "id": "friend-credits", "name": "Friend credits", "status": "live", "href": "#credits", "about": "Grants by email or user id, and invite codes worth $X for N uses.", "canon": ["C-087"] },
+    { "id": "billing", "name": "Pass-through billing", "status": "not wired", "href": "#credits", "about": "The $5 threshold is enforced (402 payment_required). Paying needs Stripe keys: not wired yet.", "canon": ["C-086"] },
     { "id": "clerk-production", "name": "Clerk production instance", "status": "planned", "href": "/wiki/canon/state.html", "about": "Development instance today (100-user cap)." }
   ]
 }

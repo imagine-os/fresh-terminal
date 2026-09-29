@@ -1,5 +1,5 @@
 /**
- * Builds the hub's data (2026-09-29, C-086) into app/dist/hub/data/*.json from
+ * Builds the hub's data (2026-09-29, C-088) into app/dist/hub/data/*.json from
  * the docs, after the app and wiki builds. The site Worker serves these files
  * only to signed-in admins (site/src/worker.ts); the hub page itself is a shell
  * with no content in it.

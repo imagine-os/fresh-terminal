@@ -19,7 +19,7 @@ routes = [
 
 [vars]
 ALLOWED_ORIGINS = "https://freshterminal.ai,https://www.freshterminal.ai,https://imagine-os.github.io,http://localhost:5173,http://localhost:4173"
-# Hub admins (C-085, C-086): Clerk user ids, comma-separated. Ids are not secret.
+# Hub admins (C-087, C-088): Clerk user ids, comma-separated. Ids are not secret.
 # Emails stay out of this public repo: they come from the ADMIN_EMAILS repository secret.
 ADMIN_USER_IDS = ""
 SITE_URL = "https://freshterminal.ai"

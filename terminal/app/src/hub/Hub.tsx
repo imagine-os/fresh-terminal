@@ -6,7 +6,7 @@ import { CreditsPanel } from './CreditsPanel';
 import { Status } from './Status';
 
 /**
- * The hub (2026-09-29, C-086): every page and item we are working on, the wiki,
+ * The hub (2026-09-29, C-088): every page and item we are working on, the wiki,
  * the Canon, a searchable prompt/response library, the plan, the credits panel
  * and the secrets checklist (names only). Void theme, square corners.
  */

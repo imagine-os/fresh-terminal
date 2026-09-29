@@ -5,7 +5,7 @@ import { billingProvider, creditLimitMicro, sha256Hex, type CreditsBindings, typ
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
 
 /**
- * Friend credits, the admin API and the payment hook (2026-09-29, C-081..C-083).
+ * Friend credits, the admin API and the payment hook (2026-09-29, C-086..C-088).
  *
  * - Admin = a Clerk user whose id is in ADMIN_USER_IDS (Worker var) or whose
  *   verified email is in ADMIN_EMAILS (Worker secret, read through the Clerk

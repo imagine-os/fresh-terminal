@@ -11,7 +11,7 @@ export const NOT_WIRED = [
   { id: 'auth.clerk.es', label: 'Clerk sign-in screens in Spanish (Clerk UI is English only for now)' },
   { id: 'sync.lines', label: 'Transcript lines in cloud sync (boxes, menus, pages, looks and the ledger mirror sync; lines stay in this browser)' },
   { id: 'credits.turnstile', label: 'Turnstile check before a new free-credit device (code is in; the Cloudflare token needs Account Turnstile Edit, then the next router deploy switches it on)' },
-  { id: 'credits.buy', label: 'Top up / add payment (Stripe Checkout, C-084): the code is in; it switches on when STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET are set. Until then free usage ends at the credit limit and your key still works' },
+  { id: 'credits.buy', label: 'Top up / add payment (Stripe Checkout, C-086): the code is in; it switches on when STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET are set. Until then free usage ends at the credit limit and your key still works' },
   { id: 'billing.passthrough', label: 'Charging a saved card for usage past the credit limit (auto top-up); today a paid top-up is prepaid credit' },
   { id: 'sync.realtime', label: 'Realtime sync between devices (sync runs on sign-in, after edits and on focus; last writer wins)' },
   { id: 'store.spacetimedb', label: 'SpacetimeDB live store (module written, not published)' },

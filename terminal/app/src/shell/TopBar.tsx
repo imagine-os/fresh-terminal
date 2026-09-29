@@ -61,7 +61,7 @@ export function TopBar(props: Props) {
   const account = useAccount();
   const credits = useCredits();
   const { toast } = useToast();
-  // C-084: wired only when the router says a payment provider is connected.
+  // C-086: wired only when the router says a payment provider is connected.
   const paymentsWired = credits.status?.billing?.provider === 'stripe';
   const onTopUp = async () => {
     if (!account.signedIn) {
@@ -138,6 +138,19 @@ export function TopBar(props: Props) {
       </Tooltip>
       {props.boxName ? <span className="tagline">/ {props.boxName}</span> : null}
       <span className="topbar-spacer" />
+      {/* Where your work lives, one line, top center (C-085). */}
+      <span className="topbar-note" data-testid="topbar-note">
+        {account.signedIn ? (
+          t('topbar.savedCloud')
+        ) : (
+          <>
+            <b>{t('topbar.saved')}</b>{' '}
+            <button type="button" className="topbar-note-link" onClick={account.signIn} disabled={!account.loaded}>
+              {t('topbar.signInToSave')}
+            </button>
+          </>
+        )}
+      </span>
       <span className="balance" data-live={props.usedMicro > 0} data-testid="balance" aria-label={`${formatMicro(props.usedMicro)} ${t('topbar.used')}`}>
         {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
       </span>

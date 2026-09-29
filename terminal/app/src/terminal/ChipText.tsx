@@ -16,13 +16,13 @@ export const CHIP_ICONS: Record<ChipKind, string> = {
   page: '▭',
   nav: '☰',
   theme: '◐',
-  mood: '☹',
+  mood: '🙁',
   entity: '◆',
 };
 
-/** Mood shows its face: ☹ negative, ☺ positive. */
+/** Mood shows its face as an emoji people can read: 🙁 negative, 🙂 positive (Justin, ts 1790656150). */
 export function chipIcon(chip: Pick<Chip, 'kind' | 'value'>): string {
-  if (chip.kind === 'mood') return chip.value === 'positive' ? '☺' : '☹';
+  if (chip.kind === 'mood') return chip.value === 'positive' ? '🙂' : '🙁';
   return CHIP_ICONS[chip.kind];
 }
 

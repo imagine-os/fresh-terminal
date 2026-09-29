@@ -1,5 +1,5 @@
 /**
- * The hub's data (2026-09-29, C-086): built from the docs at deploy time by
+ * The hub's data (2026-09-29, C-088): built from the docs at deploy time by
  * scripts/build-hub.ts and served only to signed-in admins. Shared by the
  * builder and the hub page.
  */

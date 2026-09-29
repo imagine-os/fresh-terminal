@@ -25,8 +25,8 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | api.freshterminal.ai (same router, custom domain) | https://api.freshterminal.ai/health | 2026-09-29, infra pass (C-064) |
 | Sign in (Clerk development instance) and cloud sync (D1) | Header **Sign in** button on freshterminal.ai and on Pages | 2026-09-29, infra pass (C-065, C-066) |
 | Free credits, enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day signed-out cap) | `GET https://api.freshterminal.ai/credits`; live check in changelog 0008 | 2026-09-29 (C-074) |
-| Billing threshold per account ($5 default; past the credit limit `402 payment_required`), friend credits and invite codes | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-084, C-085) |
-| The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-086) |
+| Billing threshold per account ($5 default; past the credit limit `402 payment_required`), friend credits and invite codes | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
+| The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-088) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |
 
@@ -68,7 +68,7 @@ As of 2026-09-29:
 
 - SpacetimeDB live store. The module is written and type-checked, not published. The app uses browser storage instead, so boxes don't sync between devices or people. 2026-09-29: account data goes to Cloudflare D1 first (C-047).
 - ~~Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.~~ Superseded 2026-09-29 (C-065): sign-in is wired on the Clerk development instance. Still not wired: the Clerk production instance (steps in C-065), Clerk screens in Spanish, transcript lines in sync, realtime sync between devices.
-- Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.) 2026-09-29 (C-084): the $5 threshold is enforced and the Stripe Checkout top-up code is in; it switches on when `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are repository secrets and the router redeploys. Charging a saved card for usage (auto top-up) is not built.
+- Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.) 2026-09-29 (C-086): the $5 threshold is enforced and the Stripe Checkout top-up code is in; it switches on when `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are repository secrets and the router redeploys. Charging a saved card for usage (auto top-up) is not built.
 - ~~A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).~~ Built 2026-09-29 (C-080): $1 per account, $10 across accounts per UTC day.
 - Turnstile before a new free-credit device: built, not switched on; the Cloudflare token needs Account → Turnstile → Edit (C-074).
 - Shared chain beyond the browser, and the server re-checking hashes.
@@ -103,8 +103,10 @@ As of 2026-09-29:
 | **Logos and icons skill** | Added 2026-09-29 02:25 UTC at `terminal/skills/logos-and-icons/SKILL.md`: source order (official → official repo → Simple Icons → text mark), licence check, sizes, registry at `docs/brand/registry.md`, generate only for our own marks. First use: marks on the FreshStack cards and brand chips. Assets not gathered yet. |
 | **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 157 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
+| **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |
 | **Review pass** (C-081) | Shipped 2026-09-29 04:45 UTC: no-op edits refused, names not ids, one Undo bar, created pages open, screen context, mood tags. |
 | **No silent turns, smarter tagger, tiles, stage** (C-080) | Shipped 2026-09-29 04:20 UTC. |
+| **Sign-in in our look** (C-084) | Shipped 2026-09-29 about 04:35 UTC (Opus 5.5): Clerk themed from the active theme. Justin: turn off required username and phone in Clerk; Branding toggle optional. |
 | **Tighter start** (C-078) | Shipped 2026-09-29 04:00 UTC: square corners, one bottom row, centered prompt on an empty box, tags. |
 | **Branded export, import, live credits** (C-076) | Shipped 2026-09-29 03:50 UTC. |
 | **Clean start** (C-075) | Shipped 2026-09-29 03:40 UTC: Alt+key shortcuts while typing, free usage label, sidebar hidden with top-left icon and settings, starters and hints behind switches, calmer tray. |

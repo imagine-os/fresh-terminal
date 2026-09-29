@@ -3,7 +3,7 @@ import { routerFetch } from '../lib/routerFetch';
 import { refreshCredits } from './useCredits';
 
 /**
- * The "Top up / add payment" hook and invite codes (2026-09-29, C-084, C-085).
+ * The "Top up / add payment" hook and invite codes (2026-09-29, C-086, C-087).
  * Top up asks the router for a Stripe Checkout page; until STRIPE_SECRET_KEY
  * and STRIPE_WEBHOOK_SECRET are set there, it answers 501 not_wired and this
  * says so. Invite codes land as credit on the signed-in account.

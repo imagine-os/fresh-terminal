@@ -42,7 +42,7 @@ export interface CreditsBindings extends AuthBindings {
   DEVICES_PER_IP_DAY?: string;
   DEVICES_PER_NET_DAY?: string;
   ANON_MAX_BODY_BYTES?: string;
-  /** Stripe Checkout top-ups (C-081). Both set = the "Top up / add payment" button is wired. */
+  /** Stripe Checkout top-ups (C-086). Both set = the "Top up / add payment" button is wired. */
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
 }
@@ -177,13 +177,13 @@ interface AccountCreditRow {
   id: string;
   grant_micro: number;
   spent_micro: number;
-  /** Lifetime free usage before a payment method is needed (C-081, default $5). */
+  /** Lifetime free usage before a payment method is needed (C-086, default $5). */
   billing_threshold_micro: number;
   billing_state: BillingState;
   paid_micro: number;
 }
 
-/** min(grant, threshold): what the account can spend before it must pay (C-081). */
+/** min(grant, threshold): what the account can spend before it must pay (C-086). */
 export function creditLimitMicro(row: Pick<AccountCreditRow, 'grant_micro' | 'billing_threshold_micro'>): number {
   return Math.max(0, Math.min(row.grant_micro, row.billing_threshold_micro));
 }
@@ -430,7 +430,7 @@ export function meter(options: MeterOptions): MiddlewareHandler {
     if (payer.kind === 'none') return deny(c, 401, 'device_required', 'This browser has no device id yet. The app gets one from POST /credits/device.');
 
     if (payer.kind === 'account') {
-      // Pass-through gate (C-081): free usage runs to min(grant, threshold); past it the account must pay.
+      // Pass-through gate (C-086): free usage runs to min(grant, threshold); past it the account must pay.
       // "Your key" calls go browser -> OpenRouter and never reach this meter, so they are never blocked.
       if (creditLimitMicro(payer.row) - payer.row.spent_micro < config.minBalanceMicro) {
         if (payer.row.billing_state === 'free') {

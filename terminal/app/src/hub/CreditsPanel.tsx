@@ -4,7 +4,7 @@ import type { HubClient } from './client';
 import { Status } from './Status';
 
 /**
- * The admin credits panel (2026-09-29, C-085): grant credit by email or Clerk
+ * The admin credits panel (2026-09-29, C-087): grant credit by email or Clerk
  * user id, make and switch off invite codes, set an account's billing
  * threshold, and read recent grants and the ledger. The router checks admin on
  * every call; this panel only shows what it answers.

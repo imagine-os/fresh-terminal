@@ -16,8 +16,8 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-086) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
-| [canon/prompts.md](canon/prompts.md) | All 78 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-088) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 80 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
 | [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, replay, step, wiki and more | 2026-09-29 |
@@ -53,6 +53,7 @@ Read this first.
 | [prompts/0016-playback.md](prompts/0016-playback.md) | A playback scrubber for every step of a session; "evolve as we grow" | 2026-09-29 |
 | [prompts/0017-domain-clerk-d1.md](prompts/0017-domain-clerk-d1.md) | "i already did cloudflare clerk": freshterminal.ai, sign-in and D1 unblocked | 2026-09-29 |
 | [prompts/0018-koi-v3-canvas-v2.md](prompts/0018-koi-v3-canvas-v2.md) | "koi pond 2 came out terrible" and "The canvas you made is awful": koi v3 and canvas v2 | 2026-09-29 |
+| [prompts/0019-signin-style.md](prompts/0019-signin-style.md) | "signin system should match style": Clerk in our look | 2026-09-29 |
 
 ## 4. Decisions: one per file
 
@@ -79,8 +80,9 @@ Read this first.
 | [decisions/0019-playback.md](decisions/0019-playback.md) | Every step is a saved event with parents; replay first, branches and merges later | 2026-09-29 |
 | [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md) | freshterminal.ai on Workers, Clerk anonymous-first, accounts, boxes and ledger mirror in D1 | 2026-09-29 |
 | [decisions/0021-free-credits.md](decisions/0021-free-credits.md) | Free credits enforced by the router: grants, soft prompts, abuse limits, daily cap, cost estimates | 2026-09-29 |
-| [decisions/0023-billing-friend-credits-hub.md](decisions/0023-billing-friend-credits-hub.md) | What Clerk Billing can and cannot do (sources), the $5 pass-through threshold, Stripe Checkout top-ups (proposed), friend credits and invite codes, the hub at /hub, costs | 2026-09-29 |
 | [decisions/0022-koi-v3-and-canvas-v2.md](decisions/0022-koi-v3-and-canvas-v2.md) | Koi pond v3 (top-down, then tilt up; photographic) and canvas v2 (paper sheets, sections, minimap): what was wrong, what was chosen and why | 2026-09-29 |
+| [decisions/0023-signin-style.md](decisions/0023-signin-style.md) | Clerk sign-in themed from the active theme: square, our fonts, accent button, no shadow, 44px, focus; what stays (Clerk branding, dev notice) | 2026-09-29 |
+| [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md) | What Clerk Billing can and cannot do (sources), the $5 pass-through threshold, Stripe Checkout top-ups (proposed), friend credits and invite codes, the hub at /hub, costs | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
 
@@ -98,7 +100,8 @@ Read this first.
 | [changelog/0009.md](changelog/0009.md) | Product Hunt strategy page (proposed launch plan, C-077) | 2026-09-29 |
 | [changelog/0010.md](changelog/0010.md) | Readable text over photo and material skins: sampled scrim, AA text, neutral small text | 2026-09-29 |
 | [changelog/0012.md](changelog/0012.md) | Koi pond v3 and canvas v2 redo, best-of-3 rounds, before/after screenshots, live check | 2026-09-29 |
-| [changelog/0013.md](changelog/0013.md) | The $5 pass-through gate, friend credits and invite codes, the hub at freshterminal.ai/hub, with the live check | 2026-09-29 |
+| [changelog/0013.md](changelog/0013.md) | The sign-in matches the theme (Clerk appearance), before/after at 390, 1280, 3840 | 2026-09-29 |
+| [changelog/0014.md](changelog/0014.md) | The $5 pass-through gate, friend credits and invite codes, the hub at freshterminal.ai/hub, with the live check | 2026-09-29 |
 
 ## 6. Reference
 

@@ -20,7 +20,7 @@ not_found_handling = "single-page-application"
 # The Worker runs first so it can redirect www and set headers; it then asks ASSETS.
 run_worker_first = true
 
-# The hub's admin check (C-086): /hub/data/* and /hub/api/* ask the router's
+# The hub's admin check (C-088): /hub/data/* and /hub/api/* ask the router's
 # /admin/whoami over a service binding (no public hop, no secrets here).
 [[services]]
 binding = "ROUTER"

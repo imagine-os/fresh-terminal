@@ -122,7 +122,7 @@ jobs:
             done
             echo "$url: HTTP $code"
           done
-          # The hub (C-086): the shell is public and empty; its data answers 401 without an admin session.
+          # The hub (C-088): the shell is public and empty; its data answers 401 without an admin session.
           echo "hub shell: HTTP $(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 https://freshterminal.ai/hub)"
           echo "hub data signed out: HTTP $(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 https://freshterminal.ai/hub/data/library.json) (must be 401)"
           echo "www: $(curl -sS -o /dev/null -w '%{http_code} -> %{redirect_url}' --max-time 10 https://www.freshterminal.ai/canvas 2>/dev/null || echo 'not answering yet')"

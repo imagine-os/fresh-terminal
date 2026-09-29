@@ -1,6 +1,6 @@
-# 0023 — pass-through billing after $5, friend credits, and the hub at /hub
+# 0024 — pass-through billing after $5, friend credits, and the hub at /hub
 
-Date: 2026-09-29. Model: Opus 5.5. Prompt: Canon prompt 78 (Justin, 04:13:38 UTC, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655218716499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). Canon: C-084 (billing), C-085 (friend credits), C-086 (hub). Builds on 0021 (free credits) and 0020 (domain, Clerk, D1).
+Date: 2026-09-29. Model: Opus 5.5. Prompt: Canon prompt 80 (Justin, 04:13:38 UTC, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655218716499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). Canon: C-086 (billing), C-087 (friend credits), C-088 (hub). Builds on 0021 (free credits) and 0020 (domain, Clerk, D1); decision 0023 (the themed sign-in) is a separate pass.
 
 ## What Clerk Billing can do (read 2026-09-29, official pages only)
 
@@ -36,7 +36,7 @@ The requirement: after an account has used $5 of free usage it must add a paymen
 - **Daily caps** (C-080) apply while an account is on free usage; an `active` account spends its own money and is not capped.
 - **Top up / add payment**: `POST /billing/checkout {amount_usd}` → a Stripe Checkout URL, or `501 not_wired` until both `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are Worker secrets. `POST /billing/stripe/webhook` checks the `Stripe-Signature` (HMAC-SHA256, five-minute tolerance) and credits `checkout.session.completed` once per session id. The tray tile says "not wired yet" until `GET /credits` reports `billing.provider: stripe`. **Not tested against live Stripe.**
 
-## Friend credits (C-085)
+## Friend credits (C-087)
 
 - **Admin** = a Clerk user id in the router var `ADMIN_USER_IDS`, or a verified email in the `ADMIN_EMAILS` secret (looked up through the Clerk Backend API, cached five minutes). Emails stay out of this public repo.
 - `POST /admin/grant {email | user_id, amount_usd, note}` (up to $100, `ADMIN_GRANT_MAX_USD`). An email must belong to someone who has signed up; for anyone else, send an invite code.
@@ -44,7 +44,7 @@ The requirement: after an account has used $5 of free usage it must add a paymen
 - Every credit is a `credit_grants` row (account, amount, source, who granted it, note) and a `credit` entry on the account's ledger mirror (`ledger_entries`, id `srv_<grant>`, its own hash chain per account).
 - Read back: `GET /admin/grants`, `/admin/invites`, `/admin/ledger`, `/admin/accounts`, `/admin/overview`; `POST /admin/invites/disable`, `POST /admin/account {email | user_id, billing_threshold_usd?, billing_state?}`.
 
-## The hub (C-086)
+## The hub (C-088)
 
 - `https://freshterminal.ai/hub`, served by the site Worker. The page is a shell with nothing private in it. The content (`/hub/data/*.json`) and the session check (`/hub/api/session`) need `Authorization: Bearer <Clerk session>`; the site Worker asks the router's `/admin/whoami` over a service binding. No token: 401. Not an admin: 403. The data files are built by `scripts/build-hub.ts` only in the site deploy (`HUB_DATA=1`); the GitHub Pages build gets the shell and no data, because nothing guards Pages.
 - Sections: every page and item with live links and status; the prompt and response library (every prompt word for word with what happened and its Slack link, the Canon, decision records and changelogs, searchable); the Canon; the wiki index; the plan as kanban; the credits panel; the secrets checklist (names, set or missing, from the deploy; never values).

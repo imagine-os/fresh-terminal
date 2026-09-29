@@ -1,6 +1,6 @@
 # Hub (`/hub`)
 
-Date: 2026-09-29. Model: Opus 5.5. Canon C-086. Decision 0023.
+Date: 2026-09-29. Model: Opus 5.5. Canon C-088. Decision 0024.
 
 - **Where:** https://freshterminal.ai/hub (only on the domain; the Pages copy points there).
 - **Who:** signed-in Clerk admins. Admin = a user id in the router var `ADMIN_USER_IDS` or a verified email in the `ADMIN_EMAILS` secret. Everyone else sees a sign-in prompt, or "not a hub admin" after signing in.

@@ -3,7 +3,7 @@
  * serves the built app from static assets (SPA fallback is configured in
  * wrangler.toml). No secrets and no state live here.
  *
- * The hub (C-086) is at /hub. The page itself is a shell with no content.
+ * The hub (C-088) is at /hub. The page itself is a shell with no content.
  * Everything with content (/hub/data/*) and the session check (/hub/api/*)
  * needs a Clerk session token from an admin: this Worker asks the router
  * (service binding ROUTER, else api.freshterminal.ai) at /admin/whoami, which

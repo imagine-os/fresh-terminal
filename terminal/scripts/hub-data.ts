@@ -1,5 +1,5 @@
 /**
- * Hub data, built from the docs at build time (2026-09-29, C-086). Pure
+ * Hub data, built from the docs at build time (2026-09-29, C-088). Pure
  * functions so they can be tested; scripts/build-hub.ts writes the files.
  * Everything here comes from the repo's Markdown: prompts (verbatim), the
  * Canon's decisions, decision records, changelogs, the wiki index and the plan.

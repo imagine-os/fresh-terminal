@@ -1,7 +1,7 @@
 name: hub-smoke
 
 # End-to-end check of the hub, friend credits and the $5 billing gate on the
-# live site and router (C-084..C-086). Run on demand and after router deploys.
+# live site and router (C-086..C-088). Run on demand and after router deploys.
 # Uses two throwaway users in the Clerk DEVELOPMENT instance: "admin" is made a
 # hub admin for the length of the run through the Worker secret
 # ADMIN_USER_IDS_SMOKE (removed at the end), "friend" gets the credit. No model

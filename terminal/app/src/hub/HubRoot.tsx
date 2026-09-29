@@ -6,7 +6,7 @@ import { Hub } from './Hub';
 import { liveClient, sampleClient, isLocalPreview } from './client';
 
 /**
- * The hub's gate (2026-09-29, C-086). Signed out: a sign-in prompt and nothing
+ * The hub's gate (2026-09-29, C-088). Signed out: a sign-in prompt and nothing
  * else. Signed in: the site Worker checks the session with the router
  * (/hub/api/session); only admins get the content. The same check guards every
  * data file, so this page cannot show anything the server did not allow.

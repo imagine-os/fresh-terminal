@@ -1,7 +1,7 @@
 import { resolveRouterUrl } from '../config/router';
 
 /**
- * Hub requests (2026-09-29, C-086). Content comes from the site Worker at
+ * Hub requests (2026-09-29, C-088). Content comes from the site Worker at
  * /hub/data/* and the session check from /hub/api/session; both need the Clerk
  * session token and answer 401 without it. The credits panel talks to the
  * router's /admin/* with the same token; the router checks admin again.
