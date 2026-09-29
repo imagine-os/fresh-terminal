@@ -16,6 +16,7 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | FreshStack (the default stack, three modes, exit per piece) | https://imagine-os.github.io/fresh-terminal/pages/freshstack.html | 2026-09-29 02:20 UTC, live on the next Pages deploy |
 | Replay of a box (playback scrubber, every step, interface as it was) | https://imagine-os.github.io/fresh-terminal/ then press `P`, or `/box/<id>/play` | 2026-09-29 02:45 UTC, live on the next Pages deploy |
 | The Canon | https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/README.md, and a card on the master canvas | 2026-09-29, pass 4 |
+| Product Hunt strategy (proposed; the call, pitch pick, readiness, costs) | https://imagine-os.github.io/fresh-terminal/pages/producthunt.html | 2026-09-29 03:40 UTC, live on the next Pages deploy (C-070) |
 | Audit and rebuild recommendation | https://imagine-os.github.io/fresh-terminal/pages/audit.html | 2026-09-28 |
 | Old themes page | `/pages/themes.html`, now redirects to the library | 2026-09-29 |
 | Router | https://fresh-terminal-router.jmassion.workers.dev (Cloudflare Worker) | 2026-09-29 01:13 UTC |

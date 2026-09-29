@@ -14,6 +14,7 @@ describe('canvas cards', () => {
       'canon',
       'freshstack',
       'brand-marks',
+      'product-hunt-strategy',
     ]);
     for (const card of SEED_CARDS) {
       expect(cardSchema.safeParse(card).success).toBe(true);

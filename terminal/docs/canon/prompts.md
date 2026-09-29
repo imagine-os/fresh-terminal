@@ -553,3 +553,10 @@ Justin's session, same message: FreshStack nesting (Jev under OpenRouter, Gemini
 
 **What happened:** Box removal shipped (C-069). The top-bar tray with the menu and tools behind it is the next piece.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790650600.637069
+
+## 65. Mon Sep 28, 10:14 PM CDT · 2026-09-29 03:14:40 UTC
+
+> start thinking about the product hunt strategy. you can make a page for product hunt strategy
+
+**What happened:** Research on Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then a strategy page: https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free credits, a daily spend limit, first-run screen, repo licence). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-070. Opus 5.5.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651680.495959
