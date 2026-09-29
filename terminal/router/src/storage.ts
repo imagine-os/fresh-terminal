@@ -2,7 +2,7 @@ import { storageStatus, type StorageStatus } from '../../shared/src/credits/stor
 import type { D1Database } from './d1';
 
 /**
- * Storage metering (2026-09-29, C-091): the bytes an account keeps in D1, its
+ * Storage metering (2026-09-29, C-092): the bytes an account keeps in D1, its
  * stages and its ledger mirror. Measured on every sync write and on GET /credits,
  * stored on the account row. Billing above the free allowance is not wired; this
  * only measures. Byte counts are of the stored values (UTF-8), which is close to,

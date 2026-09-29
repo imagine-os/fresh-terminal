@@ -16,7 +16,7 @@ export async function startTopUp(amountUsd = 10): Promise<TopUpResult> {
     const body = (await response.json().catch(() => ({}))) as { url?: string; code?: string; error?: string; provider?: string };
     if (response.status === 401) return { kind: 'sign-in' };
     if (response.status === 501 || body.code === 'not_wired') return { kind: 'not-wired' };
-    // Clerk Billing (C-092): the refill plans live in the Billing tab of Clerk's profile window.
+    // Clerk Billing (C-093): the refill plans live in the Billing tab of Clerk's profile window.
     if (response.ok && body.provider === 'clerk') return { kind: 'clerk' };
     if (response.ok && body.url && /^https:\/\/checkout\.stripe\.com\//.test(body.url)) return { kind: 'redirect', url: body.url };
     return { kind: 'error', message: body.error ?? `HTTP ${response.status}` };

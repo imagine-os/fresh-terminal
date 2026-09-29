@@ -48,7 +48,7 @@ export interface CreditsBindings extends AuthBindings {
   /** Stripe Checkout top-ups (C-086). Both set = the "Top up / add payment" button is wired. */
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
-  /** Clerk Billing refill plans (C-092): "clerk" plus the Clerk webhook signing secret switch it on. */
+  /** Clerk Billing refill plans (C-093): "clerk" plus the Clerk webhook signing secret switch it on. */
   BILLING_PROVIDER?: string;
   CLERK_WEBHOOK_SIGNING_SECRET?: string;
   /** Only paid Clerk plans whose slug starts with this credit the ledger (default "credit"). */
@@ -74,9 +74,9 @@ export const CREDIT_DEFAULTS = {
   chances: 2,
   /** $2 of provider cost per UTC day across all anonymous devices. */
   anonDailyCostCapMicro: 2_000_000,
-  /** Per-account daily cap on free usage: off (0) since C-090 ("no daily cap . just $5 on us"). ACCOUNT_DAILY_MICRO turns it back on. */
+  /** Per-account daily cap on free usage: off (0) since C-091 ("no daily cap . just $5 on us"). ACCOUNT_DAILY_MICRO turns it back on. */
   accountDailyMicro: 0,
-  /** Hidden circuit breaker (C-090): $25 of provider cost per UTC day across all signed-in accounts on free usage. 0 = off. */
+  /** Hidden circuit breaker (C-091): $25 of provider cost per UTC day across all signed-in accounts on free usage. 0 = off. */
   accountDailyTotalCostMicro: 25_000_000,
   /** The $5 starter kit per signed-in account (C-089; was $1). ACCOUNT_STARTER_USD sets it. */
   accountGrantMicro: 5_000_000,
@@ -270,7 +270,7 @@ async function accountDaily(db: D1Database, accountId: string, now: number): Pro
 }
 
 export const DAILY_FREE_USAGE_REACHED = 'Daily free usage reached. It resets at 00:00 UTC, or use your key.';
-/** The all-accounts circuit breaker (C-090) is not advertised; this is what a caller sees if it trips. */
+/** The all-accounts circuit breaker (C-091) is not advertised; this is what a caller sees if it trips. */
 export const FREE_USAGE_PAUSED = 'Free usage is paused for the rest of the day (UTC). Your key still works.';
 
 /** Per-account cap (off by default) and the all-accounts breaker; 0 turns either off. */
@@ -575,7 +575,7 @@ export function mountCreditRoutes(app: { get: (path: string, handler: (c: Contex
     if (payer.kind === 'device') cap = (await dailyAnonCost(db, options.now())) >= config.anonDailyCostCapMicro;
     if (payer.kind === 'account') {
       cap = dailyCapHit(await accountDaily(db, payer.id, options.now()), config) !== null;
-      // C-091: what this account stores with us (measured; billing above 100 MB is not wired).
+      // C-092: what this account stores with us (measured; billing above 100 MB is not wired).
       const storage = await measureStorage(db, payer.id, options.now());
       const share = await db.prepare('SELECT share_data FROM accounts WHERE id = ?1').bind(payer.id).first<{ share_data: number }>();
       return c.json({ ...statusFor(payer, config, cap, bindings), storage, share_data: Number(share?.share_data ?? 0) === 1 });

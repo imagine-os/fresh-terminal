@@ -194,7 +194,7 @@ describe('signed-in daily caps', () => {
     expect((await h.call('/paid/json?cost=1', { device: token })).status).toBe(200);
   });
 
-  it('has no per-account daily cap by default (C-090) and a hidden $25 all-accounts breaker', async () => {
+  it('has no per-account daily cap by default (C-091) and a hidden $25 all-accounts breaker', async () => {
     const db = fakeD1();
     const app = createApp({ bindings: () => ({ DEVICE_SIGNING_KEY: KEY }), resources: () => ({ DB: db }) });
     const health = (await (await app.request('/health')).json()) as { credits: { accountDailyMicro: number; accountDailyTotalCostMicro: number } };

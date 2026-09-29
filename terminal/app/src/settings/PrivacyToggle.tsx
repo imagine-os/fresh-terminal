@@ -4,7 +4,7 @@ import { useI18n } from '../i18n';
 import { routerFetch } from '../lib/routerFetch';
 
 /**
- * "Share my data with Fresh Terminal to improve it (off by default)" (C-090).
+ * "Share my data with Fresh Terminal to improve it (off by default)" (C-091).
  * Signed-in only: the setting lives on the account (PUT /me/privacy). Off means
  * Fresh Terminal's admin tools see totals only, never your stages or prompts.
  */

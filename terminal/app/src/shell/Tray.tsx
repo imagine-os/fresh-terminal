@@ -4,7 +4,6 @@ import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
 import { IconClose, IconPin, IconTray } from '../ui/icons';
-import { NavTree } from './NavTree';
 
 export type ToolGroup = 'go' | 'look' | 'session';
 
@@ -30,9 +29,9 @@ interface Props {
   tools: Tool[];
   pinned: string[];
   onPinned: (ids: string[]) => void;
-  /** The current box's menu, shown inside the tray. */
-  nav: NavItem[];
-  onNavigate: (target: NavTarget, item: NavItem) => void;
+  /** The stage menu used to live here; it stays in the sidebar now (C-090). Kept for callers. */
+  nav?: NavItem[];
+  onNavigate?: (target: NavTarget, item: NavItem) => void;
   /** Quiet links at the foot of the tray (source, docs). */
   links?: Array<{ label: string; href: string }>;
   /** Version and tagline, faint, at the very bottom. */
@@ -79,7 +78,7 @@ function ToolButton({ tool, inTray }: { tool: Tool; inTray: boolean }) {
  * button; pin a tool to bring it back to the bar (click the pin, or drag it
  * onto the bar). The current box's menu lives here too.
  */
-export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foot }: Props) {
+export function Tray({ tools, pinned, onPinned, links = [], foot }: Props) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [dropping, setDropping] = useState(false);
@@ -106,6 +105,20 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foo
       window.removeEventListener('pointerdown', onClick);
     };
   }, [open]);
+
+  // Desktop: the tray opens on hover and closes when the pointer leaves; touch and click still work (C-090).
+  const closeTimer = useRef<number | null>(null);
+  const hoverable = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const hoverOpen = () => {
+    if (!hoverable) return;
+    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  const hoverClose = () => {
+    if (!hoverable) return;
+    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setOpen(false), 220);
+  };
 
   const pin = (id: string, value: boolean) => {
     const next = value ? [...pinned.filter((candidate) => candidate !== id), id] : pinned.filter((candidate) => candidate !== id);
@@ -139,7 +152,7 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foo
           </Tooltip>
         ))}
       </span>
-      <span className="tray-anchor">
+      <span className="tray-anchor" onPointerEnter={hoverOpen} onPointerLeave={hoverClose}>
         <Tooltip label={t('tray.title')} align="end">
           <Button ref={buttonRef} icon variant="ghost" aria-label={t('tray.title')} aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((current) => !current)} data-testid="tray-toggle">
             <IconTray />
@@ -154,25 +167,12 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foo
                 <IconClose />
               </Button>
             </div>
-            {nav.length > 0 ? (
-              <section className="tray-section">
-                <div className="tray-label">{t('nav.menu')}</div>
-                <NavTree
-                  items={nav}
-                  onActivate={(target, item) => {
-                    setOpen(false);
-                    onNavigate(target, item);
-                  }}
-                />
-              </section>
-            ) : null}
             {GROUPS.map((group) => {
               const members = tools.filter((tool) => (tool.group ?? 'go') === group.id);
               if (members.length === 0) return null;
               return (
                 <section className="tray-section" key={group.id}>
-                  <div className="tray-label">{t(group.label)}</div>
-                  <ul className="tray-grid">
+                  <ul className="tray-list">
                     {members.map((tool) => {
                       const isPinned = pinned.includes(tool.id);
                       const common = {
@@ -184,18 +184,18 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foo
                       };
                       const body = (
                         <>
-                          <span className="tile-icon" aria-hidden="true">
+                          <span className="row-icon" aria-hidden="true">
                             {tool.icon}
                           </span>
-                          <span className="tile-label">{tool.short ?? tool.label}</span>
-                          {tool.detail ? <span className="tile-detail">{tool.detail}</span> : null}
-                          {tool.shortcut ? <kbd className="tile-key">{tool.shortcut}</kbd> : null}
+                          <span className="row-label">{tool.short ?? tool.label}</span>
+                          {tool.detail ? <span className="row-detail">{tool.detail}</span> : null}
+                          {tool.shortcut ? <kbd className="row-key">{tool.shortcut}</kbd> : null}
                         </>
                       );
                       return (
                         <li
                           key={tool.id}
-                          className="tray-tool tile"
+                          className="tray-tool row"
                           data-pinned={isPinned}
                           draggable
                           onDragStart={(event) => {
@@ -204,13 +204,13 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foo
                           }}
                         >
                           {tool.href ? (
-                            <a className="tile-button" href={tool.href} {...common}>
+                            <a className="row-button" href={tool.href} {...common}>
                               {body}
                             </a>
                           ) : (
                             <button
                               type="button"
-                              className="tile-button"
+                              className="row-button"
                               onClick={() => {
                                 tool.onClick();
                                 if (!tool.pressed && tool.pressed === undefined) setOpen(false);

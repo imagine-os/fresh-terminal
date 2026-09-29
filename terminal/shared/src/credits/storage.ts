@@ -1,5 +1,5 @@
 /**
- * Storage pricing (2026-09-29, C-091). One constant, so the router, the app, the
+ * Storage pricing (2026-09-29, C-092). One constant, so the router, the app, the
  * hub and the sales site all say the same thing. NOT FINAL: Justin has not set a
  * price; enforcement is not wired until billing exists (today it is measured only).
  *

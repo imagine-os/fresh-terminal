@@ -1,17 +1,18 @@
 import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
 import { formatMicro } from '@shared/ledger';
+import { useCredits } from '../credits/useCredits';
+import { formatMoney, type Currency } from '../lib/currency';
 import type { Theme } from '@shared/themes';
 import type { NavItem, NavTarget } from '@shared/ui';
 import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconDownload, IconHint, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconSpark, IconTheme, IconTopBar, IconUpload } from '../ui/icons';
-import { useAccount } from '../auth/Account';
-import { useCredits } from '../credits';
+import { IconDev, IconDownload, IconKey, IconLang, IconList, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
 import { redeemInviteCode, startTopUp } from '../credits/billing';
 import { useToast } from '../ui/Toast';
 import { AccountButton } from './AccountButton';
+import { useAccount } from '../auth/Account';
 import { Tray, type Tool } from './Tray';
 
 interface Props {
@@ -45,6 +46,14 @@ interface Props {
   hintsOn: boolean;
   onToggleStarters: () => void;
   onToggleHints: () => void;
+  /** The $ used counter's reading currency (C-090). */
+  currency: Currency;
+  onCycleCurrency: () => void;
+  /** Terminal-talk: the terminal speaks back. A switch and a demo for now. */
+  talkOn: boolean;
+  onToggleTalk: () => void;
+  onActions: () => void;
+  onPlan: () => void;
 }
 
 function key(id: string): string {
@@ -60,6 +69,8 @@ export function TopBar(props: Props) {
   const { t, lang } = useI18n();
   const account = useAccount();
   const credits = useCredits();
+  const grantedMicro = credits.status?.granted_micro ?? 5_000_000;
+  // Fewer tools, one list (C-090): Look is gone, Library and Canvas live on their own pages.
   const { toast } = useToast();
   // C-086: wired only when the router says a payment provider is connected.
   const paymentsWired = credits.status?.billing?.provider === 'stripe' || credits.status?.billing?.provider === 'clerk';
@@ -89,15 +100,9 @@ export function TopBar(props: Props) {
   };
   const tools: Tool[] = [
     { id: 'box.new', group: 'go', label: t('topbar.newBox'), short: t('tool.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
-    { id: 'canvas.open', group: 'go', label: t('topbar.canvas'), short: t('tool.canvas'), icon: <IconBox />, onClick: props.onCanvas, shortcut: key('canvas.open'), pressed: props.canvasActive, testId: 'canvas-link' },
-    { id: 'library.open', group: 'go', label: t('topbar.library'), short: t('tool.library'), icon: <IconLibrary />, onClick: () => {}, href: props.libraryHref, shortcut: key('library.open'), testId: 'library-link' },
+    { id: 'actions.open', group: 'go', label: t('topbar.actions'), short: t('tool.actions'), icon: <IconList />, onClick: props.onActions, testId: 'actions-link' },
     { id: 'play.open', group: 'go', label: t('topbar.replay'), short: t('tool.replay'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
-    { id: 'sidebar.toggle', group: 'look', label: t('topbar.toggleSidebar'), short: t('tool.sidebar'), icon: <IconSidebar />, onClick: props.onToggleSidebar, shortcut: key('sidebar.toggle') },
-    { id: 'theme.cycle', group: 'look', label: `${t('topbar.theme')}: ${props.theme.name}`, short: t('tool.theme'), detail: props.theme.name, icon: <IconTheme />, onClick: props.onCycleTheme, shortcut: key('theme.cycle') },
-    { id: 'lang.toggle', group: 'look', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
-    { id: 'bar.toggle', group: 'look', label: t('topbar.hide'), short: t('tool.hideBar'), icon: <IconTopBar />, onClick: props.onHideTopBar, shortcut: key('bar.toggle'), testId: 'hide-bar' },
-    { id: 'starters.toggle', group: 'look', label: t('tray.starters'), short: t('tool.starters'), icon: <IconSpark />, onClick: props.onToggleStarters, pressed: props.startersOn, testId: 'switch-starters' },
-    { id: 'hints.toggle', group: 'look', label: t('tray.hints'), short: t('tool.hints'), icon: <IconHint />, onClick: props.onToggleHints, pressed: props.hintsOn, testId: 'switch-hints' },
+    { id: 'lang.toggle', group: 'session', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
     { id: 'session.export', group: 'session', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
     { id: 'session.import', group: 'session', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
     {
@@ -112,7 +117,9 @@ export function TopBar(props: Props) {
     },
     { id: 'invite.redeem', group: 'session', label: t('invite.label'), short: t('tool.invite'), icon: <IconSpark />, onClick: () => void onInvite(), testId: 'invite-redeem' },
     { id: 'settings.open', group: 'session', label: t('topbar.settings'), short: t('tool.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
+    { id: 'talk.toggle', group: 'session', label: t('tray.talk'), short: t('tray.talk'), detail: t('tray.talkSoon'), icon: <IconMic />, onClick: props.onToggleTalk, pressed: props.talkOn, testId: 'talk-toggle' },
     { id: 'dev.toggle', group: 'session', label: t('topbar.devMode'), short: t('tool.dev'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },
+    ...(props.devMode ? [{ id: 'plan.open', group: 'session' as const, label: t('tray.plan'), short: t('tray.plan'), icon: <IconList />, onClick: props.onPlan }] : []),
   ];
   return (
     <>
@@ -121,7 +128,7 @@ export function TopBar(props: Props) {
           <IconSidebar />
         </Button>
       </Tooltip>
-      <Tooltip label={PRODUCT_NAME} align="start">
+      <Tooltip label={t('topbar.version.tip', { version: PRODUCT_VERSION })} align="start">
         <a
           className="brand"
           href={import.meta.env.BASE_URL}
@@ -134,7 +141,6 @@ export function TopBar(props: Props) {
             &gt;_
           </span>
           <span>{PRODUCT_NAME}</span>
-          <span className="version" data-testid="version">v{PRODUCT_VERSION}</span>
         </a>
       </Tooltip>
       {props.boxName ? <span className="tagline">/ {props.boxName}</span> : null}
@@ -152,8 +158,16 @@ export function TopBar(props: Props) {
           </>
         )}
       </span>
-      <span className="balance" data-live={props.usedMicro > 0} data-testid="balance" aria-label={`${formatMicro(props.usedMicro)} ${t('topbar.used')}`}>
-        {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
+      <span className="balance" data-live={props.usedMicro > 0} data-testid="balance">
+        <Tooltip label={t('topbar.used.tip', { total: formatMicro(grantedMicro, 2) })} align="end">
+          <button type="button" className="balance-used" onClick={props.onCycleCurrency} aria-label={`${formatMoney(props.usedMicro, props.currency)} ${t('topbar.used')}`} data-testid="balance-used">
+            {formatMoney(props.usedMicro, props.currency)} {t('topbar.used')}
+          </button>
+        </Tooltip>
+        <span aria-hidden="true"> · </span>
+        <Tooltip label={props.payMode === 'own' ? t('pay.mode.own') : t('topbar.free.tip')} align="end">
+          <span className="balance-mode">{t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}</span>
+        </Tooltip>
       </span>
       <span className="topbar-group">
         <Tray

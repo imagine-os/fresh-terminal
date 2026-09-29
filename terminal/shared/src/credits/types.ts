@@ -33,9 +33,9 @@ export interface CreditsStatus {
   turnstile_sitekey?: string;
   /** Signed-in accounts only: the pass-through billing gate (C-086). */
   billing?: AccountBilling;
-  /** Signed-in accounts only (GET /credits): what the account stores with us (C-091; measured, not billed yet). */
+  /** Signed-in accounts only (GET /credits): what the account stores with us (C-092; measured, not billed yet). */
   storage?: StorageStatus;
-  /** Signed-in accounts only: the person chose to share their data with Fresh Terminal (C-090; off by default). */
+  /** Signed-in accounts only: the person chose to share their data with Fresh Terminal (C-091; off by default). */
   share_data?: boolean;
 }
 
@@ -55,7 +55,7 @@ export interface AccountBilling {
   credit_limit_micro: number;
   /** What a payment provider has charged this account in total. */
   paid_micro: number;
-  /** "not-wired" until a payment provider is connected on the router: Stripe Checkout top-ups, or Clerk Billing refill plans (C-092). */
+  /** "not-wired" until a payment provider is connected on the router: Stripe Checkout top-ups, or Clerk Billing refill plans (C-093). */
   provider: 'stripe' | 'clerk' | 'not-wired';
 }
 

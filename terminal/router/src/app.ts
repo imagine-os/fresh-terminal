@@ -192,7 +192,7 @@ export function createApp(options: CreateAppOptions) {
   mountCreditRoutes(app as never, meterOptions);
   // Friend credits (admin grants, invite codes), the admin API for the hub, and the payment hook (router/src/admin.ts).
   mountAdminRoutes(app, meterOptions);
-  // Privacy by default: share_data and access grants (router/src/privacy.ts, C-090).
+  // Privacy by default: share_data and access grants (router/src/privacy.ts, C-091).
   mountPrivacyRoutes(app, meterOptions);
 
   const resourcesFor = (env: unknown): RouterResources => options.resources?.(env) ?? ((env ?? {}) as RouterResources);
@@ -261,7 +261,7 @@ export function createApp(options: CreateAppOptions) {
     const parsed = pushBoxesSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: 'Invalid body', issues: parsed.error.issues.slice(0, 5) }, 400);
     const result = await pushBoxes(who.db, who.account.id, parsed.data.boxes, now());
-    await measureStorage(who.db, who.account.id, now()); // C-091: storage is measured on every write
+    await measureStorage(who.db, who.account.id, now()); // C-092: storage is measured on every write
     return c.json(result);
   });
 

@@ -37,7 +37,7 @@ function harness() {
 
 beforeEach(() => clearAdminCache());
 
-describe('privacy by default (C-090)', () => {
+describe('privacy by default (C-091)', () => {
   it('share_data is off by default; the admin sees numbers, never stage content or ledger lines', async () => {
     const h = harness();
     await h.seed('user_friend');

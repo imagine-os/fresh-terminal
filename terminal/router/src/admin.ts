@@ -472,7 +472,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     return c.json({ account: await accountView(gate.db, target.userId), email: target.email });
   });
 
-  // Numbers only (C-090): counts, money, bytes and the privacy flag. Never stage content or prompts.
+  // Numbers only (C-091): counts, money, bytes and the privacy flag. Never stage content or prompts.
   app.get('/admin/accounts', async (c) => {
     const gate = await requireAdmin(c);
     if (!gate.ok) return gate.response;
@@ -521,7 +521,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     return c.json({ entries, private_totals: [...privateTotals.values()], note: 'Accounts that have not shared their data appear as totals only.' });
   });
 
-  // An account's stage content: only when the person shares their data or granted access (C-090).
+  // An account's stage content: only when the person shares their data or granted access (C-091).
   app.get('/admin/account-content', async (c) => {
     const gate = await requireAdmin(c);
     if (!gate.ok) return gate.response;
@@ -561,7 +561,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const auth = await who(c);
     if (auth.state !== 'signed-in') return c.json({ error: 'Sign in to add a payment method.', code: 'sign_in_required' }, 401);
     const bindings = options.bindings(c.env);
-    // Clerk Billing (C-092): checkout happens in Clerk's own components (the Billing tab of the profile); the app opens it.
+    // Clerk Billing (C-093): checkout happens in Clerk's own components (the Billing tab of the profile); the app opens it.
     if (billingProvider(bindings) === 'clerk') return c.json({ provider: 'clerk', open: 'user-profile-billing' });
     if (billingProvider(bindings) !== 'stripe' || !bindings.STRIPE_SECRET_KEY) {
       return c.json({ error: 'Top up / add payment is not wired yet. Your key still works.', code: 'not_wired' }, 501);
@@ -594,7 +594,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     return c.json({ url: session.url, id: session.id });
   });
 
-  // Clerk Billing refill plans (C-092). A paid charge (checkout or monthly renewal) on a plan whose slug starts with
+  // Clerk Billing refill plans (C-093). A paid charge (checkout or monthly renewal) on a plan whose slug starts with
   // CLERK_CREDIT_PLAN_PREFIX ("credit") credits its amount to the payer's ledger, once per payment attempt.
   // Signature: Svix, checked by @clerk/backend's verifyWebhook. Not tested against live Clerk Billing yet.
   app.post('/billing/clerk/webhook', async (c) => {

@@ -5,7 +5,7 @@ import type { AdminOptions } from './admin';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
 
 /**
- * Privacy by default (2026-09-29, C-090). Justin: "they need to be able to have
+ * Privacy by default (2026-09-29, C-091). Justin: "they need to be able to have
  * that checked off by default and know their data is private from us unless chosen
  * to share. Unless we add them personally as a client, then we shouldnt have acess
  * to their data unless they grant it to us."
@@ -18,7 +18,7 @@ import { accountIdFor, ensureAccount, type D1Database } from './d1';
  *   side. Without share_data or a live grant, admin endpoints return aggregate
  *   numbers only (counts, cost), never stage content, prompts or ledger lines.
  *
- * Honest limits (Canon C-090): the router still sees prompts in transit to call the
+ * Honest limits (Canon C-091): the router still sees prompts in transit to call the
  * models (not in "your key" mode, which goes browser to OpenRouter), and whoever
  * holds the Cloudflare account can read D1 directly. This is a policy the code
  * keeps, not encryption.

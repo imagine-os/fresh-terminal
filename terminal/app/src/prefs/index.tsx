@@ -31,6 +31,10 @@ export interface Prefs {
   sidebarStay: boolean;
   /** Sidebar width in px, dragged at its edge (C-079). */
   sidebarWidth: number;
+  /** Reading currency for the $ used counter (C-090). */
+  currency: 'usd' | 'cop' | 'btc';
+  /** Terminal-talk switch (the terminal speaks back); a demo until the voice agent lands. */
+  terminalTalk: boolean;
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -53,6 +57,8 @@ const defaults: Prefs = {
   sidebarMenu: false,
   sidebarStay: false,
   sidebarWidth: 260,
+  currency: 'usd',
+  terminalTalk: false,
 };
 
 interface PrefsValue {

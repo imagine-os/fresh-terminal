@@ -214,7 +214,7 @@ describe('pass-through billing gate', () => {
   });
 });
 
-describe('Clerk Billing refill plans (C-092)', () => {
+describe('Clerk Billing refill plans (C-093)', () => {
   const secretBytes = new TextEncoder().encode('fresh-terminal-test-signing-key!');
   const secret = `whsec_${btoa(String.fromCharCode(...secretBytes))}`;
   async function signed(body: string) {

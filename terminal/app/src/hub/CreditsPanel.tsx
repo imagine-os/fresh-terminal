@@ -353,7 +353,7 @@ function ThresholdForm({ client, onDone }: { client: HubClient; onDone: () => Pr
   );
 }
 
-/** The admin's own switch, the same one every account has in Settings (C-090). */
+/** The admin's own switch, the same one every account has in Settings (C-091). */
 function PrivacySelf({ client }: { client: HubClient }) {
   const [share, setShare] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);

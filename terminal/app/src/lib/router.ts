@@ -7,6 +7,7 @@ export type Route =
   | { name: 'new-box'; theme: string | null; skin?: string | null; from?: string | null }
   | { name: 'canvas' }
   | { name: 'plan' }
+  | { name: 'actions' }
   | { name: 'page'; id: string }
   | { name: 'play'; id: string; step: number | null };
 
@@ -19,6 +20,9 @@ function parse(pathname: string, search: string): Route {
   }
   if (/^\/plan\/?$/.test(path)) {
     return { name: 'plan' };
+  }
+  if (/^\/actions\/?$/.test(path)) {
+    return { name: 'actions' };
   }
   const page = /^\/page\/([^/]+)\/?$/.exec(path);
   if (page !== null && page[1]) {
@@ -51,6 +55,8 @@ export function hrefFor(route: Route): string {
       return `${base}/canvas`;
     case 'plan':
       return `${base}/plan`;
+    case 'actions':
+      return `${base}/actions`;
     case 'page':
       return `${base}/page/${encodeURIComponent(route.id)}`;
     case 'play':

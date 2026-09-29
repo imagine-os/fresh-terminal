@@ -12,6 +12,8 @@ import { AccountProvider } from './auth/Account';
 import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
+import { ActionsView } from './actions-view/ActionsView';
+import { nextCurrency } from './lib/currency';
 import { I18nProvider, useI18n } from './i18n';
 import { newId } from './lib/ids';
 import { downloadSession } from './lib/exportSession';
@@ -369,6 +371,7 @@ function Product() {
     const runners: Record<string, () => void> = {
       'canvas.open': () => navigate({ name: 'canvas' }),
       'plan.open': () => navigate({ name: 'plan' }),
+      'actions.open': () => navigate({ name: 'actions' }),
       'library.open': () => window.location.assign(`${import.meta.env.BASE_URL}pages/library.html`),
       'settings.open': () => setSettingsOpen(true),
       'box.new': () => newBox(),
@@ -446,7 +449,8 @@ function Product() {
       else if (key === 'l') run(toggleLang);
       else if (key === 'c') run(openCanvas);
       else if (key === 'k') run(() => setSettingsOpen((current) => !current));
-      else if (key === 'v') run(() => window.dispatchEvent(new CustomEvent('ft:voice-toggle')));
+      // Voice needs Alt/Option+V: a bare v typed anywhere used to start listening (C-090).
+      else if (key === 'v' && viaAlt) run(() => window.dispatchEvent(new CustomEvent('ft:voice-toggle')));
       else if (key === 'b') run(() => window.location.assign(`${import.meta.env.BASE_URL}pages/library.html`));
       else if (key === 'escape') {
         update({ leftOpen: false });
@@ -473,6 +477,8 @@ function Product() {
         <PlanViewer />
       </div>
     );
+  } else if (route.name === 'actions') {
+    stage = <ActionsView boxId={currentBox?.id ?? null} />;
   } else if (route.name === 'page' && !currentBox) {
     stage = <PageView pageId={route.id} />;
   } else if (replaying && currentBox) {
@@ -574,6 +580,15 @@ function Product() {
             hintsOn={prefs.showHints}
             onToggleStarters={() => set('showStarters', !prefs.showStarters)}
             onToggleHints={() => set('showHints', !prefs.showHints)}
+            currency={prefs.currency}
+            onCycleCurrency={() => set('currency', nextCurrency(prefs.currency))}
+            talkOn={prefs.terminalTalk}
+            onToggleTalk={() => {
+              set('terminalTalk', !prefs.terminalTalk);
+              toast(prefs.terminalTalk ? t('talk.off') : t('talk.on'));
+            }}
+            onActions={() => navigate({ name: 'actions' })}
+            onPlan={() => navigate({ name: 'plan' })}
           />
         ),
         leftSidebar: (

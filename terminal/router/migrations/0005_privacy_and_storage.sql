@@ -1,4 +1,4 @@
--- Fresh Terminal D1 schema v5 (2026-09-29, C-090, C-091): privacy by default and
+-- Fresh Terminal D1 schema v5 (2026-09-29, C-091, C-092): privacy by default and
 -- storage metering.
 --
 -- share_data: 0 = the account's content (stages, prompts, ledger lines) is private

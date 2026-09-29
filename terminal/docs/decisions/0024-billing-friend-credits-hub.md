@@ -65,13 +65,13 @@ The requirement: after an account has used $5 of free usage it must add a paymen
 - `GET /credits`: `granted` (= `granted_micro`, USD micro-dollars) and `label` ("starter kit" signed in, "free usage" anonymous).
 - Cost: at most $5 per signed-in account, bounded by the $10/day all-accounts cap and, on the development instance, by its 100 users ($500). **Sure.**
 
-## Addendum 2026-09-29 05:20: Clerk Billing instead of Stripe Checkout (C-092)
+## Addendum 2026-09-29 05:20: Clerk Billing instead of Stripe Checkout (C-093)
 
-- Justin prefers Clerk Billing. It still needs a Stripe account for real money, connected once inside Clerk (not in our repo); development instances use Clerk's shared test gateway. It sells recurring plans only, so pass-through runs as monthly credit refill plans (`credit-5`, `credit-10`, `credit-25`) whose paid charges land on the ledger through `POST /billing/clerk/webhook`. Sources and details in Canon C-092. The Stripe Checkout code stays as the fallback for one-off packs.
+- Justin prefers Clerk Billing. It still needs a Stripe account for real money, connected once inside Clerk (not in our repo); development instances use Clerk's shared test gateway. It sells recurring plans only, so pass-through runs as monthly credit refill plans (`credit-5`, `credit-10`, `credit-25`) whose paid charges land on the ledger through `POST /billing/clerk/webhook`. Sources and details in Canon C-093. The Stripe Checkout code stays as the fallback for one-off packs.
 
-## Addendum 2026-09-29 05:10: no daily cap, storage, privacy (C-090, C-091)
+## Addendum 2026-09-29 05:10: no daily cap, storage, privacy (C-091, C-092)
 
 - Justin ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)): "no daily cap . just $5 on us." The per-account $1/day cap is off; the all-accounts cap is a hidden $25/day circuit breaker (`ACCOUNT_DAILY_TOTAL_COST_MICRO`), which Justin can remove.
 - Your key: $0 for models; storage above 100 MB per account is metered at about $0.05/GB-month (`STORAGE_PRICING`, not final, not billed yet).
-- Privacy: `share_data` off by default, access grants for "add as a client", admin endpoints show totals only otherwise. The hub's credits panel follows the same rule: credit lines are ours, every other account is a row of totals unless it shares or grants. Honest limits and the encryption proposal are in C-090.
+- Privacy: `share_data` off by default, access grants for "add as a client", admin endpoints show totals only otherwise. The hub's credits panel follows the same rule: credit lines are ours, every other account is a row of totals unless it shares or grants. Honest limits and the encryption proposal are in C-091.
 

@@ -715,12 +715,19 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 >
 > Mute the voice assistant can go away for now because we're not having it talk back to us yet. That will come later. I'm not sure how to implement that with what we're building. Perhaps give me a option in the tool menu to enable terminal-talk, and give me a demo of how that will work, i'm very curious what the perfect voice experience is for this. Maybe even use fable to think that through deepr or extra on opus 5.5 since opus 5.5. is supposed to be the best model.
 
-(With two screenshots.)
+(With two screenshots: a phone start on a cached build; a desktop stage full of "Voice: network" lines.)
 
-**What happened:** Split. This pass took the starter kit and the privacy question: C-089, a $5 starter kit per signed-in account that is also the pass-through threshold, `GET /credits` returns `granted` and the label "starter kit" for "of $5 starter kit"; open question 19 on end-to-end encryption, linked from the hub (changelog 0014). Justin's session took the rest (top bar, tray, mobile, Actions, voice, the currency switch, the SpacetimeDB answer).
+**What happened:** C-090 (this session): the interface and voice parts, the SpacetimeDB answer, the Terminal-talk demo in docs/voice-experience.md. Other session: Split. This pass took the starter kit and the privacy question: C-089, a $5 starter kit per signed-in account that is also the pass-through threshold, `GET /credits` returns `granted` and the label "starter kit" for "of $5 starter kit"; open question 19 on end-to-end encryption, linked from the hub (changelog 0014). Justin's session took the rest (top bar, tray, mobile, Actions, voice, the currency switch, the SpacetimeDB answer).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657599.470899
 
-## 82. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
+## 82. Mon Sep 28, 11:55 PM CDT · 2026-09-29 04:55:43 UTC
+
+> please give me a sales wesbite for this product. simple clean strong easy to understand. can be more than one page and have pricing based on what you think is best checkout, and or whatever calls to action you want. Make it nice and simple. You can look at omarchy for some simplicity inspiration though we can be way better.
+
+**What happened:** Taken by the other session (billing and the freshterminal.ai site are its build); this session asked it to keep the headline pair, the tagline and the brand set.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657743245569?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657743.245569
+
+## 83. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
 
 > no daily cap . just $5 on us.
 >
@@ -730,12 +737,20 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 >
 > they can have a cehckbox to share their data with us or not. But of course they need to be able to have that checked off by default and know their data is private from us unless chosen to share. Unless we add them personally as a client, then we shouldnt have acess to their data unless they grant it to us.
 
-**What happened:** C-090 and C-091 (Opus 5.5, changelog 0014). No per-account daily cap: $5 on us, then pay as you go; the all-accounts cap stays only as a hidden $25/day breaker Justin can remove. Your key pays $0 for models, and storage above 100 MB per account is metered (about $0.05/GB-month, not final, not billed yet). `share_data` is off by default with a toggle in Settings and the hub; access grants cover "add as a client"; admin endpoints show totals only unless the person shares or grants. The realtime sync and offline-prompt points went to open question 19's neighbours and Justin's session (SpacetimeDB is still waiting on its token).
+**What happened:** The offline prompt queue landed in C-090 (a line typed offline is held, marked, and sent, edited or discarded when the connection is back; stale after 10 min). The cap, storage costs, the privacy checkbox and SpacetimeDB live sync went to the other session.
+**Billing build (Opus 5.5):** C-091 and C-092 (Opus 5.5, changelog 0014). No per-account daily cap: $5 on us, then pay as you go; the all-accounts cap stays only as a hidden $25/day breaker Justin can remove. Your key pays $0 for models, and storage above 100 MB per account is metered (about $0.05/GB-month, not final, not billed yet). `share_data` is off by default with a toggle in Settings and the hub; access grants cover "add as a client"; admin endpoints show totals only unless the person shares or grants. The realtime sync and offline-prompt points went to open question 19's neighbours and Justin's session (SpacetimeDB is still waiting on its token).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658094.470499
 
-## 83. Tue Sep 29, 12:09 AM CDT · 2026-09-29 05:09:13 UTC
+## 84. Tue Sep 29, 12:03 AM CDT · 2026-09-29 05:03:40 UTC
+
+> when i share the website link freshterminal.ai it should have an image thumbnail and the tagline for sharing. the tagline should be something different than the tagline in the thumbnail. it should be something like the terminal for everyone, or something better . terminal that just works.  i dunn. if computers started smart, the terminal would be like this.... I dunno.
+
+**What happened:** Taken by the other session with its sales-site build (card, og tags on the app and the site). This session suggested the copy: card "A terminal that adapts to you."; share title "Fresh Terminal — the terminal for everyone"; description "If computers had started smart, the terminal would look like this. Type or talk; it builds itself around you."
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658220851259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658220.851259
+
+## 85. Tue Sep 29, 12:09 AM CDT · 2026-09-29 05:09:13 UTC (recorded after 84)
 
 > can we use clerk billing please? or is stripe already necessary for this
 
-**What happened:** C-092 (Opus 5.5, changelog 0014). Checked on Clerk's pages: yes, Clerk Billing, and a Stripe account is still needed for real money (Clerk uses Stripe only for processing; you connect it once inside Clerk; development runs on Clerk's shared test gateway with no Stripe account). Clerk Billing sells plans, not one-off top-ups, so pass-through runs as monthly "credit" refill plans: each paid charge lands on the ledger through the Clerk webhook. Built, not wired until the webhook secret exists.
+**What happened:** C-093 (Opus 5.5, changelog 0014). Checked on Clerk's pages: yes, Clerk Billing, and a Stripe account is still needed for real money (Clerk uses Stripe only for processing; you connect it once inside Clerk; development runs on Clerk's shared test gateway with no Stripe account). Clerk Billing sells plans, not one-off top-ups, so pass-through runs as monthly "credit" refill plans: each paid charge lands on the ledger through the Clerk webhook. Built, not wired until the webhook secret exists.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658553862549?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658553.862549

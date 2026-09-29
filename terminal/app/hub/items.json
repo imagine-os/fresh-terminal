@@ -189,8 +189,8 @@
       "canon": [
         "C-086",
         "C-089",
-        "C-090",
-        "C-091"
+        "C-091",
+        "C-092"
       ]
     },
     {
@@ -205,9 +205,9 @@
       "name": "Privacy",
       "status": "in progress",
       "href": "/wiki/canon/open-questions.html",
-      "about": "Live: data is private from us by default (share_data off, access grants, admin sees totals only; C-090). Next: encryption with a key the person holds (open question 19).",
+      "about": "Live: data is private from us by default (share_data off, access grants, admin sees totals only; C-091). Next: encryption with a key the person holds (open question 19).",
       "canon": [
-        "C-090"
+        "C-091"
       ]
     }
   ]
