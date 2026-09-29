@@ -1,7 +1,7 @@
 import type { FocusEvent, KeyboardEvent } from 'react';
 import type { Card } from '@shared/canvas';
 import { useI18n } from '../i18n';
-import { resolveHref } from './Canvas';
+import { resolveHref } from './href';
 
 interface Props {
   card: Card;

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="description" content="A live koi pond start page with a floating terminal composer. Move to ripple, rest to feed the fish, type to make them scatter.">
@@ -106,8 +107,10 @@ body.calm .cursor{animation:none}
 @keyframes hintfade{0%,70%{opacity:1}100%{opacity:0}}
 @media (max-width:520px){#hint{display:none}}
 </style>
+<style>#archived{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);z-index:50;display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px;border-radius:999px;background:rgba(20,16,8,.78);color:#ffe2b0;border:1px solid rgba(255,200,120,.5);font:600 13px/1.2 ui-sans-serif,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(10px)}#archived:focus-visible{outline:2px solid #9be7d8;outline-offset:3px}#archived span{font-weight:400;opacity:.85;text-decoration:underline}@media (max-width:640px){#archived{top:auto;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 80px);font-size:12px}}</style>
 </head>
 <body>
+<a id="archived" href="./koi.html" title="This is an older version kept for comparison. Open the current koi pond.">Archived version · koi pond v1 <span>open current</span></a>
 <canvas id="pond" aria-label="Live koi pond. Move or touch to ripple the water; rest still to feed the fish; type to make them scatter." role="img"></canvas>
 <div id="fallback" aria-hidden="true"></div>
 

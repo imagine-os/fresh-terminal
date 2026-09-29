@@ -1,0 +1,13 @@
+{
+  "name": "koi3-build",
+  "private": true,
+  "description": "Source for pages/koi.html (koi pond v3). Not part of the pnpm workspace; builds a single static bundle into app/public/pages/koi.js.",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0",
+    "three": "0.170.0"
+  }
+}

@@ -23,6 +23,12 @@ export const cardSchema = z.object({
   h: z.number().positive(),
   thickness_mm: z.number().positive(),
   rotation: z.number(),
+  /** Canvas v2 groups cards into labelled sections; cards without one land in "Added". */
+  section: z.string().optional(),
+  /** Screenshot shown on the card (relative to the app base), made by `pnpm canvas:thumbs`. */
+  thumb: z.string().optional(),
+  /** Older versions kept for comparison; shown with an "archived" label. */
+  archived: z.boolean().optional(),
   created_at: z.number().int(),
   updated_at: z.number().int(),
 });
@@ -39,6 +45,7 @@ export interface CardInput {
   w?: number;
   h?: number;
   thickness_mm?: number;
+  section?: string;
 }
 
 export function slugify(text: string): string {
@@ -72,6 +79,7 @@ export function makeCard(input: CardInput, existing: Card[], now: number = Date.
     h: input.h ?? (input.kind === 'image' ? 240 : 220),
     thickness_mm: input.thickness_mm ?? DEFAULT_THICKNESS_MM[input.kind],
     rotation: 0,
+    ...(input.section ? { section: input.section } : {}),
     created_at: now,
     updated_at: now,
   });
