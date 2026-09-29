@@ -176,3 +176,16 @@ describe('names, lists and grammar (C-079)', () => {
     expect(kinds('wait a second, then a third one')).toEqual([]);
   });
 });
+
+describe('mood (C-081)', () => {
+  const moods = (text: string) => localTagger.tag(text).filter((chip) => chip.kind === 'mood').map((chip) => `${chip.text}=${chip.value}`);
+  it('reads feeling words as mood with a value', () => {
+    expect(moods("you're doing a bad job")).toEqual(['bad=negative']);
+    expect(moods('I love it, this is great')).toEqual(['love=positive', 'great=positive']);
+  });
+  it('flips on negation and leaves badass alone', () => {
+    expect(moods('not bad at all')).toEqual(['bad=positive']);
+    expect(moods('that is badass')).toEqual(['badass=positive']);
+    expect(moods('Bad is an adjective I think')).toEqual([]);
+  });
+});

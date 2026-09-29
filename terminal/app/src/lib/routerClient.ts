@@ -76,6 +76,8 @@ export interface RouteRequest {
   /** The box's own records, so the model can change them. */
   snapshot?: Snapshot;
   history: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+  /** What is on screen now: open page, visible regions, recent edits (C-081). */
+  screen?: { open_page?: string | null; visible?: string[]; recent_edits?: string[] };
 }
 
 /** Calls POST /route and reads the SSE stream. Never sees the API key. */

@@ -64,11 +64,24 @@ function findOne<T>(list: T[], ref: string, id: (item: T) => string, name: (item
   throw new OpError(`No ${what} called "${ref}"`);
 }
 
-function describeTarget(target: NavTarget | null): string {
+/** People read names, never ids (C-081): "the page 'Theme Gallery'", not "page:page-f4aa…". */
+function describeTarget(target: NavTarget | null, state?: UiState): string {
   if (target === null) {
-    return 'group';
+    return 'a group';
   }
-  return `${target.kind}:${target.ref}`;
+  if (target.kind === 'page') {
+    const page = state?.pages.find((candidate) => candidate.id === target.ref || norm(candidate.title) === norm(target.ref));
+    return `the page '${page?.title ?? target.ref}'`;
+  }
+  if (target.kind === 'url') {
+    return target.ref;
+  }
+  return `${target.kind} '${target.ref}'`;
+}
+
+function sameTarget(a: NavTarget | null, b: NavTarget | null): boolean {
+  if (a === null || b === null) return a === b;
+  return a.kind === b.kind && a.ref === b.ref;
 }
 
 function nextOrder(nav: NavItem[], parent: string | null): number {
@@ -126,7 +139,7 @@ function applyOne(state: UiState, op: Op, ctx: EngineContext): { state: UiState;
         state: { ...state, nav: [...state.nav, item] },
         inverse: [{ op: 'nav.remove', item: id }],
         applied: { ...op, id, parent: parentId, target },
-        change: { region: 'nav', text: `added '${item.label}' ${where} in the sidebar`, before: null, after: `${pathLabel([...state.nav, item], id)} → ${describeTarget(target)}` },
+        change: { region: 'nav', text: `added '${item.label}' ${where} in the sidebar`, before: null, after: `${pathLabel([...state.nav, item], id)} → ${describeTarget(target, state)}` },
       };
     }
     case 'nav.rename': {
@@ -160,12 +173,16 @@ function applyOne(state: UiState, op: Op, ctx: EngineContext): { state: UiState;
     case 'nav.retarget': {
       const item = findOne(state.nav, op.item, (n) => n.id, (n) => n.label, 'menu item');
       const target = checkTarget(op.target, state, ctx);
+      if (sameTarget(item.target, target)) {
+        // A no-op is not an edit (C-081): nothing to undo, nothing to announce.
+        throw new OpError(`'${item.label}' already opens ${describeTarget(target, state)}; nothing to change`);
+      }
       const nav = state.nav.map((n) => (n.id === item.id ? { ...n, target, updated_at: now } : n));
       return {
         state: { ...state, nav },
         inverse: [{ op: 'nav.retarget', item: item.id, target: item.target }],
         applied: { ...op, item: item.id, target },
-        change: { region: 'nav', text: `pointed '${item.label}' at ${describeTarget(target)}`, before: describeTarget(item.target), after: describeTarget(target) },
+        change: { region: 'nav', text: `pointed '${item.label}' at ${describeTarget(target, state)}`, before: describeTarget(item.target, state), after: describeTarget(target, state) },
       };
     }
     case 'nav.remove': {
@@ -223,6 +240,9 @@ function applyOne(state: UiState, op: Op, ctx: EngineContext): { state: UiState;
     case 'theme.set': {
       if (op.theme_id !== null && !ctx.themeIds.includes(op.theme_id)) {
         throw new OpError(`Unknown theme "${op.theme_id}". Themes: ${ctx.themeIds.join(', ')}`);
+      }
+      if (op.theme_id === state.boxUi.theme_id) {
+        throw new OpError(`the theme is already ${op.theme_id ?? 'the default'}; nothing to change`);
       }
       return {
         state: { ...state, boxUi: { ...state.boxUi, theme_id: op.theme_id, updated_at: now } },
@@ -441,6 +461,9 @@ function applyOne(state: UiState, op: Op, ctx: EngineContext): { state: UiState;
       const id = op.id ?? ctx.newId('term');
       const caseSensitive = op.case_sensitive ?? op.text !== op.text.toLowerCase();
       const clash = state.glossary.find((term) => (caseSensitive ? term.text === op.text : norm(term.text) === norm(op.text)));
+      if (clash && clash.type === op.type && (op.note ?? '') === (clash.note ?? '')) {
+        throw new OpError(`'${op.text.trim()}' is already a ${op.type} here; nothing to change`);
+      }
       const glossary = clash ? state.glossary.filter((term) => term.id !== clash.id) : state.glossary;
       const term: GlossaryTerm = { id, box_id: ctx.boxId, text: op.text.trim(), type: op.type, note: op.note ?? '', case_sensitive: caseSensitive, created_at: now };
       const inverse: Op[] = [{ op: 'glossary.remove', term: id }];
@@ -451,7 +474,7 @@ function applyOne(state: UiState, op: Op, ctx: EngineContext): { state: UiState;
         state: { ...state, glossary: [...glossary, term] },
         inverse,
         applied: { ...op, id, case_sensitive: caseSensitive },
-        change: { region: 'glossary', text: `will always treat '${term.text}' as ${term.type} in this box`, before: clash ? clash.type : null, after: term.type },
+        change: { region: 'glossary', text: `will always treat '${term.text}' as ${term.type} on this stage`, before: clash ? clash.type : null, after: term.type },
       };
     }
     case 'glossary.remove': {

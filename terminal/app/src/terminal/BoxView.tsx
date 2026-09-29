@@ -325,6 +325,18 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
           .slice(-12)
           .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
         const boxSnapshot = store.snapshotFor(box.id, commands.effectiveThemeId);
+        // What the person sees, so "it should have been here" means something (C-081).
+        const openPage = pageId ? boxSnapshot.pages.find((page) => page.id === pageId)?.title ?? null : null;
+        const screen = {
+          open_page: openPage,
+          visible: ['top bar', 'stage', 'prompt', ...(snapshot.lines.length === 0 ? ['headline'] : [])],
+          recent_edits: store
+            .getSnapshot()
+            .edits.filter((batch) => batch.box_id === box.id)
+            .slice(-3)
+            .reverse()
+            .map((batch) => `${batch.state === 'undone' ? '(undone) ' : ''}${batch.summary.replace(/^Edited: /, '')}`),
+        };
 
         const handlers: RouteHandlers = {
           onMeta: (meta) => {
@@ -344,6 +356,12 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             const applied = store.applyOps(box.id, payload.ops as Op[], 'assistant');
             if (applied.ok) {
               batch = { id: applied.batch.id, summary: applied.batch.summary, changes: applied.batch.changes };
+              // A page you asked for opens; nobody should have to hunt for it (C-081).
+              const created = applied.batch.changes.find((change) => change.region === 'page' && change.before === null && change.after);
+              if (created) {
+                const page = store.getSnapshot().pages.find((candidate) => candidate.box_id === box.id && candidate.title === created.after);
+                if (page) commands.openPage(page.id);
+              }
             } else {
               extra.push({ kind: 'error', text: `Not applied: ${applied.reason}` });
             }
@@ -417,7 +435,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
             return;
           }
-          await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers, { signal: abort.signal });
+          await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot, screen }, handlers, { signal: abort.signal });
         }
       } catch (error) {
         // Nothing may end in silence: a thrown turn leaves a visible line.

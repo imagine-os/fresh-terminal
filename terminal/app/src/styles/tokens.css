@@ -29,6 +29,7 @@
   --chip-object: #ffd07c;
   --chip-variable: #ff9ad5;
   --chip-entity: #9be6ff;
+  --chip-mood: #ffb08a;
 
   --doodle: #7cf0c4b0;
 
@@ -82,6 +83,7 @@
   --chip-object: #a56a00;
   --chip-variable: #c22e86;
   --chip-entity: #0a7f9e;
+  --chip-mood: #b3541e;
 
   --doodle: #0b8f66b0;
 }

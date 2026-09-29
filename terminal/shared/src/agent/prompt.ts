@@ -11,10 +11,38 @@ Rules:
 - Themes: use theme_set with an id from themes.
 - Keep replies short. No marketing tone.
 - Chips: the user's message comes with typed chips. A chip with source "user" or "glossary" is the user's own reading: trust it over yours.
-- If a request needs something no tool can do, say so in one line in respond and offer the closest change you can make.`;
+- If a request needs something no tool can do, say so in one line in respond and offer the closest change you can make.
+- Conversation is not an edit. A question, a complaint, a remark or feedback ("you're doing a bad job", "hmm, we need work", "that means nothing to me") gets an answer through respond and no tool call, unless it plainly asks for a change. A complaint about the change you just made is a request to reverse it. Never repeat an edit that is already in place; the tools refuse no-ops.
+- People read names, never ids. Say "the page 'Theme Gallery'", never "page:page-f4aa…". When you create a page, name it in the summary; the interface opens it.
+- Words about feelings ("bad", "annoying", "love it") are feedback about the interface, not glossary terms. Do not add glossary terms unless the person says how to read a word.`;
 
-export function systemMessages(snapshot: Snapshot): string {
-  return `${EDIT_SYSTEM_PROMPT}\n\nCurrent interface state (JSON):\n${JSON.stringify(promptView(snapshot))}`;
+export interface ScreenNote {
+  /** Title of the page open on the stage, or null for the transcript. */
+  open_page?: string | null | undefined;
+  /** Regions on screen right now (top bar, left sidebar, bottom bar ...). */
+  visible?: string[] | undefined;
+  /** The last few edits, newest first, as people read them. */
+  recent_edits?: string[] | undefined;
+}
+
+export interface PromptExtra {
+  /** The routed intent; conversation intents get the no-edit reminder up front. */
+  intent?: string | undefined;
+  screen?: ScreenNote | undefined;
+}
+
+const CONVERSATION_INTENTS = new Set(['chat', 'show', 'list', 'find']);
+
+export function systemMessages(snapshot: Snapshot, extra: PromptExtra = {}): string {
+  const parts = [EDIT_SYSTEM_PROMPT];
+  if (extra.intent && CONVERSATION_INTENTS.has(extra.intent)) {
+    parts.push(`This turn was routed as "${extra.intent}": answer with respond only; call an edit tool only if the message plainly asks for a change.`);
+  }
+  if (extra.screen) {
+    parts.push(`On screen now (JSON): ${JSON.stringify(extra.screen)}`);
+  }
+  parts.push(`Current interface state (JSON):\n${JSON.stringify(promptView(snapshot))}`);
+  return parts.join('\n\n');
 }
 
 /** The user turn, with chips as structured data when there are any. */

@@ -18,8 +18,13 @@ function EditsBlock({ batchId, summary }: { batchId: string; summary: string }) 
   const snapshot = useStoreSnapshot();
   const batch = snapshot.edits.find((candidate) => candidate.id === batchId);
   const undone = batch?.state === 'undone';
+  // One wide Undo bar on the newest applied edit of this stage; older edits are a quiet line (C-081).
+  const newest = batch
+    ? [...snapshot.edits].filter((candidate) => candidate.box_id === batch.box_id && candidate.state === 'applied').sort((a, b) => b.created_at - a.created_at)[0]
+    : undefined;
+  const compact = Boolean(batch) && !undone && newest?.id !== batchId;
   return (
-    <div className="rb-edits" data-state={undone ? 'undone' : 'applied'} data-testid="edits-block">
+    <div className="rb-edits" data-state={undone ? 'undone' : 'applied'} data-compact={compact ? 'true' : undefined} data-testid="edits-block">
       <span className="rb-edits-text">{undone ? `${t('edits.undone')}: ${summary.replace(/^Edited: /, '')}` : summary}</span>
       {batch ? (
         <Button

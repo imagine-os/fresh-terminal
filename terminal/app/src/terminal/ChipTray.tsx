@@ -1,6 +1,6 @@
 import { isAmbiguous, type Chip } from '@shared/chips';
 import { useI18n } from '../i18n';
-import { CHIP_ICONS, chipTitle } from './ChipText';
+import { CHIP_ICONS, chipIcon, chipTitle } from './ChipText';
 
 interface Props {
   chips: Chip[];
@@ -77,7 +77,7 @@ function ChipButton({ chip, onOpen, inStack = false }: { chip: Chip; onOpen: Pro
     >
       {inStack ? null : (
         <span className="chip-icon" aria-hidden="true">
-          {CHIP_ICONS[chip.kind]}
+          {chipIcon(chip)}
         </span>
       )}
       {chip.text}

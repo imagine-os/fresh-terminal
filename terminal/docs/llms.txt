@@ -29,6 +29,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Reference
 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
+- [decisions/0023-signin-style.md](decisions/0023-signin-style.md): Clerk sign-in themed from the active theme (square, our fonts, accent button, no shadow, 44px targets, visible focus); Clerk branding and the dev notice stay
 - [decisions/0022-koi-v3-and-canvas-v2.md](decisions/0022-koi-v3-and-canvas-v2.md): koi pond v3 (opens top-down, tilts up; CC0 photo assets) and canvas v2 (paper sheets with screenshots, hand-drawn sections, minimap), chosen by best-of-3
 - [decisions/0021-free-credits.md](decisions/0021-free-credits.md): free credits enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day cap), abuse limits, GET /credits, cost estimates
 - [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md): freshterminal.ai on a Worker, api.freshterminal.ai, Clerk anonymous-first, D1 schema and sync rules, limits
@@ -45,6 +46,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0013.md](changelog/0013.md): the sign-in matches the theme (Clerk appearance)
 - [changelog/0012.md](changelog/0012.md): koi pond v3 and canvas v2 redo, before/after, live check
 - [changelog/0011.md](changelog/0011.md): daily caps for signed-in free usage
 - [changelog/0010.md](changelog/0010.md): readable text over photo and material skins (sampled scrim, AA, neutral small text)

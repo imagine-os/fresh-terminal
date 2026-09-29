@@ -4,6 +4,7 @@ import { ROUTER_URL } from '../lib/routerClient';
 import { setSessionTokenProvider } from '../lib/routerFetch';
 import { store } from '../store';
 import { CloudSync, type SyncStatus } from '../sync/cloud';
+import { currentClerkAppearance, useClerkAppearance } from './clerkAppearance';
 import { CLERK_PUBLISHABLE_KEY, clerkEnabled, clerkInstanceKind } from './clerkConfig';
 
 /**
@@ -60,7 +61,7 @@ function ClerkBridge({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onAction = (event: Event) => {
       const id = (event as CustomEvent<{ id?: string }>).detail?.id;
-      if (id === 'auth.signIn') clerk.openSignIn({});
+      if (id === 'auth.signIn') clerk.openSignIn({ appearance: currentClerkAppearance() });
       if (id === 'auth.signOut') void clerk.signOut();
       if (id === 'sync.now') void engine.current?.sync();
     };
@@ -118,7 +119,7 @@ function ClerkBridge({ children }: { children: ReactNode }) {
       userId: userId ?? null,
       name: user?.firstName ?? user?.username ?? user?.primaryEmailAddress?.emailAddress ?? null,
       sync,
-      signIn: () => clerk.openSignIn({}),
+      signIn: () => clerk.openSignIn({ appearance: currentClerkAppearance() }),
       signOut: () => void clerk.signOut(),
       syncNow: () => void engine.current?.sync(),
     }),
@@ -131,8 +132,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   if (!clerkEnabled()) {
     return <AccountContext.Provider value={SIGNED_OUT}>{children}</AccountContext.Provider>;
   }
+  return <ThemedClerk>{children}</ThemedClerk>;
+}
+
+/** Clerk in our look, following the active theme (see clerkAppearance.ts). */
+function ThemedClerk({ children }: { children: ReactNode }) {
+  const appearance = useClerkAppearance();
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl={import.meta.env.BASE_URL}>
+    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl={import.meta.env.BASE_URL} appearance={appearance}>
       <ClerkBridge>{children}</ClerkBridge>
     </ClerkProvider>
   );
