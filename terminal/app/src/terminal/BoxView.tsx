@@ -346,6 +346,27 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               { reveal: 'none' },
             );
             return;
+          case 'flip': {
+            const wanted = local.direction === 'undo' ? 'applied' : 'undone';
+            const batch = [...store.getSnapshot().edits]
+              .filter((candidate) => candidate.box_id === box.id && candidate.state === wanted)
+              .sort((a, b) => (b.flipped_at ?? (local.direction === 'undo' ? b.created_at : 0)) - (a.flipped_at ?? (local.direction === 'undo' ? a.created_at : 0)))[0];
+            const meta: ReplyMeta = { intent: local.direction, model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' };
+            if (!batch) {
+              store.appendLine(box.id, 'system', t(local.direction === 'undo' ? 'actions.nothingToUndo' : 'actions.nothingToRedo'), [], { reveal: 'none', reply: { meta, blocks: [] } });
+              return;
+            }
+            const flipped = local.direction === 'undo' ? store.undo(batch.id) : store.redo(batch.id);
+            const what = batch.summary.replace(/^Edited: /, '');
+            store.appendLine(
+              box.id,
+              'system',
+              flipped.ok ? `${t(local.direction === 'undo' ? 'edits.undone' : 'actions.redone')}: ${what}` : flipped.reason,
+              [],
+              { reveal: 'none', reply: { meta, blocks: [] } },
+            );
+            return;
+          }
           case 'verify-chain': {
             const result = verifyLedger(store.getSnapshot().entries);
             const own = result.owners[store.identity];
@@ -426,9 +447,10 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             skinRequested = true;
           },
           onDone: (done) => {
+            let ledgerId: string | null = null;
             if (done.entry) {
               const { owner_identity: _ignored, ...draft } = done.entry;
-              store.appendEntry(draft);
+              ledgerId = store.appendEntry(draft).id;
             }
             if (skinRequested) {
               store.updateLine(reply.id, promptText, false);
@@ -440,6 +462,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               model: done.served_model,
               ms: performance.now() - started,
               cost_micro: done.entry?.price_micro ?? 0,
+              ...(ledgerId ? { ledger_ids: [ledgerId] } : {}),
             };
             const summaryText = modelBlocks.find((block) => block.kind === 'summary');
             const text = summaryText && summaryText.kind === 'summary' ? summaryText.text : assembled || batch?.summary || '';

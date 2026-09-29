@@ -1,6 +1,6 @@
 # 0025 — the sales site: /about, /pricing, /faq, and share cards
 
-Date: 2026-09-29. Model: Opus 5.5 (all of it: research, copy, design, build, checks). Prompts: Canon 82 (the brief, ts 1790657743.245569), 83 (pricing and privacy notes, ts 1790658094.470499), 84 (share thumbnail, ts 1790658220.851259). Canon C-095.
+Date: 2026-09-29. Model: Opus 5.5 (all of it: research, copy, design, build, checks). Prompts: Canon 82 (the brief, ts 1790657743.245569), 83 (pricing and privacy notes, ts 1790658094.470499), 84 (share thumbnail, ts 1790658220.851259). Canon C-096.
 
 ## What Omarchy's site does that makes it feel simple (read 2026-09-29, https://omarchy.org; information only, nothing copied)
 
@@ -32,7 +32,7 @@ Screenshots of every variant: scratchpad `sales/bo3/` (not committed).
 
 ## Honesty rules applied
 
-- Live claims are only what the app does today (C-095 list). Coming soon: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, encryption with your own key, teams and self-host. Live and said so: the offline queue (C-090), the share-my-data switch (off by default) and access grants (C-091).
+- Live claims are only what the app does today (C-096 list). Coming soon: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, encryption with your own key, teams and self-host. Live and said so: the offline queue (C-090), the share-my-data switch (off by default) and access grants (C-091).
 - Privacy copy says what reaches us: signed out, nothing but the request that the router passes to the model provider (through OpenRouter; the router keeps the cost line); signed in, stages (menus, pages, looks) in D1, not the conversation lines; staff tools never show another account's content unless the person shares or grants access (C-091), a rule the code keeps, not encryption.
 
 ## Share cards

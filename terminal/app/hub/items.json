@@ -152,12 +152,33 @@
       "name": "Plan and kanban",
       "status": "live",
       "href": "#plan",
-      "about": "The development plan as data, by status and dependency.",
+      "about": "Our build plan as data, by status and dependency. Lives in docs/plan (moved out of the product, C-095); the dev viewer at /plan reads it.",
       "links": [
         {
-          "label": "plan.md",
-          "href": "/wiki/plan.html"
+          "label": "docs/plan",
+          "href": "/wiki/plan/README.html"
+        },
+        {
+          "label": "plan.json",
+          "href": "/wiki/plan/plan.json"
         }
+      ]
+    },
+    {
+      "id": "actions",
+      "name": "Actions",
+      "status": "live",
+      "href": "/actions",
+      "about": "The person's own activity: list, table, board and timeline with follows arrows; filters by status, stage, model and words; sort by time, status or cost; model and cost from the ledger.",
+      "links": [
+        {
+          "label": "pages/actions.md",
+          "href": "/wiki/pages/actions.html"
+        }
+      ],
+      "canon": [
+        "C-090",
+        "C-095"
       ]
     },
     {
