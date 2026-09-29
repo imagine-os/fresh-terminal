@@ -9,11 +9,20 @@ import { fakeD1 } from './testing/fakeD1';
 
 const KEY = 'test-signing-key';
 
+export const clerkUsers: typeof fetch = async (input) => {
+  const match = /^https:\/\/api\.clerk\.com\/v1\/users\/([^/]+)$/.exec(String(input));
+  if (!match) return new Response('{}', { status: 404 });
+  const id = decodeURIComponent(match[1] ?? '');
+  return Response.json({ id, primary_email_address_id: 'e1', email_addresses: [{ id: 'e1', email_address: `${id}@example.com`, verification: { status: 'verified' } }] });
+};
+
 function harness(overrides: Record<string, string> = {}, limiter?: RateLimiter) {
   const db: D1Database = fakeD1();
   let clock = Date.UTC(2026, 8, 29, 3, 0, 0);
   const options: MeterOptions = {
-    bindings: () => ({ DEVICE_SIGNING_KEY: KEY, CLERK_SECRET_KEY: 'sk_test_x', ...overrides }),
+    bindings: () => ({ DEVICE_SIGNING_KEY: KEY, CLERK_SECRET_KEY: 'sk_test_x', WELCOME_PER_NET_DAILY: '1000', ...overrides }),
+    // Clerk Backend API stand-in: every user has their own verified address (the welcome credit, C-106).
+    fetchImpl: clerkUsers,
     resources: () => ({ DB: db, ...(limiter ? { RL_IP: limiter, RL_NET: limiter } : {}) }),
     authorizedParties: () => ['https://freshterminal.ai'],
     verifier: async (token) => {
@@ -155,7 +164,7 @@ describe('signed-in credits', () => {
     const h = harness();
     await h.call('/credits', { method: 'GET', token: 'good-user_old' });
     // An account from before the starter kit: $1 grant, starter not folded in, $0.40 spent.
-    await h.db.prepare("UPDATE accounts SET grant_micro = 1000000, starter_micro = 0, spent_micro = 400000 WHERE id = 'acct_user_old'").run();
+    await h.db.prepare("UPDATE accounts SET grant_micro = 1000000, starter_micro = 0, spent_micro = 400000, starter_state = 'legacy' WHERE id = 'acct_user_old'").run();
     const once = (await h.call('/credits', { method: 'GET', token: 'good-user_old' })).body as unknown as CreditsStatus;
     expect(once).toMatchObject({ granted_micro: 5_000_000, remaining_micro: 4_600_000 });
     const twice = (await h.call('/credits', { method: 'GET', token: 'good-user_old' })).body as unknown as CreditsStatus;

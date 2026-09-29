@@ -4030,3 +4030,82 @@ textarea.field-input {
   .tags-graph svg { max-height: 60vh; }
   .tag-node-label { font-size: 15px; }
 }
+
+/* Pay what you want (C-105) and Settings → Invite (C-107). */
+.markup-setting,
+.referral-panel {
+  display: grid;
+  gap: var(--space-cozy);
+}
+.markup-slider {
+  display: grid;
+  gap: 0.35rem;
+}
+.markup-slider input[type='range'] {
+  width: 100%;
+  min-height: var(--target);
+  accent-color: var(--accent);
+}
+.markup-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.markup-preset {
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.markup-preset[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.markup-preset:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.referral-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.referral-link label:not(.sr-only) {
+  flex-basis: 100%;
+}
+.referral-link input {
+  flex: 1 1 14rem;
+  min-width: 0;
+  min-height: var(--target);
+  padding: 0 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.referral-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+.referral-stats div {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+}
+.referral-stats dt {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+.referral-stats dd {
+  margin: 0;
+  font-weight: 600;
+}

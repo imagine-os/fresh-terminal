@@ -4,7 +4,9 @@ import { Button } from '../ui/Button';
 import { useToast } from '../ui/Toast';
 import { VOICE_PROVIDERS, speechRecognitionCtor, type RealtimeProviderInfo, type VoiceProviderId } from '../voice';
 import { deleteOwnKey, maskKey, readOwnKey, writeOwnKey } from './ownKey';
+import { MarkupSetting } from './MarkupSetting';
 import { PrivacyToggle } from './PrivacyToggle';
+import { ReferralPanel } from './ReferralPanel';
 
 export type PayMode = 'ours' | 'own';
 
@@ -157,6 +159,12 @@ export function SettingsPanel({ open, payMode, onPayMode, onClose, voiceProvider
             </Button>
           </div>
         ) : null}
+
+        <h2 style={{ fontSize: 'var(--type-body)' }}>{t('markup.title')}</h2>
+        <MarkupSetting />
+
+        <h2 id="settings-invite" style={{ fontSize: 'var(--type-body)' }}>{t('referral.title')}</h2>
+        <ReferralPanel />
 
         <h2 style={{ fontSize: 'var(--type-body)' }}>{t('privacy.title')}</h2>
         <PrivacyToggle />

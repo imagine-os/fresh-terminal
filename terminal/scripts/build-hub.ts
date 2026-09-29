@@ -59,6 +59,11 @@ const workerSecrets = (process.env.HUB_WORKER_SECRETS ?? '')
   .map((name) => name.trim())
   .filter((name) => /^[A-Z0-9_]+$/.test(name));
 
+// Card pictures (C-104): hub:thumbs writes app/public/previews (committed) and, on deploy, app/dist/previews.
+const previewDirs = [resolve(here, '../app/dist/previews'), resolve(here, '../app/public/previews')];
+for (const item of items.items) {
+  item.thumb = previewDirs.some((dir) => existsSync(resolve(dir, `${item.id}-640.jpg`))) ? `/previews/${item.id}` : null;
+}
 write('items.json', items);
 write('library.json', { prompts, canon, records });
 write('wiki.json', { pages: parseWikiIndex(read('README.md')) });

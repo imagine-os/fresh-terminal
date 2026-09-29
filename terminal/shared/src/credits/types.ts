@@ -33,6 +33,10 @@ export interface CreditsStatus {
   turnstile_sitekey?: string;
   /** Signed-in accounts only: the pass-through billing gate (C-086). */
   billing?: AccountBilling;
+  /** Signed-in only (C-106): the $5 welcome credit, once per person. message is the honest line for blocked or pending. */
+  welcome?: { state: 'legacy' | 'pending' | 'granted' | 'blocked'; message: string | null };
+  /** The markup on router-paid model spend (C-103): 10% past the starter kit; the starter kit and the signed-out trial run at cost. */
+  markup?: MarkupStatus;
   /** Signed-in accounts only (GET /credits): what the account stores with us (C-092; measured, not billed yet). */
   storage?: StorageStatus;
   /** Signed-in accounts only: the person chose to share their data with Fresh Terminal (C-091; off by default). */
@@ -84,3 +88,55 @@ export interface CreditsError {
 export const SOFT_PROMPT_HEADER = 'X-FT-Soft-Prompt';
 /** Request header carrying the signed anonymous device id. */
 export const DEVICE_HEADER = 'X-FT-Device';
+
+/**
+ * C-103 (Justin, 2026-09-29): credits first, 10% markup "since we're not charging account fees".
+ * margin_bp applies to model spend past the starter kit (bought credits, invites and grants);
+ * the starter kit's spend and the signed-out trial are at cost; your key is never marked up.
+ */
+export interface MarkupStatus {
+  /** Basis points over provider cost on marked-up spend (1000 = 10%): the account's own choice (C-105) or the default. */
+  margin_bp: number;
+  /** The default (the route table's margin_bp) and the range a person can choose from (C-105). */
+  default_bp: number;
+  min_bp: number;
+  max_bp: number;
+  /** The person set their own markup (pay what you want, C-105). */
+  chosen: boolean;
+  /** Where it applies, in words for the counter tooltip. */
+  applies: 'after the starter kit' | 'not on the signed-out trial';
+  /** How much more spend runs at cost before the markup starts (micro-dollars). */
+  at_cost_left_micro: number;
+  /** Your key: always 0. */
+  your_key_bp: 0;
+}
+
+/**
+ * Pay what you want (C-105, Justin: "they can also pay what they want... and they can increase
+ * the markup to support us if they wish"): a signed-in account picks its own markup on spend past
+ * the starter kit. 5% is the floor so card fees are covered; 100% the ceiling.
+ */
+export const MARKUP_DEFAULT_BP = 1000;
+export const MARKUP_MIN_BP = 500;
+export const MARKUP_MAX_BP = 10_000;
+export const MARKUP_PRESETS_BP = [500, 1000, 1500, 2500] as const;
+
+/** A valid markup choice: a whole number of basis points in [MARKUP_MIN_BP, MARKUP_MAX_BP]. */
+export function isMarkupBp(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= MARKUP_MIN_BP && value <= MARKUP_MAX_BP;
+}
+
+/**
+ * Referrals (C-107, Justin: "We do need a generous referral/affiliate program"). Defaults until Justin
+ * changes them: the friend gets $5 extra ($10 in all) when they are a first-time sign-up; the referrer
+ * gets $5 once the friend has spent their free $5 or bought any credits, then 50% of our markup on the
+ * friend's paid usage for 12 months, as credit. At most 50 rewards per referrer per month. Cash-out: not wired yet.
+ */
+export const REFERRAL_BONUS_MICRO = 5_000_000;
+export const REFERRAL_REWARD_MICRO = 5_000_000;
+export const REFERRAL_QUALIFY_SPEND_MICRO = 5_000_000;
+export const REFERRAL_SHARE_BP = 5000;
+export const REFERRAL_SHARE_DAYS = 365;
+export const REFERRAL_MONTHLY_CAP = 50;
+export const REFERRAL_CLAIM_DAYS = 7;
+

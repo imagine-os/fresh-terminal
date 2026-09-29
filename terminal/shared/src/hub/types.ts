@@ -63,6 +63,10 @@ export interface HubItem {
   name: string;
   status: ItemStatus;
   href: string;
+  /** What hub:thumbs shoots for the card picture: a site path, "canvas:<card id>", or false for the monogram. */
+  preview?: string | false;
+  /** Set by build-hub when a picture exists: the path without the size suffix, e.g. /previews/canvas (then -640.jpg / -1280.jpg). */
+  thumb?: string | null;
   about: string;
   links?: Array<{ label: string; href: string }>;
   canon?: string[];

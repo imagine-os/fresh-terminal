@@ -6,8 +6,8 @@ import type { Line } from '../store';
 import { Reveal } from '../ui/Reveal';
 import { ChipText } from './ChipText';
 import { ReplyView, parseReply } from './ReplyView';
-import { formatMicro } from '@shared/ledger';
 import { useI18n } from '../i18n';
+import { CostLabel } from './CostLabel';
 
 function parseChips(json: string): Chip[] {
   try {
@@ -36,7 +36,7 @@ function MetaLine({ meta }: { meta: NonNullable<ReturnType<typeof parseReply>>['
       <span aria-hidden="true">·</span>
       <span>{time}</span>
       <span aria-hidden="true">·</span>
-      <span>{formatMicro(meta.cost_micro, 4)}</span>
+      <CostLabel meta={meta} />
     </div>
   );
 }

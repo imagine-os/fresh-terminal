@@ -1,5 +1,5 @@
 {
-  "$comment": "What the hub lists (C-088). Status words: live, in progress, not wired, planned. Edit this file when a page moves; build-hub.ts copies it into the gated hub data.",
+  "$comment": "What the hub lists (C-088). Status words: live, in progress, not wired, planned. Edit this file when a page moves; build-hub.ts copies it into the gated hub data. Card pictures (C-104): `preview` is the page hub:thumbs shoots (a site path, \"canvas:<card id>\" to reuse a canvas thumbnail, or false for the monogram); without it a site-relative href is shot.",
   "updated": "2026-09-29",
   "items": [
     {
@@ -96,6 +96,7 @@
       "name": "Koi pond",
       "status": "in progress",
       "href": "/pages/koi.html",
+      "preview": "canvas:koi-pond",
       "about": "v3: looks down at the water, then tilts up into the garden.",
       "links": [
         {
@@ -116,6 +117,7 @@
       "name": "Wiki",
       "status": "live",
       "href": "/wiki/",
+      "preview": "/wiki/index.html",
       "about": "Every doc in terminal/docs, rendered on each deploy.",
       "links": [
         {
@@ -129,6 +131,7 @@
       "name": "Skins",
       "status": "live",
       "href": "/",
+      "preview": "/wiki/decisions/0018-skins-and-refine.html",
       "about": "Photo and material skins for the stage and bars, with a readability layer.",
       "links": [
         {
@@ -145,6 +148,7 @@
       "name": "Skills",
       "status": "live",
       "href": "https://github.com/imagine-os/fresh-terminal/tree/main/terminal/skills",
+      "preview": false,
       "about": "Agent skills kept in the repo (logos and icons)."
     },
     {
@@ -152,6 +156,7 @@
       "name": "Plan and kanban",
       "status": "live",
       "href": "#plan",
+      "preview": "/plan",
       "about": "Our build plan as data, by status and dependency. Lives in docs/plan (moved out of the product, C-095); the dev viewer at /plan reads it.",
       "links": [
         {
@@ -186,6 +191,7 @@
       "name": "Hub",
       "status": "live",
       "href": "/hub",
+      "preview": "/hub/?sample=1",
       "about": "This page: admins only, checked on the server.",
       "canon": [
         "C-088"
@@ -196,6 +202,7 @@
       "name": "Friend credits",
       "status": "live",
       "href": "#credits",
+      "preview": "/hub/?sample=1#credits",
       "about": "Grants by email or user id, and invite codes worth $X for N uses.",
       "canon": [
         "C-087"
@@ -203,15 +210,16 @@
     },
     {
       "id": "billing",
-      "name": "Pass-through billing",
+      "name": "Buy credits",
       "status": "not wired",
       "href": "#credits",
-      "about": "$5 starter kit per account, no daily cap, then pass-through (402 payment_required); your key: $0 for models, storage over 100 MB metered (not billed). Paying needs the Stripe keys: not wired yet.",
+      "preview": "/hub/?sample=1#credits",
+      "about": "Credits first (C-103): a $5 starter kit per account at model cost, then Clerk auto-renewing refill plans; bought credits spend at model cost + 10%, no account fees. Your key: $0 markup. Needs the Clerk plans and webhook secret: not wired yet.",
       "canon": [
         "C-086",
         "C-089",
-        "C-091",
-        "C-092"
+        "C-093",
+        "C-103"
       ]
     },
     {

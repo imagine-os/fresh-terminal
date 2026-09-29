@@ -26,7 +26,8 @@ describe('skins', () => {
     expect(Object.keys(question.criteria ?? {}).sort()).toEqual(['css_tokens', 'image_generate', 'image_search', 'library', 'procedural_code']);
     expect(body.entries).toEqual([expect.objectContaining({ what: 'skin.plan', cost_micro: 13 })]);
     expect(body.params.cap_micro).toBe(30000);
-    expect((body as unknown as { estimate: { micro: number; certainty: string } }).estimate).toEqual({ micro: 733, low_micro: 253, high_micro: 1213, certainty: 'fairly sure' });
+    // C-103: the plan call's 13 micro-dollars cost 14 with the 10% markup (no meter here, so the route table's margin applies).
+    expect((body as unknown as { estimate: { micro: number; certainty: string } }).estimate).toEqual({ micro: 734, low_micro: 254, high_micro: 1214, certainty: 'fairly sure' });
   });
 
   it('library variants are free and never repeat excluded ones', async () => {

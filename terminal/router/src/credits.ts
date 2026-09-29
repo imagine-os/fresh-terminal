@@ -1,8 +1,12 @@
 import type { Context, MiddlewareHandler } from 'hono';
-import { DEVICE_HEADER, SOFT_PROMPT_HEADER, type AccountBilling, type BillingState, type CreditsError, type CreditsErrorCode, type CreditsStatus } from '../../shared/src/credits/types';
+import { DEVICE_HEADER, MARKUP_MAX_BP, MARKUP_MIN_BP, SOFT_PROMPT_HEADER, isMarkupBp, type AccountBilling, type MarkupStatus, type BillingState, type CreditsError, type CreditsErrorCode, type CreditsStatus } from '../../shared/src/credits/types';
 import { authenticate, type AuthBindings, type TokenVerifier } from './auth';
+import { applyMarginBasisPoints } from '../../shared/src/ledger/types';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
+import { loadRules } from './rules';
 import { measureStorage } from './storage';
+import { settleReferral } from './referrals';
+import { decideWelcome, type WelcomeBindings, type WelcomeState } from './welcome';
 
 /**
  * Free credits, enforced here and nowhere else (2026-09-29).
@@ -27,7 +31,7 @@ import { measureStorage } from './storage';
  * Without a D1 binding (local Node dev, most tests) metering is off.
  */
 
-export interface CreditsBindings extends AuthBindings {
+export interface CreditsBindings extends AuthBindings, WelcomeBindings {
   DEVICE_SIGNING_KEY?: string;
   /** Cloudflare Turnstile (invisible widget "fresh-terminal", created by router-deploy). */
   TURNSTILE_SECRET?: string;
@@ -108,8 +112,10 @@ const LEGACY_STARTER_MICRO = 1_000_000;
  * Idempotent and race-safe (the update is conditional on the old starter value).
  */
 export async function applyStarter(db: D1Database, accountId: string, starter: number, now: number): Promise<void> {
-  const row = await db.prepare('SELECT starter_micro FROM accounts WHERE id = ?1').bind(accountId).first<{ starter_micro: number }>();
+  const row = await db.prepare('SELECT starter_micro, starter_state FROM accounts WHERE id = ?1').bind(accountId).first<{ starter_micro: number; starter_state?: string | null }>();
   if (!row) return;
+  // C-106: a pending or blocked account has no starter to fold; its welcome credit is decided in welcome.ts.
+  if (row.starter_state === 'pending' || row.starter_state === 'blocked') return;
   const current = Number(row.starter_micro ?? 0);
   const had = current === 0 ? LEGACY_STARTER_MICRO : current;
   if (current !== 0 && current === starter) return;
@@ -218,7 +224,7 @@ interface DeviceRow {
   limited: number;
 }
 
-interface AccountCreditRow {
+export interface AccountCreditRow {
   id: string;
   grant_micro: number;
   spent_micro: number;
@@ -226,6 +232,10 @@ interface AccountCreditRow {
   billing_threshold_micro: number;
   billing_state: BillingState;
   paid_micro: number;
+  /** The account's own markup (C-105); null = the default. */
+  markup_bp?: number | null;
+  /** The $5 welcome credit (C-106): its state and the honest line for a blocked or pending one. */
+  welcome?: { state: WelcomeState; message: string | null };
 }
 
 /** min(grant, threshold): what the account can spend before it must pay (C-086). */
@@ -239,9 +249,9 @@ export function billingProvider(bindings: CreditsBindings): AccountBilling['prov
 }
 
 export const PAYMENT_REQUIRED_MESSAGE =
-  'You have used your free usage. Add a payment method to keep going: you pay for what you use, at cost plus a small fee. Your key still works.';
+  'You have used your starter kit. Buy credits to keep going: model cost plus 10%, nothing else. Your key still works.';
 export const PAYMENT_NOT_WIRED_MESSAGE =
-  'You have used your free usage. Adding a payment method is not wired yet; your key still works.';
+  'You have used your starter kit. Buying credits is not wired yet; your key still works.';
 
 export type Payer =
   | { kind: 'account'; id: string; row: AccountCreditRow }
@@ -254,6 +264,66 @@ const payers = new WeakMap<Request, Payer>();
 /** The payer the meter resolved for this request (only set when metering is on). */
 export function payerFor(request: Request): Payer | undefined {
   return payers.get(request);
+}
+
+/** The markup rate people are quoted: the highest margin_bp in the route table (every rule is 1000 today, C-103). */
+export function headlineMarginBp(): number {
+  return Math.max(0, ...loadRules().rules.map((rule) => rule.margin_bp ?? 0));
+}
+
+export interface Markup {
+  price_micro: number;
+  /** The part of the cost charged at cost (inside the starter kit, or the signed-out trial). */
+  at_cost_micro: number;
+  /** The part of the cost the margin applies to. */
+  marked_micro: number;
+  margin_bp: number;
+  markup_micro: number;
+}
+
+/**
+ * C-103: what a router-paid call costs the person. Signed-in: the first `starter` micro-dollars
+ * of lifetime spend run at cost, everything after carries margin_bp (a call that crosses the line
+ * is split). Signed-out trial: at cost. No meter (local dev without D1): margin_bp on all of it.
+ * Your key goes browser -> OpenRouter, never reaches the router, and is always at cost.
+ */
+export function markupFor(payer: Payer | undefined, costMicro: number, marginBp: number, starter: number): Markup {
+  const cost = Math.max(0, Math.round(costMicro));
+  let atCost = 0;
+  let rate = Math.max(0, Math.round(marginBp));
+  if (payer?.kind === 'device') atCost = cost;
+  else if (payer?.kind === 'account') {
+    atCost = Math.min(cost, Math.max(0, starter - payer.row.spent_micro));
+    rate = accountMarkupBp(payer.row, rate);
+  }
+  const marked = cost - atCost;
+  const price = atCost + applyMarginBasisPoints(marked, rate);
+  return { price_micro: price, at_cost_micro: atCost, marked_micro: marked, margin_bp: rate, markup_micro: price - cost };
+}
+
+/**
+ * The markup an account pays past the starter kit (C-105, pay what you want): its own choice,
+ * kept in [5%, 100%], or the route table's default.
+ */
+export function accountMarkupBp(row: Pick<AccountCreditRow, 'markup_bp'>, defaultBp: number): number {
+  const chosen = row.markup_bp;
+  if (chosen === null || chosen === undefined || !Number.isFinite(chosen)) return defaultBp;
+  return Math.min(MARKUP_MAX_BP, Math.max(MARKUP_MIN_BP, Math.round(chosen)));
+}
+
+const pricedSoFar = new WeakMap<Request, number>();
+
+/**
+ * markupFor with the payer the meter resolved for this request. Several entries in one request
+ * (a skin run) count against the starter kit in order, so it is not spent at cost twice.
+ */
+export function priceForRequest(request: Request, bindings: CreditsBindings, costMicro: number, marginBp: number): Markup {
+  const payer = payerFor(request);
+  const before = pricedSoFar.get(request) ?? 0;
+  const view: Payer | undefined = payer?.kind === 'account' ? { ...payer, row: { ...payer.row, spent_micro: payer.row.spent_micro + before } } : payer;
+  const markup = markupFor(view, costMicro, marginBp, starterMicro(bindings));
+  pricedSoFar.set(request, before + markup.price_micro);
+  return markup;
 }
 
 async function dailyAnonCost(db: D1Database, now: number): Promise<number> {
@@ -280,13 +350,22 @@ function dailyCapHit(daily: { mine: number; allCost: number }, config: CreditCon
   return null;
 }
 
-async function accountCredits(db: D1Database, clerkUserId: string, now: number, config: CreditConfig): Promise<AccountCreditRow> {
+interface WelcomeInput {
+  deviceId: string | null;
+  netHash: string;
+  bindings: CreditsBindings;
+  fetchImpl: typeof fetch;
+}
+
+async function accountCredits(db: D1Database, clerkUserId: string, now: number, config: CreditConfig, welcome: WelcomeInput): Promise<AccountCreditRow> {
   await ensureAccount(db, clerkUserId, now);
   const id = accountIdFor(clerkUserId);
-  // The starter kit (C-089): the column default is the old $1; fold in the configured starter once.
-  await applyStarter(db, id, config.accountGrantMicro, now);
+  // C-106: a new account's $5 welcome credit is decided once, per person (email, device, network).
+  const decision = await decideWelcome(db, { accountId: id, clerkUserId, deviceId: welcome.deviceId, net: welcome.netHash, day: utcDay(now), now, starterMicro: config.accountGrantMicro, bindings: welcome.bindings, fetchImpl: welcome.fetchImpl });
+  // The starter kit (C-089): accounts from before C-106 (legacy) fold in the configured starter once; granted ones follow ACCOUNT_STARTER_USD.
+  if (decision.state === 'legacy' || decision.state === 'granted') await applyStarter(db, id, config.accountGrantMicro, now);
   const row = await db
-    .prepare('SELECT id, grant_micro, spent_micro, billing_threshold_micro, billing_state, paid_micro FROM accounts WHERE id = ?1')
+    .prepare('SELECT id, grant_micro, spent_micro, billing_threshold_micro, billing_state, paid_micro, markup_bp FROM accounts WHERE id = ?1')
     .bind(id)
     .first<AccountCreditRow>();
   const state = row?.billing_state;
@@ -297,6 +376,8 @@ async function accountCredits(db: D1Database, clerkUserId: string, now: number, 
     billing_threshold_micro: Number(row?.billing_threshold_micro ?? 5_000_000),
     billing_state: state === 'needs_payment' || state === 'active' ? state : 'free',
     paid_micro: Number(row?.paid_micro ?? 0),
+    markup_bp: isMarkupBp(Number(row?.markup_bp)) ? Number(row?.markup_bp) : null,
+    welcome: { state: decision.state, message: decision.message },
   };
 }
 
@@ -325,13 +406,26 @@ export async function verifyTurnstile(secret: string, token: string, ip: string,
   }
 }
 
+/**
+ * The signed-in caller's account with its welcome credit decided (C-106), from this request's
+ * device id and network. For routes outside the meter (invite redeem, referral claim).
+ */
+export async function accountForRequest(c: Context, options: MeterOptions, db: D1Database, clerkUserId: string): Promise<AccountCreditRow> {
+  const bindings = options.bindings(c.env);
+  const deviceId = await verifyDevice(c.req.header(DEVICE_HEADER), bindings.DEVICE_SIGNING_KEY);
+  const netHash = await sha256Hex(`ft-net-v1|${networkOf(clientIp((name) => c.req.header(name)))}`);
+  return accountCredits(db, clerkUserId, options.now(), creditConfig(bindings), { deviceId, netHash, bindings, fetchImpl: options.fetchImpl ?? fetch });
+}
+
 async function resolvePayer(c: Context, options: MeterOptions, db: D1Database, config: CreditConfig): Promise<Payer> {
   const bindings = options.bindings(c.env);
   const authHeader = c.req.header('Authorization');
   if (authHeader) {
     const auth = await authenticate(authHeader, bindings, options.authorizedParties(c.env), options.verifier);
     if (auth.state === 'signed-in') {
-      const row = await accountCredits(db, auth.userId, options.now(), config);
+      const deviceId = await verifyDevice(c.req.header(DEVICE_HEADER), bindings.DEVICE_SIGNING_KEY);
+      const netHash = await sha256Hex(`ft-net-v1|${networkOf(clientIp((name) => c.req.header(name)))}`);
+      const row = await accountCredits(db, auth.userId, options.now(), config, { deviceId, netHash, bindings, fetchImpl: options.fetchImpl ?? fetch });
       return { kind: 'account', id: row.id, row };
     }
     if (auth.state === 'invalid') return { kind: 'invalid', reason: auth.reason };
@@ -347,7 +441,19 @@ export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: b
   const turnstile = bindings.TURNSTILE_SECRET && bindings.TURNSTILE_SITEKEY ? { turnstile: 'on' as const, turnstile_sitekey: bindings.TURNSTILE_SITEKEY } : { turnstile: 'not-wired' as const };
   // C-089: signed-in accounts see "of $5 starter kit"; anonymous devices keep "free usage".
   const base = { ...turnstile, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'starter kit' : 'free usage' };
+  const margin = headlineMarginBp();
   if (payer.kind === 'account') {
+    const markup: MarkupStatus = {
+      margin_bp: accountMarkupBp(payer.row, margin),
+      default_bp: margin,
+      min_bp: MARKUP_MIN_BP,
+      max_bp: MARKUP_MAX_BP,
+      chosen: payer.row.markup_bp !== null && payer.row.markup_bp !== undefined,
+      applies: 'after the starter kit',
+      at_cost_left_micro: Math.max(0, starterMicro(bindings) - payer.row.spent_micro),
+      your_key_bp: 0,
+    };
+    const welcome = payer.row.welcome ? { state: payer.row.welcome.state, message: payer.row.welcome.message } : undefined;
     const limit = creditLimitMicro(payer.row);
     const remaining = Math.max(0, limit - payer.row.spent_micro);
     const billing: AccountBilling = {
@@ -357,13 +463,14 @@ export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: b
       paid_micro: payer.row.paid_micro,
       provider: billingProvider(bindings),
     };
-    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, granted: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false, billing };
+    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, granted: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false, billing, markup, ...(welcome ? { welcome } : {}) };
   }
   if (payer.kind === 'device') {
     const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
     const left = Math.max(0, config.chances - payer.row.chances_used);
     const out = remaining < config.minBalanceMicro && left === 0;
-    return { ...base, signed_in: false, mode: 'device', granted_micro: payer.row.grant_micro, granted: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: left, sign_in_required: out || dailyCapReached, limited: payer.row.limited === 1 };
+    const markup: MarkupStatus = { margin_bp: margin, default_bp: margin, min_bp: MARKUP_MIN_BP, max_bp: MARKUP_MAX_BP, chosen: false, applies: 'not on the signed-out trial', at_cost_left_micro: remaining, your_key_bp: 0 };
+    return { ...base, signed_in: false, mode: 'device', granted_micro: payer.row.grant_micro, granted: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: left, sign_in_required: out || dailyCapReached, limited: payer.row.limited === 1, markup };
   }
   return { ...base, signed_in: false, mode: 'none', granted_micro: 0, granted: 0, spent_micro: 0, remaining_micro: 0, soft_prompts_left: config.chances, sign_in_required: false, limited: false };
 }
@@ -451,6 +558,13 @@ async function record(db: D1Database, payer: Payer, costs: { cost: number; price
         ]
       : []),
   ]);
+  // C-107: a referred friend's spending may earn their referrer the $5 reward, and 50% of our markup on paid usage.
+  if (payer.kind === 'account') {
+    const freeTotal = Math.max(0, payer.row.grant_micro - payer.row.paid_micro);
+    const before = payer.row.spent_micro;
+    const paidPart = Math.min(costs.price, Math.max(0, before + costs.price - Math.max(freeTotal, before)));
+    await settleReferral(db, payer.id, now, { markupMicro: Math.max(0, costs.price - costs.cost), paidPart: payer.row.paid_micro > 0 ? paidPart : 0, price: costs.price });
+  }
 }
 
 function later(c: Context, work: Promise<void>): void {
@@ -495,11 +609,16 @@ export function meter(options: MeterOptions): MiddlewareHandler {
           payer.row.billing_state = 'needs_payment';
         }
         const status = statusFor(payer, config, false, bindings);
-        const wired = billingProvider(bindings) === 'stripe';
+        const wired = billingProvider(bindings) !== 'not-wired';
+        // C-106: an account without the welcome credit (blocked or not yet verified) hears why, honestly.
+        const welcomeLine = payer.row.welcome?.message;
+        if (welcomeLine && payer.row.spent_micro === 0) {
+          return deny(c, 402, 'payment_required', `${welcomeLine} ${wired ? 'Buy credits to keep going, or use your key.' : 'Buying credits is not wired yet; your key still works.'}`, status);
+        }
         if (payer.row.billing_threshold_micro <= payer.row.grant_micro) {
           return deny(c, 402, 'payment_required', wired ? PAYMENT_REQUIRED_MESSAGE : PAYMENT_NOT_WIRED_MESSAGE, status);
         }
-        return deny(c, 402, 'account_credits_exhausted', wired ? PAYMENT_REQUIRED_MESSAGE : 'Your free account credits are used up. Adding a payment method is not wired yet; your key (K, your own OpenRouter key) still works.', status);
+        return deny(c, 402, 'account_credits_exhausted', wired ? PAYMENT_REQUIRED_MESSAGE : 'Your free account credits are used up. Buying credits is not wired yet; your key (K, your own OpenRouter key) still works.', status);
       }
       // Daily caps for signed-in free usage (your key goes browser -> OpenRouter and is never capped).
       // An account that has paid (billing_state active) spends its own money and is not capped.

@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import { handleKeyArrival } from './lib/arrival';
+import { captureReferral, handleKeyArrival } from './lib/arrival';
 import './styles/app.css';
 
 // A deploy replaces hashed chunks under open tabs; a lazy piece then fails to
@@ -42,3 +42,4 @@ createRoot(root).render(
 
 // "Use your key" on /pricing links to ?open=key (sales site, 2026-09-29).
 handleKeyArrival();
+captureReferral();

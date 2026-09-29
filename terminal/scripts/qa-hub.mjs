@@ -23,6 +23,10 @@ try {
     await page.goto(`${BASE}/hub/?sample=1`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-hub="admin"] .hub-tile');
     await page.waitForSelector('.hub-stats');
+    // Card pictures (C-104): every card has a picture or a monogram; pictures in view have loaded.
+    await page.waitForFunction(() => [...document.querySelectorAll('.hub-thumb img')].filter((img) => img.getBoundingClientRect().top < innerHeight).every((img) => img.complete), null, { timeout: 15000 }).catch(() => undefined);
+    const thumbs = await page.evaluate(() => ({ tiles: document.querySelectorAll('.hub-tile').length, pictures: document.querySelectorAll('.hub-tile > .hub-thumb img').length, monograms: document.querySelectorAll('.hub-tile > .hub-thumb-none').length, lazy: [...document.querySelectorAll('.hub-thumb img')].every((img) => img.loading === 'lazy' && img.alt.startsWith('Preview of ')), rounded: [...document.querySelectorAll('.hub-thumb, .hub-thumb img')].some((el) => getComputedStyle(el).borderRadius !== '0px') }));
+    if (thumbs.pictures + thumbs.monograms !== thumbs.tiles || !thumbs.lazy || thumbs.rounded) failures += 1;
     const report = await page.evaluate(() => {
       const overflow = document.documentElement.scrollWidth > window.innerWidth + 1;
       const small = [];
@@ -40,6 +44,7 @@ try {
     });
     const ok = !report.overflow && report.smallCount === 0;
     if (!ok) failures += 1;
+    console.log(`${width}: pictures=${thumbs.pictures} monograms=${thumbs.monograms} of ${thumbs.tiles} lazy+alt=${thumbs.lazy} rounded=${thumbs.rounded}`);
     console.log(`${width}: overflow=${report.overflow} small=${report.smallCount}${report.small.length ? ` ${report.small.join('; ')}` : ''}`);
     if ([390, 1280, 3840].includes(width)) await page.screenshot({ path: `${OUT}/hub-admin-${width}.png` });
     if (width === 1280) {

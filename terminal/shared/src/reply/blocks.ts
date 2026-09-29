@@ -37,6 +37,10 @@ export interface ReplyMeta {
   model: string;
   ms: number;
   cost_micro: number;
+  /** C-103: the part of cost_micro that is markup (price - model cost); 0 or absent inside the starter kit and with your key. */
+  markup_micro?: number;
+  /** C-105: the markup rate on this turn, in basis points (the account's choice, 10% by default). */
+  markup_bp?: number;
   source?: 'jev' | 'rules' | 'local';
   /** Ledger entries this turn wrote, so Actions can take model and cost from the ledger exactly. */
   ledger_ids?: string[];

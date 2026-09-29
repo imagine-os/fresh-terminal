@@ -85,7 +85,7 @@ describe('router app', () => {
     const doneLine = text.split('\n').find((line) => line.startsWith('data:') && line.includes('"entry"')) as string;
     const done = JSON.parse(doneLine.slice(5)) as { entry: { cost_micro: number; price_micro: number } };
     expect(done.entry.cost_micro).toBe(50 + 10);
-    expect(done.entry.price_micro).toBe(60);
+    expect(done.entry.price_micro).toBe(66); // C-103: 10% markup (no meter in this test, so all of it is past the starter kit)
   });
 
   it('falls back to rules-only routing when the decisions endpoint is down', async () => {
@@ -166,7 +166,7 @@ describe('router app', () => {
     expect(done.served_model).toBe('served/actual-model');
     expect(done.entry.model).toBe('served/actual-model');
     expect(done.entry.cost_micro).toBe(100);
-    expect(done.entry.price_micro).toBe(100);
+    expect(done.entry.price_micro).toBe(110); // C-103: cost + 10%
     expect(done.entry.ref).toBe('gen-123');
     expect(done.entry.unit_kind).toBe('call');
   });

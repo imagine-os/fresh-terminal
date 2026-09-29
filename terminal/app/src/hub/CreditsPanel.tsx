@@ -17,6 +17,10 @@ interface Overview {
   invites: Row;
   devices: Row;
   privacy?: Row;
+  /** C-105, C-106, C-107: totals only. */
+  markup?: Row;
+  welcome?: Row;
+  referrals?: Row;
   billing: { provider: string; default_threshold_micro: number; starter_micro?: number };
   max_grant_micro: number;
 }
@@ -94,7 +98,7 @@ export function CreditsPanel({ client }: { client: HubClient }) {
             <dd>{String(overview.invites.open ?? 0)}</dd>
           </div>
           <div>
-            <dt>Need a payment method</dt>
+            <dt>Need to buy credits</dt>
             <dd>{String(overview.accounts.needs_payment ?? 0)}</dd>
           </div>
           <div>
@@ -108,9 +112,27 @@ export function CreditsPanel({ client }: { client: HubClient }) {
             <dd>{(Number(overview.privacy?.stored_bytes ?? 0) / 1_000_000).toFixed(1)} MB</dd>
           </div>
           <div>
+            <dt>Average markup</dt>
+            <dd>
+              {(Number(overview.markup?.average_bp ?? 1000) / 100).toFixed(1)}% <span className="hub-muted">{String(overview.markup?.chosen ?? 0)} chose their own</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Welcome credit</dt>
+            <dd>
+              {String(overview.welcome?.granted ?? 0)} <span className="hub-muted">given, {String(overview.welcome?.blocked ?? 0)} blocked, {String(overview.welcome?.pending ?? 0)} waiting</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Referrals</dt>
+            <dd>
+              {String(overview.referrals?.rewarded ?? 0)} <span className="hub-muted">rewarded of {String(Number(overview.referrals?.claims ?? 0) - Number(overview.referrals?.refused ?? 0))}; {usd(Number(overview.referrals?.bonus_micro ?? 0) + Number(overview.referrals?.reward_micro ?? 0) + Number(overview.referrals?.share_paid_micro ?? 0))} credited</span>
+            </dd>
+          </div>
+          <div>
             <dt>Payments</dt>
             <dd>
-              <Status value={overview.billing.provider === 'stripe' ? 'live' : 'not wired'} />
+              <Status value={overview.billing.provider === 'stripe' || overview.billing.provider === 'clerk' ? 'live' : 'not wired'} />
             </dd>
           </div>
         </dl>
@@ -170,8 +192,8 @@ export function CreditsPanel({ client }: { client: HubClient }) {
       <Table
         label="Private accounts, totals only"
         empty="None in the recent lines."
-        head={['Account', 'Lines', 'Price', 'Cost', 'Last']}
-        rows={privateTotals.map((total) => [<code key="a">{String(total.account_id)}</code>, String(total.entries), usd(Number(total.price_micro), 4), usd(Number(total.cost_micro), 4), when(Number(total.last_at))])}
+        head={['Account', 'Lines', 'Price', 'Cost', 'Markup', 'Last']}
+        rows={privateTotals.map((total) => [<code key="a">{String(total.account_id)}</code>, String(total.entries), usd(Number(total.price_micro), 4), usd(Number(total.cost_micro), 4), usd(Math.max(0, Number(total.price_micro) - Number(total.cost_micro)), 4), when(Number(total.last_at))])}
       />
       <PrivacySelf client={client} />
     </div>
@@ -336,7 +358,7 @@ function ThresholdForm({ client, onDone }: { client: HubClient; onDone: () => Pr
   return (
     <form className="hub-form" onSubmit={(event) => void submit(event)} aria-labelledby="threshold-title">
       <h3 id="threshold-title">Billing threshold</h3>
-      <p className="hub-muted">Free usage an account gets before it needs a payment method. Default $5. Paying is not wired yet.</p>
+      <p className="hub-muted">Free usage an account gets before it needs to buy credits. Default $5, at model cost; bought credits run at model cost + 10% (C-104). Buying credits is not wired yet.</p>
       <label>
         Email or Clerk user id
         <input required value={who} onChange={(event) => setWho(event.target.value)} autoComplete="off" />

@@ -1,6 +1,10 @@
 import type { Context, Hono } from 'hono';
 import { z } from 'zod';
+import { MARKUP_MAX_BP, MARKUP_MIN_BP, MARKUP_PRESETS_BP, isMarkupBp } from '../../shared/src/credits/types';
 import { authenticate } from './auth';
+import { DEVICE_HEADER } from '../../shared/src/credits/types';
+import { accountForRequest, accountMarkupBp, headlineMarginBp, verifyDevice } from './credits';
+import { claimReferral, normalizeReferralCode, referralSummary } from './referrals';
 import type { AdminOptions } from './admin';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
 
@@ -110,5 +114,62 @@ export function mountPrivacyRoutes(app: Hono<any>, options: AdminOptions): void 
     // Only your own grants: the account id is part of the condition.
     await who.db.prepare('UPDATE access_grants SET revoked_at = ?1, updated_at = ?1 WHERE id = ?2 AND account_id = ?3 AND revoked_at IS NULL').bind(now, body.id, accountIdFor(who.userId)).run();
     return c.json(await view(who.db, accountIdFor(who.userId), now));
+  });
+
+  // Pay what you want (C-105): the account's own markup on spend past the starter kit.
+  async function markupView(db: D1Database, accountId: string) {
+    const row = await db.prepare('SELECT markup_bp FROM accounts WHERE id = ?1').bind(accountId).first<{ markup_bp: number | null }>();
+    const chosen = isMarkupBp(Number(row?.markup_bp)) ? Number(row?.markup_bp) : null;
+    const fallback = headlineMarginBp();
+    return {
+      markup_bp: accountMarkupBp({ markup_bp: chosen }, fallback),
+      default_bp: fallback,
+      min_bp: MARKUP_MIN_BP,
+      max_bp: MARKUP_MAX_BP,
+      presets_bp: MARKUP_PRESETS_BP,
+      chosen: chosen !== null,
+      label: 'Model cost + your markup. 10% by default; set it higher to support us.',
+    };
+  }
+
+  app.get('/me/markup', async (c) => {
+    const who = await me(c);
+    if (!who.ok) return who.response;
+    return c.json(await markupView(who.db, accountIdFor(who.userId)));
+  });
+
+  app.put('/me/markup', async (c) => {
+    const who = await me(c);
+    if (!who.ok) return who.response;
+    const body = (await c.req.json().catch(() => ({}))) as { markup_bp?: unknown };
+    // null goes back to the default; anything else must be a whole number of basis points in range.
+    if (body.markup_bp !== null && !isMarkupBp(body.markup_bp)) {
+      return c.json({ error: `Send {markup_bp: a whole number from ${MARKUP_MIN_BP} (5%) to ${MARKUP_MAX_BP} (100%)}, or null for the default`, code: 'invalid_markup' }, 400);
+    }
+    await who.db.prepare('UPDATE accounts SET markup_bp = ?1, updated_at = ?2 WHERE id = ?3').bind(body.markup_bp, options.now(), accountIdFor(who.userId)).run();
+    return c.json(await markupView(who.db, accountIdFor(who.userId)));
+  });
+
+  // Referrals (C-107): your link and what it earned; a friend claims a code after signing up.
+  app.get('/me/referral', async (c) => {
+    const who = await me(c);
+    if (!who.ok) return who.response;
+    const site = (options.bindings(c.env) as { SITE_URL?: string }).SITE_URL ?? 'https://freshterminal.ai';
+    const row = await accountForRequest(c, options as never, who.db, who.userId);
+    return c.json({ ...(await referralSummary(who.db, accountIdFor(who.userId), site, options.now())), welcome: row.welcome ?? null });
+  });
+
+  app.post('/me/referral', async (c) => {
+    const who = await me(c);
+    if (!who.ok) return who.response;
+    const body = (await c.req.json().catch(() => ({}))) as { code?: unknown };
+    if (typeof body.code !== 'string' || normalizeReferralCode(body.code).length < 6 || body.code.length > 40) return c.json({ error: 'Send {code}', code: 'referral_unknown' }, 400);
+    // Settle the welcome credit first: the $5 extra is for first-time sign-ups only (C-106).
+    await accountForRequest(c, options as never, who.db, who.userId);
+    const bindings = options.bindings(c.env) as { DEVICE_SIGNING_KEY?: string };
+    const deviceId = await verifyDevice(c.req.header(DEVICE_HEADER), bindings.DEVICE_SIGNING_KEY);
+    const result = await claimReferral(who.db, { friendAccountId: accountIdFor(who.userId), code: body.code, deviceId, now: options.now() });
+    if (!result.ok) return c.json({ error: result.error, code: result.code }, result.status);
+    return c.json({ ok: true, bonus_micro: result.bonus_micro });
   });
 }

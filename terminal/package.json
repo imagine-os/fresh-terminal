@@ -25,7 +25,8 @@
     "canvas:thumbs": "tsx scripts/canvas-thumbs.ts",
     "share:sync": "tsx scripts/share-sync.ts",
     "og:card": "node scripts/og-card.mjs",
-    "sales:shots": "node scripts/sales-shots.mjs"
+    "sales:shots": "node scripts/sales-shots.mjs",
+    "hub:thumbs": "tsx scripts/hub-thumbs.ts"
   },
   "dependencies": {
     "@clerk/backend": "^3.20.1",

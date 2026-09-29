@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
 import { formatMicro } from '@shared/ledger';
 import { useCredits } from '../credits/useCredits';
@@ -9,7 +10,7 @@ import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
 import { IconCoin, IconDev, IconDownload, IconKey, IconLang, IconList, IconTag, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
-import { redeemInviteCode, startTopUp } from '../credits/billing';
+import { claimReferralCode, claimStoredReferral, isInviteCode, redeemInviteCode, startTopUp } from '../credits/billing';
 import { useToast } from '../ui/Toast';
 import { AccountButton } from './AccountButton';
 import { useAccount } from '../auth/Account';
@@ -76,6 +77,13 @@ export function TopBar(props: Props) {
   const grantedMicro = credits.status?.granted_micro ?? 5_000_000;
   // Fewer tools, one list (C-090): Look is gone, Library and Canvas live on their own pages.
   const { toast } = useToast();
+  // C-107: a ?ref= link opened before sign-in is claimed once, right after sign-in.
+  useEffect(() => {
+    if (!account.signedIn) return;
+    void claimStoredReferral().then((result) => {
+      if (result) toast(result.ok ? t('referral.claimed', { amount: result.bonus }) : result.message);
+    });
+  }, [account.signedIn]);
   // C-086: wired only when the router says a payment provider is connected.
   const paymentsWired = credits.status?.billing?.provider === 'stripe' || credits.status?.billing?.provider === 'clerk';
   const onTopUp = async () => {
@@ -99,6 +107,12 @@ export function TopBar(props: Props) {
     }
     const code = window.prompt(t('invite.prompt'))?.trim();
     if (!code) return;
+    // One field for both (C-107): an admin invite code FT-XXXX-XXXX, or a friend's referral code.
+    if (!isInviteCode(code)) {
+      const referral = await claimReferralCode(code);
+      toast(referral.ok ? t('referral.claimed', { amount: referral.bonus }) : referral.message);
+      return;
+    }
     const result = await redeemInviteCode(code);
     toast(result.ok ? t('invite.done', { amount: result.amount }) : result.signIn ? t('invite.signIn') : result.message);
   };
@@ -169,7 +183,7 @@ export function TopBar(props: Props) {
         )}
       </span>
       <span className="balance" data-live={props.usedMicro > 0} data-testid="balance">
-        <Tooltip label={t('topbar.used.tip', { total: formatMicro(grantedMicro, 2) })} align="end">
+        <Tooltip label={t('topbar.used.tip', { total: formatMicro(grantedMicro, 2), markup: String((credits.status?.markup?.margin_bp ?? 1000) / 100) })} align="end">
           <button type="button" className="balance-used" onClick={props.onCycleCurrency} aria-label={`${formatMoney(props.usedMicro, props.currency)} ${t('topbar.used')}`} data-testid="balance-used">
             {formatMoney(props.usedMicro, props.currency)} {t('topbar.used')}
           </button>

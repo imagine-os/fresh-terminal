@@ -1,5 +1,5 @@
 {
-  "$comment": "Route table: intent -> tier -> model -> permission. Seeded defaults; the SpacetimeDB route_rule table overrides these once connected. margin_bp is basis points over provider cost (0 = pass-through). Tier kind: chat (answers the user), decisions (Jev: typed decisions only, used for routing and checks), tagger (chips JSON). allowed_models is the per-request `model` allowlist for chat tiers.",
+  "$comment": "Route table: intent -> tier -> model -> permission. Seeded defaults; the SpacetimeDB route_rule table overrides these once connected. margin_bp is basis points over provider cost (0 = pass-through; 1000 = 10%, C-103). The router applies it only to model spend past the $5 starter kit: the starter kit and the signed-out trial run at cost, and your key never reaches the router (margin 0). Tier kind: chat (answers the user), decisions (Jev: typed decisions only, used for routing and checks), tagger (chips JSON). allowed_models is the per-request `model` allowlist for chat tiers.",
   "default": "chat",
   "allowed_models": [
     "anthropic/claude-haiku-4.5",
@@ -57,85 +57,85 @@
       "intent": "chat",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "edit_ui",
       "tier": "editor",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "make",
       "tier": "careful",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "build",
       "tier": "careful",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "show",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "list",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "add",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "remove",
       "tier": "fast",
       "permission": "owner",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "open",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "send",
       "tier": "careful",
       "permission": "owner",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "schedule",
       "tier": "careful",
       "permission": "owner",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "find",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "tag",
       "tier": "tagger",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     },
     {
       "intent": "skin",
       "tier": "fast",
       "permission": "anyone",
-      "margin_bp": 0
+      "margin_bp": 1000
     }
   ],
   "escalation": {

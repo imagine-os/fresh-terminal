@@ -57,3 +57,25 @@ describe('hub data from the real docs', () => {
     expect(secretStates(null).every((s) => s.state === 'unknown')).toBe(true);
   });
 });
+
+describe('hub card pictures (C-104)', () => {
+  it('shoots site paths, reuses canvas thumbs, and skips external links or preview: false', async () => {
+    const { previewSource } = await import('./hub-thumbs');
+    expect(previewSource({ href: '/canvas' })).toEqual({ kind: 'page', path: '/canvas' });
+    expect(previewSource({ href: '/pages/koi.html', preview: 'canvas:koi-pond' })).toEqual({ kind: 'canvas', id: 'koi-pond' });
+    expect(previewSource({ href: '#credits', preview: '/hub/?sample=1#credits' })).toEqual({ kind: 'page', path: '/hub/?sample=1#credits' });
+    expect(previewSource({ href: 'https://github.com/imagine-os/fresh-terminal' })).toBeNull();
+    expect(previewSource({ href: '/', preview: false })).toBeNull();
+  });
+  it('every hub item has a picture source or an explicit monogram', () => {
+    const items = JSON.parse(readFileSync(resolve(__dirname, '../app/hub/items.json'), 'utf8')).items as Array<{ id: string; href: string; preview?: string | false }>;
+    for (const item of items) expect(item.preview === false || (item.preview ?? item.href).match(/^(\/|canvas:)/), item.id).toBeTruthy();
+  });
+  it('monograms are two letters', async () => {
+    const { monogram } = await import('../app/src/hub/monogram');
+    expect(monogram('Friend credits')).toBe('FC');
+    expect(monogram('Replay')).toBe('RE');
+    expect(monogram('The terminal')).toBe('TE');
+    expect(monogram('Clerk production')).toBe('CP');
+  });
+});

@@ -26,7 +26,10 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | Sign in (Clerk development instance) and cloud sync (D1) | Header **Sign in** button on freshterminal.ai and on Pages | 2026-09-29, infra pass (C-065, C-066) |
 | Free credits, enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day signed-out cap) | `GET https://api.freshterminal.ai/credits`; live check in changelog 0008 | 2026-09-29 (C-074) |
 | $5 starter kit per signed-in account (C-089), no per-account daily cap (C-094), which is also the pass-through threshold (past it `402 payment_required`), friend credits and invite codes; privacy by default (`share_data` off, access grants, admin sees totals only; C-094); storage measured per account (100 MB free, not billed; C-092) | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
-| The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-088) |
+| The hub (admins only, checked by the server); Work cards show a picture of each page, re-shot on every deploy | https://freshterminal.ai/hub | 2026-09-29 (C-088, C-104) |
+| Markup: model cost + the account's markup past the starter kit (10% default, 5% to 100%, Settings → Your markup); starter kit and signed-out trial at cost; your key no markup | `GET /credits` → `markup`; `GET /me/markup`; `GET /health` → `credits.markup` | 2026-09-29 (C-103, C-105) |
+| The $5 welcome credit once per person (verified email, no disposable or alias emails, one per device, 5 a day per /24) | `GET /credits` → `welcome` | 2026-09-29 (C-106) |
+| Referrals: `?ref=` link, $5 extra for the friend, $5 plus 50% of our markup for 12 months for the referrer, 50 a month; cash-out not wired yet | Settings → Invite friends; `GET/POST /me/referral` | 2026-09-29 (C-107) |
 | Sales site: about, pricing, FAQ (EN/ES, share cards) | https://freshterminal.ai/about, https://freshterminal.ai/pricing, https://freshterminal.ai/faq (also on Pages under /fresh-terminal/) | 2026-09-29 (C-097) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |

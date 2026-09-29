@@ -25,10 +25,10 @@ import { mountSkinRoutes } from './skins';
 import { mountAdminRoutes, type AdminBindings } from './admin';
 import { mountPrivacyRoutes } from './privacy';
 import { measureStorage } from './storage';
-import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
+import { costMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
 import { authenticate, clerkConfigured, type TokenVerifier } from './auth';
-import { creditConfig, meter, mountCreditRoutes, payerFor, type CreditsBindings, type RateLimiter } from './credits';
+import { creditConfig, headlineMarginBp, meter, mountCreditRoutes, payerFor, priceForRequest, starterMicro, type CreditsBindings, type RateLimiter } from './credits';
 import { DEVICE_HEADER, SOFT_PROMPT_HEADER } from '../../shared/src/credits/types';
 import { ensureAccount, listBoxes, listEntries, pushBoxes, pushEntries, type D1Database } from './d1';
 import { pushBoxesSchema, pushEntriesSchema, type AccountInfo } from '../../shared/src/sync/types';
@@ -232,6 +232,9 @@ export function createApp(options: CreateAppOptions) {
         rate_limits: Boolean(resourcesFor(c.env).RL_IP && resourcesFor(c.env).RL_NET),
         turnstile: bindings.TURNSTILE_SECRET && bindings.TURNSTILE_SITEKEY ? 'on' : 'not-wired',
         ...creditConfig(bindings),
+        // C-103: 10% on router-paid model spend past the starter kit; the starter kit and the signed-out trial at cost; your key 0.
+        markup: { margin_bp: headlineMarginBp(), applies: 'after the starter kit', starter_micro: starterMicro(bindings), signed_out_trial: 'at cost', your_key_bp: 0 },
+        purchase: 'credits first (Clerk auto-renewing refill plans, C-103)',
       },
     });
   });
@@ -441,7 +444,7 @@ export function createApp(options: CreateAppOptions) {
                 units: 1,
                 unit_kind: 'call',
                 cost_micro: routing.costMicro,
-                price_micro: priceMicroFor(routing.costMicro, route.marginBasisPoints),
+                price_micro: priceForRequest(c.req.raw, bindings, routing.costMicro, route.marginBasisPoints).price_micro,
                 ref: routing.generationId ?? '',
                 created_at: (options.now ?? Date.now)(),
               })
@@ -507,7 +510,9 @@ export function createApp(options: CreateAppOptions) {
       const last = rounds[rounds.length - 1];
       const billedModel = last?.servedModel || last?.model || route.model;
       const costMicro = callCostMicro + routing.costMicro;
-      const priceMicro = priceMicroFor(costMicro, route.marginBasisPoints);
+      // C-103: margin_bp only past the starter kit (the meter resolved the payer before the call).
+      const markup = priceForRequest(c.req.raw, bindings, costMicro, route.marginBasisPoints);
+      const priceMicro = markup.price_micro;
 
       // One charge entry per turn. owner_identity is filled by the client
       // (or the module reducer) because the router does not hold it.
@@ -536,6 +541,7 @@ export function createApp(options: CreateAppOptions) {
           costSource: source,
           // The provider bills rounds that ran even when the turn failed, so they are ledgered too.
           entry: failed && costMicro === routing.costMicro ? null : entry,
+          markup: { margin_bp: markup.margin_bp, at_cost_micro: markup.at_cost_micro, marked_micro: markup.marked_micro, markup_micro: markup.markup_micro },
           ms: (options.now ?? Date.now)() - started,
         }),
       });
@@ -621,7 +627,7 @@ export function createApp(options: CreateAppOptions) {
             units: 1,
             unit_kind: 'call',
             cost_micro: tagCost,
-            price_micro: tagCost, // the tagger tier is pass-through (no margin)
+            price_micro: priceForRequest(c.req.raw, bindings, tagCost, table.rules.find((rule) => rule.intent === 'tag')?.margin_bp ?? 0).price_micro, // C-103: the same markup rule as chat
             ref: result?.generationId ?? '',
             created_at: (options.now ?? Date.now)(),
           })

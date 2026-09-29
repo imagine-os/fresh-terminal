@@ -47,6 +47,9 @@ export function sampleClient(): HubClient {
         return answer<T>({
           accounts: { n: 7, spent: 2_340_000, cost: 1_950_000, needs_payment: 1, active: 0 },
           privacy: { sharing: 1, stored_bytes: 1_840_000 },
+          markup: { accounts: 7, average_bp: 1214, chosen: 2, default_bp: 1000 },
+          welcome: { granted: 5, blocked: 1, pending: 1, legacy: 0, blocked_reasons: { 'email alias of an earlier sign-up': 1 } },
+          referrals: { claims: 3, pending: 1, rewarded: 2, capped: 0, refused: 0, reversed: 0, bonus_micro: 15_000_000, reward_micro: 10_000_000, share_paid_micro: 120_000 },
           grants: { n: grants.length, total: grants.reduce((sum, row) => sum + Number(row.amount_micro), 0) },
           invites: { n: invites.length, open: 1 },
           devices: { n: 41, spent: 3_100_000, cost: 2_600_000 },

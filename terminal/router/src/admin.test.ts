@@ -14,7 +14,8 @@ const USERS: Record<string, { email: string; verified: boolean }> = {
 };
 
 function clerkUser(id: string) {
-  const user = USERS[id];
+  // Anyone not listed signs up with their own verified address (for the welcome credit, C-106).
+  const user = USERS[id] ?? (id.startsWith('user_') ? { email: `${id}@example.com`, verified: true } : undefined);
   if (!user) return null;
   return { id, primary_email_address_id: 'e1', email_addresses: [{ id: 'e1', email_address: user.email, verification: { status: user.verified ? 'verified' : 'unverified' } }] };
 }
@@ -36,7 +37,7 @@ function harness(overrides: RouterBindings = {}) {
   const db: D1Database = fakeD1();
   let clock = Date.UTC(2026, 8, 29, 5, 0, 0);
   const app = createApp({
-    bindings: () => ({ CLERK_SECRET_KEY: 'sk_test_x', DEVICE_SIGNING_KEY: 'k', ADMIN_USER_IDS: 'user_admin', ADMIN_EMAILS: 'boss@example.com', ...overrides }),
+    bindings: () => ({ CLERK_SECRET_KEY: 'sk_test_x', DEVICE_SIGNING_KEY: 'k', ADMIN_USER_IDS: 'user_admin', ADMIN_EMAILS: 'boss@example.com', WELCOME_PER_NET_DAILY: '1000', ...overrides }),
     resources: () => ({ DB: db }),
     verifier: async (token) => {
       if (token.startsWith('good-')) return { sub: token.slice(5) };
@@ -150,7 +151,8 @@ describe('pass-through billing gate', () => {
   it('after the $5 threshold of free usage, paid calls answer 402 payment_required; your key is not metered', async () => {
     const h = harness();
     // A friend with $10 of credit and the default $5 threshold... the grant raises the threshold to $11,
-    // so set the threshold back to $5 to test it on its own.
+    // so set the threshold back to $5 to test it on its own. The friend signs up first (welcome credit, C-106).
+    await h.call('/credits', { token: 'good-user_friend' });
     await h.call('/admin/grant', { token: 'good-user_admin', body: { user_id: 'user_friend', amount_usd: 10, note: 'big gift' } });
     await h.call('/admin/account', { token: 'good-user_admin', body: { user_id: 'user_friend', billing_threshold_usd: 5 } });
     await h.db.prepare("UPDATE accounts SET spent_micro = 5000000 WHERE id = 'acct_user_friend'").run();

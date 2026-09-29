@@ -462,6 +462,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               model: done.served_model,
               ms: performance.now() - started,
               cost_micro: done.entry?.price_micro ?? 0,
+              // C-103: the ledger line carries cost and price; the difference is the markup, shown on the reply line.
+              ...(done.entry && done.entry.price_micro > done.entry.cost_micro ? { markup_micro: done.entry.price_micro - done.entry.cost_micro, ...(done.markup ? { markup_bp: done.markup.margin_bp } : {}) } : {}),
               ...(ledgerId ? { ledger_ids: [ledgerId] } : {}),
             };
             const summaryText = modelBlocks.find((block) => block.kind === 'summary');

@@ -93,6 +93,11 @@ label { display: grid; gap: 0.25rem; font-size: 0.9rem; color: var(--fg-muted); 
 .hub-tile { border: 1px solid var(--border-strong); background: var(--surface); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .hub-tile[data-status='not-wired'] { border-color: #5a2020; }
 .hub-tile[data-status='in-progress'] { border-color: #5a4a10; }
+.hub-thumb { display: block; aspect-ratio: 16 / 10; margin: -0.9rem -1rem 0.5rem; border-bottom: 1px solid var(--border); background: #000; overflow: hidden; border-radius: 0; }
+.hub-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 0; }
+.hub-thumb-none { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; background: var(--surface-hover); }
+.hub-mono { font-size: clamp(2rem, 1.2rem + 2.5vw, 4.5rem); font-weight: 600; letter-spacing: 0.06em; color: var(--fg); line-height: 1; }
+.hub-mono-tag { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-muted); border: 1px solid var(--border-strong); padding: 0.1rem 0.5rem; }
 .hub-tile-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
 .hub-tile h3 a { text-decoration: none; display: inline-flex; align-items: center; min-height: var(--target); }
 .hub-links { display: flex; flex-wrap: wrap; gap: 0 0.25rem; margin-top: auto; }

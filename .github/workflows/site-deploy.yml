@@ -82,6 +82,17 @@ jobs:
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
           HUB_DATA: '1'
       - if: steps.gate.outputs.ok == 'true'
+        name: Hub card pictures (shoot the built pages, then refresh the hub data)
+        # C-104: every deploy re-shoots the Work cards from this build into app/dist/previews.
+        # A failure keeps the committed pictures in app/public/previews (or the monogram); it never blocks the deploy.
+        continue-on-error: true
+        env:
+          HUB_DATA: '1'
+        run: |
+          pnpm -C terminal exec playwright install --with-deps chromium > /dev/null
+          pnpm -C terminal hub:thumbs --out app/dist/previews
+          pnpm -C terminal exec tsx scripts/build-hub.ts
+      - if: steps.gate.outputs.ok == 'true'
         name: Deploy (workers.dev + freshterminal.ai + www)
         working-directory: terminal/site
         run: pnpm dlx wrangler@4 deploy

@@ -9,7 +9,8 @@ import { SKIN_PATHS, SKIN_TARGETS, SKIN_TARGET_LABELS, ensureReadable, isSafeBac
 import { STYLE_TOKEN, STYLE_VALUE } from '../../shared/src/ui/style';
 import type { CreateAppOptions, RouterBindings } from './app';
 import { decide, type Answer, type Question } from './jev';
-import { costMicroFor, priceMicroFor, type Usage } from './pricing';
+import { priceForRequest } from './credits';
+import { costMicroFor, type Usage } from './pricing';
 import { loadRules } from './rules';
 
 /**
@@ -54,7 +55,8 @@ function refineRule(): RefineRule {
   );
 }
 
-function makeEntry(boxId: string, what: string, model: string, costMicro: number, ref: string, now: number, units = 1): EntryDraft {
+/** price: what the person pays for costMicro (C-103: margin past the starter kit, see credits.ts markupFor). */
+function makeEntry(price: (costMicro: number) => number, boxId: string, what: string, model: string, costMicro: number, ref: string, now: number, units = 1): EntryDraft {
   return entryDraftSchema.parse({
     box_id: boxId,
     owner_identity: '',
@@ -64,7 +66,7 @@ function makeEntry(boxId: string, what: string, model: string, costMicro: number
     units: Math.max(0, Math.round(units)),
     unit_kind: 'call',
     cost_micro: Math.max(0, Math.round(costMicro)),
-    price_micro: priceMicroFor(Math.max(0, Math.round(costMicro)), 0),
+    price_micro: price(Math.max(0, Math.round(costMicro))),
     ref,
     created_at: now,
   });
@@ -307,6 +309,9 @@ function rulesPath(text: string, material: string): SkinPath {
 }
 
 export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options: CreateAppOptions): void {
+  // C-103: skin calls carry the same markup as chat (the "skin" rule's margin_bp), past the starter kit only.
+  const skinMargin = loadRules().rules.find((rule) => rule.intent === 'skin')?.margin_bp ?? 0;
+  const priced = (c: { req: { raw: Request }; env: unknown }) => (cost: number) => priceForRequest(c.req.raw, options.bindings(c.env as never), cost, skinMargin).price_micro;
   const now = () => (options.now ?? Date.now)();
   const fetchImpl = options.fetchImpl ?? fetch;
 
@@ -344,7 +349,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
       }
       if (decision) {
         const cost = typeof decision.usage.cost === 'number' ? Math.round(decision.usage.cost * 1_000_000) : 0;
-        entries.push(makeEntry(boxId, 'skin.plan', decision.model, cost, decision.id, now()));
+        entries.push(makeEntry(priced(c), boxId, 'skin.plan', decision.model, cost, decision.id, now()));
       }
     }
     // Never plan a path the cap cannot afford even once; take the next best that fits and say so.
@@ -406,7 +411,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
       const search = async (target: string) => {
         try {
           const response = await fetchImpl(target, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' } });
-          entries.push(makeEntry(body.boxId, 'skin.search', 'openverse', 0, target.slice(0, 200), now()));
+          entries.push(makeEntry(priced(c), body.boxId, 'skin.search', 'openverse', 0, target.slice(0, 200), now()));
           if (!response.ok) {
             error = `Openverse ${response.status}`;
             return [];
@@ -451,7 +456,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
       const variants: VariantOut[] = [];
       let error: string | undefined;
       calls.forEach((call, index) => {
-        entries.push(makeEntry(body.boxId, 'skin.image', call.model, costOf(call), call.id, now()));
+        entries.push(makeEntry(priced(c), body.boxId, 'skin.image', call.model, costOf(call), call.id, now()));
         if (!call.ok) {
           error = call.error;
           return;
@@ -507,7 +512,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
         { role: 'user', content: user },
       ],
     });
-    entries.push(makeEntry(body.boxId, 'skin.code', call.model, costOf(call), call.id, now()));
+    entries.push(makeEntry(priced(c), body.boxId, 'skin.code', call.model, costOf(call), call.id, now()));
     if (!call.ok) return c.json({ variants: [], entries, error: call.error });
     const json = extractJson(call.text) as { variants?: unknown[] } | null;
     const variants = (json?.variants ?? [])
@@ -575,7 +580,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
           },
         },
       });
-      entries.push(makeEntry(body.boxId, 'skin.vision', call.model, costOf(call), call.id, now(), withImages.length));
+      entries.push(makeEntry(priced(c), body.boxId, 'skin.vision', call.model, costOf(call), call.id, now(), withImages.length));
       const json = call.ok ? (extractJson(call.text) as { items?: Array<Record<string, unknown>> } | null) : null;
       (json?.items ?? []).forEach((item, position) => {
         const at = typeof item.index === 'number' && item.index >= 1 && item.index <= withImages.length ? item.index - 1 : position;
@@ -614,7 +619,7 @@ export function mountSkinRoutes(app: Hono<{ Bindings: RouterBindings }>, options
       });
       if (decision) {
         const cost = typeof decision.usage.cost === 'number' ? Math.round(decision.usage.cost * 1_000_000) : 0;
-        entries.push(makeEntry(body.boxId, 'skin.score', decision.model, cost, decision.id, now(), body.variants.length));
+        entries.push(makeEntry(priced(c), body.boxId, 'skin.score', decision.model, cost, decision.id, now(), body.variants.length));
         scored = body.variants.map((_variant, index) => expectedScore(decision.answers[`v${index}`]));
       }
     }

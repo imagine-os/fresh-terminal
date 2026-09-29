@@ -11,7 +11,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-102 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-107 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
@@ -30,6 +30,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Reference
 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
+- [decisions/0026-markup-welcome-referrals.md](decisions/0026-markup-welcome-referrals.md): credits first; model cost + your markup (10% default, 5% to 100%) past the $5 starter kit; your key no markup; the $5 welcome credit once per person; referrals
 - [decisions/0025-sales-site.md](decisions/0025-sales-site.md): the sales site at freshterminal.ai/about, /pricing, /faq; pricing (free, $5 starter kit, pay as you go at model cost + 10%, buy credits not wired yet, your key $0 for models); share tags from shared/src/share.ts
 - [pages/sales.md](pages/sales.md): the sales pages doc (sections, actions, EN/ES, share tags)
 - [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md): Clerk Billing checked (subscriptions only, no usage billing), the $5 pass-through threshold (402 payment_required), Stripe Checkout top-ups proposed, friend credits and invite codes, the admin API, the hub at freshterminal.ai/hub, costs
@@ -54,6 +55,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0020.md](changelog/0020.md): hub card pictures, markup, pay what you want, welcome credit once per person, referrals
 - [changelog/0017.md](changelog/0017.md): the account window fits phone to 4K (sign-in width no longer on every Clerk card)
 - [changelog/0019.md](changelog/0019.md): share previews for every public page on every publish
 - [reference/share-previews.md](reference/share-previews.md): how share previews are built and checked

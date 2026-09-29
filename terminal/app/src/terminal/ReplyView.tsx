@@ -1,9 +1,9 @@
-import { formatMicro } from '@shared/ledger';
 import type { Reply, ReplyBlock } from '@shared/reply';
 import { useI18n } from '../i18n';
 import { store, useStoreSnapshot } from '../store';
 import { Button } from '../ui/Button';
 import { RefineBlock } from './RefineBlock';
+import { CostLabel } from './CostLabel';
 import { useToast } from '../ui/Toast';
 
 const STEP_MARK = { done: '✓', active: '✱', todo: '○' } as const;
@@ -158,7 +158,7 @@ export function ReplyView({ reply }: { reply: Reply }) {
           <span aria-hidden="true">·</span>
           <span>{meta.ms >= 1000 ? `${(meta.ms / 1000).toFixed(1)}s` : `${Math.max(0, Math.round(meta.ms))}ms`}</span>
           <span aria-hidden="true">·</span>
-          <span>{formatMicro(meta.cost_micro, 4)}</span>
+          <CostLabel meta={meta} />
         </div>
       ) : null}
       {reply.blocks.map((block, index) => (

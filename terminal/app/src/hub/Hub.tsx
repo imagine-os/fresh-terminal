@@ -3,6 +3,7 @@ import type { HubItem, HubManifest, Library, LibraryItem, PlanTask, SecretsData,
 import { HubError } from './api';
 import type { HubClient } from './client';
 import { CreditsPanel } from './CreditsPanel';
+import { monogram } from './monogram';
 import { Status } from './Status';
 
 /**
@@ -166,6 +167,7 @@ function WorkGrid({ items }: { items: HubItem[] }) {
       <ul className="hub-grid" role="list">
         {items.map((item) => (
           <li key={item.id} className="hub-tile" data-status={item.status.replace(/\s+/g, '-')}>
+            <Thumb item={item} />
             <div className="hub-tile-head">
               <h3>
                 <a href={item.href}>{item.name}</a>
@@ -190,6 +192,41 @@ function WorkGrid({ items }: { items: HubItem[] }) {
         ))}
       </ul>
     </>
+  );
+}
+
+/**
+ * The card picture (C-104): a screenshot of the page, lazy, 640 or 1280 wide by
+ * the card's size. No picture, or one that fails to load, shows the monogram and
+ * status tag instead, never an empty box. The picture links to the page but is
+ * not a second tab stop (the title link is).
+ */
+function Thumb({ item }: { item: HubItem }) {
+  const [broken, setBroken] = useState(false);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  if (!item.thumb || broken) {
+    return (
+      <div className="hub-thumb hub-thumb-none" role="img" aria-label={`${item.name}: no preview picture`}>
+        <span className="hub-mono" aria-hidden="true">{monogram(item.name)}</span>
+        <span className="hub-mono-tag" aria-hidden="true">{item.status}</span>
+      </div>
+    );
+  }
+  const src = `${base}${item.thumb}`;
+  return (
+    <a className="hub-thumb" href={item.href} tabIndex={-1}>
+      <img
+        src={`${src}-640.jpg`}
+        srcSet={`${src}-640.jpg 640w, ${src}-1280.jpg 1280w`}
+        sizes="(min-width: 120rem) 30vw, (min-width: 40rem) 50vw, 100vw"
+        width={1280}
+        height={800}
+        loading="lazy"
+        decoding="async"
+        alt={`Preview of ${item.name}`}
+        onError={() => setBroken(true)}
+      />
+    </a>
   );
 }
 

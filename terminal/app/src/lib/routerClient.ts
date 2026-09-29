@@ -35,6 +35,8 @@ export interface RouteDone {
   costSource: string;
   ms?: number;
   entry: EntryDraft | null;
+  /** C-103 / C-105: the markup on this turn (the rate is the account's own choice, 10% by default). */
+  markup?: { margin_bp: number; at_cost_micro: number; marked_micro: number; markup_micro: number };
   chars: number;
 }
 

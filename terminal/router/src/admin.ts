@@ -2,7 +2,8 @@ import type { Context, Hono } from 'hono';
 import { verifyWebhook } from '@clerk/backend/webhooks';
 import { z } from 'zod';
 import { authenticate, type AuthResult, type TokenVerifier } from './auth';
-import { applyStarter, billingProvider, creditLimitMicro, sha256Hex, starterMicro, type CreditsBindings, type CreditsResources } from './credits';
+import { referralTotals, reverseReferral, settleReferral } from './referrals';
+import { accountForRequest, applyStarter, billingProvider, creditLimitMicro, headlineMarginBp, sha256Hex, starterMicro, type CreditsBindings, type CreditsResources } from './credits';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
 import { canSeeContent } from './privacy';
 
@@ -121,7 +122,7 @@ export function clearAdminCache(): void {
 
 // ---------- credits ----------
 
-export type CreditSource = 'admin' | 'invite' | 'topup';
+export type CreditSource = 'admin' | 'invite' | 'topup' | 'referral_bonus' | 'referral_reward' | 'referral_share' | 'referral_reversal';
 
 export interface CreditInput {
   clerkUserId: string;
@@ -146,7 +147,16 @@ export interface GrantRow {
   created_at: number;
 }
 
-const WHAT: Record<CreditSource, string> = { admin: 'credit.grant', invite: 'credit.invite', topup: 'credit.topup' };
+const WHAT: Record<CreditSource, string> = {
+  admin: 'credit.grant',
+  invite: 'credit.invite',
+  topup: 'credit.topup',
+  // C-107: referrals.
+  referral_bonus: 'credit.referral_bonus',
+  referral_reward: 'credit.referral_reward',
+  referral_share: 'credit.referral_share',
+  referral_reversal: 'credit.referral_reversal',
+};
 
 /** Adds credit to an account: credit_grants row + accounts update + a `credit` entry on its ledger mirror, in one batch. */
 export async function applyCredit(db: D1Database, input: CreditInput, now: number): Promise<GrantRow> {
@@ -162,13 +172,14 @@ export async function applyCredit(db: D1Database, input: CreditInput, now: numbe
   const entry = {
     id: `srv_${id}`,
     box_id: '',
-    kind: 'credit',
+    // A negative amount (a reversed referral reward) is a charge line of the same size: ledger amounts stay positive.
+    kind: input.amountMicro < 0 ? 'charge' : 'credit',
     what: WHAT[input.source],
     model: '',
     units: 1,
     unit_kind: 'op',
     cost_micro: 0,
-    price_micro: input.amountMicro,
+    price_micro: Math.abs(input.amountMicro),
     ref: id,
     created_at: now,
   };
@@ -184,7 +195,7 @@ export async function applyCredit(db: D1Database, input: CreditInput, now: numbe
     db
       .prepare(
         `UPDATE accounts SET
-           grant_micro = grant_micro + ?1,
+           grant_micro = MAX(0, grant_micro + ?1),
            billing_threshold_micro = MAX(billing_threshold_micro, grant_micro + ?1),
            paid_micro = paid_micro + ?2,
            billing_state = CASE WHEN ?3 = 1 THEN 'active' WHEN billing_state = 'needs_payment' THEN 'free' ELSE billing_state END,
@@ -197,7 +208,7 @@ export async function applyCredit(db: D1Database, input: CreditInput, now: numbe
         `INSERT INTO ledger_entries (account_id, id, box_id, kind, what, model, units, unit_kind, cost_micro, price_micro, ref, prev_hash, hash, shared_prev_hash, shared_hash, created_at, updated_at)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, NULL, NULL, ?14, ?14)`,
       )
-      .bind(accountId, entry.id, '', 'credit', entry.what, '', 1, 'op', 0, input.amountMicro, id, prevHash, hash, now),
+      .bind(accountId, entry.id, '', entry.kind, entry.what, '', 1, 'op', 0, entry.price_micro, id, prevHash, hash, now),
   ]);
   return {
     id,
@@ -382,12 +393,30 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const invites = await db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN disabled = 0 AND uses < max_uses THEN 1 ELSE 0 END),0) AS open FROM invite_codes').first<Json>();
     const devices = await db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(spent_micro),0) AS spent, COALESCE(SUM(cost_micro),0) AS cost FROM anon_devices').first<Json>();
     const privacy = await db.prepare('SELECT COALESCE(SUM(share_data),0) AS sharing, COALESCE(SUM(stored_bytes),0) AS stored_bytes FROM accounts').first<Json>();
+    // Pay what you want (C-105): the average markup across accounts, a total only (no per-account rows).
+    const markupRow = await db
+      .prepare('SELECT COUNT(*) AS n, COALESCE(AVG(COALESCE(markup_bp, ?1)), ?1) AS average_bp, SUM(CASE WHEN markup_bp IS NOT NULL THEN 1 ELSE 0 END) AS chosen FROM accounts')
+      .bind(headlineMarginBp())
+      .first<Json>();
+    const markup = { accounts: Number(markupRow?.n ?? 0), average_bp: Math.round(Number(markupRow?.average_bp ?? headlineMarginBp())), chosen: Number(markupRow?.chosen ?? 0), default_bp: headlineMarginBp() };
+    // C-106 and C-107: welcome credits by state (and why blocked), and referral totals. Counts only.
+    const { results: welcomeRows } = await db.prepare('SELECT starter_state AS state, starter_reason AS reason, COUNT(*) AS n FROM accounts GROUP BY starter_state, starter_reason').all<{ state: string; reason: string | null; n: number }>();
+    const welcome: Record<string, number> = {};
+    const blockedReasons: Record<string, number> = {};
+    for (const row of welcomeRows) {
+      welcome[row.state] = (welcome[row.state] ?? 0) + Number(row.n);
+      if (row.state === 'blocked' && row.reason) blockedReasons[row.reason] = (blockedReasons[row.reason] ?? 0) + Number(row.n);
+    }
+    const referrals = await referralTotals(db);
     return c.json({
       accounts,
       grants,
       invites,
       devices,
       privacy,
+      markup,
+      welcome: { ...welcome, blocked_reasons: blockedReasons },
+      referrals,
       billing: { provider: billingProvider(bindings), default_threshold_micro: 5_000_000, starter_micro: starterMicro(bindings), topup_amounts_usd: TOPUP_AMOUNTS_USD },
       admins: { ids: list(bindings.ADMIN_USER_IDS).length, emails: list(bindings.ADMIN_EMAILS).length, you_via: gate.via },
       max_grant_micro: maxGrantMicro(bindings),
@@ -551,9 +580,10 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     }
     const body = (await c.req.json().catch(() => ({}))) as { code?: unknown };
     if (typeof body.code !== 'string' || body.code.trim().length < 6 || body.code.length > 40) return c.json({ error: 'Send {code}', code: 'invite_unknown' }, 400);
+    // C-106: settle this person's welcome credit first (their own request carries their device and network).
+    await accountForRequest(c, options as never, db, auth.userId);
     const result = await redeemInvite(db, body.code, auth.userId, options.now());
     if (!result.ok) return c.json({ error: result.error, code: result.code }, result.status);
-    await applyStarter(db, accountIdFor(auth.userId), starterMicro(options.bindings(c.env)), options.now());
     return c.json({ ok: true, amount_micro: result.grant.amount_micro, account: await accountView(db, auth.userId) });
   });
 
@@ -577,6 +607,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
       'line_items[0][price_data][product_data][name]': `Fresh Terminal usage credit ($${amount})`,
       client_reference_id: auth.userId,
       'metadata[clerk_user_id]': auth.userId,
+      'payment_intent_data[metadata][clerk_user_id]': auth.userId,
       'metadata[amount_usd]': String(amount),
       customer_creation: 'always',
       // Saves the card so pass-through billing can charge usage later (not wired yet: auto top-up).
@@ -607,11 +638,18 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     } catch {
       return c.json({ error: 'bad signature' }, 400);
     }
+    // C-107: a refunded Clerk payment reverses the payer's referral (event shape not tested against live Clerk yet).
+    if (event.type === 'paymentAttempt.updated' && event.data?.status === 'refunded' && event.data.payer?.user_id) {
+      const reversed = await reverseReferral(db, accountIdFor(event.data.payer.user_id), options.now(), 'friend payment refunded (Clerk)');
+      return c.json({ received: true, credited: false, referral_reversed: reversed });
+    }
     const credit = clerkCreditFor(event, bindings.CLERK_CREDIT_PLAN_PREFIX ?? 'credit');
     if (!credit) return c.json({ received: true, credited: false });
     const seen = await db.prepare('SELECT id FROM credit_grants WHERE ref = ?1').bind(credit.ref).first();
     if (seen) return c.json({ received: true, credited: false, duplicate: true });
     await applyCredit(db, { clerkUserId: credit.userId, amountMicro: credit.amountMicro, source: 'topup', grantedBy: 'clerk-billing', note: `Clerk Billing ${credit.plan} (${credit.chargeType})`, ref: credit.ref }, options.now());
+    // C-107: buying credits qualifies a referred friend, so their referrer gets the $5 reward.
+    await settleReferral(db, accountIdFor(credit.userId), options.now());
     return c.json({ received: true, credited: true });
   });
 
@@ -625,6 +663,11 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     }
     const event = JSON.parse(raw) as { type?: string; data?: { object?: { id?: string; payment_status?: string; amount_total?: number; client_reference_id?: string; metadata?: Record<string, string> } } };
     const session = event.data?.object;
+    // C-107: a refunded charge reverses the payer's referral (the charge carries clerk_user_id from payment_intent_data).
+    if (event.type === 'charge.refunded' && session?.metadata?.clerk_user_id) {
+      const reversed = await reverseReferral(db, accountIdFor(session.metadata.clerk_user_id), options.now(), 'friend payment refunded (Stripe)');
+      return c.json({ received: true, credited: false, referral_reversed: reversed });
+    }
     if (event.type !== 'checkout.session.completed' || session?.payment_status !== 'paid') return c.json({ received: true, credited: false });
     const userId = session.metadata?.clerk_user_id ?? session.client_reference_id;
     const cents = Number(session.amount_total ?? 0);
@@ -632,6 +675,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const seen = await db.prepare('SELECT id FROM credit_grants WHERE ref = ?1').bind(session.id).first();
     if (seen) return c.json({ received: true, credited: false, duplicate: true });
     await applyCredit(db, { clerkUserId: userId, amountMicro: cents * 10_000, source: 'topup', grantedBy: 'stripe', note: 'Stripe Checkout top-up', ref: session.id }, options.now());
+    await settleReferral(db, accountIdFor(userId), options.now());
     return c.json({ received: true, credited: true });
   });
 }

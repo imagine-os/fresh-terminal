@@ -28,7 +28,8 @@ export async function ensureAccount(db: D1Database, clerkUserId: string, now: nu
   const id = accountIdFor(clerkUserId);
   await db
     .prepare(
-      `INSERT INTO accounts (id, clerk_user_id, plan, created_at, updated_at) VALUES (?1, ?2, 'free', ?3, ?3)
+      // C-106: a new account starts with no credit; its $5 welcome credit is decided once (router/src/welcome.ts).
+      `INSERT INTO accounts (id, clerk_user_id, plan, grant_micro, starter_state, created_at, updated_at) VALUES (?1, ?2, 'free', 0, 'pending', ?3, ?3)
        ON CONFLICT(clerk_user_id) DO UPDATE SET updated_at = excluded.updated_at`,
     )
     .bind(id, clerkUserId, now)

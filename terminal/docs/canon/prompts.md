@@ -834,7 +834,7 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 > this needs preview thumbnails. Later i can ask you again about setup for billing. We can do passthrough billing or buy credit packs, if it can autorenew via clerk then its essentially the same as what i want. because pass is about keeping track of the spend and charging at what ever periods is correct either in advance or after. in our case its better if they buy credits first.  set it to 10% markup for now since we're not charigng account fees. this will offset credit card fee and hosting and such i think
 
-**What happened:** (With a screenshot of the hub cards.) Thumbnails went to the hub build. On the sales site (C-101): pay as you go reads "Model cost + your markup. 10% by default", no account fees, credits bought first as refill packs through Clerk (coming soon); your key has no markup.
+**What happened:** (With a screenshot of the hub cards.) Thumbnails went to the hub build. On the sales site (C-101): pay as you go reads "Model cost + your markup. 10% by default", no account fees, credits bought first as refill packs through Clerk (coming soon); your key has no markup. In the billing pass: C-104, every hub Work card shows a picture of its page (`pnpm hub:thumbs`, re-shot on every site deploy) with a monogram fallback; C-103, credits first through Clerk auto-renewing refill plans, `margin_bp` 1000 (10%) on router-paid model spend past the $5 starter kit, shown on the reply line, the counter tooltip, the hub and `/health`, your key no markup, "Top up" reads "Buy credits".
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790660079788909?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790660079.788909
 
 ## 96. Tue Sep 29, 12:54 AM CDT · 2026-09-29 05:54:00 UTC (recorded after 94)
@@ -857,7 +857,7 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 >
 > pay as you go, they can also pay what they want. which is one of my favorite features of places like gumroad. and they can increase the markup to support us if they wish :wink:
 
-**What happened:** The wording was superseded by 99. Pay what you want is on /pricing and in the FAQ (C-101): your markup, 10% by default, 5% minimum, with a preview slider marked not wired yet until the billing setting ships.
+**What happened:** The wording was superseded by 99. Pay what you want is on /pricing and in the FAQ (C-101): your markup, 10% by default, 5% minimum, with a preview slider marked not wired yet until the billing setting ships. In the billing pass (C-105): `accounts.markup_bp`, 5% to 100%, 10% by default, set in Settings → Your markup (slider, presets 5/10/15/25%) through `PUT /me/markup`; the ledger charges it, the reply line and counter tooltip show it; the hub shows the average as a total.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661612925139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661612.925139
 
 ## 99. Tue Sep 29, 1:02 AM CDT · 2026-09-29 06:02:07 UTC (recorded after 94)
@@ -870,7 +870,7 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 >
 > We do need a generous referral/affiliate program tho
 
-**What happened:** C-101: a device that has never signed in sees "Get $5 free" ("New accounts only. Sign in with GitHub, Google or email."), in the app and on the sales pages; after a first sign-in the button is plain "Sign in" (`ft.hasSignedIn`). No "Already have an account?" line. The pricing card says "$5 free when you create your account (once per person)" and the FAQ answers "Who gets the $5?". Once-per-person enforcement and referrals are the billing build's.
+**What happened:** C-101: a device that has never signed in sees "Get $5 free" ("New accounts only. Sign in with GitHub, Google or email."), in the app and on the sales pages; after a first sign-in the button is plain "Sign in" (`ft.hasSignedIn`). No "Already have an account?" line. The pricing card says "$5 free when you create your account (once per person)" and the FAQ answers "Who gets the $5?". Once-per-person enforcement and referrals are the billing build's. In the billing pass: C-106, the $5 welcome credit is once per person (verified email, no disposable or alias emails, one per device, 5 a day per /24; a blocked sign-up sees "This device or email already used the $5 welcome credit."); C-107, referrals ($5 extra for a first-time friend, $5 plus 50% of our markup for 12 months for the referrer, 50 a month, cash-out not wired yet).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661727324539?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661727.324539
 
 ## 100. Tue Sep 29, 1:17 AM CDT · 2026-09-29 06:17:08 UTC (recorded after 94)
