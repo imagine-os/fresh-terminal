@@ -46,6 +46,8 @@ jobs:
 
       - name: Signed out (the hub shell is public and empty; everything else answers 401)
         run: |
+          # The site deploys in parallel with the router: wait (up to 5 min) until the hub's gate is live.
+          for i in $(seq 1 30); do [ "$(curl -sS -o /dev/null -w '%{http_code}' "$SITE/hub/api/session")" = "401" ] && break; sleep 10; done
           shell=$(curl -sS -w '\n%{http_code}' "$SITE/hub")
           echo "GET /hub: HTTP $(echo "$shell" | tail -1), shell only: $(echo "$shell" | grep -c 'id="hub"'), noindex: $(curl -sSI "$SITE/hub" | grep -ci 'x-robots-tag: noindex')"
           for path in /hub/data/library.json /hub/data/secrets.json /hub/api/session; do
@@ -60,6 +62,9 @@ jobs:
       - name: Admin grant, invite code, $5 gate (throwaway users)
         id: users
         run: |
+          set +e
+          # fd 3 is the step's real stdout, so ::add-mask:: reaches the runner while tokens stay inside $(...).
+          exec 3>&1
           clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
           make_user() {
             local tag=$1 n=$2
@@ -73,7 +78,7 @@ jobs:
           session() { curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/sessions -d "{\"user_id\":\"$1\"}" | jq -r '.id // empty'; }
           sa=$(session "$admin"); sf=$(session "$friend")
           # Session tokens live 60 s, so each call mints a fresh one.
-          tok() { local t; t=$(curl -sS "${clerk[@]}" -X POST "https://api.clerk.com/v1/sessions/$1/tokens" -d '{}' | jq -r '.jwt // empty'); echo "::add-mask::$t"; echo "$t"; }
+          tok() { local t; t=$(curl -sS "${clerk[@]}" -X POST "https://api.clerk.com/v1/sessions/$1/tokens" -d '{}' | jq -r '.jwt // empty'); echo "::add-mask::$t" >&3; echo "$t"; }
           call() { local sid=$1 method=$2 url=$3 body=${4:-}; local t; t=$(tok "$sid");
             if [ -n "$body" ]; then curl -sS -w '\n%{http_code}' -H "Authorization: Bearer $t" -H 'Origin: https://freshterminal.ai' -H 'Content-Type: application/json' -X "$method" "$url" -d "$body";
             else curl -sS -w '\n%{http_code}' -H "Authorization: Bearer $t" -H 'Origin: https://freshterminal.ai' -X "$method" "$url"; fi; }
