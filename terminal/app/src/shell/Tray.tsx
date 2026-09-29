@@ -6,9 +6,17 @@ import { Tooltip } from '../ui/Tooltip';
 import { IconClose, IconPin, IconTray } from '../ui/icons';
 import { NavTree } from './NavTree';
 
+export type ToolGroup = 'go' | 'look' | 'session';
+
 export interface Tool {
   id: string;
+  /** Which tile row it sits in (C-079); "go" when not said. */
+  group?: ToolGroup;
   label: string;
+  /** One or two words for the tile. */
+  short?: string;
+  /** Current value under the tile label ("Void", "EN"). */
+  detail?: string;
   icon: ReactNode;
   onClick: () => void;
   shortcut?: string;
@@ -27,7 +35,15 @@ interface Props {
   onNavigate: (target: NavTarget, item: NavItem) => void;
   /** Quiet links at the foot of the tray (source, docs). */
   links?: Array<{ label: string; href: string }>;
+  /** Version and tagline, faint, at the very bottom. */
+  foot?: string;
 }
+
+const GROUPS: Array<{ id: ToolGroup; label: 'tray.go' | 'tray.look' | 'tray.session' }> = [
+  { id: 'go', label: 'tray.go' },
+  { id: 'look', label: 'tray.look' },
+  { id: 'session', label: 'tray.session' },
+];
 
 function ToolButton({ tool, inTray }: { tool: Tool; inTray: boolean }) {
   const common = {
@@ -63,7 +79,7 @@ function ToolButton({ tool, inTray }: { tool: Tool; inTray: boolean }) {
  * button; pin a tool to bring it back to the bar (click the pin, or drag it
  * onto the bar). The current box's menu lives here too.
  */
-export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [] }: Props) {
+export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [], foot }: Props) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [dropping, setDropping] = useState(false);
@@ -150,48 +166,81 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [] }: P
                 />
               </section>
             ) : null}
-            <section className="tray-section">
-              <div className="tray-label">{t('tray.tools')}</div>
-              <ul className="tray-tools">
-                {tools.map((tool) => {
-                  const isPinned = pinned.includes(tool.id);
-                  return (
-                    <li
-                      key={tool.id}
-                      className="tray-tool"
-                      data-pinned={isPinned}
-                      draggable
-                      onDragStart={(event) => {
-                        event.dataTransfer.setData('text/x-tool', tool.id);
-                        event.dataTransfer.effectAllowed = 'copy';
-                      }}
-                    >
-                      <span className="tray-tool-main">
-                        <ToolButton tool={tool} inTray />
-                        {tool.shortcut ? <kbd className="kbd">{tool.shortcut}</kbd> : null}
-                      </span>
-                      <Tooltip label={isPinned ? t('tray.unpin') : t('tray.pin')} align="end">
-                        <Button
-                          icon
-                          variant="ghost"
-                          className="tray-pin"
-                          aria-pressed={isPinned}
-                          aria-label={`${isPinned ? t('tray.unpin') : t('tray.pin')}: ${tool.label}`}
-                          onClick={() => pin(tool.id, !isPinned)}
-                          data-testid={`pin-${tool.id}`}
+            {GROUPS.map((group) => {
+              const members = tools.filter((tool) => (tool.group ?? 'go') === group.id);
+              if (members.length === 0) return null;
+              return (
+                <section className="tray-section" key={group.id}>
+                  <div className="tray-label">{t(group.label)}</div>
+                  <ul className="tray-grid">
+                    {members.map((tool) => {
+                      const isPinned = pinned.includes(tool.id);
+                      const common = {
+                        'aria-label': tool.label,
+                        'aria-pressed': tool.pressed,
+                        'data-testid': tool.testId,
+                        'data-tool': tool.id,
+                        title: tool.shortcut ? `${tool.label} · Alt+${tool.shortcut}` : tool.label,
+                      };
+                      const body = (
+                        <>
+                          <span className="tile-icon" aria-hidden="true">
+                            {tool.icon}
+                          </span>
+                          <span className="tile-label">{tool.short ?? tool.label}</span>
+                          {tool.detail ? <span className="tile-detail">{tool.detail}</span> : null}
+                          {tool.shortcut ? <kbd className="tile-key">{tool.shortcut}</kbd> : null}
+                        </>
+                      );
+                      return (
+                        <li
+                          key={tool.id}
+                          className="tray-tool tile"
+                          data-pinned={isPinned}
+                          draggable
+                          onDragStart={(event) => {
+                            event.dataTransfer.setData('text/x-tool', tool.id);
+                            event.dataTransfer.effectAllowed = 'copy';
+                          }}
                         >
-                          <IconPin />
-                        </Button>
-                      </Tooltip>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+                          {tool.href ? (
+                            <a className="tile-button" href={tool.href} {...common}>
+                              {body}
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              className="tile-button"
+                              onClick={() => {
+                                tool.onClick();
+                                if (!tool.pressed && tool.pressed === undefined) setOpen(false);
+                              }}
+                              {...common}
+                            >
+                              {body}
+                            </button>
+                          )}
+                          <Tooltip label={isPinned ? t('tray.unpin') : t('tray.pin')} align="end">
+                            <Button
+                              icon
+                              variant="ghost"
+                              className="tray-pin"
+                              aria-pressed={isPinned}
+                              aria-label={`${isPinned ? t('tray.unpin') : t('tray.pin')}: ${tool.label}`}
+                              onClick={() => pin(tool.id, !isPinned)}
+                              data-testid={`pin-${tool.id}`}
+                            >
+                              <IconPin />
+                            </Button>
+                          </Tooltip>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              );
+            })}
             <div className="tray-foot">
-              <span>
-                {t('tray.hint')} · {t('shortcut.alt')}
-              </span>
               {links.length > 0 ? (
                 <span className="tray-links">
                   {links.map((link) => (
@@ -201,6 +250,7 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [] }: P
                   ))}
                 </span>
               ) : null}
+              {foot ? <span className="tray-version">{foot}</span> : null}
             </div>
           </div>
         ) : null}

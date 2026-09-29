@@ -6,7 +6,7 @@ import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconDownload, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme, IconTopBar, IconUpload } from '../ui/icons';
+import { IconBox, IconDev, IconDownload, IconHint, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconSpark, IconTheme, IconTopBar, IconUpload } from '../ui/icons';
 import { AccountButton } from './AccountButton';
 import { Tray, type Tool } from './Tray';
 
@@ -36,6 +36,11 @@ interface Props {
   onExport: () => void;
   onImport: () => void;
   onHideTopBar: () => void;
+  /** Starter prompts and the how-it-works cards: tray switches since C-079. */
+  startersOn: boolean;
+  hintsOn: boolean;
+  onToggleStarters: () => void;
+  onToggleHints: () => void;
 }
 
 function key(id: string): string {
@@ -50,18 +55,20 @@ function key(id: string): string {
 export function TopBar(props: Props) {
   const { t, lang } = useI18n();
   const tools: Tool[] = [
-    { id: 'box.new', label: t('topbar.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
-    { id: 'canvas.open', label: t('topbar.canvas'), icon: <IconBox />, onClick: props.onCanvas, shortcut: key('canvas.open'), pressed: props.canvasActive, testId: 'canvas-link' },
-    { id: 'library.open', label: t('topbar.library'), icon: <IconLibrary />, onClick: () => {}, href: props.libraryHref, shortcut: key('library.open'), testId: 'library-link' },
-    { id: 'play.open', label: t('topbar.replay'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
-    { id: 'sidebar.toggle', label: t('topbar.toggleSidebar'), icon: <IconSidebar />, onClick: props.onToggleSidebar, shortcut: key('sidebar.toggle') },
-    { id: 'theme.cycle', label: `${t('topbar.theme')}: ${props.theme.name}`, icon: <IconTheme />, onClick: props.onCycleTheme, shortcut: key('theme.cycle') },
-    { id: 'lang.toggle', label: `${t('topbar.language')} (${lang})`, icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
-    { id: 'settings.open', label: t('topbar.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
-    { id: 'dev.toggle', label: t('topbar.devMode'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },
-    { id: 'session.export', label: t('firstRun.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
-    { id: 'session.import', label: t('import.label'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
-    { id: 'bar.toggle', label: t('topbar.hide'), icon: <IconTopBar />, onClick: props.onHideTopBar, shortcut: key('bar.toggle'), testId: 'hide-bar' },
+    { id: 'box.new', group: 'go', label: t('topbar.newBox'), short: t('tool.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
+    { id: 'canvas.open', group: 'go', label: t('topbar.canvas'), short: t('tool.canvas'), icon: <IconBox />, onClick: props.onCanvas, shortcut: key('canvas.open'), pressed: props.canvasActive, testId: 'canvas-link' },
+    { id: 'library.open', group: 'go', label: t('topbar.library'), short: t('tool.library'), icon: <IconLibrary />, onClick: () => {}, href: props.libraryHref, shortcut: key('library.open'), testId: 'library-link' },
+    { id: 'play.open', group: 'go', label: t('topbar.replay'), short: t('tool.replay'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
+    { id: 'sidebar.toggle', group: 'look', label: t('topbar.toggleSidebar'), short: t('tool.sidebar'), icon: <IconSidebar />, onClick: props.onToggleSidebar, shortcut: key('sidebar.toggle') },
+    { id: 'theme.cycle', group: 'look', label: `${t('topbar.theme')}: ${props.theme.name}`, short: t('tool.theme'), detail: props.theme.name, icon: <IconTheme />, onClick: props.onCycleTheme, shortcut: key('theme.cycle') },
+    { id: 'lang.toggle', group: 'look', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
+    { id: 'bar.toggle', group: 'look', label: t('topbar.hide'), short: t('tool.hideBar'), icon: <IconTopBar />, onClick: props.onHideTopBar, shortcut: key('bar.toggle'), testId: 'hide-bar' },
+    { id: 'starters.toggle', group: 'look', label: t('tray.starters'), short: t('tool.starters'), icon: <IconSpark />, onClick: props.onToggleStarters, pressed: props.startersOn, testId: 'switch-starters' },
+    { id: 'hints.toggle', group: 'look', label: t('tray.hints'), short: t('tool.hints'), icon: <IconHint />, onClick: props.onToggleHints, pressed: props.hintsOn, testId: 'switch-hints' },
+    { id: 'session.export', group: 'session', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
+    { id: 'session.import', group: 'session', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
+    { id: 'settings.open', group: 'session', label: t('topbar.settings'), short: t('tool.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
+    { id: 'dev.toggle', group: 'session', label: t('topbar.devMode'), short: t('tool.dev'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },
   ];
   return (
     <>
@@ -86,7 +93,7 @@ export function TopBar(props: Props) {
           <span className="version" data-testid="version">v{PRODUCT_VERSION}</span>
         </a>
       </Tooltip>
-      <span className="tagline">{props.boxName ? `/ ${props.boxName}` : t('landing.tagline')}</span>
+      {props.boxName ? <span className="tagline">/ {props.boxName}</span> : null}
       <span className="topbar-spacer" />
       <span className="balance" data-live={props.usedMicro > 0} data-testid="balance" aria-label={`${formatMicro(props.usedMicro)} ${t('topbar.used')}`}>
         {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
@@ -102,6 +109,7 @@ export function TopBar(props: Props) {
             { label: t('footer.source'), href: REPO_URL },
             { label: t('footer.docs'), href: `${import.meta.env.BASE_URL}wiki/` },
           ]}
+          foot={`v${PRODUCT_VERSION} · ${t('landing.tagline')}`}
         />
         <AccountButton />
       </span>

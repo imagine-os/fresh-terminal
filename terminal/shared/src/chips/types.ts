@@ -55,6 +55,8 @@ export interface Chip {
   note?: string;
   /** Resolved record id for page / nav / theme chips. */
   ref?: string;
+  /** Chips of one list share a group id, so the UI can stack them (C-079). */
+  group?: string;
 }
 
 export type TextSegment = { type: 'text'; text: string } | { type: 'chip'; chip: Chip };
@@ -68,7 +70,8 @@ export function isAmbiguous(chip: Chip): boolean {
   if (!second) {
     return false;
   }
-  return second.kind !== chip.kind && second.p >= 0.25 && (chip.p ?? 1) - second.p < 0.35;
+  const differs = second.kind !== chip.kind || (second.value !== undefined && second.value !== chip.value);
+  return differs && second.p >= 0.25 && (chip.p ?? 1) - second.p < 0.35;
 }
 
 export const chipReadingSchema = z.object({
@@ -88,4 +91,5 @@ export const chipSchema = z.object({
   alternatives: z.array(chipReadingSchema).max(4).optional(),
   note: z.string().max(300).optional(),
   ref: z.string().max(120).optional(),
+  group: z.string().max(80).optional(),
 });

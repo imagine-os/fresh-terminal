@@ -633,3 +633,39 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-078, all of it in one pass; the prompt now starts in the middle and moves down after the first line.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653427634589?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790653427.634589
+
+## 74. Mon Sep 28, 10:51 PM CDT · 2026-09-29 03:51:52 UTC
+
+> I typed this in and hit ener in a new browser. nothing happened.  other than my message posting at the top. Please analyze the message look at what you did right and wrong.
+>
+> PS: is jev the best way to do this? is there something that bakes into a intellitype type system even faster better? should we mix things?
+>
+> Really analyze my isntruction and complaints and see if you can find solutions and a fix. i really like the way in which we can stack things that are lists of same type as an exmaple.
+
+(With a screenshot of a long message in the writing pad and its tags.)
+
+**What happened:** C-080. The silent Enter was a stale build failing a lazy import before the safety net; the tagger got names, lists, grammar and verb-only teaching words.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653912325809?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790653912.325809
+
+## 75. Mon Sep 28, 10:55 PM CDT · 2026-09-29 03:55:42 UTC
+
+> the dropdown menu looks bad. the little star in the prompt bar doesnt mean anything to me, the ? doesnt feel like it belongs in the prompt bar.  How do we make this look super super memorable and viral from pure simplicity. One thing i do love is the text that says a temrinal that routes what you type to the right model.  But we need a better line. A Terminal that adapts to you. we grow together" is pretty good line.  Then we dont need tagline in top left corner we can use that elsewhere. re-think the items and layout of drop down menu on op bar. The 1 thing you can add by default is ability to drag to resize the width of the sidebar.
+
+**What happened:** C-080: two-line headline, tagline into the tray foot, Starters and Hints into the tray, tiles in three groups, sidebar resize.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790654142508119?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790654142.508119
+
+## 76. Mon Sep 28, 11:03 PM CDT · 2026-09-29 04:03:17 UTC
+
+> I like the name stage instead of box
+
+**What happened:** C-080: "stage" in every string people read; ids stay "box".
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790654597690369?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790654597.690369
+
+## 77. Mon Sep 28, 11:10 PM CDT · 2026-09-29 04:10:00 UTC
+
+> Review my correspondance and all the erros and such.  By the way, signin system should match style.   The mobile screenshot you shared looks awful.  it does not need so much wasted space at the top. . On mobile, maybe the prompt box should start on the bototm? not sure
+
+(With a screenshot of a long desktop session: thirteen turns, several no-op edits and eight Undo bars.)
+
+**What happened:** The mobile start landed in C-080 (prompt at the bottom, counter in the tray). The review of the session is the next pass. The other session took the sign-in appearance.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655000670529?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790655000.670529

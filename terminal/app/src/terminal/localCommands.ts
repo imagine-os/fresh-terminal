@@ -32,7 +32,7 @@ export function matchLocalCommand(text: string, chips: Chip[], context: LocalCon
   const lower = trimmed.toLowerCase().replace(/[.!?]+$/, '');
   const reveal = revealFor(trimmed);
 
-  if (/^list (my )?boxes$/.test(lower)) {
+  if (/^list (my )?(boxes|stages)$/.test(lower)) {
     return {
       kind: 'system',
       key: 'system.listBoxes',
@@ -53,11 +53,11 @@ export function matchLocalCommand(text: string, chips: Chip[], context: LocalCon
     return { kind: 'system', key: 'system.settings', reveal };
   }
 
-  const makeThing = /^make (?:a )?(page|box) (?:called|named) /.exec(lower);
+  const makeThing = /^make (?:a )?(page|box|stage) (?:called|named) /.exec(lower);
   if (makeThing !== null) {
     const object = chips.find((chip) => chip.kind === 'object' && chip.value);
     const name = (object?.value ?? trimmed.slice(makeThing[0].length).replace(/^["'“]|["'”]$/g, '')).trim();
-    if (name.length > 0 && makeThing[1] === 'box') {
+    if (name.length > 0 && (makeThing[1] === 'box' || makeThing[1] === 'stage')) {
       return { kind: 'create-box', name };
     }
     if (name.length > 0) {

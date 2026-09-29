@@ -551,7 +551,8 @@ export function createApp(options: CreateAppOptions) {
     // Ask Jev only about spans that are still ambiguous after merge and glossary.
     let jevCost = 0;
     let jevUsed = false;
-    const ambiguous = chips.filter(isAmbiguous);
+    // Only spans torn between kinds; a number torn between two values is a question for the person, not for Jev.
+    const ambiguous = chips.filter((chip) => isAmbiguous(chip) && (chip.alternatives ?? []).some((reading) => reading.kind !== chip.kind));
     if (ambiguous.length > 0 && bindings.ROUTER_USE_JEV !== 'false') {
       const spans = ambiguous.map((chip, index) => ({
         key: `chip_${index}`,

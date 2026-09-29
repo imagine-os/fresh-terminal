@@ -6,7 +6,7 @@ import { useI18n } from '../i18n';
 import { tagRemote, type RemoteTagResult } from '../lib/modelTagger';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconHint, IconMic, IconSend, IconSpark } from '../ui/icons';
+import { IconMic, IconSend } from '../ui/icons';
 import type { VoiceControls } from '../voice/useVoice';
 import { ChipPopover, type ChipDecision, type ChipRecords } from './ChipPopover';
 import { ChipText } from './ChipText';
@@ -30,6 +30,10 @@ interface Props {
   hasLines: boolean;
   busy: boolean;
   onSend: (text: string, chips: Chip[]) => void;
+  /** Esc while a turn runs stops it (C-079). */
+  onCancel?: () => void;
+  /** Enter while a turn runs: say so instead of swallowing the key. */
+  onBusyEnter?: () => void;
   onActivity?: () => void;
   voice: VoiceControls;
   voiceMode: 'toggle' | 'hold';
@@ -37,10 +41,8 @@ interface Props {
   /** Text arriving from a final voice transcript to append to the draft. */
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
+  /** Starter prompts under the box (a tray switch since C-079). */
   showStarters?: boolean;
-  showHints?: boolean;
-  onToggleStarters?: () => void;
-  onToggleHints?: () => void;
 }
 
 export interface ComposerHandle {
@@ -72,9 +74,8 @@ export function Composer({
   voiceAppend,
   onVoiceAppendConsumed,
   showStarters = false,
-  showHints = false,
-  onToggleStarters,
-  onToggleHints,
+  onCancel,
+  onBusyEnter,
 }: Props) {
   const { t } = useI18n();
   const [text, setText] = useState('');
@@ -112,6 +113,10 @@ export function Composer({
       setRemote(null);
       return;
     }
+    // Every call is metered: wait for a pause at a word end, not after each keystroke (C-079).
+    if (/[\p{L}\p{N}]$/u.test(text)) {
+      return;
+    }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
       void tagRemote(text, localChips, glossary, controller.signal).then((found) => {
@@ -119,7 +124,7 @@ export function Composer({
           setRemote(found);
         }
       });
-    }, 600);
+    }, 1200);
     return () => {
       controller.abort();
       window.clearTimeout(timer);
@@ -187,7 +192,17 @@ export function Composer({
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
+      if (busy) {
+        // Never swallow the key: say the last turn is still running (C-079).
+        onBusyEnter?.();
+        return;
+      }
       send();
+    }
+    if (event.key === 'Escape' && busy && onCancel) {
+      event.preventDefault();
+      event.stopPropagation();
+      onCancel();
     }
   };
 
@@ -260,20 +275,6 @@ export function Composer({
           />
         </div>
         <div className="composer-tools">
-          {onToggleStarters ? (
-            <Tooltip label={t('composer.startersTip')} side="top" align="end">
-              <Button icon variant="ghost" aria-pressed={showStarters} aria-label={t('composer.starters')} onClick={onToggleStarters} data-testid="switch-starters">
-                <IconSpark />
-              </Button>
-            </Tooltip>
-          ) : null}
-          {onToggleHints ? (
-            <Tooltip label={t('composer.hintsTip')} side="top" align="end">
-              <Button icon variant="ghost" aria-pressed={showHints} aria-label={t('composer.hints')} onClick={onToggleHints} data-testid="switch-hints">
-                <IconHint />
-              </Button>
-            </Tooltip>
-          ) : null}
           {voice.active ? <Waveform level={voice.level} state={voice.state} /> : null}
           {voiceAvailable ? (
             <Tooltip

@@ -135,8 +135,44 @@ describe('phrases and teaching verbs (2026-09-29)', () => {
     expect(first?.text).toBe('make sure');
     expect(chips.some((chip) => chip.text === 'make' && chip.end === 4)).toBe(false);
   });
-  it('tags learn and tagged wherever they appear', () => {
-    const chips = localTagger.tag('Even the word tagged could learn a recipe');
-    expect(chips.filter((chip) => chip.kind === 'action').map((chip) => chip.text)).toEqual(['tagged', 'learn']);
+  it('tags learn and tagged only when they are verbs', () => {
+    const verbs = (text: string) => localTagger.tag(text).filter((chip) => chip.kind === 'action').map((chip) => chip.text);
+    expect(verbs('Hoy should be tagged as a brand; learn it')).toEqual(['tagged', 'learn']);
+    expect(verbs('tag Hoy as a brand')).toEqual(['tag']);
+    expect(verbs('a stack of tags to save space, the same type of tag, turned into a tag')).toEqual([]);
+  });
+});
+
+describe('names, lists and grammar (C-079)', () => {
+  it('leaves capitalised grammar alone: "What Can you do" is not a thing', () => {
+    expect(kinds('How are YOu? What Can you do?')).toEqual([]);
+    expect(kinds('Then Santa Maria Tenis Club called')).toEqual(['entity:Santa Maria Tenis Club']);
+  });
+  it('reads an introduced name as a person everywhere it appears', () => {
+    const chips = localTagger.tag('Hi, my name is Justin. Justin is my name.');
+    expect(chips.map((chip) => `${chip.kind}:${chip.text}`)).toEqual(['person:Justin', 'person:Justin']);
+    expect(kinds('me llamo Ana y vivo aquí')).toEqual(['person:Ana']);
+  });
+  it('groups a comma list of the same kind and questions the count', () => {
+    const chips = localTagger.tag('I have 3 companies, Hoy, Santa Maria Tenis Club, Between-Gigs, Aluzina, etc. Those are my clients.');
+    const orgs = chips.filter((chip) => chip.kind === 'org');
+    expect(orgs.map((chip) => chip.text)).toEqual(['Hoy', 'Santa Maria Tenis Club', 'Between-Gigs', 'Aluzina']);
+    expect(new Set(orgs.map((chip) => chip.group)).size).toBe(1);
+    const count = chips.find((chip) => chip.kind === 'number');
+    expect(count).toMatchObject({ text: '3', note: 'listed 4' });
+    expect(count?.alternatives?.[0]).toMatchObject({ kind: 'number', value: '4' });
+    expect(count && isAmbiguous(count)).toBe(true);
+  });
+  it('picks the kind from the word before the list', () => {
+    expect(kinds('invite my friends, Ana, Luis and Marta')).toEqual(['person:Ana', 'person:Luis', 'person:Marta']);
+    expect(kinds('cities: Paris, Lima, Bogota')).toEqual(['place:Paris', 'place:Lima', 'place:Bogota']);
+    expect(localTagger.tag('I have 3 companies, Hoy, Aluzina and Between-Gigs').find((chip) => chip.kind === 'number')?.note).toBeUndefined();
+  });
+  it('reads inline ordinals as one list', () => {
+    const chips = localTagger.tag('1st is the worst, second is the best, 3rd is the one with the hairy chest.');
+    const list = chips.filter((chip) => chip.kind === 'list');
+    expect(list.map((chip) => `${chip.text}=${chip.value}`)).toEqual(['1st=1', 'second=2', '3rd=3']);
+    expect(new Set(list.map((chip) => chip.group)).size).toBe(1);
+    expect(kinds('wait a second, then a third one')).toEqual([]);
   });
 });

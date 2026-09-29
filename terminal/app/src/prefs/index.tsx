@@ -29,6 +29,8 @@ export interface Prefs {
   /** Sidebar settings: show the box menu there; keep it open when a box is picked. */
   sidebarMenu: boolean;
   sidebarStay: boolean;
+  /** Sidebar width in px, dragged at its edge (C-079). */
+  sidebarWidth: number;
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -50,6 +52,7 @@ const defaults: Prefs = {
   showHints: false,
   sidebarMenu: false,
   sidebarStay: false,
+  sidebarWidth: 260,
 };
 
 interface PrefsValue {

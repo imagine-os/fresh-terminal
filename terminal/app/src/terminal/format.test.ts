@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDraft, paragraphs, wantsPage } from './format';
+import { formatDraft, inlineListItems, paragraphs, wantsPage } from './format';
 
 describe('draft formatting', () => {
   it('capitalises sentence starts and the pronoun I without changing length', () => {
@@ -22,5 +22,18 @@ describe('draft formatting', () => {
     expect(wantsPage('short')).toBe(false);
     expect(wantsPage('a\nb')).toBe(true);
     expect(wantsPage('x'.repeat(80))).toBe(true);
+  });
+});
+
+describe('inlineListItems (C-079)', () => {
+  it('splits a paragraph at the ordinals of one group', () => {
+    const text = 'Some things: 1st is the worst, second is the best, 3rd is the one.';
+    const chips = [
+      { kind: 'list', start: 13, end: 16, group: 'ord-13' },
+      { kind: 'list', start: 31, end: 37, group: 'ord-13' },
+      { kind: 'list', start: 51, end: 54, group: 'ord-13' },
+    ];
+    expect(inlineListItems(text, chips)?.map((item) => item.text)).toEqual(['1st is the worst', 'second is the best', '3rd is the one.']);
+    expect(inlineListItems(text, [])).toBeNull();
   });
 });
