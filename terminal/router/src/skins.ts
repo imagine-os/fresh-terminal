@@ -221,8 +221,12 @@ interface OpenverseImage {
   height?: number;
 }
 
+/** Licences we can use in a product without asking: no NC, no ND. The "related" endpoint ignores the search filter, so every result is checked here. */
+export const ALLOWED_LICENSES = new Set(['cc0', 'pdm', 'by', 'by-sa']);
+
 export function openverseToVariant(image: OpenverseImage, round: number, index: number): VariantOut | null {
   if (!image.url || !/^https:\/\/[^\s"'()\\<>]+$/.test(image.url)) return null;
+  if (!ALLOWED_LICENSES.has((image.license ?? '').toLowerCase())) return null;
   const license = image.license ?? '';
   const label = `${LICENSE_LABELS[license] ?? license.toUpperCase()}${image.license_version && license !== 'pdm' ? ` ${image.license_version}` : ''}`.trim();
   const title = (image.title ?? 'Untitled').slice(0, 200);
