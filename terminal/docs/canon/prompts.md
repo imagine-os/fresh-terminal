@@ -584,7 +584,7 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 > start thinking about the product hunt strategy. you can make a page for product hunt strategy
 
 **What happened:** Taken by the other session (a Product Hunt strategy page).
-Other session (Opus 5.5): researched Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then made the page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free usage, a launch-day spend limit, the minimal first screen, a repo licence; free usage and the first screen have shipped). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-077.
+Other session (Opus 5.5): researched Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then made the page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free usage, a launch-day spend limit, the minimal first screen, a repo licence; free usage and the first screen have shipped). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-078.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651680.495959
 
 ## 69. Mon Sep 28, 10:25 PM CDT · 2026-09-29 03:25:36 UTC
@@ -620,3 +620,16 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-076: the export opens with a readme (ASCII mark, what it is, come back, how to import); import from the tray or by dropping the file; live credits in the first-run line.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653063786309?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790653063.786309
+
+## 73. Mon Sep 28, 10:43 PM CDT · 2026-09-29 03:43:47 UTC
+
+> we dont need rounded corners to start. v.1.0 can go at the top. bottom only needs one row. starters hits can go next to the voice maybe , shifter enter isnt needed twice it literlaly has 2 lines. source and docs can be hidden behind a menu or something. maybe even after sign in. i dont think chips it the right word. maybe tags? and the tag counter maybe goes elsewhere? I dont know why it says fresh terminal again at the bottom . youre very redunant.
+>
+> Should the prompt box start in the middle, then move down to the bottom bar? or should it stay pinned at the bottom?
+>
+> We're getting good. thank you
+
+(With two screenshots of the live clean start at 1440 × 900.)
+
+**What happened:** C-078, all of it in one pass; the prompt now starts in the middle and moves down after the first line.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653427634589?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790653427.634589

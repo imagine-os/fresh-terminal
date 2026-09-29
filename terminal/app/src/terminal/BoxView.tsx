@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { localTagger, type Chip } from '@shared/chips';
 import type { Change, Op } from '@shared/ops';
 import type { Reply, ReplyBlock, ReplyMeta } from '@shared/reply';
-import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
+import { PRODUCT_NAME } from '@shared/brand';
 import type { Theme } from '@shared/themes';
 import { verifyLedger } from '@shared/ledger';
 import { listActions } from '../actions/registry';
@@ -196,6 +196,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
 
   const lines = useMemo(() => snapshot.lines.filter((line) => line.box_id === box.id), [snapshot.lines, box.id]);
   const isEmpty = lines.length === 0;
+  // An empty box starts with the prompt in the middle; it moves to the bottom bar after the first line (C-077).
+  const centered = isEmpty && !pageId;
 
   useEffect(() => {
     store.openSession(box.id);
@@ -428,7 +430,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       {pageId ? (
         <PageView pageId={pageId} />
       ) : isEmpty ? (
-        <section className="empty" data-fading={fading} aria-label={PRODUCT_NAME}>
+        <section className="empty" data-fading={fading} data-centered={centered} aria-label={PRODUCT_NAME}>
           {landing ? (
             <>
               <h1 className="headline">
@@ -454,26 +456,13 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             </>
           ) : null}
           {commands.showHints ? <Doodles fading={fading} showNewBox={showNewBoxDoodle} /> : null}
+          <div id="composer-inline" className="composer-inline" />
         </section>
       ) : (
         <Transcript lines={lines} />
       )}
-      {landing ? (
-        <footer className="footer">
-          <span>
-            {PRODUCT_NAME} · {t('footer.version')} {PRODUCT_VERSION}
-          </span>
-          <span>
-            <a className="btn" data-variant="ghost" href={REPO_URL} rel="noreferrer">
-              {t('footer.source')}
-            </a>
-            <a className="btn" data-variant="ghost" href={`${import.meta.env.BASE_URL}wiki/`}>
-              {t('footer.docs')}
-            </a>
-          </span>
-        </footer>
-      ) : null}
       <ComposerSlot
+        inline={centered}
         boxId={box.id}
         theme={theme}
         hasBoxes={snapshot.boxes.length > 1}
@@ -532,11 +521,13 @@ function ComposerSlot(props: {
   hasLines: boolean;
   busy: boolean;
   onSend: (text: string, chips: Chip[]) => void;
+  /** Render in the middle of the empty stage instead of the bottom bar. */
+  inline?: boolean;
 }) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    setTarget(document.getElementById('composer-slot'));
-  }, []);
+    setTarget(document.getElementById(props.inline ? 'composer-inline' : 'composer-slot'));
+  }, [props.inline]);
   if (target === null) {
     return null;
   }

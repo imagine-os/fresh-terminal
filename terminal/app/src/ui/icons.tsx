@@ -242,3 +242,20 @@ export function IconUpload(props: IconProps) {
     </svg>
   );
 }
+
+export function IconSpark(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
+    </svg>
+  );
+}
+
+export function IconHint(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M9.6 9.5a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1 .9-1 1.6M12 16.5h.01" />
+    </svg>
+  );
+}

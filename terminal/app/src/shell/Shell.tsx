@@ -31,6 +31,8 @@ interface ShellProps {
   /** Per-box skins by target (skin.apply ops). */
   /** The tray's hide-the-top-bar switch. */
   hideTopBar?: boolean;
+  /** The prompt is in the middle of an empty box; the bottom bar has nothing to show. */
+  hideBottomBar?: boolean;
   skins?: Partial<Record<SkinTarget, Skin>>;
 }
 
@@ -175,7 +177,7 @@ export function skinProps(
   };
 }
 
-export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false }: ShellProps) {
+export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false, hideBottomBar = false }: ShellProps) {
   const ref = useRef<HTMLDivElement>(null);
   const readout = useSizeClass(ref);
 
@@ -186,6 +188,9 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
   const regions = resolveRegions(spec, readout.sizeClass, devMode);
   if (hideTopBar) {
     regions.topBar = 'hidden';
+  }
+  if (hideBottomBar) {
+    regions.bottomBar = 'hidden';
   }
   const left = effectiveBehaviour(regions.leftSidebar, leftOpen);
   const right = effectiveBehaviour(regions.rightSidebar, rightOpen || (devMode && regions.rightSidebar === 'floating'));

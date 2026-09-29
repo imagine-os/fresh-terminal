@@ -2639,3 +2639,41 @@ textarea.field-input {
 .stage-drop {
   display: contents;
 }
+
+/* ---------- tighter start (C-077): centered prompt, version badge, tray links ---------- */
+
+.version {
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+  margin-left: 0.4rem;
+}
+.empty[data-centered='true'] {
+  justify-content: center;
+  gap: var(--space-roomy);
+  padding-bottom: 12vh;
+}
+.composer-inline {
+  width: 100%;
+}
+.composer-inline .composer {
+  width: 100%;
+}
+.tray-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.tray-links {
+  display: inline-flex;
+  gap: 0.75rem;
+}
+.tray-links a {
+  color: var(--fg-faint);
+  text-decoration: none;
+}
+.tray-links a:hover {
+  color: var(--fg);
+  text-decoration: underline;
+}

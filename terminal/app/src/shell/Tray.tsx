@@ -25,6 +25,8 @@ interface Props {
   /** The current box's menu, shown inside the tray. */
   nav: NavItem[];
   onNavigate: (target: NavTarget, item: NavItem) => void;
+  /** Quiet links at the foot of the tray (source, docs). */
+  links?: Array<{ label: string; href: string }>;
 }
 
 function ToolButton({ tool, inTray }: { tool: Tool; inTray: boolean }) {
@@ -61,7 +63,7 @@ function ToolButton({ tool, inTray }: { tool: Tool; inTray: boolean }) {
  * button; pin a tool to bring it back to the bar (click the pin, or drag it
  * onto the bar). The current box's menu lives here too.
  */
-export function Tray({ tools, pinned, onPinned, nav, onNavigate }: Props) {
+export function Tray({ tools, pinned, onPinned, nav, onNavigate, links = [] }: Props) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [dropping, setDropping] = useState(false);
@@ -187,7 +189,18 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate }: Props) {
               </ul>
             </section>
             <div className="tray-foot">
-              {t('tray.hint')} · {t('shortcut.alt')}
+              <span>
+                {t('tray.hint')} · {t('shortcut.alt')}
+              </span>
+              {links.length > 0 ? (
+                <span className="tray-links">
+                  {links.map((link) => (
+                    <a key={link.href} href={link.href} rel="noreferrer">
+                      {link.label}
+                    </a>
+                  ))}
+                </span>
+              ) : null}
             </div>
           </div>
         ) : null}
