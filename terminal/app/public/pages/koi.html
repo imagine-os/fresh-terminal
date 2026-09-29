@@ -4,143 +4,199 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="A 3D koi pond start page with a tiltable camera, a wooden bridge, lily pads that can carry content, stone paths and a floating terminal composer.">
+<meta name="description" content="Koi pond v3: a photographic garden pond. It opens looking straight down at the water like a table top, then tilts up to look across the pond to a vermilion bridge and the garden beyond.">
 <title>Koi Pond Terminal</title>
 <style>
 :root{
-  --bg:#06161a; --glass:rgba(10,24,28,.42); --glass-edge:rgba(255,255,255,.28); --ink:#e9f1f0; --ink-dim:rgba(233,241,240,.62);
-  --accent:#ffb562; --focus:#9be7d8; --pad:16px; --ui-scale:1;
+  --bg:#07120f; --glass:rgba(8,20,18,.52); --glass-strong:rgba(8,20,18,.78); --edge:rgba(255,255,255,.22); --ink:#eef4f1; --dim:rgba(238,244,241,.66);
+  --accent:#ffb867; --focus:#9be7d8; --pad:16px; --ui:1;
 }
-@media (min-width:1900px){ :root{ --ui-scale:1.35; } }
-@media (min-width:2500px){ :root{ --ui-scale:1.7; } }
-@media (min-width:3600px){ :root{ --ui-scale:2.2; } }
+@media (min-width:1900px){ :root{ --ui:1.3; } }
+@media (min-width:2500px){ :root{ --ui:1.65; } }
+@media (min-width:3400px){ :root{ --ui:2.1; } }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:calc(15px * var(--ui-scale));-webkit-font-smoothing:antialiased;touch-action:none}
-#pond{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#fallback{position:fixed;inset:0;display:none;overflow:hidden;background:radial-gradient(120% 90% at 50% 110%,rgba(255,181,98,.10),transparent 60%),radial-gradient(60% 50% at 25% 30%,#144a4a 0%,transparent 70%),radial-gradient(70% 60% at 75% 70%,#0f3c3f 0%,transparent 70%),linear-gradient(180deg,#0a2a30 0%,#061a1f 100%)}
+body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:calc(15px * var(--ui));-webkit-font-smoothing:antialiased;touch-action:none}
+#pond{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#fallback{position:fixed;inset:0;display:none;background:#0c2420 url('./koi3/env_low.webp') center 55%/cover no-repeat}
+#fallback p{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);margin:0;padding:12px 18px;border-radius:14px;background:var(--glass-strong);max-width:min(90vw,34em);text-align:center;line-height:1.45}
 body.nogl #pond{display:none} body.nogl #fallback{display:block}
-.css-ripple{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);pointer-events:none;animation:ring 1.8s ease-out forwards}
-#fallback::before,#fallback::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.18);width:12px;height:12px;left:30%;top:40%;animation:ring 6s ease-out infinite}
-#fallback::after{left:66%;top:62%;animation-delay:3s}
-@keyframes ring{from{transform:scale(1);opacity:.8}to{transform:scale(28);opacity:0}}
-body.calm .css-ripple,body.calm #fallback::before,body.calm #fallback::after{animation-duration:12s}
 
-.ui{position:fixed;z-index:3}
-#controls{top:max(var(--pad),env(safe-area-inset-top));right:max(var(--pad),env(safe-area-inset-right));display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 2*var(--pad))}
-#fps{font-size:.8em;color:var(--ink-dim);padding:0 6px;min-width:5ch;text-align:right;text-shadow:0 1px 2px rgba(0,0,0,.6)}
-.ctl{min-height:44px;min-width:44px;padding:0 14px;border-radius:999px;border:1px solid var(--glass-edge);background:var(--glass);color:var(--ink);font:inherit;font-size:.85em;letter-spacing:.02em;cursor:pointer;backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 8px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18);display:inline-flex;align-items:center;gap:8px;transition:background .2s,border-color .2s}
-.ctl .k{color:var(--ink-dim)} .ctl .v{color:var(--ink)}
-a.ctl{text-decoration:none}
-.ctl[aria-pressed="true"],.ctl[aria-expanded="true"]{background:rgba(155,231,216,.16);border-color:rgba(155,231,216,.5)}
-.ctl:hover{background:rgba(20,40,44,.55)}
-.ctl:focus-visible,#send:focus-visible,#tilt:focus-visible,#devpanel button:focus-visible,#devjson:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+#loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:radial-gradient(80% 70% at 50% 50%,#12302a,#050d0b);transition:opacity .9s ease;pointer-events:none}
+#loading span{color:var(--dim);letter-spacing:.04em;font-size:.95em}
+#loading.done{opacity:0}
 
-/* tilt slider, right edge */
-#tiltwrap{right:max(var(--pad),env(safe-area-inset-right));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-#tiltwrap .k{font-size:.7em;color:var(--ink-dim);writing-mode:vertical-rl;transform:rotate(180deg)}
-#tilt{-webkit-appearance:none;appearance:none;writing-mode:vertical-lr;direction:rtl;width:44px;height:min(38vh,320px);background:transparent;margin:0;cursor:pointer}
-#tilt::-webkit-slider-runnable-track{width:4px;background:rgba(255,255,255,.28);border-radius:2px}
-#tilt::-moz-range-track{width:4px;background:rgba(255,255,255,.28);border-radius:2px}
-#tilt::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:44px;height:44px;border-radius:50%;background:rgba(255,181,98,.18);border:2px solid var(--accent);margin-left:-20px;box-shadow:inset 0 0 0 14px rgba(0,0,0,0),0 2px 8px rgba(0,0,0,.4)}
-#tilt::-moz-range-thumb{width:44px;height:44px;border-radius:50%;background:rgba(255,181,98,.18);border:2px solid var(--accent)}
-@media (max-height:520px){#tiltwrap{display:none}}
+.ui{position:fixed;z-index:5}
+.ctl{min-height:calc(44px * var(--ui));min-width:calc(44px * var(--ui));padding:0 calc(14px * var(--ui));border-radius:999px;border:1px solid var(--edge);background:var(--glass);color:var(--ink);font:inherit;font-size:.86em;cursor:pointer;backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 6px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14);display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;white-space:nowrap}
+.ctl .k{color:var(--dim)}
+.ctl:hover{background:rgba(20,44,40,.66)}
+.ctl[aria-pressed="true"],.ctl[aria-expanded="true"]{background:rgba(155,231,216,.18);border-color:rgba(155,231,216,.55)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 
-/* etched lines */
-#lines{left:50%;bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 44px + 28px + 1.4em);transform:translateX(-50%);width:min(760px * var(--ui-scale),calc(100vw - 2*var(--pad)));display:flex;flex-direction:column;gap:.35em;pointer-events:none}
-.etched{color:rgba(255,255,255,.85);font-size:.95em;line-height:1.35;white-space:pre-wrap;word-break:break-word;text-shadow:0 1px 0 rgba(255,255,255,.18),0 -1px 1px rgba(0,0,0,.6),0 0 14px rgba(255,200,140,.25);animation:etch 20s linear forwards}
-@keyframes etch{0%{opacity:0;transform:translateY(8px);filter:blur(2px)}5%{opacity:.9;transform:none;filter:none}40%{opacity:.55}100%{opacity:0}}
+/* view switch, top-left: the one control that matters */
+#view{left:max(var(--pad),env(safe-area-inset-left));top:max(var(--pad),env(safe-area-inset-top));display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+#view .seg{display:inline-flex;padding:4px;gap:4px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 24px rgba(0,0,0,.25)}
+#view .seg button{min-height:calc(44px * var(--ui));min-width:calc(44px * var(--ui));padding:0 calc(16px * var(--ui));border-radius:999px;border:0;background:transparent;color:var(--dim);font:inherit;font-size:.9em;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+#view .seg button[aria-pressed="true"]{background:rgba(255,184,103,.2);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(255,184,103,.55)}
+#view .seg svg{width:1.15em;height:1.15em;flex:none}
+#hint{color:var(--ink);font-size:.8em;opacity:.8;text-shadow:0 1px 3px rgba(0,0,0,.7);max-width:40ch;line-height:1.4;padding-left:6px;transition:opacity 1s}
+body.ready #hint{animation:hintfade 14s ease forwards}
+@keyframes hintfade{0%,75%{opacity:.85}100%{opacity:0}}
 
-/* glass composer (unchanged) */
-#composer{left:50%;bottom:max(var(--pad),env(safe-area-inset-bottom));transform:translateX(-50%);width:min(760px * var(--ui-scale),calc(100vw - 2*var(--pad)));min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 6px 6px 18px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.25)}
-#composer:focus-within{outline:2px solid var(--focus);outline-offset:0;border-color:rgba(155,231,216,.55)}
-#composer .prompt{color:var(--accent);font-weight:600;user-select:none}
-#composer .field{position:relative;flex:1;min-width:0;display:flex}
-#cmd{flex:1;min-width:0;min-height:44px;background:transparent;border:0;color:var(--ink);font:inherit;caret-color:var(--accent);outline:none;padding-left:.95ch}
-#cmd::placeholder{color:var(--ink-dim)}
-#send{min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--glass-edge);background:rgba(255,181,98,.14);color:var(--accent);font:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-#send:hover{background:rgba(255,181,98,.24)}
-#composer .cursor{position:absolute;left:0;top:50%;margin-top:-.58em;width:.6ch;height:1.15em;background:var(--accent);opacity:.9;animation:blink 1.1s steps(1) infinite;pointer-events:none;border-radius:1px}
-#composer:focus-within .cursor{display:none}
-@keyframes blink{50%{opacity:0}}
-body.calm .cursor{animation:none}
-@media (prefers-reduced-motion:reduce){.cursor{animation:none}}
+#controls{top:max(var(--pad),env(safe-area-inset-top));right:max(var(--pad),env(safe-area-inset-right));display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 2*var(--pad) - 330px * var(--ui))}
+#fps{font-size:.78em;color:var(--dim);min-width:6ch;text-align:right;text-shadow:0 1px 2px rgba(0,0,0,.7);font-variant-numeric:tabular-nums}
+#morebtn{display:none}
+@media (max-width:760px){
+  #controls{max-width:none;top:auto;bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 64px);right:max(var(--pad),env(safe-area-inset-right))}
+  #controls .opt,#fps{display:none}
+  body.more-open #controls{left:var(--pad);justify-content:flex-end}
+  body.more-open #controls .opt{display:inline-flex}
+  #morebtn{display:inline-flex}
+  #hint{display:none}
+  #view .seg button{padding:0 12px}
+}
+
+/* tilt slider (wide screens) */
+#tiltwrap{right:max(var(--pad),env(safe-area-inset-right));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#tiltwrap .k{font-size:.72em;color:var(--dim)}
+#tilt{-webkit-appearance:none;appearance:none;writing-mode:vertical-lr;direction:rtl;width:44px;height:calc(min(34vh,300px) * var(--ui));background:transparent;margin:0;cursor:pointer}
+#tilt::-webkit-slider-runnable-track{width:3px;background:rgba(255,255,255,.3);border-radius:2px}
+#tilt::-moz-range-track{width:3px;background:rgba(255,255,255,.3);border-radius:2px}
+#tilt::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;height:30px;border-radius:50%;background:rgba(255,184,103,.25);border:2px solid var(--accent);margin-left:-13.5px}
+#tilt::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:rgba(255,184,103,.25);border:2px solid var(--accent)}
+@media (max-width:900px),(max-height:560px){#tiltwrap{display:none}}
+
+/* composer */
+#lines{left:50%;bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 72px * var(--ui));transform:translateX(-50%);width:min(720px * var(--ui),calc(100vw - 2*var(--pad)));display:flex;flex-direction:column;gap:.3em;pointer-events:none}
+.etched{color:#fff;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.95em;line-height:1.35;white-space:pre-wrap;word-break:break-word;text-shadow:0 1px 3px rgba(0,0,0,.8);animation:etch 16s linear forwards}
+@keyframes etch{0%{opacity:0;transform:translateY(6px)}5%{opacity:.95;transform:none}50%{opacity:.7}100%{opacity:0}}
+#composer{left:50%;bottom:max(var(--pad),env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px * var(--ui),calc(100vw - 2*var(--pad)));min-height:calc(54px * var(--ui));display:flex;align-items:center;gap:10px;padding:5px 5px 5px 18px;border-radius:18px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);box-shadow:0 18px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.2)}
+#composer:focus-within{outline:2px solid var(--focus);outline-offset:0}
+#composer .prompt{color:var(--accent);font-weight:700;font-family:ui-monospace,Menlo,monospace}
+#cmd{flex:1;min-width:0;min-height:44px;background:transparent;border:0;color:var(--ink);font:inherit;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;caret-color:var(--accent);outline:none}
+#cmd::placeholder{color:var(--dim)}
+#send{min-width:calc(44px * var(--ui));min-height:calc(44px * var(--ui));border-radius:12px;border:1px solid var(--edge);background:rgba(255,184,103,.16);color:var(--accent);font:inherit;cursor:pointer}
 .sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-#hint{left:max(var(--pad),env(safe-area-inset-left));top:max(var(--pad),env(safe-area-inset-top));color:var(--ink-dim);font-size:.8em;text-shadow:0 1px 2px rgba(0,0,0,.6);max-width:46ch;line-height:1.45;pointer-events:none;animation:hintfade 16s ease forwards}
-@keyframes hintfade{0%,70%{opacity:1}100%{opacity:0}}
-@media (max-width:640px){#hint,#fps{display:none} .ctl{font-size:.78em;padding:0 11px}}
 
-/* content that rides on lily pads */
+/* cards riding on the giant lily pads */
 #padContent{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
-.pad-card{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:auto;display:none;border-radius:18px;background:rgba(255,252,240,.88);color:#1d2a20;box-shadow:0 6px 24px rgba(0,0,0,.25),inset 0 1px 0 #fff;padding:22px 26px;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden;will-change:transform}
-.pad-card.on-pad{display:block}
-.pad-card.billboard{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.pad-card h2{margin:0 0 .3em;font-size:36px;font-weight:600;letter-spacing:-.01em}
-.pad-card p{margin:0 0 .5em;font-size:22px;line-height:1.35;color:#3a4a3f}
-.pad-card ul{margin:0;padding-left:1.1em;font-size:21px;line-height:1.45}
-.pad-card small{display:block;margin-top:.6em;font-size:16px;color:#6b7d70}
+.pad-card{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:auto;display:none;color:#1f2a22;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,253,246,.94),rgba(248,244,232,.92));border-radius:.9em;box-shadow:0 .15em .5em rgba(0,0,0,.18),inset 0 0 0 1px rgba(255,255,255,.7);padding:.9em 1.05em;line-height:1.3;backface-visibility:hidden}
+.pad-card.round{border-radius:50%;display:none;padding:1.4em 1.5em;text-align:center}
+.pad-card h2{margin:0 0 .15em;font-size:1.45em;font-weight:650;letter-spacing:-.01em;color:#142018}
+.pad-card .meta{margin:0 0 .5em;font-size:.82em;color:#56675b}
+.pad-card ul{margin:0;padding:0;list-style:none;font-size:.95em}
+.pad-card li{display:flex;gap:.55em;padding:.28em 0;border-top:1px solid rgba(40,60,40,.12)}
+.pad-card li:first-child{border-top:0}
+.pad-card li b{font-weight:600;color:#8a3a1e;min-width:3.2em;font-variant-numeric:tabular-nums}
+.pad-card a{color:#123f35;text-decoration:none;display:block;padding:.34em .2em;border-radius:.4em;font-weight:560;min-height:44px;display:flex;align-items:center;justify-content:center}
+.pad-card a:hover{background:rgba(20,80,60,.08)}
+.pad-card:not(.round) .links{display:flex;flex-wrap:wrap;gap:.2em .6em;margin-top:.2em}
+.pad-card:not(.round) .links a{padding:0 .35em;font-size:.92em;text-decoration:underline;text-underline-offset:.2em}
+.pad-card .tag{display:inline-block;font-size:.7em;padding:.15em .55em;border-radius:1em;background:rgba(138,58,30,.12);color:#8a3a1e;margin-left:.4em;vertical-align:.15em}
+.pad-card button{font:inherit;font-size:.9em;border:1px dashed rgba(40,60,40,.35);background:transparent;border-radius:.5em;padding:.25em .6em;color:#3b4c40;cursor:pointer;min-height:44px}
+
+#toast{left:50%;top:calc(max(var(--pad),env(safe-area-inset-top)) + 64px * var(--ui));transform:translateX(-50%);padding:10px 16px;border-radius:12px;background:var(--glass-strong);border:1px solid rgba(255,184,103,.5);color:var(--ink);font-size:.9em;z-index:30}
+#toast.show{animation:toast 2.6s ease forwards}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-6px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
 
 /* dev panel */
-#devpanel{left:max(var(--pad),env(safe-area-inset-left));bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 76px);width:min(420px,calc(100vw - 2*var(--pad)));max-height:min(60vh,520px);display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:rgba(10,24,28,.78);border:1px solid var(--glass-edge);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:var(--ink);font-size:.8em}
+#devpanel{left:max(var(--pad),env(safe-area-inset-left));bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 76px * var(--ui));width:min(440px * var(--ui),calc(100vw - 2*var(--pad)));max-height:min(58vh,560px);display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--edge);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);font-size:.82em;z-index:8}
 #devpanel[hidden]{display:none}
-#devpanel header{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--ink-dim)}
-#devjson{flex:1;min-height:180px;resize:vertical;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font:inherit;font-size:.9em;line-height:1.35}
+#devpanel header{display:flex;justify-content:space-between;gap:8px;color:var(--dim);flex-wrap:wrap}
+#devjson{flex:1;min-height:180px;resize:vertical;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font:inherit;font-family:ui-monospace,Menlo,monospace;font-size:.9em}
 #devpanel .row{display:flex;gap:8px;flex-wrap:wrap}
-#devpanel button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--glass-edge);background:rgba(255,255,255,.08);color:var(--ink);font:inherit;cursor:pointer}
-#devpanel button.primary{background:rgba(255,181,98,.18);color:var(--accent)}
+#devpanel button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--edge);background:rgba(255,255,255,.08);color:var(--ink);font:inherit;cursor:pointer}
 #deverr{color:#ff9b8a;min-height:1.2em;white-space:pre-wrap}
-#devpanel code{color:var(--accent)}
+body.calm .etched{animation-duration:30s}
+@media (prefers-reduced-motion:reduce){#loading{transition:none}.etched{animation:none;opacity:.8}}
 </style>
 </head>
 <body>
-<canvas id="pond" role="img" aria-label="Live 3D koi pond. Move or touch to ripple the water; rest still to feed the fish; drag or use arrow keys to tilt the view; type below to make the fish scatter."></canvas>
-<div id="fallback" aria-hidden="true"></div>
+<canvas id="pond" tabindex="0" role="img" aria-label="A photographic 3D koi pond. It starts looking straight down at the water; drag, scroll or use the up and down arrow keys to tilt up and look across the pond. Tap the water to feed the koi."></canvas>
+<div id="fallback"><p>This device could not start WebGL, so here is a photo of the garden instead. The koi pond needs WebGL.</p></div>
+<div id="loading" aria-hidden="true"><span data-i18n="loading">Filling the pond…</span></div>
 
-<div id="padContent" aria-live="off">
-  <article id="card-today" class="pad-card" hidden>
-    <h2>Today</h2>
-    <p>Tue · a card riding on a rounded lily pad</p>
-    <ul><li>10:00 pond review</li><li>13:30 bridge planks</li><li>evening — feed the koi</li></ul>
-    <small>drag or two-finger to tilt · try “add a square pad on the left”</small>
-  </article>
+<div id="view" class="ui">
+  <div class="seg" role="group" aria-label="Camera view">
+    <button id="vTop" type="button" aria-pressed="true" title="Look straight down at the water, like a table top (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="2.5"/></svg><span data-i18n="top">Top-down</span></button>
+    <button id="vFwd" type="button" aria-pressed="false" title="Tilt up and look forward into the distance (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17h18"/><path d="M5 17c2-5 12-5 14 0"/><circle cx="17" cy="7" r="2"/></svg><span data-i18n="fwd">Forward</span></button>
+  </div>
+  <div id="hint" aria-hidden="true" data-i18n="hint">drag, scroll or ↑ ↓ to tilt · ← → to turn · tap the water</div>
 </div>
-
-<div id="hint" class="ui" aria-hidden="true">move to ripple · rest still to feed · tap to startle · drag or arrow keys to tilt · type below</div>
 
 <div id="controls" class="ui" role="group" aria-label="Pond settings">
   <span id="fps" aria-live="off">— fps</span>
-  <button id="todbtn" class="ctl" type="button" title="Time of day: dawn, day, dusk or night"><span class="k">light</span> <span class="v">dusk</span></button>
-  <button id="qbtn" class="ctl" type="button" title="Rendering quality: auto, high or low"><span class="k">quality</span> <span class="v">auto</span></button>
-  <button id="cbtn" class="ctl" type="button" aria-pressed="false" title="Calm mode: gentler motion"><span class="k">calm</span> <span class="v">off</span></button>
-  <button id="devbtn" class="ctl" type="button" aria-expanded="false" aria-controls="devpanel" title="Developer panel: edit pads and paths as JSON"><span class="k">dev</span></button>
-  <a id="licenses" class="ctl" href="./koi-LICENSES.md" title="Third-party notices: three.js (MIT), koi-pond-garden (MIT)"><span class="k">licenses</span></a>
-  <a id="v1link" class="ctl" href="./koi-v1.html" title="The first koi pond (v1)"><span class="k">v1</span></a>
+  <button id="todbtn" class="ctl opt" type="button" title="Light: a grade over one midday photo (day, dusk, night, dawn)"><span class="k" data-i18n="light">light</span> <span class="v">day</span></button>
+  <button id="qbtn" class="ctl opt" type="button" title="Rendering quality: auto, high (refraction, shadows) or low (phones)"><span class="k" data-i18n="quality">quality</span> <span class="v">auto</span></button>
+  <button id="cbtn" class="ctl opt" type="button" aria-pressed="false" title="Calm mode: gentler motion"><span class="k" data-i18n="calm">calm</span> <span class="v">off</span></button>
+  <button id="langbtn" class="ctl opt" type="button" title="English / Español"><span class="v">EN</span></button>
+  <button id="devbtn" class="ctl opt" type="button" aria-expanded="false" aria-controls="devpanel" title="Developer panel: edit pads and paths as JSON"><span class="k" data-i18n="dev">dev</span></button>
+  <a class="ctl opt" href="./koi-LICENSES.md" title="Third-party notices and asset licences"><span class="k" data-i18n="licenses">licenses</span></a>
+  <a class="ctl opt" href="./koi-v2.html" title="Archived: koi pond v2"><span class="k">v2</span></a>
+  <a class="ctl opt" href="./koi-v1.html" title="Archived: koi pond v1"><span class="k">v1</span></a>
+  <button id="morebtn" class="ctl" type="button" aria-expanded="false" aria-label="More settings" title="More settings"><span aria-hidden="true">⋯</span></button>
 </div>
 
 <div id="tiltwrap" class="ui">
-  <label for="tilt" class="k">tilt</label>
-  <input id="tilt" type="range" min="12" max="88" step="1" value="65" aria-label="Camera tilt, 88 is top-down">
+  <span class="k" aria-hidden="true">↑</span>
+  <input id="tilt" type="range" min="0" max="100" step="1" value="0" aria-label="Camera tilt: 0 is looking straight down, 100 is looking forward">
+  <span class="k" aria-hidden="true">↓</span>
+</div>
+
+<div id="padContent">
+  <article id="card-today" class="pad-card" hidden aria-label="Today">
+    <h2 data-i18n="today">Today</h2>
+    <p class="meta" id="todayDate">—</p>
+    <ul>
+      <li><b>10:00</b><span>Pond review</span></li>
+      <li><b>13:30</b><span>Bridge planks</span></li>
+      <li><b>18:00</b><span>Feed the koi</span></li>
+    </ul>
+  </article>
+  <article id="card-pinned" class="pad-card round" hidden aria-label="Pinned">
+    <h2 data-i18n="pinned">Pinned</h2>
+    <nav class="links" aria-label="Pinned links"><a href="../canvas">Canvas</a><a href="./library.html">Library</a><a href="../wiki/">Wiki</a></nav>
+  </article>
+  <article id="card-inbox" class="pad-card" hidden aria-label="Inbox">
+    <h2><span data-i18n="inbox">Inbox</span><span class="tag">not wired yet</span></h2>
+    <p class="meta">Messages will land on this pad.</p>
+    <button type="button" data-not-wired="inbox" title="Not wired yet: the inbox has no backend">Open inbox</button>
+  </article>
 </div>
 
 <section id="devpanel" class="ui" hidden aria-label="Developer panel">
-  <header><span>pads &amp; paths (JSON) · <code>window.pond</code></span><span>not wired to a backend yet</span></header>
+  <header><span>pads &amp; paths (JSON) · <code>window.pond</code></span><span>page-local; not wired to a backend yet</span></header>
   <textarea id="devjson" spellcheck="false" aria-label="Pads and paths JSON"></textarea>
   <div id="deverr" role="alert"></div>
-  <div class="row"><button id="devapply" class="primary" type="button">Apply</button><button id="devreset" type="button">Reset to defaults</button></div>
+  <div class="row"><button id="devapply" type="button">Apply</button><button id="devreset" type="button">Reset to defaults</button></div>
 </section>
 
+<div id="toast" class="ui" role="status" hidden></div>
 <div id="lines" class="ui" aria-live="polite" aria-label="Recent lines"></div>
-
 <form id="composer" class="ui" autocomplete="off">
   <label for="cmd" class="sr">Terminal input</label>
   <span class="prompt" aria-hidden="true">›</span>
-  <span class="field">
-    <span class="cursor" aria-hidden="true"></span>
-    <input id="cmd" type="text" placeholder="type something into the pond…" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
-  </span>
+  <input id="cmd" type="text" placeholder="type something into the pond…" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
   <button id="send" type="submit" aria-label="Send line">↵</button>
 </form>
 
+<script type="application/json" id="page-actions">
+{"page":"pages/koi.html","version":"3.0.0","actions":[
+ {"id":"koi.view.top","intent":"look straight down at the pond","permission":"anyone"},
+ {"id":"koi.view.forward","intent":"tilt up and look forward","permission":"anyone"},
+ {"id":"koi.tilt","intent":"tilt the camera by an amount","permission":"anyone"},
+ {"id":"koi.turn","intent":"turn the view left or right","permission":"anyone"},
+ {"id":"koi.feed","intent":"feed the koi at a point","permission":"anyone"},
+ {"id":"koi.light","intent":"change the light (day, dusk, night, dawn)","permission":"anyone"},
+ {"id":"koi.quality","intent":"set rendering quality","permission":"anyone"},
+ {"id":"koi.calm","intent":"toggle calm mode","permission":"anyone"},
+ {"id":"koi.lang","intent":"switch English or Spanish","permission":"anyone"},
+ {"id":"koi.pad.add","intent":"add a lily pad that holds content","permission":"dev"},
+ {"id":"koi.path.add","intent":"add a stepping-stone path","permission":"dev"},
+ {"id":"koi.inbox.open","intent":"open the inbox pad","permission":"anyone","wired":false}
+]}
+</script>
 <script src="./koi.js"></script>
 </body>
 </html>

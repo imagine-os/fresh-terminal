@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n';
-import { resolveHref } from './Canvas';
+import { resolveHref } from './href';
 
 /**
  * Shows one of our own static pages inside the stage without an iframe: the

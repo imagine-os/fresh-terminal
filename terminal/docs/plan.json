@@ -1048,6 +1048,44 @@
       ],
       "model": "Sonnet 5 (captures), Fable (comments)",
       "pass": 7
+    },
+    {
+      "id": "koi-v3",
+      "title": "Koi pond v3: opens top-down, tilts up to the bridge and garden; CC0 photo assets; best-of-3 (C-082)",
+      "status": "done",
+      "depends_on": [],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "canvas-v2",
+      "title": "Canvas v2: paper sheets with screenshots, sections, minimap, pan/zoom on every input; best-of-3 (C-083)",
+      "status": "done",
+      "depends_on": [
+        "master-canvas"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "koi-v3-device-check",
+      "title": "Koi v3 on a real phone and a 4K TV: fps, heat, tilt feel; tune the low tier",
+      "status": "todo",
+      "depends_on": [
+        "koi-v3"
+      ],
+      "model": "Sonnet 5 (QA matrix)",
+      "pass": 6
+    },
+    {
+      "id": "canvas-thumbs-ci",
+      "title": "Canvas screenshots in CI after each deploy (canvas:thumbs), so new cards get a picture without a manual run",
+      "status": "todo",
+      "depends_on": [
+        "canvas-v2"
+      ],
+      "model": "Sonnet 5",
+      "pass": 6
     }
   ]
 }

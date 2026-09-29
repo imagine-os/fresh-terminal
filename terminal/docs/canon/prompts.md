@@ -521,14 +521,14 @@ Justin's session, same message: FreshStack nesting (Jev under OpenRouter, Gemini
 
 > The canvas you made is awful
 
-**What happened:** The canvas is being redesigned by a separate worker; the current one stays as an archive. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+**What happened:** The canvas is being redesigned by a separate worker; the current one stays as an archive. Done 2026-09-29: canvas v2 (C-083, decision 0022, repo prompt 0018); v1 at `/canvas?v=1`. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649916347129?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790649916.347129
 
 ## 61. Mon Sep 28, 9:45 PM CDT · 2026-09-29 02:45:55 UTC
 
 > koi pond 2 came out terrible. And it was supposed to start facing down, then reveal that it can tilt up.   For me this is the difference between staring at the top of a desk or table top vs looking foward into the distance
 
-**What happened:** Koi pond v3 is being rebuilt by a separate worker: it opens looking straight down, then tilts up to look into the distance; v2 stays as an archive. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+**What happened:** Koi pond v3 is being rebuilt by a separate worker: it opens looking straight down, then tilts up to look into the distance; v2 stays as an archive. Done 2026-09-29: koi pond v3 (C-082, decision 0022, repo prompt 0018); v2 at `pages/koi-v2.html`. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649955559429?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790649955.559429
 
 ## 62. Mon Sep 28, 9:46 PM CDT · 2026-09-29 02:46:38 UTC

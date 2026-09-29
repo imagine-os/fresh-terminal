@@ -11,7 +11,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-081 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-083 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
@@ -29,6 +29,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Reference
 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
+- [decisions/0022-koi-v3-and-canvas-v2.md](decisions/0022-koi-v3-and-canvas-v2.md): koi pond v3 (opens top-down, tilts up; CC0 photo assets) and canvas v2 (paper sheets with screenshots, hand-drawn sections, minimap), chosen by best-of-3
 - [decisions/0021-free-credits.md](decisions/0021-free-credits.md): free credits enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day cap), abuse limits, GET /credits, cost estimates
 - [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md): freshterminal.ai on a Worker, api.freshterminal.ai, Clerk anonymous-first, D1 schema and sync rules, limits
 - [decisions/0016-self-editing.md](decisions/0016-self-editing.md): how the interface edits itself (ops, undo, tool calling, escalation)
@@ -38,11 +39,13 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [decisions/0019-playback.md](decisions/0019-playback.md): replay, steps with parent ids, state rebuilt at any step, branches later
 - [pages/box.md](pages/box.md): the box page spec
 - [pages/landing.md](pages/landing.md): the landing page spec
-- [pages/canvas.md](pages/canvas.md): the master canvas spec
+- [pages/canvas.md](pages/canvas.md): the master canvas v2 spec (sections, screenshots, minimap, pan/zoom on every input; v1 at /canvas?v=1)
+- [pages/koi.md](pages/koi.md): koi pond v3 spec (top-down to forward tilt, controls, URL options); live page https://imagine-os.github.io/fresh-terminal/pages/koi.html
 - [pages/producthunt.md](pages/producthunt.md): Product Hunt launch strategy (proposed 2026-09-29): launch Fresh Terminal not FreshStack, five blockers, tagline pick, costs with certainty; live page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html
 
 ## Changelog
 
+- [changelog/0012.md](changelog/0012.md): koi pond v3 and canvas v2 redo, before/after, live check
 - [changelog/0011.md](changelog/0011.md): daily caps for signed-in free usage
 - [changelog/0010.md](changelog/0010.md): readable text over photo and material skins (sampled scrim, AA, neutral small text)
 - [changelog/0009.md](changelog/0009.md): Product Hunt strategy page
