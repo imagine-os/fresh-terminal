@@ -23,13 +23,9 @@ export function realtimePrice(model: string, table: PriceTable = loadPrices()): 
   return table.realtime?.[model] ?? null;
 }
 
-export interface Usage {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-  /** OpenRouter returns cost in USD as a float when usage.include is set. */
-  cost?: number;
-}
+import type { Usage } from '../../shared/src/agent/openrouter';
+
+export type { Usage };
 
 export function loadPrices(): PriceTable {
   return pricesJson as unknown as PriceTable;

@@ -1,4 +1,7 @@
+import type { Snapshot } from '@shared/agent';
 import type { Chip } from '@shared/chips';
+import type { Change, Op } from '@shared/ops';
+import type { ReplyBlock } from '@shared/reply';
 import type { EntryDraft } from '@shared/ledger';
 import { resolveRouterUrl } from '../config/router';
 
@@ -6,6 +9,8 @@ import { resolveRouterUrl } from '../config/router';
 export const ROUTER_URL: string = resolveRouterUrl(import.meta.env.VITE_ROUTER_URL as string | undefined, import.meta.env.DEV);
 
 export interface RouteMeta {
+  routing?: { intent: string; source: string; confidence: number | null; model: string | null; costMicro: number };
+  escalated?: boolean;
   route: {
     intent: string;
     tier: string;
@@ -22,6 +27,7 @@ export interface RouteDone {
   usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost?: number };
   served_model: string;
   costSource: string;
+  ms?: number;
   entry: EntryDraft | null;
   chars: number;
 }
@@ -32,9 +38,19 @@ export type RouteFailure =
   | { kind: 'pending'; note: string }
   | { kind: 'error'; message: string };
 
+export interface OpsPayload {
+  ops: Op[];
+  changes: Change[];
+  rejected: string[];
+}
+
 export interface RouteHandlers {
   onMeta?: (meta: RouteMeta) => void;
   onDelta: (text: string) => void;
+  /** A validated batch of interface changes to apply. */
+  onOps?: (payload: OpsPayload) => void;
+  /** The structured reply. */
+  onReply?: (blocks: ReplyBlock[]) => void;
   onDone: (done: RouteDone) => void;
   onFail: (failure: RouteFailure) => void;
 }
@@ -45,6 +61,8 @@ export interface RouteRequest {
   chips: Chip[];
   /** Optional explicit model from the allowlist. */
   model?: string;
+  /** The box's own records, so the model can change them. */
+  snapshot?: Snapshot;
   history: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
 }
 
@@ -92,6 +110,10 @@ export async function streamRoute(request: RouteRequest, handlers: RouteHandlers
       handlers.onDelta(parsed.text);
     } else if (eventName === 'meta') {
       handlers.onMeta?.(JSON.parse(data) as RouteMeta);
+    } else if (eventName === 'ops') {
+      handlers.onOps?.(JSON.parse(data) as OpsPayload);
+    } else if (eventName === 'reply') {
+      handlers.onReply?.((JSON.parse(data) as { blocks: ReplyBlock[] }).blocks);
     } else if (eventName === 'done') {
       done = true;
       handlers.onDone(JSON.parse(data) as RouteDone);

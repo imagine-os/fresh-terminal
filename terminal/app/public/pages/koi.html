@@ -4,120 +4,130 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="A live koi pond start page with a floating terminal composer. Move to ripple, rest to feed the fish, type to make them scatter.">
+<meta name="description" content="A 3D koi pond start page with a tiltable camera, a wooden bridge, lily pads that can carry content, stone paths and a floating terminal composer.">
 <title>Koi Pond Terminal</title>
 <style>
 :root{
   --bg:#06161a; --glass:rgba(10,24,28,.42); --glass-edge:rgba(255,255,255,.28); --ink:#e9f1f0; --ink-dim:rgba(233,241,240,.62);
-  --accent:#ffb562; --focus:#9be7d8; --pad:16px;
-  --ui-scale:1;
+  --accent:#ffb562; --focus:#9be7d8; --pad:16px; --ui-scale:1;
 }
 @media (min-width:1900px){ :root{ --ui-scale:1.35; } }
 @media (min-width:2500px){ :root{ --ui-scale:1.7; } }
 @media (min-width:3600px){ :root{ --ui-scale:2.2; } }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{
-  background:var(--bg); color:var(--ink); overflow:hidden;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size:calc(15px * var(--ui-scale));
-  -webkit-font-smoothing:antialiased; touch-action:none;
-}
+body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:calc(15px * var(--ui-scale));-webkit-font-smoothing:antialiased;touch-action:none}
 #pond{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-/* CSS fallback pond, shown only when WebGL is unavailable */
-#fallback{position:fixed;inset:0;display:none;overflow:hidden;
-  background:
-    radial-gradient(120% 90% at 50% 110%, rgba(255,181,98,.10), transparent 60%),
-    radial-gradient(60% 50% at 25% 30%, #144a4a 0%, transparent 70%),
-    radial-gradient(70% 60% at 75% 70%, #0f3c3f 0%, transparent 70%),
-    linear-gradient(180deg,#0a2a30 0%, #061a1f 100%);
-}
+#fallback{position:fixed;inset:0;display:none;overflow:hidden;background:radial-gradient(120% 90% at 50% 110%,rgba(255,181,98,.10),transparent 60%),radial-gradient(60% 50% at 25% 30%,#144a4a 0%,transparent 70%),radial-gradient(70% 60% at 75% 70%,#0f3c3f 0%,transparent 70%),linear-gradient(180deg,#0a2a30 0%,#061a1f 100%)}
 body.nogl #pond{display:none} body.nogl #fallback{display:block}
-.css-ripple{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;
-  border:1.5px solid rgba(255,255,255,.55);pointer-events:none;animation:ring 1.8s ease-out forwards}
-#fallback::before,#fallback::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.18);
-  width:12px;height:12px;left:30%;top:40%;animation:ring 6s ease-out infinite}
+.css-ripple{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);pointer-events:none;animation:ring 1.8s ease-out forwards}
+#fallback::before,#fallback::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.18);width:12px;height:12px;left:30%;top:40%;animation:ring 6s ease-out infinite}
 #fallback::after{left:66%;top:62%;animation-delay:3s}
 @keyframes ring{from{transform:scale(1);opacity:.8}to{transform:scale(28);opacity:0}}
 body.calm .css-ripple,body.calm #fallback::before,body.calm #fallback::after{animation-duration:12s}
 
-/* UI layer */
 .ui{position:fixed;z-index:3}
-#controls{top:max(var(--pad), env(safe-area-inset-top));right:max(var(--pad), env(safe-area-inset-right));display:flex;gap:8px;align-items:center}
+#controls{top:max(var(--pad),env(safe-area-inset-top));right:max(var(--pad),env(safe-area-inset-right));display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 2*var(--pad))}
 #fps{font-size:.8em;color:var(--ink-dim);padding:0 6px;min-width:5ch;text-align:right;text-shadow:0 1px 2px rgba(0,0,0,.6)}
-.ctl{
-  min-height:44px;min-width:44px;padding:0 14px;border-radius:999px;border:1px solid var(--glass-edge);
-  background:var(--glass);color:var(--ink);font:inherit;font-size:.85em;letter-spacing:.02em;cursor:pointer;
-  backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
-  box-shadow:0 8px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
-  display:inline-flex;align-items:center;gap:8px;transition:background .2s,border-color .2s;
-}
+.ctl{min-height:44px;min-width:44px;padding:0 14px;border-radius:999px;border:1px solid var(--glass-edge);background:var(--glass);color:var(--ink);font:inherit;font-size:.85em;letter-spacing:.02em;cursor:pointer;backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 8px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18);display:inline-flex;align-items:center;gap:8px;transition:background .2s,border-color .2s}
 .ctl .k{color:var(--ink-dim)} .ctl .v{color:var(--ink)}
-.ctl[aria-pressed="true"]{background:rgba(155,231,216,.16);border-color:rgba(155,231,216,.5)}
+a.ctl{text-decoration:none}
+.ctl[aria-pressed="true"],.ctl[aria-expanded="true"]{background:rgba(155,231,216,.16);border-color:rgba(155,231,216,.5)}
 .ctl:hover{background:rgba(20,40,44,.55)}
-.ctl:focus-visible,#send:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
-#composer:focus-within{outline:2px solid var(--focus);outline-offset:0;border-color:rgba(155,231,216,.55)}
-#cmd:focus{outline:none}
+.ctl:focus-visible,#send:focus-visible,#tilt:focus-visible,#devpanel button:focus-visible,#devjson:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 
-/* etched history lines */
-#lines{left:50%;bottom:calc(max(var(--pad), env(safe-area-inset-bottom)) + 44px + 28px + 1.4em);transform:translateX(-50%);
-  width:min(760px * var(--ui-scale), calc(100vw - 2*var(--pad)));display:flex;flex-direction:column;gap:.35em;pointer-events:none}
-.etched{
-  color:rgba(255,255,255,.85);font-size:.95em;line-height:1.35;white-space:pre-wrap;word-break:break-word;
-  text-shadow:0 1px 0 rgba(255,255,255,.18), 0 -1px 1px rgba(0,0,0,.6), 0 0 14px rgba(255,200,140,.25);
-  animation:etch 20s linear forwards;
-}
+/* tilt slider, right edge */
+#tiltwrap{right:max(var(--pad),env(safe-area-inset-right));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#tiltwrap .k{font-size:.7em;color:var(--ink-dim);writing-mode:vertical-rl;transform:rotate(180deg)}
+#tilt{-webkit-appearance:none;appearance:none;writing-mode:vertical-lr;direction:rtl;width:44px;height:min(38vh,320px);background:transparent;margin:0;cursor:pointer}
+#tilt::-webkit-slider-runnable-track{width:4px;background:rgba(255,255,255,.28);border-radius:2px}
+#tilt::-moz-range-track{width:4px;background:rgba(255,255,255,.28);border-radius:2px}
+#tilt::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:44px;height:44px;border-radius:50%;background:rgba(255,181,98,.18);border:2px solid var(--accent);margin-left:-20px;box-shadow:inset 0 0 0 14px rgba(0,0,0,0),0 2px 8px rgba(0,0,0,.4)}
+#tilt::-moz-range-thumb{width:44px;height:44px;border-radius:50%;background:rgba(255,181,98,.18);border:2px solid var(--accent)}
+@media (max-height:520px){#tiltwrap{display:none}}
+
+/* etched lines */
+#lines{left:50%;bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 44px + 28px + 1.4em);transform:translateX(-50%);width:min(760px * var(--ui-scale),calc(100vw - 2*var(--pad)));display:flex;flex-direction:column;gap:.35em;pointer-events:none}
+.etched{color:rgba(255,255,255,.85);font-size:.95em;line-height:1.35;white-space:pre-wrap;word-break:break-word;text-shadow:0 1px 0 rgba(255,255,255,.18),0 -1px 1px rgba(0,0,0,.6),0 0 14px rgba(255,200,140,.25);animation:etch 20s linear forwards}
 @keyframes etch{0%{opacity:0;transform:translateY(8px);filter:blur(2px)}5%{opacity:.9;transform:none;filter:none}40%{opacity:.55}100%{opacity:0}}
-body.calm .etched{animation-duration:20s}
 
-/* glass composer */
-#composer{
-  left:50%;bottom:max(var(--pad), env(safe-area-inset-bottom));transform:translateX(-50%);
-  width:min(760px * var(--ui-scale), calc(100vw - 2*var(--pad)));min-height:56px;
-  display:flex;align-items:center;gap:12px;padding:6px 6px 6px 18px;border-radius:18px;
-  background:var(--glass);border:1px solid var(--glass-edge);
-  backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);
-  box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(0,0,0,.25);
-}
+/* glass composer (unchanged) */
+#composer{left:50%;bottom:max(var(--pad),env(safe-area-inset-bottom));transform:translateX(-50%);width:min(760px * var(--ui-scale),calc(100vw - 2*var(--pad)));min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 6px 6px 18px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.25)}
+#composer:focus-within{outline:2px solid var(--focus);outline-offset:0;border-color:rgba(155,231,216,.55)}
 #composer .prompt{color:var(--accent);font-weight:600;user-select:none}
-#cmd{
-  flex:1;min-width:0;min-height:44px;background:transparent;border:0;color:var(--ink);font:inherit;
-  caret-color:var(--accent);outline:none;
-}
-#cmd::placeholder{color:var(--ink-dim)}
-#send{
-  min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--glass-edge);background:rgba(255,181,98,.14);color:var(--accent);
-  font:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
-}
-#send:hover{background:rgba(255,181,98,.24)}
-/* cursor block that blinks when the field is empty or unfocused (native caret takes over while typing) */
 #composer .field{position:relative;flex:1;min-width:0;display:flex}
-#cmd{padding-left:.95ch}
-#composer .cursor{position:absolute;left:0;top:50%;margin-top:-.58em;width:.6ch;height:1.15em;background:var(--accent);opacity:.9;
-  animation:blink 1.1s steps(1) infinite;pointer-events:none;border-radius:1px}
+#cmd{flex:1;min-width:0;min-height:44px;background:transparent;border:0;color:var(--ink);font:inherit;caret-color:var(--accent);outline:none;padding-left:.95ch}
+#cmd::placeholder{color:var(--ink-dim)}
+#send{min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--glass-edge);background:rgba(255,181,98,.14);color:var(--accent);font:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+#send:hover{background:rgba(255,181,98,.24)}
+#composer .cursor{position:absolute;left:0;top:50%;margin-top:-.58em;width:.6ch;height:1.15em;background:var(--accent);opacity:.9;animation:blink 1.1s steps(1) infinite;pointer-events:none;border-radius:1px}
 #composer:focus-within .cursor{display:none}
 @keyframes blink{50%{opacity:0}}
 body.calm .cursor{animation:none}
-@media (prefers-reduced-motion: reduce){.cursor{animation:none}}
+@media (prefers-reduced-motion:reduce){.cursor{animation:none}}
 .sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-/* hint */
-#hint{left:max(var(--pad), env(safe-area-inset-left));top:max(var(--pad), env(safe-area-inset-top));color:var(--ink-dim);font-size:.8em;
-  text-shadow:0 1px 2px rgba(0,0,0,.6);max-width:44ch;line-height:1.45;pointer-events:none;animation:hintfade 14s ease forwards}
+#hint{left:max(var(--pad),env(safe-area-inset-left));top:max(var(--pad),env(safe-area-inset-top));color:var(--ink-dim);font-size:.8em;text-shadow:0 1px 2px rgba(0,0,0,.6);max-width:46ch;line-height:1.45;pointer-events:none;animation:hintfade 16s ease forwards}
 @keyframes hintfade{0%,70%{opacity:1}100%{opacity:0}}
-@media (max-width:520px){#hint{display:none}}
+@media (max-width:640px){#hint,#fps{display:none} .ctl{font-size:.78em;padding:0 11px}}
+
+/* content that rides on lily pads */
+#padContent{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.pad-card{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:auto;display:none;border-radius:18px;background:rgba(255,252,240,.88);color:#1d2a20;box-shadow:0 6px 24px rgba(0,0,0,.25),inset 0 1px 0 #fff;padding:22px 26px;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden;will-change:transform}
+.pad-card.on-pad{display:block}
+.pad-card.billboard{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.pad-card h2{margin:0 0 .3em;font-size:36px;font-weight:600;letter-spacing:-.01em}
+.pad-card p{margin:0 0 .5em;font-size:22px;line-height:1.35;color:#3a4a3f}
+.pad-card ul{margin:0;padding-left:1.1em;font-size:21px;line-height:1.45}
+.pad-card small{display:block;margin-top:.6em;font-size:16px;color:#6b7d70}
+
+/* dev panel */
+#devpanel{left:max(var(--pad),env(safe-area-inset-left));bottom:calc(max(var(--pad),env(safe-area-inset-bottom)) + 76px);width:min(420px,calc(100vw - 2*var(--pad)));max-height:min(60vh,520px);display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:rgba(10,24,28,.78);border:1px solid var(--glass-edge);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:var(--ink);font-size:.8em}
+#devpanel[hidden]{display:none}
+#devpanel header{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--ink-dim)}
+#devjson{flex:1;min-height:180px;resize:vertical;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font:inherit;font-size:.9em;line-height:1.35}
+#devpanel .row{display:flex;gap:8px;flex-wrap:wrap}
+#devpanel button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--glass-edge);background:rgba(255,255,255,.08);color:var(--ink);font:inherit;cursor:pointer}
+#devpanel button.primary{background:rgba(255,181,98,.18);color:var(--accent)}
+#deverr{color:#ff9b8a;min-height:1.2em;white-space:pre-wrap}
+#devpanel code{color:var(--accent)}
 </style>
 </head>
 <body>
-<canvas id="pond" aria-label="Live koi pond. Move or touch to ripple the water; rest still to feed the fish; type to make them scatter." role="img"></canvas>
+<canvas id="pond" role="img" aria-label="Live 3D koi pond. Move or touch to ripple the water; rest still to feed the fish; drag or use arrow keys to tilt the view; type below to make the fish scatter."></canvas>
 <div id="fallback" aria-hidden="true"></div>
 
-<div id="hint" class="ui" aria-hidden="true">move to ripple · rest still to feed · tap to startle · type below</div>
+<div id="padContent" aria-live="off">
+  <article id="card-today" class="pad-card" hidden>
+    <h2>Today</h2>
+    <p>Tue · a card riding on a rounded lily pad</p>
+    <ul><li>10:00 pond review</li><li>13:30 bridge planks</li><li>evening — feed the koi</li></ul>
+    <small>drag or two-finger to tilt · try “add a square pad on the left”</small>
+  </article>
+</div>
+
+<div id="hint" class="ui" aria-hidden="true">move to ripple · rest still to feed · tap to startle · drag or arrow keys to tilt · type below</div>
 
 <div id="controls" class="ui" role="group" aria-label="Pond settings">
   <span id="fps" aria-live="off">— fps</span>
+  <button id="todbtn" class="ctl" type="button" title="Time of day: dawn, day, dusk or night"><span class="k">light</span> <span class="v">dusk</span></button>
   <button id="qbtn" class="ctl" type="button" title="Rendering quality: auto, high or low"><span class="k">quality</span> <span class="v">auto</span></button>
   <button id="cbtn" class="ctl" type="button" aria-pressed="false" title="Calm mode: gentler motion"><span class="k">calm</span> <span class="v">off</span></button>
+  <button id="devbtn" class="ctl" type="button" aria-expanded="false" aria-controls="devpanel" title="Developer panel: edit pads and paths as JSON"><span class="k">dev</span></button>
+  <a id="licenses" class="ctl" href="./koi-LICENSES.md" title="Third-party notices: three.js (MIT), koi-pond-garden (MIT)"><span class="k">licenses</span></a>
+  <a id="v1link" class="ctl" href="./koi-v1.html" title="The first koi pond (v1)"><span class="k">v1</span></a>
 </div>
+
+<div id="tiltwrap" class="ui">
+  <label for="tilt" class="k">tilt</label>
+  <input id="tilt" type="range" min="12" max="88" step="1" value="65" aria-label="Camera tilt, 88 is top-down">
+</div>
+
+<section id="devpanel" class="ui" hidden aria-label="Developer panel">
+  <header><span>pads &amp; paths (JSON) · <code>window.pond</code></span><span>not wired to a backend yet</span></header>
+  <textarea id="devjson" spellcheck="false" aria-label="Pads and paths JSON"></textarea>
+  <div id="deverr" role="alert"></div>
+  <div class="row"><button id="devapply" class="primary" type="button">Apply</button><button id="devreset" type="button">Reset to defaults</button></div>
+</section>
 
 <div id="lines" class="ui" aria-live="polite" aria-label="Recent lines"></div>
 

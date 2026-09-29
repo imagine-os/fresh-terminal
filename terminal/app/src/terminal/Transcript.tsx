@@ -5,6 +5,7 @@ import { COMPOSITIONS, isComposition } from '../compositions';
 import type { Line } from '../store';
 import { Reveal } from '../ui/Reveal';
 import { ChipText } from './ChipText';
+import { ReplyView, parseReply } from './ReplyView';
 
 function parseChips(json: string): Chip[] {
   try {
@@ -22,6 +23,14 @@ function patternOf(line: Line): RevealPattern {
 const GLYPH: Record<Line['kind'], string> = { user: '>', assistant: '·', system: '#' };
 
 function LineBody({ line, fresh }: { line: Line; fresh: boolean }) {
+  const reply = parseReply(line.blocks_json);
+  if (reply) {
+    return (
+      <Reveal pattern={fresh ? 'beam-horizontal' : 'none'}>
+        <ReplyView reply={reply} />
+      </Reveal>
+    );
+  }
   if (line.component && isComposition(line.component)) {
     const Component = COMPOSITIONS[line.component];
     return (

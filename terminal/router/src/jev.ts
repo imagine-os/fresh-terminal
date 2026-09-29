@@ -98,6 +98,8 @@ export interface RoutingDecision {
 
 const INTENT_DESCRIPTIONS: Record<string, string> = {
   chat: 'General conversation, a question, or anything that is not one of the other verbs.',
+  edit_ui:
+    "Change this app's own interface: add, nest, rename, move or remove sidebar menu items; change the layout, theme, colours or style; create or edit pages; add starters, canvas cards or glossary terms.",
   make: 'Create or make something new: a page, a box, a document, a plan.',
   build: 'Build or assemble something with several parts, code, or a system.',
   show: 'Display or reveal information that already exists.',
@@ -203,6 +205,56 @@ export async function needsOwner(
     return { needsOwner: false, probability: null, costMicro: 0 };
   }
   return { needsOwner: answer.noul >= 0.5, probability: answer.noul, costMicro: costMicroOf(decision.usage) };
+}
+
+export interface AmbiguousSpan {
+  key: string;
+  text: string;
+  start: number;
+  end: number;
+  kinds: string[];
+}
+
+/**
+ * Resolves ambiguous chips with one Decisions call: a Choice per span over its
+ * plausible kinds, with the whole text as state so context decides ("Hoy's new
+ * logo" vs "hoy a las 3").
+ */
+export async function disambiguateChips(
+  text: string,
+  spans: AmbiguousSpan[],
+  describe: (kind: string) => string,
+  options: { apiKey?: string; model?: string; fetchImpl?: typeof fetch },
+): Promise<{ answers: Record<string, { kind: string; confidence: number; probabilities: Record<string, number> }>; costMicro: number } | null> {
+  if (!options.apiKey || spans.length === 0) {
+    return null;
+  }
+  const questions: Record<string, Question> = {};
+  for (const span of spans.slice(0, 8)) {
+    const criteria: Record<string, string> = {};
+    for (const kind of span.kinds) {
+      criteria[kind] = describe(kind);
+    }
+    questions[span.key] = {
+      type: 'choice',
+      instructions: `In this text, what is "${text.slice(span.start, span.end)}" (characters ${span.start} to ${span.end})?`,
+      criteria,
+    };
+  }
+  const decideOptions: DecideOptions = { apiKey: options.apiKey, state: text, questions };
+  if (options.model) decideOptions.model = options.model;
+  if (options.fetchImpl) decideOptions.fetchImpl = options.fetchImpl;
+  const decision = await decide(decideOptions);
+  if (!decision) {
+    return null;
+  }
+  const answers: Record<string, { kind: string; confidence: number; probabilities: Record<string, number> }> = {};
+  for (const [key, answer] of Object.entries(decision.answers)) {
+    if (answer.type === 'choice') {
+      answers[key] = { kind: answer.choice, confidence: answer.confidence, probabilities: answer.probabilities };
+    }
+  }
+  return { answers, costMicro: costMicroOf(decision.usage) };
 }
 
 function costMicroOf(usage: DecisionUsage): number {

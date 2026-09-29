@@ -1,39 +1,57 @@
 import type { Chip } from '@shared/chips';
+import type { GlossaryTerm } from '@shared/ui';
 import { ROUTER_URL } from './routerClient';
+import { cachedRouterHealth } from './routerHealth';
+
+export interface RemoteTagResult {
+  text: string;
+  chips: Chip[];
+  costMicro: number;
+  jev: boolean;
+}
 
 /**
- * The model tagger hook: asks the router's tagger tier (google/gemini-2.5-flash-lite)
- * for chips as JSON. Off by default; the dev panel toggles it. Local chips win on
- * overlap so the heuristic tagger stays the source of certainty.
+ * Asks the router's tagger tier (google/gemini-2.5-flash-lite, strict JSON
+ * schema) for chips, merged there with our local chips and the box glossary,
+ * with Jev settling spans that stay ambiguous. On by default; silently local
+ * only when no router is reachable.
  */
-export async function tagRemote(text: string, signal?: AbortSignal): Promise<Chip[]> {
+export async function tagRemote(
+  text: string,
+  local: Chip[],
+  glossary: GlossaryTerm[],
+  signal?: AbortSignal,
+): Promise<RemoteTagResult | null> {
+  if (cachedRouterHealth().state !== 'ok') {
+    return null;
+  }
   try {
     const init: RequestInit = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({
+        text,
+        local,
+        glossary: glossary.map((term) => ({ text: term.text, type: term.type, note: term.note, case_sensitive: term.case_sensitive })),
+      }),
     };
     if (signal) {
       init.signal = signal;
     }
     const response = await fetch(`${ROUTER_URL}/tag`, init);
     if (!response.ok) {
-      return [];
+      return null;
     }
-    const body = (await response.json()) as { chips?: Chip[] };
-    return Array.isArray(body.chips) ? body.chips : [];
+    const body = (await response.json()) as { chips?: Chip[]; cost_micro?: number; jev?: { used: boolean } };
+    return {
+      text,
+      chips: Array.isArray(body.chips) ? body.chips : [],
+      costMicro: body.cost_micro ?? 0,
+      jev: Boolean(body.jev?.used),
+    };
   } catch {
-    return [];
+    return null;
   }
 }
 
-export function mergeChips(local: Chip[], remote: Chip[]): Chip[] {
-  const merged = [...local];
-  for (const chip of remote) {
-    const overlaps = merged.some((existing) => chip.start < existing.end && chip.end > existing.start);
-    if (!overlaps) {
-      merged.push(chip);
-    }
-  }
-  return merged.sort((a, b) => a.start - b.start);
-}
+export { mergeChips } from '@shared/chips';

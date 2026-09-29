@@ -11,3 +11,5 @@
 **Data.** Lines (`kind`, `text`, `chips_json`) and a session are written to the store on open/send; presence is touched on open; one ledger `charge` entry is chained per successful model call.
 
 **i18n keys.** `box.*`, `topbar.*`, `sidebar.*`, `composer.*`, `suggest.*`, `doodle.*`, `system.*`, `dev.*` (dev panel), `notWired*`.
+
+**Pass 4 (2026-09-29).** The sidebar shows the box's menu tree (`nav-tree`, rows 44 px, arrow keys move, Right/Left expand and collapse) above the box list. Every prompt can edit the interface: the router's ops are applied through `store.applyOps` and the reply shows a header line, typed blocks, a diff, and "Edited: … · Undo". Chips appear in a tray under the composer; click (or focus + Enter) opens the chip popover. Ctrl/Cmd+Z undoes the last edit when focus is outside a field or the composer is empty. Pages the box creates open at `/page/:id` (`page-view`). New i18n keys: `chips.*`, `chipKind.*`, `nav.*`, `edits.*`, `reply.local`, `page.missing`. New actions: `plan.open`, `edit.undo`, `edit.redo`, `nav.open`, `chip.edit`.

@@ -131,7 +131,7 @@ export function balanceMicro(entries: Entry[]): number {
   for (const entry of entries) {
     if (entry.kind === 'charge') {
       total -= entry.price_micro;
-    } else {
+    } else if (entry.kind === 'credit' || entry.kind === 'settle') {
       total += entry.price_micro;
     }
   }

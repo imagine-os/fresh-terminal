@@ -1,11 +1,21 @@
-import { segment, type Chip, type ChipKind } from '@shared/chips';
+import { isAmbiguous, segment, type Chip, type ChipKind } from '@shared/chips';
 
-const ICONS: Record<ChipKind, string> = {
-  date: '◷',
+export const CHIP_ICONS: Record<ChipKind, string> = {
   action: '▶',
-  list: '≡',
+  date: '◷',
+  time: '⏱',
+  person: '☺',
+  org: '▣',
+  place: '⌖',
   object: '“”',
   variable: '$',
+  list: '≡',
+  number: '#',
+  money: '¤',
+  url: '↗',
+  page: '▭',
+  nav: '☰',
+  theme: '◐',
   entity: '◆',
 };
 
@@ -14,6 +24,15 @@ interface Props {
   chips: Chip[];
   /** Renders a trailing cursor element (used by the composer mirror). */
   cursor?: boolean;
+}
+
+export function chipTitle(chip: Chip): string {
+  const readings = [`${chip.kind}${chip.p !== undefined ? ` ${Math.round(chip.p * 100)}%` : ''}`];
+  for (const alternative of chip.alternatives ?? []) {
+    readings.push(`${alternative.kind} ${Math.round(alternative.p * 100)}%`);
+  }
+  const who = chip.source === 'user' ? ' · set by you' : chip.source === 'glossary' ? ' · from this box glossary' : '';
+  return `${readings.join(' or ')}${who}${chip.note ? ` · ${chip.note}` : ''}`;
 }
 
 /** Renders text with chips inline as pills. Pure; the source text is untouched. */
@@ -25,11 +44,23 @@ export function ChipText({ text, chips, cursor = false }: Props) {
         part.type === 'text' ? (
           <span key={index}>{part.text}</span>
         ) : (
-          <span key={index} className="chip" data-kind={part.chip.kind} title={part.chip.kind}>
+          <span
+            key={index}
+            className="chip"
+            data-kind={part.chip.kind}
+            data-ambiguous={isAmbiguous(part.chip) ? 'true' : undefined}
+            data-source={part.chip.source}
+            title={chipTitle(part.chip)}
+          >
             <span className="chip-icon" aria-hidden="true">
-              {ICONS[part.chip.kind]}
+              {CHIP_ICONS[part.chip.kind]}
             </span>
             {part.chip.text}
+            {isAmbiguous(part.chip) ? (
+              <span className="chip-q" aria-hidden="true">
+                ?
+              </span>
+            ) : null}
           </span>
         ),
       )}

@@ -1,5 +1,6 @@
 import type { Chip } from '@shared/chips';
-import { parseDialect, printDialect, type ShellRegion } from '@shared/dialect';
+import { mergeDialect } from '@shared/dialect';
+import type { Op } from '@shared/ops';
 import { SEED_THEMES } from '@shared/themes';
 import { revealFor, type RevealPattern } from '@shared/starters';
 import type { StringKey } from '../i18n/strings';
@@ -10,8 +11,7 @@ export type LocalCommand =
   | { kind: 'text'; text: string; reveal: RevealPattern; speak?: boolean }
   | { kind: 'create-box'; name: string }
   | { kind: 'draw'; component: 'dashboard' | 'login' | 'plan-kanban'; reveal: RevealPattern; wired: boolean }
-  | { kind: 'theme'; themeId: string }
-  | { kind: 'dialect'; text: string }
+  | { kind: 'ops'; ops: Op[]; openPage?: string }
   | { kind: 'lang'; lang: 'en' | 'es' }
   | { kind: 'verify-chain' };
 
@@ -22,13 +22,6 @@ export interface LocalContext {
   actionIntents: string[];
 }
 
-const REGION_WORDS: Record<string, ShellRegion> = {
-  'top bar': 'topBar',
-  'bottom bar': 'bottomBar',
-  'left sidebar': 'leftSidebar',
-  'right sidebar': 'rightSidebar',
-  stage: 'stage',
-};
 
 /**
  * Intents answered locally so the product works with no router and no key.
@@ -60,12 +53,23 @@ export function matchLocalCommand(text: string, chips: Chip[], context: LocalCon
     return { kind: 'system', key: 'system.settings', reveal };
   }
 
-  const makePage = /^make (?:a )?(?:page|box) (?:called|named) /.exec(lower);
-  if (makePage !== null) {
+  const makeThing = /^make (?:a )?(page|box) (?:called|named) /.exec(lower);
+  if (makeThing !== null) {
     const object = chips.find((chip) => chip.kind === 'object' && chip.value);
-    const name = object?.value ?? trimmed.slice(makePage[0].length).replace(/^["'“]|["'”]$/g, '');
-    if (name.trim().length > 0) {
-      return { kind: 'create-box', name: name.trim() };
+    const name = (object?.value ?? trimmed.slice(makeThing[0].length).replace(/^["'“]|["'”]$/g, '')).trim();
+    if (name.length > 0 && makeThing[1] === 'box') {
+      return { kind: 'create-box', name };
+    }
+    if (name.length > 0) {
+      // A real page in this box, linked from the sidebar.
+      return {
+        kind: 'ops',
+        ops: [
+          { op: 'page.create', title: name, blocks: [{ kind: 'heading', text: name, level: 1 }] },
+          { op: 'nav.add', label: name, target: { kind: 'page', ref: name } },
+        ],
+        openPage: name,
+      };
     }
   }
 
@@ -86,23 +90,19 @@ export function matchLocalCommand(text: string, chips: Chip[], context: LocalCon
       (candidate) => candidate.name.toLowerCase() === wanted || candidate.id === wanted.replace(/\s+/g, '-'),
     );
     if (theme) {
-      return { kind: 'theme', themeId: theme.id };
+      return { kind: 'ops', ops: [{ op: 'theme.set', theme_id: theme.id }] };
     }
     return { kind: 'text', text: `No theme called "${wanted}". Themes: ${SEED_THEMES.map((t) => t.name).join(', ')}.`, reveal: 'typewriter' };
   }
 
-  const setDialect = /^set (top bar|bottom bar|left sidebar|right sidebar|stage): (.+)$/.exec(lower);
+  const setDialect = /^set (top bar|bottom bar|left sidebar|right sidebar|sidebar|stage): (.+)$/.exec(lower);
   if (setDialect !== null) {
-    const region = REGION_WORDS[setDialect[1] ?? ''];
     const statement = `${setDialect[1]}: ${setDialect[2]}.`;
-    const parsedStatement = parseDialect(statement);
-    if (region === undefined || parsedStatement.issues.some((issue) => issue.message.startsWith('Unknown'))) {
-      const reasons = parsedStatement.issues.map((issue) => issue.message).join('; ');
-      return { kind: 'text', text: `Could not read that dialect: ${reasons || 'unknown region'}.`, reveal: 'typewriter' };
+    const checked = mergeDialect(context.dialectText, statement);
+    if (checked.issues.length > 0) {
+      return { kind: 'text', text: `Could not read that dialect: ${checked.issues.map((issue) => issue.message).join('; ')}.`, reveal: 'typewriter' };
     }
-    const current = parseDialect(context.dialectText).spec;
-    current.regions[region] = parsedStatement.spec.regions[region];
-    return { kind: 'dialect', text: printDialect(current) };
+    return { kind: 'ops', ops: [{ op: 'shell.set', dialect_text: statement }] };
   }
 
   if (/^charge me nothing/.test(lower)) {

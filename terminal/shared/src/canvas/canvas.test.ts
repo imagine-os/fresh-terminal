@@ -11,6 +11,7 @@ describe('canvas cards', () => {
       'docs-start-here',
       'first-box',
       'koi-pond',
+      'canon',
     ]);
     for (const card of SEED_CARDS) {
       expect(cardSchema.safeParse(card).success).toBe(true);
@@ -19,6 +20,8 @@ describe('canvas cards', () => {
       title: 'Library of terminals',
       href: 'pages/library.html',
     });
+    expect(SEED_CARDS.find((card) => card.id === 'koi-pond')?.href).toBe('pages/koi.html');
+    expect(SEED_CARDS.find((card) => card.id === 'canon')).toMatchObject({ kind: 'doc', thickness_mm: 1 });
   });
 
   it('gives paper 1 mm and images 10 mm by default', () => {

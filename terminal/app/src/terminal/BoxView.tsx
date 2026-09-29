@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { localTagger, type Chip } from '@shared/chips';
+import type { Change, Op } from '@shared/ops';
+import type { Reply, ReplyBlock, ReplyMeta } from '@shared/reply';
 import { PRODUCT_NAME, PRODUCT_VERSION, REPO_URL } from '@shared/brand';
 import type { Theme } from '@shared/themes';
 import { verifyLedger } from '@shared/ledger';
@@ -12,15 +14,19 @@ import { speechRecognitionCtor, type VoiceSessionSummary } from '../voice';
 import { useVoice, type VoiceControls } from '../voice/useVoice';
 import { readOwnKey } from '../settings/ownKey';
 import { store, useStoreSnapshot, type Box } from '../store';
+import type { GlossaryTerm } from '@shared/ui';
+import type { ChipDecision, ChipRecords } from './ChipPopover';
 import { Composer } from './Composer';
 import { Doodles } from './Doodles';
 import { Transcript } from './Transcript';
 
 export interface AppCommands {
-  setTheme: (id: string) => void;
-  setDialect: (text: string) => void;
   setLang: (lang: 'en' | 'es') => void;
+  /** The layout text in effect for this box. */
   dialectText: string;
+  /** The theme in effect for this box (its own, or the visitor default). */
+  effectiveThemeId: string;
+  openPage: (pageId: string) => void;
   payMode: 'ours' | 'own';
   modelTagger: boolean;
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
@@ -36,6 +42,56 @@ interface Props {
   showNewBoxDoodle: boolean;
   onOpenBox: (id: string) => void;
   commands: AppCommands;
+}
+
+/** Turns applied changes into a diff block (before → after per record). */
+function sentences(text: string): string[] {
+  return text
+    .split(/(?<=\.)\s+|\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+/** Multi-sentence values (the layout) show only the sentences that changed. */
+function diffRows(change: Change): Array<{ label: string; before: string | null; after: string | null }> {
+  const clip = (value: string | null) => (value === null ? null : value.slice(0, 400));
+  if (change.before !== null && change.after !== null) {
+    const before = sentences(change.before);
+    const after = sentences(change.after);
+    if (before.length > 1 || after.length > 1) {
+      const removed = before.filter((line) => !after.includes(line));
+      const added = after.filter((line) => !before.includes(line));
+      const count = Math.max(removed.length, added.length);
+      return Array.from({ length: count }, (_, index) => ({
+        label: change.region,
+        before: clip(removed[index] ?? null),
+        after: clip(added[index] ?? null),
+      }));
+    }
+  }
+  return [{ label: change.region, before: clip(change.before), after: clip(change.after) }];
+}
+
+function diffBlock(changes: Change[]): ReplyBlock | null {
+  const rows = changes
+    .filter((change) => change.before !== null || change.after !== null)
+    .flatMap(diffRows)
+    .slice(0, 30);
+  return rows.length > 0 ? { kind: 'diff', rows } : null;
+}
+
+/** Orders a reply: model blocks, then diff and edits, then next last. */
+function assemble(meta: ReplyMeta | null, modelBlocks: ReplyBlock[], batch: { id: string; summary: string; changes: Change[] } | null, extra: ReplyBlock[] = []): Reply {
+  const next = modelBlocks.filter((block) => block.kind === 'next');
+  const rest = modelBlocks.filter((block) => block.kind !== 'next');
+  const blocks: ReplyBlock[] = [...rest, ...extra];
+  if (batch) {
+    const diff = diffBlock(batch.changes);
+    if (diff) blocks.push(diff);
+    blocks.push({ kind: 'edits', batch_id: batch.id, summary: batch.summary });
+  }
+  blocks.push(...next);
+  return { meta, blocks };
 }
 
 /**
@@ -114,6 +170,16 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
 
   const voiceAvailable = commands.voiceProvider === 'webspeech' ? speechRecognitionCtor() !== null : true;
 
+  const records = useMemo<ChipRecords>(
+    () => ({
+      pages: snapshot.pages.filter((page) => page.box_id === box.id).map((page) => ({ id: page.id, title: page.title })),
+      nav: snapshot.navItems.filter((item) => item.box_id === box.id).map((item) => ({ id: item.id, label: item.label })),
+      themes: snapshot.themes.map((candidate) => ({ id: candidate.id, name: candidate.name })),
+    }),
+    [snapshot.pages, snapshot.navItems, snapshot.themes, box.id],
+  );
+  const glossary = useMemo(() => snapshot.glossary.filter((term) => term.box_id === box.id), [snapshot.glossary, box.id]);
+
   const lines = useMemo(() => snapshot.lines.filter((line) => line.box_id === box.id), [snapshot.lines, box.id]);
   const isEmpty = lines.length === 0;
 
@@ -163,14 +229,23 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               { component: local.component, reveal: local.reveal },
             );
             return;
-          case 'theme':
-            commands.setTheme(local.themeId);
-            store.appendLine(box.id, 'system', `Theme: ${local.themeId}.`, [], { reveal: 'none' });
+          case 'ops': {
+            const started = performance.now();
+            const applied = store.applyOps(box.id, local.ops, 'local');
+            const meta: ReplyMeta = { intent: 'edit_ui', model: '', ms: performance.now() - started, cost_micro: 0, source: 'local' };
+            if (!applied.ok) {
+              store.appendLine(box.id, 'assistant', applied.reason, [], { reply: { meta, blocks: [{ kind: 'error', text: applied.reason }] } });
+              return;
+            }
+            store.appendLine(box.id, 'assistant', applied.batch.summary, [], {
+              reply: assemble(meta, [{ kind: 'summary', text: applied.batch.summary.replace(/^Edited: /, '') }], applied.batch),
+            });
+            if (local.openPage) {
+              const page = store.getSnapshot().pages.find((candidate) => candidate.box_id === box.id && candidate.title === local.openPage);
+              if (page) commands.openPage(page.id);
+            }
             return;
-          case 'dialect':
-            commands.setDialect(local.text);
-            store.appendLine(box.id, 'system', local.text, [], { reveal: 'typewriter' });
-            return;
+          }
           case 'lang':
             commands.setLang(local.lang);
             store.appendLine(
@@ -195,44 +270,84 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       }
 
       setBusy(true);
+      const started = performance.now();
       const reply = store.appendLine(box.id, 'assistant', '', []);
       let assembled = '';
+      let modelBlocks: ReplyBlock[] = [];
+      let batch: { id: string; summary: string; changes: Change[] } | null = null;
+      const extra: ReplyBlock[] = [];
+      let intent = 'chat';
       const history = lines
         .filter((line) => line.kind !== 'system')
         .slice(-12)
         .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
+      const boxSnapshot = store.snapshotFor(box.id, commands.effectiveThemeId);
 
       const handlers: RouteHandlers = {
-          onDelta: (delta) => {
-            assembled += delta;
-            store.updateLine(reply.id, assembled, true);
-          },
-          onDone: (done) => {
-            store.updateLine(reply.id, assembled, false);
-            if (done.entry) {
-              const { owner_identity: _ignored, ...draft } = done.entry;
-              store.appendEntry(draft);
+        onMeta: (meta) => {
+          intent = meta.routing?.intent ?? meta.route.intent;
+        },
+        onDelta: (delta) => {
+          assembled += delta;
+          store.updateLine(reply.id, assembled, true);
+        },
+        onOps: (payload) => {
+          if (payload.ops.length === 0) {
+            if (payload.rejected.length > 0) {
+              extra.push({ kind: 'error', text: payload.rejected.join('; ').slice(0, 600) });
             }
-          },
-          onFail: (failure) => {
-            store.updateLine(reply.id, assembled, false);
-            let message: string;
-            if (failure.kind === 'no-router') {
-              message = t('system.noRouter');
-            } else if (failure.kind === 'no-key') {
-              message = t('system.noKey');
-            } else if (failure.kind === 'pending') {
-              message = t('system.pending', { note: failure.note });
-            } else {
-              message = t('system.error', { message: failure.message });
-            }
-            store.appendLine(box.id, 'system', message, []);
-          },
+            return;
+          }
+          const applied = store.applyOps(box.id, payload.ops as Op[], 'assistant');
+          if (applied.ok) {
+            batch = { id: applied.batch.id, summary: applied.batch.summary, changes: applied.batch.changes };
+          } else {
+            extra.push({ kind: 'error', text: `Not applied: ${applied.reason}` });
+          }
+        },
+        onReply: (blocks) => {
+          modelBlocks = blocks;
+        },
+        onDone: (done) => {
+          if (done.entry) {
+            const { owner_identity: _ignored, ...draft } = done.entry;
+            store.appendEntry(draft);
+          }
+          const meta: ReplyMeta = {
+            intent,
+            model: done.served_model,
+            ms: performance.now() - started,
+            cost_micro: done.entry?.price_micro ?? 0,
+          };
+          const summaryText = modelBlocks.find((block) => block.kind === 'summary');
+          const text = summaryText && summaryText.kind === 'summary' ? summaryText.text : assembled || batch?.summary || '';
+          store.updateLine(reply.id, text, false);
+          const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
+          store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
+        },
+        onFail: (failure) => {
+          store.updateLine(reply.id, assembled, false);
+          let message: string;
+          if (failure.kind === 'no-router') {
+            message = t('system.noRouter');
+          } else if (failure.kind === 'no-key') {
+            message = t('system.noKey');
+          } else if (failure.kind === 'pending') {
+            message = t('system.pending', { note: failure.note });
+          } else {
+            message = t('system.error', { message: failure.message });
+          }
+          store.appendLine(box.id, 'system', message, []);
+        },
       };
       const ownKey = commands.payMode === 'own' ? readOwnKey() : '';
       if (ownKey) {
         // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
-        await streamDirect({ boxId: box.id, text, chips, history }, { apiKey: ownKey, referer: window.location.origin }, handlers);
+        await streamDirect(
+          { boxId: box.id, text, chips, history, snapshot: boxSnapshot },
+          { apiKey: ownKey, referer: window.location.origin },
+          handlers,
+        );
       } else {
         // Never POST to a static host: a missing router used to surface as "HTTP 405".
         const health = await probeRouter();
@@ -242,7 +357,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
           setBusy(false);
           return;
         }
-        await streamRoute({ boxId: box.id, text, chips, history }, handlers);
+        await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers);
       }
       setBusy(false);
     },
@@ -303,6 +418,16 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         busy={busy}
         onSend={onSend}
         modelTagger={commands.modelTagger}
+        records={records}
+        glossary={glossary}
+        onTeach={(term) => {
+          const taught = store.applyOps(box.id, [{ op: 'glossary.add', text: term.text, type: term.type, note: term.note, case_sensitive: term.case_sensitive }], 'chip');
+          if (taught.ok) {
+            store.appendLine(box.id, 'system', taught.batch.summary, [], {
+              reply: assemble(null, [], { id: taught.batch.id, summary: taught.batch.summary, changes: taught.batch.changes }),
+            });
+          }
+        }}
         voice={voice}
         voiceMode={commands.voiceMode}
         voiceAvailable={voiceAvailable}
@@ -324,6 +449,9 @@ function ComposerSlot(props: {
   boxId: string;
   theme: Theme;
   modelTagger: boolean;
+  records: ChipRecords;
+  glossary: GlossaryTerm[];
+  onTeach: (term: NonNullable<ChipDecision['teach']>) => void;
   voice: VoiceControls;
   voiceMode: 'toggle' | 'hold';
   voiceAvailable: boolean;
@@ -347,6 +475,9 @@ function ComposerSlot(props: {
       cursor={props.theme.cursor}
       themeId={props.theme.id}
       modelTagger={props.modelTagger}
+      records={props.records}
+      glossary={props.glossary}
+      onTeach={props.onTeach}
       voice={props.voice}
       voiceMode={props.voiceMode}
       voiceAvailable={props.voiceAvailable}

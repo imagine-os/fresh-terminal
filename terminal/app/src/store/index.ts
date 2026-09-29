@@ -19,4 +19,4 @@ export function useStoreSnapshot(): StoreSnapshot {
   );
 }
 
-export type { Box, Line, LineKind, LineOptions, Owner, Presence, RouteRule, Session, Store, StoreSnapshot } from './types';
+export type { Box, EditBatch, EditResult, EditSource, Line, LineKind, LineOptions, Owner, Presence, RouteRule, Session, Store, StoreSnapshot } from './types';

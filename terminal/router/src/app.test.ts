@@ -111,7 +111,7 @@ describe('router app', () => {
       const body = JSON.parse(String(init?.body)) as { model: string };
       expect(body.model).toBe('google/gemini-2.5-flash-lite');
       return new Response(
-        JSON.stringify({ id: 'gen-t', model: 'google/gemini-2.5-flash-lite', choices: [{ message: { content: JSON.stringify({ chips: [{ kind: 'date', start: 5, end: 13, text: 'tomorrow' }] }) } }], usage: { cost: 0.000002 } }),
+        JSON.stringify({ id: 'gen-t', model: 'google/gemini-2.5-flash-lite', choices: [{ message: { content: JSON.stringify({ chips: [{ kind: 'date', start: 5, end: 13, text: 'tomorrow', value: '', p: 0.9, alternatives: [] }] }) } }], usage: { cost: 0.000002 } }),
         { status: 200 },
       );
     };
@@ -239,5 +239,148 @@ describe('realtime voice sessions', () => {
     const custom = createApp({ bindings: () => ({ ALLOWED_ORIGINS: 'https://a.test, https://b.test' }) });
     const b = await custom.request('/health', { headers: { Origin: 'https://b.test' } });
     expect(b.headers.get('access-control-allow-origin')).toBe('https://b.test');
+  });
+});
+
+function sseLines(lines: string[]): Response {
+  const encoder = new TextEncoder();
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        for (const line of lines) controller.enqueue(encoder.encode(`${line}\n\n`));
+        controller.close();
+      },
+    }),
+    { status: 200 },
+  );
+}
+
+function toolCallStream(model: string, calls: Array<{ name: string; args: object }>, cost: number): Response {
+  const lines = calls.map((call, index) =>
+    `data: ${JSON.stringify({ id: 'gen-edit', model, choices: [{ delta: { tool_calls: [{ index, id: `toolu_${index}`, type: 'function', function: { name: call.name, arguments: JSON.stringify(call.args) } }] } }] })}`,
+  );
+  lines.push(`data: ${JSON.stringify({ model, choices: [{ delta: {}, finish_reason: 'tool_calls' }], usage: { prompt_tokens: 1500, completion_tokens: 120, total_tokens: 1620, cost } })}`);
+  lines.push('data: [DONE]');
+  return sseLines(lines);
+}
+
+const SNAPSHOT = {
+  box: { id: 'b1', name: 'First box' },
+  nav: [{ id: 'nav-lib', box_id: 'b1', parent_id: null, label: 'Library', target: { kind: 'url', ref: 'pages/library.html' }, order: 0, created_at: 1, updated_at: 1 }],
+  pages: [],
+  boxUi: { box_id: 'b1', dialect_text: null, theme_id: null, style: {}, seeded: true, updated_at: 1 },
+  themes: [{ id: 'void', name: 'Void' }, { id: 'glass-window', name: 'Glass Window' }],
+  actions: [{ id: 'canvas.open', intent: 'open the canvas' }],
+  boxes: [{ id: 'b1', name: 'First box' }],
+  starters: [],
+  cards: [],
+  glossary: [],
+  effectiveThemeId: 'void',
+};
+
+function eventData(text: string, name: string): unknown {
+  const lines = text.split('\n');
+  const index = lines.findIndex((line) => line === `event: ${name}`);
+  return index === -1 ? null : JSON.parse((lines[index + 1] ?? '').slice(5));
+}
+
+describe('self-editing /route', () => {
+  it('streams an ops batch and structured reply from tool calls, and charges the whole turn', async () => {
+    const chatBodies: Array<{ model: string; tools?: unknown[]; messages: Array<{ role: string; content: string }> }> = [];
+    const fakeFetch: typeof fetch = async (url, init) => {
+      if (String(url).includes('/decisions')) {
+        return new Response(
+          JSON.stringify({ id: 'gen-dec', model: 'typesafe/jev-1.13', answers: { intent: { type: 'choice', choice: 'edit_ui', confidence: 0.92, probabilities: { edit_ui: 0.95 } } }, usage: { input_tokens: 90, output_tokens: 2, cost: 0.00002 } }),
+          { status: 200 },
+        );
+      }
+      chatBodies.push(JSON.parse(String(init?.body)));
+      return toolCallStream(
+        'anthropic/claude-haiku-4.5',
+        [
+          { name: 'nav_add', args: { label: 'Projects' } },
+          { name: 'nav_add', args: { label: 'Koi Pond', parent: 'Projects', target: { kind: 'url', ref: 'pages/koi.html' } } },
+          { name: 'respond', args: { blocks: [{ kind: 'summary', text: 'Added Projects with Koi Pond under it.' }, { kind: 'next', commands: ['rename Projects to Work'] }] } },
+        ],
+        0.0021,
+      );
+    };
+    const app = createApp({ bindings: () => ({ OPENROUTER_API_KEY: 'k' }), fetchImpl: fakeFetch, now: () => 1 });
+    const response = await app.request('/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ boxId: 'b1', text: 'Add a Projects menu with Koi Pond under it', chips: [{ kind: 'org', start: 0, end: 3, text: 'Add', source: 'user' }], snapshot: SNAPSHOT }),
+    });
+    expect(response.status).toBe(200);
+    const text = await response.text();
+    const ops = eventData(text, 'ops') as { ops: Array<{ op: string; label: string }>; changes: Array<{ text: string }>; rejected: string[] };
+    expect(ops.ops.map((op) => op.label)).toEqual(['Projects', 'Koi Pond']);
+    expect(ops.changes[1]?.text).toBe("added 'Koi Pond' under 'Projects' in the sidebar");
+    const reply = eventData(text, 'reply') as { blocks: Array<{ kind: string }> };
+    expect(reply.blocks.map((block) => block.kind)).toEqual(['summary', 'next']);
+    const done = eventData(text, 'done') as { entry: { cost_micro: number; model: string }; routing: { intent: string } };
+    expect(done.routing.intent).toBe('edit_ui');
+    expect(done.entry.cost_micro).toBe(2100 + 20);
+    expect(done.entry.model).toBe('anthropic/claude-haiku-4.5');
+    // The model saw the box state, the no-files rule, typed chips and the tools.
+    const body = chatBodies[0]!;
+    expect(body.model).toBe('anthropic/claude-haiku-4.5');
+    expect(body.messages[0]?.content).toContain('Never tell the user to edit files');
+    expect(body.messages[0]?.content).toContain('"sidebar_menu"');
+    expect(body.messages[body.messages.length - 1]?.content).toContain('"source":"user"');
+    expect((body.tools ?? []).length).toBeGreaterThan(10);
+  });
+
+  it('starts on the escalation model when Jev is unsure the request is an edit', async () => {
+    const models: string[] = [];
+    const fakeFetch: typeof fetch = async (url, init) => {
+      if (String(url).includes('/decisions')) {
+        return new Response(JSON.stringify({ id: 'd', model: 'typesafe/jev-1.13', answers: { intent: { type: 'choice', choice: 'edit_ui', confidence: 0.45, probabilities: {} } }, usage: { input_tokens: 1, output_tokens: 0, cost: 0 } }), { status: 200 });
+      }
+      models.push((JSON.parse(String(init?.body)) as { model: string }).model);
+      return toolCallStream('anthropic/claude-sonnet-5.5', [{ name: 'respond', args: { blocks: [{ kind: 'summary', text: 'ok' }] } }], 0.001);
+    };
+    const app = createApp({ bindings: () => ({ OPENROUTER_API_KEY: 'k' }), fetchImpl: fakeFetch });
+    const response = await app.request('/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ boxId: 'b1', text: 'make it nicer somehow', snapshot: SNAPSHOT }),
+    });
+    const text = await response.text();
+    expect(models).toEqual(['anthropic/claude-sonnet-5.5']);
+    expect((eventData(text, 'meta') as { escalated: boolean }).escalated).toBe(true);
+  });
+});
+
+describe('/tag with glossary and Jev disambiguation', () => {
+  it('settles an ambiguous Hoy with Jev and lets the glossary override outright', async () => {
+    const decisionBodies: Array<{ questions: Record<string, { criteria: Record<string, string> }> }> = [];
+    const fakeFetch: typeof fetch = async (url, init) => {
+      if (String(url).includes('/decisions')) {
+        decisionBodies.push(JSON.parse(String(init?.body)));
+        return new Response(
+          JSON.stringify({ id: 'd', model: 'typesafe/jev-1.13', answers: { chip_0: { type: 'choice', choice: 'org', confidence: 0.8, probabilities: { org: 0.86, date: 0.14 } } }, usage: { input_tokens: 60, output_tokens: 2, cost: 0.000004 } }),
+          { status: 200 },
+        );
+      }
+      return new Response(JSON.stringify({ id: 'gen-t', model: 'google/gemini-2.5-flash-lite', choices: [{ message: { content: JSON.stringify({ chips: [] }) } }], usage: { cost: 0.000001 } }), { status: 200 });
+    };
+    const app = createApp({ bindings: () => ({ OPENROUTER_API_KEY: 'k' }), fetchImpl: fakeFetch });
+    const local = [{ kind: 'date', start: 0, end: 3, text: 'Hoy', value: 'today', p: 0.55, alternatives: [{ kind: 'org', p: 0.45 }], source: 'local' }];
+    const settled = await app.request('/tag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: 'Hoy launches today', local }) });
+    const body = (await settled.json()) as { chips: Array<{ kind: string; p: number; alternatives?: Array<{ kind: string }> }>; jev: { used: boolean } };
+    expect(body.jev.used).toBe(true);
+    expect(body.chips[0]).toMatchObject({ kind: 'org', p: 0.86 });
+    expect(body.chips[0]?.alternatives?.[0]?.kind).toBe('date');
+    expect(Object.keys(decisionBodies[0]?.questions.chip_0?.criteria ?? {})).toEqual(['date', 'org']);
+
+    const taught = await app.request('/tag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Hoy launches hoy', local, glossary: [{ text: 'Hoy', type: 'org', case_sensitive: true }] }),
+    });
+    const taughtBody = (await taught.json()) as { chips: Array<{ kind: string; source: string; text: string }>; jev: { used: boolean } };
+    expect(taughtBody.chips.find((chip) => chip.text === 'Hoy')).toMatchObject({ kind: 'org', source: 'glossary' });
+    expect(taughtBody.jev.used).toBe(false);
   });
 });

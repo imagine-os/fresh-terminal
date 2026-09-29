@@ -44,6 +44,10 @@
     "openrouter/auto": {
       "input_micro_per_million": 1000000,
       "output_micro_per_million": 5000000
+    },
+    "anthropic/claude-sonnet-5.5": {
+      "input_micro_per_million": 2000000,
+      "output_micro_per_million": 10000000
     }
   },
   "realtime": {

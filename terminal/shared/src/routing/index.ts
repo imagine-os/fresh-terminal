@@ -11,6 +11,8 @@ export interface Tier {
   /** chat answers the user; decisions (Jev) and tagger never do. Default chat. */
   kind?: TierKind;
   alternate?: string;
+  /** Stronger model for retries and hard requests. */
+  escalate_model?: string;
   status?: 'pending' | 'live';
   note?: string;
 }
@@ -22,8 +24,15 @@ export interface RouteRule {
   margin_bp: number;
 }
 
+export interface EscalationRule {
+  min_confidence: number;
+  max_nav_items: number;
+  max_pages: number;
+}
+
 export interface RouteTable {
   default: string;
+  escalation?: EscalationRule;
   /** Extra model ids a request may pick explicitly. Tier models are always allowed. */
   allowed_models?: string[];
   tiers: Record<string, Tier>;
@@ -35,6 +44,7 @@ export interface ResolvedRoute {
   tier: string;
   kind: TierKind;
   model: string;
+  escalateModel?: string;
   permission: string;
   marginBasisPoints: number;
   pending: boolean;
@@ -115,6 +125,9 @@ export function resolveRoute(intent: string, table: RouteTable, overrides: TierO
   };
   if (tier.note !== undefined) {
     resolved.note = tier.note;
+  }
+  if (tier.escalate_model !== undefined && !overrides.requestedModel) {
+    resolved.escalateModel = tier.escalate_model;
   }
   return resolved;
 }

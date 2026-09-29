@@ -3,6 +3,7 @@
   "default": "chat",
   "allowed_models": [
     "anthropic/claude-haiku-4.5",
+    "anthropic/claude-sonnet-5.5",
     "anthropic/claude-sonnet-4.5",
     "anthropic/claude-opus-5",
     "anthropic/claude-fable-5.1",
@@ -13,12 +14,20 @@
     "fast": {
       "kind": "chat",
       "model": "anthropic/claude-haiku-4.5",
-      "note": "Fast chat tier. Set 2026-09-28 after openrouter/auto resolved to a reasoning model with ~2.5s to first token; awaiting Justin's confirmation."
+      "note": "Fast chat tier. Set 2026-09-28 after openrouter/auto resolved to a reasoning model with ~2.5s to first token; awaiting Justin's confirmation.",
+      "escalate_model": "anthropic/claude-sonnet-5.5"
     },
     "careful": {
       "kind": "chat",
       "model": "anthropic/claude-haiku-4.5",
-      "note": "Same as fast until per-tier models are confirmed."
+      "note": "Same as fast until per-tier models are confirmed.",
+      "escalate_model": "anthropic/claude-sonnet-5.5"
+    },
+    "editor": {
+      "kind": "chat",
+      "model": "anthropic/claude-haiku-4.5",
+      "escalate_model": "anthropic/claude-sonnet-5.5",
+      "note": "Edits the interface through the op tools. Escalates to Sonnet 5.5 when Jev is unsure the request is an edit (confidence < 0.6), when the box is large, or for the one retry after rejected ops."
     },
     "jev": {
       "kind": "decisions",
@@ -36,6 +45,12 @@
     {
       "intent": "chat",
       "tier": "fast",
+      "permission": "anyone",
+      "margin_bp": 0
+    },
+    {
+      "intent": "edit_ui",
+      "tier": "editor",
       "permission": "anyone",
       "margin_bp": 0
     },
@@ -105,5 +120,11 @@
       "permission": "anyone",
       "margin_bp": 0
     }
-  ]
+  ],
+  "escalation": {
+    "$comment": "When the editor tier starts on the escalation model.",
+    "min_confidence": 0.6,
+    "max_nav_items": 40,
+    "max_pages": 10
+  }
 }

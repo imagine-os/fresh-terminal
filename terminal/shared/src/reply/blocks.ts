@@ -1,0 +1,80 @@
+import { z } from 'zod';
+
+/**
+ * Super-CLI reply blocks. The model answers with these through the `respond`
+ * tool; the client adds `edits` and `diff` from what it actually applied.
+ */
+export const STEP_STATUSES = ['done', 'active', 'todo'] as const;
+
+export const replyBlockSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('summary'), text: z.string().min(1).max(300) }),
+  z.object({ kind: z.literal('kv'), rows: z.array(z.object({ key: z.string().max(60), value: z.string().max(300) })).min(1).max(30) }),
+  z.object({
+    kind: z.literal('table'),
+    columns: z.array(z.string().max(60)).min(1).max(10),
+    rows: z.array(z.array(z.string().max(200)).max(10)).max(50),
+  }),
+  z.object({ kind: z.literal('steps'), items: z.array(z.object({ status: z.enum(STEP_STATUSES), text: z.string().max(200) })).min(1).max(20) }),
+  z.object({ kind: z.literal('list'), items: z.array(z.string().max(300)).min(1).max(30) }),
+  z.object({ kind: z.literal('code'), lang: z.string().max(20).default(''), code: z.string().max(6000) }),
+  z.object({
+    kind: z.literal('diff'),
+    rows: z.array(z.object({ label: z.string().max(120), before: z.string().max(400).nullable(), after: z.string().max(400).nullable() })).min(1).max(30),
+  }),
+  z.object({ kind: z.literal('edits'), batch_id: z.string(), summary: z.string().max(600) }),
+  z.object({ kind: z.literal('next'), commands: z.array(z.string().min(1).max(80)).min(1).max(4) }),
+  z.object({ kind: z.literal('note'), text: z.string().min(1).max(600) }),
+  z.object({ kind: z.literal('error'), text: z.string().min(1).max(600) }),
+  z.object({ kind: z.literal('text'), text: z.string().max(8000) }),
+]);
+export type ReplyBlock = z.infer<typeof replyBlockSchema>;
+
+export interface ReplyMeta {
+  intent: string;
+  model: string;
+  ms: number;
+  cost_micro: number;
+  source?: 'jev' | 'rules' | 'local';
+}
+
+export interface Reply {
+  meta: ReplyMeta | null;
+  blocks: ReplyBlock[];
+}
+
+/** Blocks the model may send; `edits` is client-only. */
+export const MODEL_BLOCK_KINDS = ['summary', 'kv', 'table', 'steps', 'list', 'code', 'diff', 'next', 'note', 'error'] as const;
+
+/**
+ * Parses blocks leniently: invalid blocks are dropped with a reason, never
+ * fatal, so one bad table does not lose the whole reply.
+ */
+export function parseBlocks(raw: unknown): { blocks: ReplyBlock[]; dropped: string[] } {
+  const blocks: ReplyBlock[] = [];
+  const dropped: string[] = [];
+  const list = Array.isArray(raw) ? raw : [];
+  for (const item of list) {
+    const parsed = replyBlockSchema.safeParse(item);
+    if (parsed.success && parsed.data.kind !== 'edits') {
+      blocks.push(parsed.data);
+    } else {
+      const kind = typeof item === 'object' && item !== null && 'kind' in item ? String((item as { kind: unknown }).kind) : '?';
+      dropped.push(`block "${kind}": ${parsed.success ? 'edits blocks are added by the client' : parsed.error.issues[0]?.message ?? 'invalid'}`);
+    }
+  }
+  return { blocks, dropped };
+}
+
+/** Plain text fallback: the model streamed prose instead of calling respond. */
+export function textToBlocks(text: string): ReplyBlock[] {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return [];
+  }
+  const [first, ...rest] = trimmed.split(/\n+/);
+  const blocks: ReplyBlock[] = [{ kind: 'summary', text: (first ?? '').slice(0, 300) }];
+  if (rest.length > 0) {
+    blocks.push({ kind: 'text', text: rest.join('\n') });
+  }
+  return blocks;
+}

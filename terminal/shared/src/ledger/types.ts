@@ -9,10 +9,11 @@ export const MICRO_PER_DOLLAR = 1_000_000;
 /** One "credit" in the billing dialect is one cent. */
 export const CREDIT_MICRO = 10_000;
 
-export const ENTRY_KINDS = ['charge', 'credit', 'settle'] as const;
+/** edit = a change to the interface (price 0); it is on the chain so the activity feed is verifiable. */
+export const ENTRY_KINDS = ['charge', 'credit', 'settle', 'edit'] as const;
 export type EntryKind = (typeof ENTRY_KINDS)[number];
 
-export const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call', 'second'] as const;
+export const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call', 'second', 'op'] as const;
 export type UnitKind = (typeof UNIT_KINDS)[number];
 
 const integer = z.number().int().finite();

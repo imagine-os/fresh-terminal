@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { defaultSpecText } from '@shared/dialect';
 import { DEFAULT_THEME_ID, findTheme } from '@shared/themes';
 import type { Lang } from '../i18n/strings';
 import { readJson, writeJson } from '../lib/storage';
@@ -10,11 +9,10 @@ export interface Prefs {
   themeId: string;
   lang: Lang;
   devMode: boolean;
-  dialectText: string;
   leftOpen: boolean;
   /** 'ours' = our router and key (default); 'own' = the visitor's own OpenRouter key, browser-direct. */
   payMode: 'ours' | 'own';
-  /** Dev toggle: also ask the router's tagger tier for chips on keystroke pause. */
+  /** Ask the router's tagger tier for chips on keystroke pause (on by default since pass 4). */
   modelTagger: boolean;
   /** Voice provider and mic behaviour. */
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
@@ -28,10 +26,9 @@ const defaults: Prefs = {
   themeId: DEFAULT_THEME_ID,
   lang: 'en',
   devMode: false,
-  dialectText: defaultSpecText,
   leftOpen: false,
   payMode: 'ours',
-  modelTagger: false,
+  modelTagger: true,
   voiceProvider: 'webspeech',
   voiceMode: 'toggle',
 };
@@ -46,7 +43,9 @@ const PrefsContext = createContext<PrefsValue>({ prefs: defaults, set: () => {},
 
 function loadPrefs(): Prefs {
   const saved = readJson<Partial<Prefs>>(KEY, {});
-  const merged: Prefs = { ...defaults, ...saved };
+  // Layout text moved to the box store in pass 4 (box_ui.dialect_text).
+  const { dialectText: _legacy, ...rest } = saved as Partial<Prefs> & { dialectText?: string };
+  const merged: Prefs = { ...defaults, ...rest };
   if (merged.lang !== 'en' && merged.lang !== 'es') {
     merged.lang = 'en';
   }

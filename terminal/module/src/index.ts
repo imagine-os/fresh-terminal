@@ -45,6 +45,8 @@ const line = table(
     component: t.string(),
     /** Reveal pattern for the renderer ('' for default). */
     reveal: t.string(),
+    /** Structured reply (shared/reply Reply JSON), '' for plain text. */
+    blocks_json: t.string(),
     created_at: t.timestamp(),
   },
 );
@@ -145,7 +147,101 @@ const card = table(
   },
 );
 
-const spacetimedb = schema({ box, session, line, presence, route_rule, owner, entry, theme, card });
+/*
+ * Pass 4: the interface is data. Everything the UI shows for a box lives in
+ * these tables and changes only through ops (shared/src/ops). The client and
+ * router run the pure engine; these reducers store its results per record and
+ * keep the batch (ops + inverse) so undo works across devices.
+ */
+
+/** Sidebar menu item. parent_id '' = top level. target_json = shared NavTarget or ''. */
+const nav_item = table(
+  { name: 'nav_item', public: true },
+  {
+    id: t.string().primaryKey(),
+    box_id: t.u64().index('btree'),
+    parent_id: t.string(),
+    label: t.string(),
+    icon: t.string(),
+    target_json: t.string(),
+    order: t.f64(),
+    created_at: t.timestamp(),
+    updated_at: t.timestamp(),
+  },
+);
+
+/** A page built from blocks (shared/src/ui Block JSON). */
+const page = table(
+  { name: 'page', public: true },
+  {
+    id: t.string().primaryKey(),
+    box_id: t.u64().index('btree'),
+    title: t.string(),
+    blocks_json: t.string(),
+    created_at: t.timestamp(),
+    updated_at: t.timestamp(),
+  },
+);
+
+/** Per-box layout, theme and style token overrides. '' = product default. */
+const box_ui = table(
+  { name: 'box_ui', public: true },
+  {
+    box_id: t.u64().primaryKey(),
+    dialect_text: t.string(),
+    theme_id: t.string(),
+    style_json: t.string(),
+    updated_at: t.timestamp(),
+  },
+);
+
+/** "Always treat 'Hoy' as a brand in this box." Sent with every tagger and router call. */
+const glossary_term = table(
+  { name: 'glossary_term', public: true },
+  {
+    id: t.string().primaryKey(),
+    box_id: t.u64().index('btree'),
+    text: t.string(),
+    type: t.string(),
+    note: t.string(),
+    case_sensitive: t.bool(),
+    created_at: t.timestamp(),
+  },
+);
+
+/** One atomic edit: the ops applied and their inverse. state 'applied' | 'undone'. */
+const edit_batch = table(
+  { name: 'edit_batch', public: true },
+  {
+    id: t.string().primaryKey(),
+    box_id: t.u64().index('btree'),
+    owner_identity: t.identity().index('btree'),
+    ops_json: t.string(),
+    inverse_json: t.string(),
+    summary: t.string(),
+    source: t.string(),
+    state: t.string(),
+    created_at: t.timestamp(),
+    flipped_at: t.timestamp(),
+  },
+);
+
+const spacetimedb = schema({
+  box,
+  session,
+  line,
+  presence,
+  route_rule,
+  owner,
+  entry,
+  theme,
+  card,
+  nav_item,
+  page,
+  box_ui,
+  glossary_term,
+  edit_batch,
+});
 export default spacetimedb;
 
 const LINE_KINDS = ['user', 'assistant', 'system'];
@@ -180,8 +276,9 @@ export const append_line = spacetimedb.reducer(
     chips_json: t.string(),
     component: t.string(),
     reveal: t.string(),
+    blocks_json: t.string(),
   },
-  (ctx, { box_id, kind, text, chips_json, component, reveal }) => {
+  (ctx, { box_id, kind, text, chips_json, component, reveal, blocks_json }) => {
     const found = ctx.db.box.id.find(box_id);
     if (!found) {
       throw new SenderError('Box not found');
@@ -197,6 +294,7 @@ export const append_line = spacetimedb.reducer(
       chips_json,
       component,
       reveal,
+      blocks_json,
       created_at: ctx.timestamp,
     });
     found.updated_at = ctx.timestamp;
@@ -248,8 +346,8 @@ export const set_on_chain = spacetimedb.reducer({ on_chain: t.bool() }, (ctx, { 
   }
 });
 
-const ENTRY_KINDS = ['charge', 'credit', 'settle'];
-const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call', 'second'];
+const ENTRY_KINDS = ['charge', 'credit', 'settle', 'edit'];
+const UNIT_KINDS = ['token_in', 'token_out', 'byte', 'call', 'second', 'op'];
 const HEX_64 = /^[0-9a-f]{64}$/;
 
 export const append_entry = spacetimedb.reducer(
@@ -365,3 +463,158 @@ export const move_card = spacetimedb.reducer({ id: t.string(), x: t.f64(), y: t.
   existing.updated_at = ctx.timestamp;
   ctx.db.card.id.update(existing);
 });
+
+// ---------- pass 4: interface records ----------
+
+type Ctx = Parameters<Parameters<typeof spacetimedb.reducer>[1]>[0];
+
+function ownedBox(ctx: Ctx, box_id: bigint) {
+  const found = ctx.db.box.id.find(box_id);
+  if (!found) {
+    throw new SenderError('Box not found');
+  }
+  if (!found.owner_identity.isEqual(ctx.sender)) {
+    throw new SenderError('Only the box owner can edit its interface');
+  }
+  return found;
+}
+
+function limit(value: string, max: number, what: string): void {
+  if (value.length > max) {
+    throw new SenderError(`${what} is too long`);
+  }
+}
+
+export const upsert_nav_item = spacetimedb.reducer(
+  { id: t.string(), box_id: t.u64(), parent_id: t.string(), label: t.string(), icon: t.string(), target_json: t.string(), order: t.f64() },
+  (ctx, args) => {
+    ownedBox(ctx, args.box_id);
+    if (args.label.trim().length === 0) {
+      throw new SenderError('Menu label cannot be empty');
+    }
+    limit(args.label, 60, 'Menu label');
+    limit(args.target_json, 600, 'Menu target');
+    if (args.parent_id !== '' && args.parent_id === args.id) {
+      throw new SenderError('A menu item cannot be its own parent');
+    }
+    const existing = ctx.db.nav_item.id.find(args.id);
+    if (existing) {
+      ctx.db.nav_item.id.update({ ...existing, ...args, updated_at: ctx.timestamp });
+    } else {
+      ctx.db.nav_item.insert({ ...args, created_at: ctx.timestamp, updated_at: ctx.timestamp });
+    }
+  },
+);
+
+export const remove_nav_item = spacetimedb.reducer({ id: t.string() }, (ctx, { id }) => {
+  const existing = ctx.db.nav_item.id.find(id);
+  if (!existing) {
+    return;
+  }
+  ownedBox(ctx, existing.box_id);
+  ctx.db.nav_item.id.delete(id);
+});
+
+export const upsert_page = spacetimedb.reducer(
+  { id: t.string(), box_id: t.u64(), title: t.string(), blocks_json: t.string() },
+  (ctx, args) => {
+    ownedBox(ctx, args.box_id);
+    limit(args.title, 80, 'Page title');
+    limit(args.blocks_json, 64_000, 'Page');
+    const existing = ctx.db.page.id.find(args.id);
+    if (existing) {
+      ctx.db.page.id.update({ ...existing, ...args, updated_at: ctx.timestamp });
+    } else {
+      ctx.db.page.insert({ ...args, created_at: ctx.timestamp, updated_at: ctx.timestamp });
+    }
+  },
+);
+
+export const remove_page = spacetimedb.reducer({ id: t.string() }, (ctx, { id }) => {
+  const existing = ctx.db.page.id.find(id);
+  if (!existing) {
+    return;
+  }
+  ownedBox(ctx, existing.box_id);
+  ctx.db.page.id.delete(id);
+});
+
+export const set_box_ui = spacetimedb.reducer(
+  { box_id: t.u64(), dialect_text: t.string(), theme_id: t.string(), style_json: t.string() },
+  (ctx, args) => {
+    ownedBox(ctx, args.box_id);
+    limit(args.dialect_text, 4000, 'Layout text');
+    limit(args.style_json, 8000, 'Style overrides');
+    const existing = ctx.db.box_ui.box_id.find(args.box_id);
+    if (existing) {
+      ctx.db.box_ui.box_id.update({ ...existing, ...args, updated_at: ctx.timestamp });
+    } else {
+      ctx.db.box_ui.insert({ ...args, updated_at: ctx.timestamp });
+    }
+  },
+);
+
+const CHIP_KINDS = ['action', 'date', 'time', 'person', 'org', 'place', 'object', 'variable', 'list', 'number', 'money', 'url', 'page', 'nav', 'theme', 'entity'];
+
+export const upsert_glossary_term = spacetimedb.reducer(
+  { id: t.string(), box_id: t.u64(), text: t.string(), type: t.string(), note: t.string(), case_sensitive: t.bool() },
+  (ctx, args) => {
+    ownedBox(ctx, args.box_id);
+    if (!CHIP_KINDS.includes(args.type)) {
+      throw new SenderError(`Unknown chip type "${args.type}"`);
+    }
+    limit(args.text, 80, 'Glossary text');
+    limit(args.note, 300, 'Glossary note');
+    const existing = ctx.db.glossary_term.id.find(args.id);
+    if (existing) {
+      ctx.db.glossary_term.id.update({ ...existing, ...args });
+    } else {
+      ctx.db.glossary_term.insert({ ...args, created_at: ctx.timestamp });
+    }
+  },
+);
+
+export const remove_glossary_term = spacetimedb.reducer({ id: t.string() }, (ctx, { id }) => {
+  const existing = ctx.db.glossary_term.id.find(id);
+  if (!existing) {
+    return;
+  }
+  ownedBox(ctx, existing.box_id);
+  ctx.db.glossary_term.id.delete(id);
+});
+
+const EDIT_STATES = ['applied', 'undone'];
+
+export const record_edit_batch = spacetimedb.reducer(
+  { id: t.string(), box_id: t.u64(), ops_json: t.string(), inverse_json: t.string(), summary: t.string(), source: t.string() },
+  (ctx, args) => {
+    ownedBox(ctx, args.box_id);
+    limit(args.ops_json, 64_000, 'Edit');
+    limit(args.inverse_json, 64_000, 'Edit inverse');
+    if (ctx.db.edit_batch.id.find(args.id)) {
+      throw new SenderError('Edit already recorded');
+    }
+    ctx.db.edit_batch.insert({
+      ...args,
+      owner_identity: ctx.sender,
+      state: 'applied',
+      created_at: ctx.timestamp,
+      flipped_at: ctx.timestamp,
+    });
+  },
+);
+
+export const set_edit_state = spacetimedb.reducer(
+  { id: t.string(), state: t.string(), ops_json: t.string(), inverse_json: t.string() },
+  (ctx, { id, state, ops_json, inverse_json }) => {
+    const existing = ctx.db.edit_batch.id.find(id);
+    if (!existing) {
+      throw new SenderError('Edit not found');
+    }
+    ownedBox(ctx, existing.box_id);
+    if (!EDIT_STATES.includes(state)) {
+      throw new SenderError(`Unknown edit state "${state}"`);
+    }
+    ctx.db.edit_batch.id.update({ ...existing, state, ops_json, inverse_json, flipped_at: ctx.timestamp });
+  },
+);

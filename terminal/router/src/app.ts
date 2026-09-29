@@ -4,7 +4,13 @@ import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
 import { PRODUCT_NAME, PRODUCT_VERSION } from '../../shared/src/brand';
 import { entryDraftSchema, type EntryDraft } from '../../shared/src/ledger/types';
-import { routeIntent } from './jev';
+import { systemMessages, userMessage } from '../../shared/src/agent/prompt';
+import { parseChips, snapshotSchema, type Snapshot } from '../../shared/src/agent/snapshot';
+import { runTurn, type RoundInfo } from '../../shared/src/agent/turn';
+import { CHIP_KIND_DESCRIPTIONS, applyGlossary, isChipKind, mergeChips } from '../../shared/src/chips/merge';
+import { isAmbiguous, type Chip, type ChipKind, type ChipReading } from '../../shared/src/chips/types';
+import { defaultBoxUi } from '../../shared/src/ui/types';
+import { disambiguateChips, routeIntent } from './jev';
 import {
   GEMINI_LIVE_MODEL,
   OPENAI_REALTIME_MODEL,
@@ -13,7 +19,7 @@ import {
   mintGeminiSession,
   mintOpenAISession,
 } from './realtime';
-import { streamChat, type ChatMessage } from './openrouter';
+import type { ChatMessage } from './openrouter';
 import { tagWithModel } from './tagger';
 import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
@@ -59,7 +65,10 @@ export function allowedOrigins(bindings: RouterBindings): string[] {
 const routeBodySchema = z.object({
   boxId: z.string().min(1),
   text: z.string().min(1).max(20_000),
+  /** Typed chips; user and glossary chips are authoritative. Untyped legacy chips are dropped. */
   chips: z.array(z.unknown()).default([]),
+  /** The box's own records (menu, pages, layout, theme ...). */
+  snapshot: snapshotSchema.optional(),
   /** Optional explicit model; must be in the allowlist (tier models + allowed_models). */
   model: z.string().min(1).max(200).optional(),
   history: z
@@ -70,9 +79,38 @@ const routeBodySchema = z.object({
 
 export type RouteBody = z.infer<typeof routeBodySchema>;
 
-const tagBodySchema = z.object({ text: z.string().min(1).max(4000) });
+const glossaryHintSchema = z.object({
+  text: z.string().min(1).max(80),
+  type: z.string().max(20),
+  note: z.string().max(300).optional(),
+  case_sensitive: z.boolean().optional(),
+});
 
-const SYSTEM_PROMPT = `You are the assistant inside ${PRODUCT_NAME}, a prompt-first terminal. Reply plainly and briefly. When the user asks to make, build, show, list, add, remove, open, send, schedule or find something, describe the concrete result in one or two short paragraphs. No marketing tone.`;
+const tagBodySchema = z.object({
+  text: z.string().min(1).max(4000),
+  glossary: z.array(glossaryHintSchema).max(300).default([]),
+  local: z.array(z.unknown()).max(60).default([]),
+});
+
+function emptySnapshot(boxId: string): Snapshot {
+  return {
+    box: { id: boxId, name: 'box' },
+    nav: [],
+    pages: [],
+    boxUi: defaultBoxUi(boxId, 0),
+    themes: [],
+    actions: [],
+    boxes: [{ id: boxId, name: 'box' }],
+    starters: [],
+    cards: [],
+    glossary: [],
+    effectiveThemeId: 'void',
+  };
+}
+
+function typedChips(raw: unknown[]): Chip[] {
+  return parseChips(raw);
+}
 
 export interface CreateAppOptions {
   /** Resolve bindings for a request. Node reads process.env; Workers read c.env. */
@@ -226,81 +264,91 @@ export function createApp(options: CreateAppOptions) {
     if (route.pending) {
       return c.json({ error: `Tier "${route.tier}" is pending: ${route.note ?? 'no model available'}`, route }, 501);
     }
+    const snapshot = body.snapshot ?? emptySnapshot(body.boxId);
+    const escalation = table.escalation ?? { min_confidence: 0.6, max_nav_items: 40, max_pages: 10 };
+    const startEscalated =
+      routing.intent === 'edit_ui' &&
+      ((routing.source === 'jev' && (routing.confidence ?? 1) < escalation.min_confidence) ||
+        snapshot.nav.length > escalation.max_nav_items ||
+        snapshot.pages.length > escalation.max_pages);
+    const chips = typedChips(body.chips);
     const messages: ChatMessage[] = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...body.history,
-      { role: 'user', content: body.text },
+      { role: 'system', content: systemMessages(snapshot) },
+      ...body.history.map((message): ChatMessage =>
+        message.role === 'assistant' ? { role: 'assistant', content: message.content } : { role: message.role === 'system' ? 'user' : message.role, content: message.content },
+      ),
+      { role: 'user', content: userMessage(body.text, chips) },
     ];
 
     return streamSSE(c, async (stream) => {
-      await stream.writeSSE({ event: 'meta', data: JSON.stringify({ route, routing }) });
+      const started = (options.now ?? Date.now)();
+      await stream.writeSSE({ event: 'meta', data: JSON.stringify({ route, routing, escalated: startEscalated }) });
 
-      let usage: Usage | undefined;
-      let generationId = '';
-      let servedModel = '';
-      let outputText = '';
-      let failed = false;
-
-      const streamOptions: Parameters<typeof streamChat>[0] = {
+      const turnOptions: Parameters<typeof runTurn>[0] = {
         apiKey,
         model: route.model,
+        startEscalated,
         messages,
+        snapshot,
         title: PRODUCT_NAME,
+        onDelta: (text) => {
+          void stream.writeSSE({ event: 'delta', data: JSON.stringify({ text }) });
+        },
       };
-      if (bindings.ROUTER_REFERER) {
-        streamOptions.referer = bindings.ROUTER_REFERER;
-      }
-      if (options.fetchImpl) {
-        streamOptions.fetchImpl = options.fetchImpl;
-      }
+      if (route.escalateModel) turnOptions.escalateModel = route.escalateModel;
+      if (options.fetchImpl) turnOptions.fetchImpl = options.fetchImpl;
+      if (options.now) turnOptions.now = options.now;
+      if (bindings.ROUTER_REFERER) turnOptions.referer = bindings.ROUTER_REFERER;
 
+      let failed = false;
+      let rounds: RoundInfo[] = [];
       try {
-        for await (const event of streamChat(streamOptions)) {
-          if (event.type === 'delta' && event.text) {
-            outputText += event.text;
-            await stream.writeSSE({ event: 'delta', data: JSON.stringify({ text: event.text }) });
-          } else if (event.type === 'usage' && event.usage) {
-            usage = event.usage;
-          } else if (event.type === 'id' && event.id) {
-            generationId = event.id;
-          } else if (event.type === 'model' && event.model) {
-            servedModel = event.model;
-          } else if (event.type === 'error') {
-            failed = true;
-            await stream.writeSSE({ event: 'error', data: JSON.stringify({ message: event.message }) });
-          }
+        const result = await runTurn(turnOptions);
+        rounds = result.rounds;
+        if (result.error) {
+          failed = true;
+          await stream.writeSSE({ event: 'error', data: JSON.stringify({ message: result.error }) });
         }
+        if (result.ops.length > 0 || result.rejected.length > 0) {
+          await stream.writeSSE({
+            event: 'ops',
+            data: JSON.stringify({ ops: result.ops, changes: result.changes, rejected: result.rejected }),
+          });
+        }
+        await stream.writeSSE({ event: 'reply', data: JSON.stringify({ blocks: result.blocks }) });
       } catch (error) {
         failed = true;
         const message = error instanceof Error ? error.message : String(error);
         await stream.writeSSE({ event: 'error', data: JSON.stringify({ message }) });
       }
 
-      const finalUsage: Usage = usage ?? {
-        prompt_tokens: 0,
-        completion_tokens: 0,
-        total_tokens: 0,
-      };
-      // Price by the model that was actually served (openrouter/auto picks one).
-      const billedModel = servedModel || route.model;
-      const { costMicro: callCostMicro, source } = costMicroFor(billedModel, finalUsage);
-      // The Jev routing call is part of serving this request: its cost is folded into the entry.
+      // Cost: every round's provider cost (or the price table), plus the Jev routing call.
+      let callCostMicro = 0;
+      let source = 'openrouter';
+      for (const round of rounds) {
+        const usage: Usage = round.usage ?? { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+        const priced = costMicroFor(round.servedModel || round.model, usage);
+        callCostMicro += priced.costMicro;
+        if (priced.source !== 'openrouter') source = priced.source;
+      }
+      const last = rounds[rounds.length - 1];
+      const billedModel = last?.servedModel || last?.model || route.model;
       const costMicro = callCostMicro + routing.costMicro;
       const priceMicro = priceMicroFor(costMicro, route.marginBasisPoints);
 
-      // One charge entry per model call. owner_identity is filled by the
-      // client (or the module reducer) because the router does not hold it.
+      // One charge entry per turn. owner_identity is filled by the client
+      // (or the module reducer) because the router does not hold it.
       const entry: EntryDraft = entryDraftSchema.parse({
         box_id: body.boxId,
         owner_identity: '',
         kind: 'charge',
         what: 'model.call',
         model: billedModel,
-        units: 1,
+        units: Math.max(1, rounds.length),
         unit_kind: 'call',
         cost_micro: costMicro,
         price_micro: priceMicro,
-        ref: generationId,
+        ref: last?.generationId ?? '',
         created_at: (options.now ?? Date.now)(),
       });
 
@@ -308,12 +356,13 @@ export function createApp(options: CreateAppOptions) {
         event: 'done',
         data: JSON.stringify({
           ok: !failed,
-          usage: finalUsage,
+          usage: last?.usage ?? { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
           served_model: billedModel,
           routing,
+          rounds: rounds.map((round) => ({ round: round.round, model: round.model, served_model: round.servedModel, tool_calls: round.toolCalls, rejected: round.rejected })),
           costSource: source,
           entry: failed ? null : entry,
-          chars: outputText.length,
+          ms: (options.now ?? Date.now)() - started,
         }),
       });
     });
@@ -328,19 +377,70 @@ export function createApp(options: CreateAppOptions) {
     if (!bindings.OPENROUTER_API_KEY) {
       return c.json({ error: 'OPENROUTER_API_KEY is not set on the router' }, 503);
     }
+    const { text, glossary, local } = parsed.data;
     const table = loadRules();
     const tier = table.tiers.tagger;
     const model = bindings.OPENROUTER_TAGGER_MODEL ?? tier?.model ?? 'google/gemini-2.5-flash-lite';
     const result = await tagWithModel({
       apiKey: bindings.OPENROUTER_API_KEY,
       model,
-      text: parsed.data.text,
+      text,
+      glossary: glossary.map((term) => ({ text: term.text, type: term.type, ...(term.note ? { note: term.note } : {}) })),
       ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
     });
-    if (result === null) {
-      return c.json({ chips: [], model, ok: false });
+
+    const validGlossary = glossary
+      .filter((term) => isChipKind(term.type))
+      .map((term) => ({ text: term.text, type: term.type as ChipKind, note: term.note ?? '', case_sensitive: term.case_sensitive ?? term.text !== term.text.toLowerCase() }));
+    let chips = applyGlossary(text, mergeChips(parseChips(local), result?.chips ?? []), validGlossary);
+
+    // Ask Jev only about spans that are still ambiguous after merge and glossary.
+    let jevCost = 0;
+    let jevUsed = false;
+    const ambiguous = chips.filter(isAmbiguous);
+    if (ambiguous.length > 0 && bindings.ROUTER_USE_JEV !== 'false') {
+      const spans = ambiguous.map((chip, index) => ({
+        key: `chip_${index}`,
+        text: chip.text,
+        start: chip.start,
+        end: chip.end,
+        kinds: [...new Set([chip.kind, ...(chip.alternatives ?? []).map((reading) => reading.kind)])],
+      }));
+      const settled = await disambiguateChips(text, spans, (kind) => (isChipKind(kind) ? CHIP_KIND_DESCRIPTIONS[kind] : kind), {
+        apiKey: bindings.OPENROUTER_API_KEY,
+        ...(bindings.OPENROUTER_JEV_MODEL ? { model: bindings.OPENROUTER_JEV_MODEL } : {}),
+        ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
+      });
+      if (settled) {
+        jevUsed = true;
+        jevCost = settled.costMicro;
+        chips = chips.map((chip) => {
+          const index = ambiguous.indexOf(chip);
+          const answer = index === -1 ? undefined : settled.answers[`chip_${index}`];
+          if (!answer || !isChipKind(answer.kind)) {
+            return chip;
+          }
+          const alternatives: ChipReading[] = Object.entries(answer.probabilities)
+            .filter(([kind, p]) => kind !== answer.kind && isChipKind(kind) && p > 0)
+            .map(([kind, p]) => ({ kind: kind as ChipKind, p }))
+            .sort((a, b) => b.p - a.p);
+          const next: Chip = { ...chip, kind: answer.kind, p: answer.probabilities[answer.kind] ?? answer.confidence, source: 'model' };
+          if (alternatives.length > 0) next.alternatives = alternatives;
+          else delete next.alternatives;
+          if (answer.kind !== 'date') delete next.value;
+          return next;
+        });
+      }
     }
-    return c.json({ chips: result.chips, model: result.servedModel, ok: true, cost_micro: result.costMicro, ref: result.generationId });
+
+    return c.json({
+      chips,
+      model: result?.servedModel ?? model,
+      ok: result !== null,
+      cost_micro: (result?.costMicro ?? 0) + jevCost,
+      ref: result?.generationId ?? '',
+      jev: { used: jevUsed, cost_micro: jevCost },
+    });
   });
 
   return app;

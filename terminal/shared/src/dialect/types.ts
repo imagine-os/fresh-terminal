@@ -92,7 +92,7 @@ export function sameBehaviourEverywhere(behaviour: RegionBehaviour): PerSizeBeha
 export const defaultSpecText = [
   'Top bar: full everywhere; pinsTop; tight.',
   'Bottom bar: full everywhere; pinsBottom; cozy.',
-  'Left sidebar: rail on laptop, full on desk and wall, hidden on phone and tablet.',
+  'Left sidebar: full on laptop, desk and wall, hidden on phone and tablet.',
   'Right sidebar: hidden everywhere.',
   'Stage: full everywhere; fills; roomy; body.',
   'Spacing: cozy.',

@@ -1,4 +1,4 @@
-import type { Chip, TextSegment } from './types';
+import type { Chip, ChipKind, TextSegment } from './types';
 
 /**
  * Local chip tagger. Regex and word lists only, no model call.
@@ -7,7 +7,14 @@ import type { Chip, TextSegment } from './types';
  * A model-based tagger (the JEV tier) plugs in through `ChipTagger` later.
  */
 export interface ChipTagger {
-  tag(text: string): Chip[];
+  tag(text: string, context?: TagContext): Chip[];
+}
+
+/** The box's own records, so names resolve to page / nav / theme chips. */
+export interface TagContext {
+  pages?: Array<{ id: string; title: string }>;
+  nav?: Array<{ id: string; label: string }>;
+  themes?: Array<{ id: string; name: string }>;
 }
 
 export const ACTION_VERBS = [
@@ -35,6 +42,19 @@ const DATE_PATTERNS: RegExp[] = [
   new RegExp(`\\b\\d{1,2}\\s+(?:${MONTH_NAMES}|${MONTHS})\\b`, 'gi'),
   /\b\d{4}-\d{2}-\d{2}\b/g,
 ];
+
+const SPANISH_DAYS = 'lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo';
+const SPANISH_DATES = new RegExp(`\\b(?:pasado mañana|mañana|ayer|${SPANISH_DAYS})\\b`, 'gi');
+const TIME_PATTERNS: RegExp[] = [
+  /\b(?:at|a las|a la)\s+\d{1,2}(?::\d{2})?\s?(?:am|pm|a\.m\.|p\.m\.)?(?=\W|$)/gi,
+  /\b\d{1,2}(?::\d{2})?\s?(?:am|pm|a\.m\.|p\.m\.)(?=\W|$)/gi,
+  /\b\d{1,2}:\d{2}\b/g,
+  /\b(?:noon|midnight|mediodía|medianoche)\b/gi,
+];
+const MONEY = /(?:[$€£]\s?\d[\d,]*(?:\.\d+)?|\b\d[\d,]*(?:\.\d+)?\s?(?:usd|eur|dollars|dólares|euros)\b)/gi;
+const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,;:!?)]/gi;
+const NUMBER = /\b\d+(?:[.,]\d+)?\b/g;
+const HOY = /\bhoy\b/gi;
 
 const LIST_MARKER = /(^|\n)\s*(?:[-*•]|\d+[.)])\s+/g;
 const QUOTED = /"([^"\n]{1,120})"|“([^”\n]{1,120})”|'([^'\n]{1,120})'/g;
@@ -64,12 +84,82 @@ function sentenceStarts(text: string): number[] {
   return starts;
 }
 
+function scan(pattern: RegExp, text: string, visit: (match: RegExpExecArray) => void): void {
+  pattern.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
+    visit(match);
+    if (match[0].length === 0) {
+      pattern.lastIndex += 1;
+    }
+  }
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * "Hoy" is both the Spanish word for today and a brand. Context decides:
+ * possessive or mid-sentence capital leans brand, "hoy a las 3" is a date,
+ * a capital at the start of a sentence stays ambiguous.
+ */
+function hoyReading(text: string, start: number, word: string): Chip {
+  const after = text.slice(start + word.length, start + word.length + 8).toLowerCase();
+  const before = text.slice(Math.max(0, start - 2), start);
+  const sentenceStart = start === 0 || /[.!?\n]\s*$/.test(text.slice(0, start));
+  const capital = word[0] === 'H';
+  const possessive = /^['’]s\b/.test(after);
+  const timeFollows = /^\s+(a las|a la|at|por la|en la)\b/.test(after);
+  let org = 0.1;
+  if (possessive) org = 0.8;
+  else if (capital && !sentenceStart) org = 0.65;
+  else if (capital && sentenceStart) org = 0.45;
+  if (timeFollows) org = Math.min(org, 0.05);
+  void before;
+  const date = 1 - org;
+  const top: ChipKind = org > date ? 'org' : 'date';
+  return {
+    kind: top,
+    start,
+    end: start + word.length,
+    text: word,
+    ...(top === 'date' ? { value: 'today' } : {}),
+    p: Math.max(org, date),
+    alternatives: [top === 'org' ? { kind: 'date', value: 'today', p: date } : { kind: 'org', p: org }],
+    source: 'local',
+  };
+}
+
 export class LocalTagger implements ChipTagger {
-  tag(text: string): Chip[] {
+  tag(text: string, context: TagContext = {}): Chip[] {
     const chips: Chip[] = [];
     if (text.trim().length === 0) {
       return chips;
     }
+
+    // The box's own records first: a page, menu item or theme named in the text.
+    const records: Array<{ kind: ChipKind; id: string; name: string }> = [
+      ...(context.pages ?? []).map((page) => ({ kind: 'page' as const, id: page.id, name: page.title })),
+      ...(context.nav ?? []).map((item) => ({ kind: 'nav' as const, id: item.id, name: item.label })),
+      ...(context.themes ?? []).map((theme) => ({ kind: 'theme' as const, id: theme.id, name: theme.name })),
+    ].sort((a, b) => b.name.length - a.name.length);
+    for (const record of records) {
+      if (record.name.trim().length < 3) {
+        continue;
+      }
+      scan(new RegExp(`\\b${escapeRegExp(record.name)}\\b`, 'gi'), text, (match) => {
+        pushIfFree(chips, { kind: record.kind, start: match.index, end: match.index + match[0].length, text: match[0], ref: record.id, value: record.name, p: 0.9, source: 'local' });
+      });
+    }
+
+    scan(URL_PATTERN, text, (match) => {
+      pushIfFree(chips, { kind: 'url', start: match.index, end: match.index + match[0].length, text: match[0], value: match[0], p: 0.99, source: 'local' });
+    });
+
+    scan(HOY, text, (match) => {
+      pushIfFree(chips, hoyReading(text, match.index, match[0]));
+    });
 
     for (const pattern of DATE_PATTERNS) {
       pattern.lastIndex = 0;
@@ -83,6 +173,20 @@ export class LocalTagger implements ChipTagger {
         });
       }
     }
+
+    scan(SPANISH_DATES, text, (match) => {
+      pushIfFree(chips, { kind: 'date', start: match.index, end: match.index + match[0].length, text: match[0], p: 0.85, source: 'local' });
+    });
+
+    for (const pattern of TIME_PATTERNS) {
+      scan(pattern, text, (match) => {
+        pushIfFree(chips, { kind: 'time', start: match.index, end: match.index + match[0].length, text: match[0], p: 0.9, source: 'local' });
+      });
+    }
+
+    scan(MONEY, text, (match) => {
+      pushIfFree(chips, { kind: 'money', start: match.index, end: match.index + match[0].length, text: match[0], value: match[0].replace(/\s/g, ''), p: 0.9, source: 'local' });
+    });
 
     QUOTED.lastIndex = 0;
     let quoted: RegExpExecArray | null;
@@ -149,6 +253,10 @@ export class LocalTagger implements ChipTagger {
       });
     }
 
+    scan(NUMBER, text, (match) => {
+      pushIfFree(chips, { kind: 'number', start: match.index, end: match.index + match[0].length, text: match[0], value: match[0], p: 0.8, source: 'local' });
+    });
+
     return chips.sort((a, b) => a.start - b.start);
   }
 }
@@ -181,7 +289,7 @@ export function segment(text: string, chips: Chip[]): TextSegment[] {
 export class ModelTagger implements ChipTagger {
   readonly wired = false;
 
-  tag(_text: string): Chip[] {
+  tag(_text: string, _context?: TagContext): Chip[] {
     return [];
   }
 }

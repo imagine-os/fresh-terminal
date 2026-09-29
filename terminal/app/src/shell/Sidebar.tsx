@@ -1,19 +1,42 @@
+import { useMemo, useRef } from 'react';
+import type { NavItem, NavTarget } from '@shared/ui';
 import { useI18n } from '../i18n';
-import type { Box } from '../store';
+import { useStoreSnapshot, type Box } from '../store';
 import { Button } from '../ui/Button';
+import { Reveal } from '../ui/Reveal';
 import { IconPlus } from '../ui/icons';
+import { NavTree } from './NavTree';
 
 interface Props {
   boxes: Box[];
   currentId: string | null;
   onOpen: (id: string) => void;
   onNew: () => void;
+  onNavigate: (target: NavTarget, item: NavItem) => void;
 }
 
-export function Sidebar({ boxes, currentId, onOpen, onNew }: Props) {
+export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate }: Props) {
   const { t } = useI18n();
+  const snapshot = useStoreSnapshot();
+  const mountedAt = useRef(Date.now());
+  const items = useMemo(() => snapshot.navItems.filter((item) => item.box_id === currentId), [snapshot.navItems, currentId]);
+
+  // Beam the menu in again when an edit just changed it.
+  const lastNavEdit = [...snapshot.edits]
+    .reverse()
+    .find((edit) => edit.box_id === currentId && edit.changes.some((change) => change.region === 'nav'));
+  const fresh = lastNavEdit !== undefined && lastNavEdit.created_at > mountedAt.current;
+
   return (
     <nav className="sidebar" aria-label={t('sidebar.boxes')}>
+      {items.length > 0 ? (
+        <>
+          <div className="sidebar-title">{t('nav.menu')}</div>
+          <Reveal key={fresh ? `${lastNavEdit?.id}:${lastNavEdit?.state}` : 'static'} pattern={fresh ? 'beam-horizontal' : 'none'}>
+            <NavTree items={items} onActivate={onNavigate} />
+          </Reveal>
+        </>
+      ) : null}
       <div className="sidebar-title">{t('sidebar.boxes')}</div>
       {boxes.map((box, index) => (
         <button

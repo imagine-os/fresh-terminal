@@ -1,4 +1,9 @@
+import type { Snapshot } from '@shared/agent';
 import type { Card, CardInput } from '@shared/canvas';
+import type { Change, Op, UiState } from '@shared/ops';
+import type { Reply } from '@shared/reply';
+import type { Starter } from '@shared/starters';
+import type { BoxUi, GlossaryTerm, NavItem, Page } from '@shared/ui';
 import type { Chip } from '@shared/chips';
 import type { Entry, EntryDraft } from '@shared/ledger';
 import type { Theme } from '@shared/themes';
@@ -29,6 +34,8 @@ export interface Line {
   component: string;
   /** Reveal pattern name, '' for the default. */
   reveal: string;
+  /** Structured reply (Reply JSON) for assistant lines, '' for plain text. */
+  blocks_json: string;
   created_at: number;
   /** UI-only: the assistant is still streaming into this line. */
   streaming?: boolean;
@@ -37,7 +44,27 @@ export interface Line {
 export interface LineOptions {
   component?: string;
   reveal?: string;
+  reply?: Reply;
 }
+
+export type EditSource = 'assistant' | 'local' | 'shortcut' | 'chip' | 'undo' | 'redo' | 'system';
+
+/** One applied batch of ops, with its exact inverse. */
+export interface EditBatch {
+  id: string;
+  box_id: string;
+  ops: Op[];
+  inverse: Op[];
+  changes: Change[];
+  summary: string;
+  source: EditSource;
+  state: 'applied' | 'undone';
+  /** When undo/redo last flipped this batch (drives Ctrl+Shift+Z order). */
+  flipped_at?: number;
+  created_at: number;
+}
+
+export type EditResult = { ok: true; batch: EditBatch } | { ok: false; reason: string };
 
 export interface Presence {
   identity: string;
@@ -70,6 +97,13 @@ export interface StoreSnapshot {
   themes: Theme[];
   routeRules: RouteRule[];
   cards: Card[];
+  navItems: NavItem[];
+  pages: Page[];
+  boxUis: BoxUi[];
+  glossary: GlossaryTerm[];
+  /** Starters people added (the seed list lives in docs/prompts/starters.json). */
+  starters: Starter[];
+  edits: EditBatch[];
 }
 
 export type StoreMode = 'local' | 'spacetimedb';
@@ -92,4 +126,15 @@ export interface Store {
   setOnChain(onChain: boolean): void;
   addCard(input: CardInput): Card;
   moveCard(id: string, x: number, y: number): void;
+  setLineReply(lineId: string, reply: Reply): void;
+  /** Everything one box's interface is made of. */
+  uiState(boxId: string): UiState;
+  boxUi(boxId: string): BoxUi;
+  /** The only way the interface changes: atomic, logged, undoable. */
+  applyOps(boxId: string, ops: Op[], source: EditSource): EditResult;
+  undo(batchId: string): EditResult;
+  redo(batchId: string): EditResult;
+  /** Dev-panel live editing of the layout text (not logged per keystroke). */
+  setBoxDialect(boxId: string, text: string | null): void;
+  snapshotFor(boxId: string, effectiveThemeId: string): Snapshot;
 }

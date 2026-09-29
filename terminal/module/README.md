@@ -13,10 +13,19 @@ Status: type-checks locally (`pnpm typecheck` at `terminal/`). **Not yet publish
 | `line` | id, box_id, kind (`user` / `assistant` / `system`), text, chips_json, created_at |
 | `presence` | identity (pk), box_id, last_seen |
 | `route_rule` | id, intent (unique), model, permission, updated_at |
+| `nav_item` (pass 4) | id, box_id, parent_id (`''` = top), label, icon, target_json, order, created_at, updated_at |
+| `page` (pass 4) | id, box_id, title, blocks_json, created_at, updated_at |
+| `box_ui` (pass 4) | box_id (pk), dialect_text, theme_id, style_json, updated_at |
+| `glossary_term` (pass 4) | id, box_id, text, type (chip kind), note, case_sensitive, created_at |
+| `edit_batch` (pass 4) | id, box_id, owner_identity, ops_json, inverse_json, summary, source, state (`applied` / `undone`), created_at, flipped_at |
+
+`line` also carries `component`, `reveal` and (pass 4) `blocks_json`, the structured reply. Ledger `entry.kind` accepts `edit` and `unit_kind` accepts `op`.
 
 ## Reducers
 
-`create_box`, `open_session`, `append_line`, `touch_presence`, `upsert_route_rule`.
+`create_box`, `open_session`, `append_line`, `touch_presence`, `upsert_route_rule`, `set_on_chain`, `append_entry`, `upsert_theme`, `upsert_card`, `move_card`.
+
+Pass 4 (the interface is data; every write checks that the sender owns the box): `upsert_nav_item`, `remove_nav_item`, `upsert_page`, `remove_page`, `set_box_ui`, `upsert_glossary_term`, `remove_glossary_term`, `record_edit_batch`, `set_edit_state`. The op engine (`shared/src/ops`) runs in the client and router; these reducers store its per-record results and the batch (ops + inverse) so undo works on any device.
 
 ## Publish (commands from the SpacetimeDB CLI reference, not yet run here)
 

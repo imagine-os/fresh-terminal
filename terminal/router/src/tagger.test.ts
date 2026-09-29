@@ -13,9 +13,9 @@ describe('tagWithModel', () => {
       return completion(
         JSON.stringify({
           chips: [
-            { kind: 'action', start: 0, end: 8, text: 'schedule', value: 'schedule' },
-            { kind: 'date', start: 16, end: 24, text: 'tomorrow' },
-            { kind: 'entity', start: 0, end: 3, text: 'WRONG' },
+            { kind: 'action', start: 0, end: 8, text: 'schedule', value: 'schedule', p: 0.9, alternatives: [] },
+            { kind: 'date', start: 16, end: 24, text: 'tomorrow', value: '', p: 0.8, alternatives: [{ kind: 'time', value: '', p: 0.1 }] },
+            { kind: 'entity', start: 0, end: 3, text: 'WRONG', value: '', p: 0.5, alternatives: [] },
           ],
         }),
       );
@@ -24,6 +24,7 @@ describe('tagWithModel', () => {
     expect((body.response_format as { type: string }).type).toBe('json_schema');
     expect(body.model).toBe('google/gemini-2.5-flash-lite');
     expect(result?.chips.map((chip) => chip.kind)).toEqual(['action', 'date']);
+    expect(result?.chips[1]).toEqual({ kind: 'date', start: 16, end: 24, text: 'tomorrow', p: 0.8, source: 'model', alternatives: [{ kind: 'time', p: 0.1 }] });
     expect(result?.costMicro).toBe(3);
     expect(result?.servedModel).toBe('google/gemini-2.5-flash-lite');
   });

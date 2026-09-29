@@ -1,11 +1,12 @@
 {
   "$comment": "Development plan as data. Tasks are bound by dependencies, not dates. The in-app PM viewer (dev mode) reads this file. Append-only in spirit: change status, add tasks, do not delete history.",
   "version": 1,
-  "updated": "2026-09-28",
+  "updated": "2026-09-29",
   "models": {
     "Fable 5.1": "judgment, architecture, shell and shared code",
     "Opus 5": "building modules and pages",
-    "Sonnet 5": "mechanical passes: screenshots, Spanish fill, QA matrices"
+    "Sonnet 5": "mechanical passes: screenshots, Spanish fill, QA matrices",
+    "Opus 5.5": "pass 4 onward at Justin's request (2026-09-29 00:49 UTC)"
   },
   "tasks": [
     {
@@ -705,6 +706,206 @@
       ],
       "model": "Opus 5",
       "pass": 3
+    },
+    {
+      "id": "ui-as-data",
+      "title": "UI as data: nav_item tree, pages with blocks, box_ui (layout, theme, style overrides), starters, cards, glossary in shared/, the module and the local store",
+      "status": "done",
+      "depends_on": [
+        "store-local",
+        "dialect-v0"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "op-language",
+      "title": "Op language: zod-validated ops with inverses, atomic engine, \"Edited: …\" summaries, undo/redo stack, ledger kind edit",
+      "status": "done",
+      "depends_on": [
+        "ui-as-data"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "router-tool-calls",
+      "title": "Router tool calling: box snapshot in, ops stream out, dry-run validation with one retry, escalate to Sonnet 5.5 on low-confidence edit_ui or big boxes, Jev edit_ui choice",
+      "status": "done",
+      "depends_on": [
+        "op-language",
+        "jev-routing"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "own-key-tools",
+      "title": "Own-key browser path gets the same tools and validation (shared runTurn)",
+      "status": "done",
+      "depends_on": [
+        "router-tool-calls",
+        "two-ways-to-pay"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "nav-tree",
+      "title": "Sidebar menu tree: nested items, expand/collapse, arrow keys, 44px rows, reveal on edit",
+      "status": "done",
+      "depends_on": [
+        "ui-as-data",
+        "shell"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "page-blocks",
+      "title": "Pages built from blocks (heading, text, list, card, button, table, image, embed) at /page/:id",
+      "status": "done",
+      "depends_on": [
+        "ui-as-data"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "chips-v2",
+      "title": "Chips v2: model tagger on by default (Flash-Lite, strict schema) merged with the local tagger; 16 kinds; Hoy brand vs date",
+      "status": "done",
+      "depends_on": [
+        "tagger-tier",
+        "chips-ui"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "glossary",
+      "title": "Per-box glossary sent with every tagger and router call; \"Always treat X as Y in this box\"",
+      "status": "done",
+      "depends_on": [
+        "chips-v2",
+        "op-language"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "chip-popover",
+      "title": "Chip popover: change type, edit value (date/time/record pickers), add a note, teach the glossary; ambiguous chips dashed with \"?\", Jev disambiguates",
+      "status": "done",
+      "depends_on": [
+        "chips-v2",
+        "glossary"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "super-cli-replies",
+      "title": "Super-CLI replies: header (intent · model · time · cost) and typed blocks (summary, kv, table, steps, list, code, diff, edits with Undo, next, note, error)",
+      "status": "done",
+      "depends_on": [
+        "router-tool-calls"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "koi-v2",
+      "title": "Koi pond v2 (tilt, bridge, sky, any-shape pads, stone paths) at pages/koi.html; v1 kept at pages/koi-v1.html; licenses page",
+      "status": "done",
+      "depends_on": [
+        "koi-page"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "canon",
+      "title": "The Canon: what is true now, and how it got there (docs/canon)",
+      "status": "done",
+      "depends_on": [
+        "docs-pass-1"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "canon-current",
+      "title": "Keep the Canon current every pass: owned by whoever ships the pass, updated in the same commit, newer facts win and older ones are marked superseded",
+      "status": "doing",
+      "depends_on": [
+        "canon"
+      ],
+      "model": "Opus 5.5",
+      "pass": 4
+    },
+    {
+      "id": "koi-realism",
+      "title": "Koi v2 still-fake list: bridge and rock reflections, grass, flexible fins, day preset, floating stones, caustics, 2D card over 3D",
+      "status": "todo",
+      "depends_on": [
+        "koi-v2"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "skin-apply-op",
+      "title": "skin.apply op and material record (css_tokens, procedural_code, image_generate, image_search via Openverse, library MIT/CC0 only)",
+      "status": "todo",
+      "depends_on": [
+        "op-language"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "draft-material",
+      "title": "Instant draft material as the first result while better versions are made",
+      "status": "todo",
+      "depends_on": [
+        "skin-apply-op"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "refine-loop",
+      "title": "Shared refine() best-of-3 beam loop: vision + Jev scoring 1–5; stop at 4.5, 2 rounds without gain, 5 rounds, 3¢ cap or Stop; loop parameters in the route table; ledger per round",
+      "status": "todo",
+      "depends_on": [
+        "skin-apply-op",
+        "jev-routing"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "refine-ui",
+      "title": "Refine UI: one row per round, winner outlined, user can pick any variant",
+      "status": "todo",
+      "depends_on": [
+        "refine-loop",
+        "super-cli-replies"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "pond-ops",
+      "title": "Wire window.pond (addPad, addPath, setCamera, setTimeOfDay, applyJSON) to the op language",
+      "status": "todo",
+      "depends_on": [
+        "koi-v2",
+        "op-language"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
     }
   ]
 }

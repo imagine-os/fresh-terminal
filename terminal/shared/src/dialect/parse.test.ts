@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseDialect, printDialect } from './parse';
+import { mergeDialect, parseDialect, printDialect } from './parse';
 import { defaultSpecText } from './types';
 
 describe('parseDialect', () => {
@@ -56,7 +56,7 @@ describe('parseDialect', () => {
     expect(spec.regions.leftSidebar.behaviour).toEqual({
       phone: 'hidden',
       tablet: 'hidden',
-      laptop: 'rail',
+      laptop: 'full',
       desk: 'full',
       wall: 'full',
     });
@@ -76,5 +76,28 @@ describe('parseDialect', () => {
     const { spec } = parseDialect('Top bar: hidden on phone. Bottom bar: full everywhere.');
     expect(spec.regions.topBar.behaviour.phone).toBe('hidden');
     expect(spec.regions.bottomBar.behaviour.phone).toBe('full');
+  });
+});
+
+describe('mergeDialect', () => {
+  it('changes only the mentioned size: "rail on laptop" leaves desk and phone alone', () => {
+    const { spec, issues } = mergeDialect(defaultSpecText, 'Left sidebar: rail on laptop.');
+    expect(issues).toEqual([]);
+    expect(spec.regions.leftSidebar.behaviour).toEqual({ phone: 'hidden', tablet: 'hidden', laptop: 'rail', desk: 'full', wall: 'full' });
+    expect(spec.regions.topBar).toEqual(parseDialect(defaultSpecText).spec.regions.topBar);
+  });
+
+  it('accepts the bare word "sidebar" and global words', () => {
+    const { spec } = mergeDialect(defaultSpecText, 'Sidebar: hidden everywhere. Spacing: airy.');
+    expect(spec.regions.leftSidebar.behaviour.desk).toBe('hidden');
+    expect(spec.spacing).toBe('airy');
+    expect(spec.material).toBe('flat');
+  });
+
+  it('reports unknown words and keeps the text round-trippable', () => {
+    const bad = mergeDialect(defaultSpecText, 'Left sidebar: wobbly on laptop.');
+    expect(bad.issues.map((issue) => issue.message)).toContain('Unknown behaviour "wobbly"');
+    const good = mergeDialect(defaultSpecText, 'Stage: glass.');
+    expect(parseDialect(good.text).spec).toEqual(good.spec);
   });
 });

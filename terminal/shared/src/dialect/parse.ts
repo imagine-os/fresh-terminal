@@ -24,9 +24,19 @@ export interface ParseIssue {
   message: string;
 }
 
+export type RegionField = 'fit' | 'spacing' | 'type' | 'material';
+
+/** What a piece of dialect text actually said, so it can be merged as a patch. */
+export interface DialectMentions {
+  regions: Partial<Record<ShellRegion, { sizes: SizeClass[]; fields: RegionField[] }>>;
+  spacing: boolean;
+  material: boolean;
+}
+
 export interface ParseResult {
   spec: ShellSpec;
   issues: ParseIssue[];
+  mentions: DialectMentions;
 }
 
 const REGION_ALIASES: Record<string, ShellRegion> = {
@@ -38,6 +48,7 @@ const REGION_ALIASES: Record<string, ShellRegion> = {
   bottom: 'bottomBar',
   'left sidebar': 'leftSidebar',
   'left rail': 'leftSidebar',
+  sidebar: 'leftSidebar',
   left: 'leftSidebar',
   'right sidebar': 'rightSidebar',
   'right rail': 'rightSidebar',
@@ -138,6 +149,7 @@ function parseBehaviourClause(
   clause: string,
   lineNumber: number,
   issues: ParseIssue[],
+  mentioned: Set<SizeClass>,
 ): PerSizeBehaviour | undefined {
   const base: Partial<Record<SizeClass, RegionBehaviour>> = {};
   let everywhere: RegionBehaviour | undefined;
@@ -156,8 +168,12 @@ function parseBehaviourClause(
     for (const size of splitList(sizeList)) {
       if (isSize(size)) {
         base[size] = behaviour;
+        mentioned.add(size);
       } else if (size === 'everywhere' || size === 'all') {
         everywhere = behaviour;
+        for (const every of SIZE_CLASSES) {
+          mentioned.add(every);
+        }
       } else {
         issues.push({ line: lineNumber, message: `Unknown size class "${size}"` });
       }
@@ -169,6 +185,9 @@ function parseBehaviourClause(
     if (isBehaviour(words)) {
       everywhere = words;
       matchedAnything = true;
+      for (const every of SIZE_CLASSES) {
+        mentioned.add(every);
+      }
     }
   }
 
@@ -209,6 +228,7 @@ function parseBehaviourClause(
 export function parseDialect(text: string): ParseResult {
   const spec = defaultSpec();
   const issues: ParseIssue[] = [];
+  const mentions: DialectMentions = { regions: {}, spacing: false, material: false };
 
   const statements = text
     .split(/\n|(?<=\.)\s+(?=[A-Z])/)
@@ -230,6 +250,7 @@ export function parseDialect(text: string): ParseResult {
       const word = lower(rest);
       if (isSpacing(word)) {
         spec.spacing = word;
+        mentions.spacing = true;
       } else {
         issues.push({ line: lineNumber, message: `Unknown spacing "${rest}"` });
       }
@@ -240,6 +261,7 @@ export function parseDialect(text: string): ParseResult {
       const word = lower(rest);
       if (isMaterial(word)) {
         spec.material = word;
+        mentions.material = true;
       } else {
         issues.push({ line: lineNumber, message: `Unknown material "${rest}"` });
       }
@@ -254,10 +276,12 @@ export function parseDialect(text: string): ParseResult {
 
     const target = spec.regions[region];
     const clauses = rest.split(';').map((clause) => clause.trim()).filter(Boolean);
+    const mentionedSizes = new Set<SizeClass>();
+    const mentionedFields = new Set<RegionField>();
 
     clauses.forEach((clause, clauseIndex) => {
       if (clauseIndex === 0) {
-        const behaviour = parseBehaviourClause(clause, lineNumber, issues);
+        const behaviour = parseBehaviourClause(clause, lineNumber, issues, mentionedSizes);
         if (behaviour !== undefined) {
           target.behaviour = behaviour;
           return;
@@ -267,24 +291,71 @@ export function parseDialect(text: string): ParseResult {
       const fit = lookupFit(word);
       if (fit !== undefined) {
         target.fit = fit;
+        mentionedFields.add('fit');
       } else if (isSpacing(word)) {
         target.spacing = word;
+        mentionedFields.add('spacing');
       } else if (isType(word)) {
         target.type = word;
+        mentionedFields.add('type');
       } else if (isMaterial(word)) {
         target.material = word;
+        mentionedFields.add('material');
       } else {
         issues.push({ line: lineNumber, message: `Unknown word "${clause}"` });
       }
     });
+    const previous = mentions.regions[region] ?? { sizes: [], fields: [] };
+    mentions.regions[region] = {
+      sizes: [...new Set([...previous.sizes, ...mentionedSizes])],
+      fields: [...new Set([...previous.fields, ...mentionedFields])],
+    };
   });
 
   const checked = shellSpecSchema.safeParse(spec);
   if (!checked.success) {
     issues.push({ line: 0, message: checked.error.message });
-    return { spec: defaultSpec(), issues };
+    return { spec: defaultSpec(), issues, mentions: { regions: {}, spacing: false, material: false } };
   }
-  return { spec: checked.data, issues };
+  return { spec: checked.data, issues, mentions };
+}
+
+export interface MergeResult {
+  text: string;
+  spec: ShellSpec;
+  /** Hard problems (unknown words, regions). "No behaviour given" warnings are not issues in a patch. */
+  issues: ParseIssue[];
+}
+
+/**
+ * Applies a dialect patch to the current text: only the sizes and fields the
+ * patch mentions change. "Left sidebar: rail on laptop." changes one cell.
+ */
+export function mergeDialect(currentText: string, patchText: string): MergeResult {
+  const current = parseDialect(currentText).spec;
+  const patch = parseDialect(patchText);
+  const issues = patch.issues.filter((issue) => !issue.message.startsWith('No behaviour given'));
+  const merged: ShellSpec = structuredClone(current);
+  for (const [region, mention] of Object.entries(patch.mentions.regions) as Array<[ShellRegion, { sizes: SizeClass[]; fields: RegionField[] }]>) {
+    const from = patch.spec.regions[region];
+    const to = merged.regions[region];
+    for (const size of mention.sizes) {
+      to.behaviour[size] = from.behaviour[size];
+    }
+    for (const field of mention.fields) {
+      const value = from[field];
+      if (value !== undefined) {
+        (to as Record<RegionField, unknown>)[field] = value;
+      }
+    }
+  }
+  if (patch.mentions.spacing) {
+    merged.spacing = patch.spec.spacing;
+  }
+  if (patch.mentions.material) {
+    merged.material = patch.spec.material;
+  }
+  return { text: printDialect(merged), spec: merged, issues };
 }
 
 /**

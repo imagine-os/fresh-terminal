@@ -22,6 +22,8 @@ interface ShellProps {
   /** Dev mode forces the right sidebar to show. */
   devMode: boolean;
   onSize?: (readout: SizeReadout) => void;
+  /** Per-box style token overrides (style.set ops), layered over the theme. */
+  styleOverrides?: Record<string, string>;
 }
 
 export interface ResolvedRegions {
@@ -58,7 +60,7 @@ function effectiveBehaviour(behaviour: RegionBehaviour, open: boolean): RegionBe
   return behaviour;
 }
 
-export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize }: ShellProps) {
+export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides }: ShellProps) {
   const ref = useRef<HTMLDivElement>(null);
   const readout = useSizeClass(ref);
 
@@ -73,7 +75,7 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
     (left === 'floating' && leftOpen) || (right === 'floating' && (rightOpen || devMode));
 
   // Theme tokens are custom properties on the shell root. Nothing else.
-  const style: CSSProperties & Record<string, string> = { ...theme.tokens };
+  const style: CSSProperties & Record<string, string> = { ...theme.tokens, ...(styleOverrides ?? {}) };
   style['--cursor-color'] = CURSOR_COLOR_VALUES[theme.cursor.color];
 
   const onPointerMove =

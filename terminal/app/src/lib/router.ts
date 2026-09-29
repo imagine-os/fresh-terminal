@@ -6,7 +6,8 @@ export type Route =
   | { name: 'box'; id: string }
   | { name: 'new-box'; theme: string | null }
   | { name: 'canvas' }
-  | { name: 'plan' };
+  | { name: 'plan' }
+  | { name: 'page'; id: string };
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -17,6 +18,10 @@ function parse(pathname: string, search: string): Route {
   }
   if (/^\/plan\/?$/.test(path)) {
     return { name: 'plan' };
+  }
+  const page = /^\/page\/([^/]+)\/?$/.exec(path);
+  if (page !== null && page[1]) {
+    return { name: 'page', id: decodeURIComponent(page[1]) };
   }
   if (/^\/box\/new\/?$/.test(path)) {
     return { name: 'new-box', theme: new URLSearchParams(search).get('theme') };
@@ -38,6 +43,8 @@ export function hrefFor(route: Route): string {
       return `${base}/canvas`;
     case 'plan':
       return `${base}/plan`;
+    case 'page':
+      return `${base}/page/${encodeURIComponent(route.id)}`;
     default:
       return `${base}/`;
   }

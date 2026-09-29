@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { OPENROUTER_URL, streamDirect } from './openrouterDirect';
+import type { Snapshot } from '@shared/agent';
+import { defaultBoxUi } from '@shared/ui';
 import type { RouteDone, RouteFailure, RouteMeta } from './routerClient';
+
+const snapshot: Snapshot = {
+  box: { id: 'b1', name: 'Box' },
+  nav: [],
+  pages: [],
+  boxUi: defaultBoxUi('b1', 0),
+  themes: [{ id: 'terminal-dark', name: 'Terminal' }],
+  actions: [],
+  boxes: [{ id: 'b1', name: 'Box' }],
+  starters: [],
+  cards: [],
+  glossary: [],
+  effectiveThemeId: 'terminal-dark',
+};
 
 function sse(lines: string[]): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
@@ -56,7 +72,7 @@ describe('streamDirect (bring your own key)', () => {
     };
     const sink = collect();
     await streamDirect(
-      { boxId: 'b1', text: 'make a thing', chips: [], history: [] },
+      { boxId: 'b1', text: 'make a thing', chips: [], history: [], snapshot },
       { apiKey: 'sk-test-not-real', referer: 'https://example.test', fetchImpl: fakeFetch, now: () => 1_700_000_000_000 },
       sink.handlers,
     );
@@ -66,8 +82,10 @@ describe('streamDirect (bring your own key)', () => {
     expect(headers.Authorization).toBe('Bearer sk-test-not-real');
     expect(headers['HTTP-Referer']).toBe('https://example.test');
     expect(headers['X-Title']).toBe('Fresh Terminal');
-    const body = JSON.parse(String(seenInit?.body)) as { stream: boolean; usage: { include: boolean }; model: string };
+    const body = JSON.parse(String(seenInit?.body)) as { stream: boolean; usage: { include: boolean }; model: string; tools: Array<{ function: { name: string } }> };
     expect(body.stream).toBe(true);
+    // The own-key path gets the same editing tools as the router.
+    expect(body.tools.map((tool) => tool.function.name)).toEqual(expect.arrayContaining(['nav_add', 'theme_set', 'respond']));
     expect(body.usage.include).toBe(true);
     expect(body.model.length).toBeGreaterThan(0);
 
@@ -91,7 +109,7 @@ describe('streamDirect (bring your own key)', () => {
     const fakeFetch: typeof fetch = async () => new Response('{"error":"bad key"}', { status: 401 });
     const sink = collect();
     await streamDirect(
-      { boxId: 'b1', text: 'hello', chips: [], history: [] },
+      { boxId: 'b1', text: 'hello', chips: [], history: [], snapshot },
       { apiKey: 'nope', referer: 'https://example.test', fetchImpl: fakeFetch },
       sink.handlers,
     );
@@ -108,7 +126,7 @@ describe('streamDirect (bring your own key)', () => {
     };
     const sink = collect();
     await streamDirect(
-      { boxId: 'b1', text: 'tag this', chips: [], history: [] },
+      { boxId: 'b1', text: 'tag this', chips: [], history: [], snapshot },
       { apiKey: 'k', referer: 'https://example.test', fetchImpl: fakeFetch },
       sink.handlers,
     );

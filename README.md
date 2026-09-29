@@ -2,6 +2,8 @@
 
 A prompt-first terminal. You land in a working box, type (or speak), and what you type is routed by a small table to a model. Cost passes through to a hash-linked ledger. Dark, sparse, one folder.
 
+**[Canon: what is true now, and how it got there](terminal/docs/canon/README.md).**
+
 **Everything lives in [`terminal/`](terminal/).** This file is the only instruction at the root. Docs live in [`terminal/docs`](terminal/docs/README.md), starting with [`terminal/docs/README.md`](terminal/docs/README.md).
 
 ## Run

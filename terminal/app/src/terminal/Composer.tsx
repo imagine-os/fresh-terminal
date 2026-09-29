@@ -1,21 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { localTagger, type Chip } from '@shared/chips';
+import { applyGlossary, applyOverrides, localTagger, overrideKey, type Chip, type ChipOverride, type TagContext } from '@shared/chips';
+import type { GlossaryTerm } from '@shared/ui';
 import type { CursorSpec } from '@shared/themes';
 import { useI18n } from '../i18n';
-import { mergeChips, tagRemote } from '../lib/modelTagger';
+import { tagRemote, type RemoteTagResult } from '../lib/modelTagger';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
 import { IconMic, IconSend } from '../ui/icons';
 import type { VoiceControls } from '../voice/useVoice';
+import { ChipPopover, type ChipDecision, type ChipRecords } from './ChipPopover';
 import { ChipText } from './ChipText';
+import { ChipTray } from './ChipTray';
 import { SuggestionStrip } from './SuggestionStrip';
 
 interface Props {
   boxId: string;
   cursor: CursorSpec;
   themeId: string;
-  /** Dev toggle: also ask the model tagger tier on keystroke pause. */
+  /** Ask the model tagger tier on keystroke pause (on by default). */
   modelTagger?: boolean;
+  /** The box's own records and glossary, for chips. */
+  records: ChipRecords;
+  glossary: GlossaryTerm[];
+  /** A chip popover decision that should teach the box a word. */
+  onTeach: (term: NonNullable<ChipDecision['teach']>) => void;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -43,7 +51,10 @@ export function Composer({
   boxId,
   cursor,
   themeId,
-  modelTagger = false,
+  modelTagger = true,
+  records,
+  glossary,
+  onTeach,
   hasBoxes,
   hasLines,
   busy,
@@ -70,20 +81,28 @@ export function Composer({
     textareaRef.current?.focus();
   }, [voiceAppend, onVoiceAppendConsumed]);
 
-  const localChips = useMemo<Chip[]>(() => localTagger.tag(text), [text]);
-  const [remoteChips, setRemoteChips] = useState<Chip[]>([]);
-  const chips = useMemo<Chip[]>(() => (modelTagger ? mergeChips(localChips, remoteChips) : localChips), [localChips, remoteChips, modelTagger]);
+  const context = useMemo<TagContext>(() => ({ pages: records.pages, nav: records.nav, themes: records.themes }), [records]);
+  const localChips = useMemo<Chip[]>(() => localTagger.tag(text, context), [text, context]);
+  const [remote, setRemote] = useState<RemoteTagResult | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, ChipOverride>>({});
+  const [editing, setEditing] = useState<{ chip: Chip; anchor: HTMLElement } | null>(null);
+
+  // Remote chips are only used for the exact text they were computed for.
+  const chips = useMemo<Chip[]>(() => {
+    const base = modelTagger && remote && remote.text === text ? remote.chips : localChips;
+    return applyOverrides(applyGlossary(text, base, glossary), overrides);
+  }, [modelTagger, remote, text, localChips, glossary, overrides]);
 
   useEffect(() => {
     if (!modelTagger || text.trim().length < 4) {
-      setRemoteChips([]);
+      setRemote(null);
       return;
     }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void tagRemote(text, controller.signal).then((found) => {
-        if (!controller.signal.aborted) {
-          setRemoteChips(found);
+      void tagRemote(text, localChips, glossary, controller.signal).then((found) => {
+        if (!controller.signal.aborted && found) {
+          setRemote(found);
         }
       });
     }, 600);
@@ -91,7 +110,29 @@ export function Composer({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [text, modelTagger]);
+  }, [text, modelTagger, localChips, glossary]);
+
+  // "next" chips in replies insert a command into the draft.
+  useEffect(() => {
+    const onInsert = (event: Event) => {
+      const detail = (event as CustomEvent<{ text: string }>).detail;
+      if (detail?.text) {
+        setText(detail.text);
+        setOverrides({});
+        textareaRef.current?.focus();
+      }
+    };
+    window.addEventListener('ft:composer-insert', onInsert);
+    return () => window.removeEventListener('ft:composer-insert', onInsert);
+  }, []);
+
+  const decide = (chip: Chip, decision: ChipDecision) => {
+    setOverrides((current) => ({ ...current, [overrideKey(chip)]: decision.override }));
+    if (decision.teach) {
+      onTeach(decision.teach);
+    }
+    setEditing(null);
+  };
 
   const resize = useCallback(() => {
     const element = textareaRef.current;
@@ -117,10 +158,17 @@ export function Composer({
     if (trimmed.length === 0 || busy) {
       return;
     }
-    onSend(trimmed, localTagger.tag(trimmed));
+    // Chips go out as structured data; offsets are relative to the trimmed text.
+    const offset = text.indexOf(trimmed);
+    const sent = chips
+      .map((chip) => ({ ...chip, start: chip.start - offset, end: chip.end - offset }))
+      .filter((chip) => chip.start >= 0 && chip.end <= trimmed.length && trimmed.slice(chip.start, chip.end) === chip.text);
+    onSend(trimmed, sent);
     setText('');
+    setOverrides({});
+    setRemote(null);
     textareaRef.current?.focus();
-  }, [text, busy, onSend]);
+  }, [text, busy, onSend, chips]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -244,6 +292,16 @@ export function Composer({
           </Tooltip>
         </div>
       </div>
+      <ChipTray chips={chips} onOpen={(chip, anchor) => setEditing({ chip, anchor })} />
+      {editing ? (
+        <ChipPopover
+          chip={editing.chip}
+          records={records}
+          anchor={editing.anchor}
+          onApply={(decision) => decide(editing.chip, decision)}
+          onClose={() => setEditing(null)}
+        />
+      ) : null}
       <audio ref={voice.audioRef} autoPlay data-testid="assistant-audio" />
       <div className="composer-hint">
         <span>{voice.active ? t(voice.state === 'connecting' ? 'voice.connecting' : voice.state === 'speaking' ? 'voice.speaking' : 'voice.listening') : t('composer.hint')}</span>
