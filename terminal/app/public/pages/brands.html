@@ -50,20 +50,15 @@ h2{margin:1rem 0 0;font-size:1.2rem;font-weight:600}
   <span class="pill" id="count">loading</span><span class="pill">checked 2026-09-29</span>
 </div>
 <div class="grid" id="grid" data-variant="colour"></div>
-<h2>Not gathered yet (text marks)</h2>
-<p>Not in Simple Icons; the registry names the official source to try for each. Shown as a letter until then.</p>
+<h2>Text marks by their owners' terms</h2>
+<p>Nine of the twelve missing marks were gathered from official sources on 2026-09-29 (rows above). These three stay as letters: OpenAI and Slack allow their logos only in approved contexts and never recoloured, and W3C allows its logo only unmodified. The registry records each check.</p>
 <div class="estimate" id="estimate">
-  <div class="estimate-row"><strong>Finish these 12 from official sources</strong><span class="pill">estimate</span></div>
+  <div class="estimate-row"><strong>The 12 missing marks: 9 gathered, 3 stay text</strong><span class="pill">outcome, 2026-09-29</span></div>
   <dl class="estimate-grid">
-    <dt>Money</dt><dd>about <b>$0.40</b> in model calls (12 marks × one page read and one licence check each, Claude via OpenRouter) and <b>$0</b> in vendor fees. Sure: these marks are free to download from their owners.</dd>
-    <dt>Time</dt><dd>about <b>15 minutes</b> of agent work in one pass, plus the usual checks and push.</dd>
-    <dt>How sure</dt><dd><b>Likely (about 90%)</b> for the 9 with a public repo or brand page: SpacetimeDB, Hyperbeam, Browserbase, Playwright, Liveblocks, Colyseus, Puck, Yjs, Electric SQL. <b>Unsure (about 60%)</b> for OpenAI, Slack and W3C: their brand terms may only allow the text mark, in which case the text mark stays and the registry says why.</dd>
-    <dt>Then</dt><dd>each new mark gets the six configurations automatically; the count above changes on the next deploy.</dd>
+    <dt>Estimated</dt><dd>about <b>$0.40</b> in model calls and <b>15 minutes</b>; likely (about 90%) for 9, unsure (about 60%) for OpenAI, Slack and W3C.</dd>
+    <dt>Actual</dt><dd>one agent pass of about <b>25 minutes</b> (the extra time went into a reusable cropper, <code>scripts/brand-crop.mjs</code>, that cuts an icon out of a wordmark logo in a real browser); <b>$0</b> in vendor fees. The 9 landed as predicted; the 3 unsure ones went the way their terms said.</dd>
+    <dt>Next</dt><dd>official wordmarks as <code>-wordmark.svg</code> where terms allow, and raster exports for places that cannot take SVG (the skill's later layers).</dd>
   </dl>
-  <div class="estimate-actions">
-    <a class="cta" id="start" href="../?prompt=Gather%20the%2012%20missing%20brand%20marks%20(SpacetimeDB%2C%20OpenAI%2C%20Hyperbeam%2C%20Browserbase%2C%20Playwright%2C%20Slack%2C%20Liveblocks%2C%20Colyseus%2C%20W3C%2C%20Puck%2C%20Yjs%2C%20Electric%20SQL)%20from%20their%20official%20brand%20pages%20or%20repos%2C%20per%20terminal%2Fskills%2Flogos-and-icons%2FSKILL.md%3A%20read%20the%20terms%2C%20store%20the%20SVG%2C%20add%20the%20registry%20line%2C%20run%20brand-variants%2C%20and%20report%20cost%20and%20certainty.">Start in the terminal</a>
-    <span class="estimate-note">Puts the request in your prompt box with the plan attached. Today the terminal records it and answers with the plan; the gathering itself runs as an agent pass on the repo, and its real cost lands on the ledger. Running it from the page directly is not wired yet.</span>
-  </div>
 </div>
 <div class="grid" id="text"></div>
 <h2>Sizes</h2>
@@ -73,7 +68,7 @@ h2{margin:1rem 0 0;font-size:1.2rem;font-weight:600}
 </div>
 <script>
 (function () {
-  var TEXT = [['SpacetimeDB','S'],['OpenAI','O'],['Hyperbeam','H'],['Browserbase','B'],['Playwright','P'],['Slack','S'],['Liveblocks','L'],['Colyseus','C'],['W3C','W'],['Puck','P'],['Yjs','Y'],['Electric SQL','E']];
+  var TEXT = [['OpenAI','O'],['Slack','S'],['W3C','W']];
   var variant = 'colour';
   var grid = document.getElementById('grid');
   var marks = [];

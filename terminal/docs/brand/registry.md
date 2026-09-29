@@ -57,23 +57,25 @@ One line per asset, per `terminal/skills/logos-and-icons/SKILL.md`. Source order
 ## Configurations (2026-09-29)
 
 Every gathered mark has six files, written by `node scripts/brand-variants.mjs` from the colour source and listed in `app/public/brand/index.json`: `<slug>.svg` (official colour, icon only), `-mono.svg` (`currentColor`), `-light.svg` (fixed `#15181d`), `-dark.svg` (fixed `#e8eaed`), `-wide.svg` and `-stacked.svg` (our icon + name lockups in the house font; not the vendor's wordmark). All transparent. Preview with the configuration switcher at `pages/brands.html`. Raster export, vectorizing raster-only logos and 3D versions are later costed layers (skill §4b).
+| SpacetimeDB | `app/public/brand/spacetimedb/spacetimedb.svg` | https://spacetimedb.com/images/logo.svg (site header mark; repo github.com/clockworklabs/SpacetimeDB) | Vendor mark used to identify SpacetimeDB; SpacetimeDB trademark belongs to Clockwork Labs; no endorsement implied | 2026-09-29 | colour source gathered icon cut from the site logo by scripts/brand-crop.mjs; light grey (#D7D8D9) official colour, so needs_dark_tile; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Playwright | `app/public/brand/playwright/playwright.svg` | https://playwright.dev/img/playwright-logo.svg (github.com/microsoft/playwright, Apache-2.0 repo) | Apache-2.0 repository asset; Playwright trademark belongs to Microsoft; no endorsement implied | 2026-09-29 | colour source gathered full-colour masks mark, 7 paths; mono set derived; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Browserbase | `app/public/brand/browserbase/browserbase.svg` | https://www.browserbase.com/favicon.svg (site favicon, the B mark) | Vendor mark used to identify Browserbase; trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered B letterform with its two bars as one evenodd path; official orange #FF4500; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Liveblocks | `app/public/brand/liveblocks/liveblocks.svg` | https://liveblocks.io/safari-pinned-tab.svg (site mask icon) | Vendor mark used to identify Liveblocks; trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered black mark; official colour is black on white; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Colyseus | `app/public/brand/colyseus/colyseus.svg` | https://github.com/colyseus/colyseus (media/logo.svg, MIT repo) | MIT repository asset; Colyseus trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered icon cut from the wordmark logo; purple gradient kept in the colour file; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Puck | `app/public/brand/puck/puck.svg` | https://puckeditor.com/favicon.svg (github.com/puckeditor/puck, MIT) | MIT repository asset; Puck trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered single path; official black; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Yjs | `app/public/brand/yjs/yjs.svg` | https://yjs.dev/icon.svg (site icon; repo github.com/yjs/yjs, MIT) | MIT repository asset; Yjs trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered Inkscape file flattened by brand-crop; official green #6EEB83; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Electric SQL | `app/public/brand/electricsql/electricsql.svg` | https://electric-sql.com/img/brand/logo.svg (site brand folder) | Vendor mark used to identify Electric SQL; trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered icon cut from the wordmark logo; official cyan #75FBFD; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
+| Hyperbeam | `app/public/brand/hyperbeam/hyperbeam.svg` | https://hyperbeam.com/images/hyperbeam_logo.svg (site header logo) | Vendor mark used to identify Hyperbeam; trademark belongs to its owner; no endorsement implied | 2026-09-29 | colour source gathered icon cut from the wordmark logo; official violet #A888FF; generated set `-mono` `-light` `-dark` `-wide` `-stacked` |
 
 ## Not yet gathered (text mark in use)
 
-| Mark | Why | Next source to try |
+Nine of the twelve were gathered 2026-09-29 06:05 UTC from official sources (rows above, via `scripts/brand-crop.mjs`). Three stay text marks because of their owners' terms, not because the files are missing:
+
+| Mark | Why the text mark stays | Source checked |
 | --- | --- | --- |
-| SpacetimeDB | not in Simple Icons | https://github.com/clockworklabs/SpacetimeDB (brand assets in repo/site) |
-| OpenAI | not in Simple Icons | https://openai.com/brand (terms restrict use; read first) |
-| Hyperbeam | not in Simple Icons | https://hyperbeam.com press/brand or the docs favicon |
-| Browserbase | not in Simple Icons | https://www.browserbase.com brand page |
-| Playwright | not in Simple Icons | https://github.com/microsoft/playwright (logo in repo; MIT) |
-| Slack | not in Simple Icons | https://slack.com/media-kit (terms restrict use; read first) |
-| Liveblocks | not in Simple Icons | https://liveblocks.io brand page |
-| Colyseus | not in Simple Icons | https://github.com/colyseus (logo in repo) |
-| W3C | not in Simple Icons | https://www.w3.org/Consortium/Legal/logo-usage-20000308 (usage rules) |
-| Puck | not in Simple Icons | https://github.com/puckeditor/puck (logo in repo) |
-| Yjs | not in Simple Icons | https://github.com/yjs/yjs (logo in repo) |
-| Electric SQL | not in Simple Icons | https://electric-sql.com brand assets |
+| OpenAI | OpenAI's brand guidelines allow its logo only in approved "built with" contexts and forbid recolouring; a mono set would break them. The brand page also refuses automated fetches. | https://openai.com/brand |
+| Slack | Slack's media kit terms require permission for logo use outside its own partner programs and forbid recolouring. | https://slack.com/media-kit (asset download refused, 403) |
+| W3C | The W3C logo policy allows the logo only unmodified and to refer to W3C itself; a currentColor version is a modification. | https://www.w3.org/Consortium/Legal/logo-usage-20000308 |
 
 ## Our own marks (generate, per skill §5)
 

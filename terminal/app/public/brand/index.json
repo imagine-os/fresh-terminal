@@ -42,6 +42,25 @@
       "checked": "2026-09-29"
     },
     {
+      "slug": "browserbase",
+      "name": "Browserbase",
+      "short": "Browserbase",
+      "colour": "#FF4500",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "browserbase.svg",
+        "mono": "browserbase-mono.svg",
+        "light": "browserbase-light.svg",
+        "dark": "browserbase-dark.svg",
+        "wide": "browserbase-wide.svg",
+        "stacked": "browserbase-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://www.browserbase.com/favicon.svg (site favicon, the B mark)",
+      "terms": "Vendor mark used to identify Browserbase; trademark belongs to its owner; no endorsement implied",
+      "checked": "2026-09-29"
+    },
+    {
       "slug": "claude",
       "name": "Claude",
       "short": "Claude",
@@ -99,6 +118,25 @@
       "checked": "2026-09-29"
     },
     {
+      "slug": "colyseus",
+      "name": "Colyseus",
+      "short": "Colyseus",
+      "colour": null,
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "colyseus.svg",
+        "mono": "colyseus-mono.svg",
+        "light": "colyseus-light.svg",
+        "dark": "colyseus-dark.svg",
+        "wide": "colyseus-wide.svg",
+        "stacked": "colyseus-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://github.com/colyseus/colyseus (media/logo.svg, MIT repo)",
+      "terms": "MIT repository asset; Colyseus trademark belongs to its owner; no endorsement implied",
+      "checked": "2026-09-29"
+    },
+    {
       "slug": "convex",
       "name": "Convex",
       "short": "Convex",
@@ -141,7 +179,7 @@
       "name": "Drizzle ORM",
       "short": "Drizzle ORM",
       "colour": "#C5F74F",
-      "needs_dark_tile": false,
+      "needs_dark_tile": true,
       "files": {
         "colour": "drizzle.svg",
         "mono": "drizzle-mono.svg",
@@ -153,6 +191,25 @@
       "lockups_are_ours": true,
       "source": "https://simpleicons.org/?q=drizzle (cdn.simpleicons.org/drizzle)",
       "terms": "Simple Icons collection CC0-1.0; Drizzle ORM trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "electricsql",
+      "name": "Electric SQL",
+      "short": "Electric SQL",
+      "colour": "#75FBFD",
+      "needs_dark_tile": true,
+      "files": {
+        "colour": "electricsql.svg",
+        "mono": "electricsql-mono.svg",
+        "light": "electricsql-light.svg",
+        "dark": "electricsql-dark.svg",
+        "wide": "electricsql-wide.svg",
+        "stacked": "electricsql-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://electric-sql.com/img/brand/logo.svg (site brand folder)",
+      "terms": "Vendor mark used to identify Electric SQL; trademark belongs to its owner; no endorsement implied",
       "checked": "2026-09-29"
     },
     {
@@ -308,6 +365,44 @@
       "checked": "2026-09-29"
     },
     {
+      "slug": "hyperbeam",
+      "name": "Hyperbeam",
+      "short": "Hyperbeam",
+      "colour": "#A888FF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "hyperbeam.svg",
+        "mono": "hyperbeam-mono.svg",
+        "light": "hyperbeam-light.svg",
+        "dark": "hyperbeam-dark.svg",
+        "wide": "hyperbeam-wide.svg",
+        "stacked": "hyperbeam-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://hyperbeam.com/images/hyperbeam_logo.svg (site header logo)",
+      "terms": "Vendor mark used to identify Hyperbeam; trademark belongs to its owner; no endorsement implied",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "liveblocks",
+      "name": "Liveblocks",
+      "short": "Liveblocks",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "liveblocks.svg",
+        "mono": "liveblocks-mono.svg",
+        "light": "liveblocks-light.svg",
+        "dark": "liveblocks-dark.svg",
+        "wide": "liveblocks-wide.svg",
+        "stacked": "liveblocks-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://liveblocks.io/safari-pinned-tab.svg (site mask icon)",
+      "terms": "Vendor mark used to identify Liveblocks; trademark belongs to its owner; no endorsement implied",
+      "checked": "2026-09-29"
+    },
+    {
       "slug": "livekit",
       "name": "LiveKit",
       "short": "LiveKit",
@@ -441,6 +536,25 @@
       "checked": "2026-09-29"
     },
     {
+      "slug": "playwright",
+      "name": "Playwright",
+      "short": "Playwright",
+      "colour": "#2D4552",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "playwright.svg",
+        "mono": "playwright-mono.svg",
+        "light": "playwright-light.svg",
+        "dark": "playwright-dark.svg",
+        "wide": "playwright-wide.svg",
+        "stacked": "playwright-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://playwright.dev/img/playwright-logo.svg (github.com/microsoft/playwright, Apache-2.0 repo)",
+      "terms": "Apache-2.0 repository asset; Playwright trademark belongs to Microsoft; no endorsement implied",
+      "checked": "2026-09-29"
+    },
+    {
       "slug": "pnpm",
       "name": "pnpm",
       "short": "pnpm",
@@ -476,6 +590,25 @@
       "lockups_are_ours": true,
       "source": "https://simpleicons.org/?q=postgresql (cdn.simpleicons.org/postgresql)",
       "terms": "Simple Icons collection CC0-1.0; PostgreSQL trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "puck",
+      "name": "Puck",
+      "short": "Puck",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "puck.svg",
+        "mono": "puck-mono.svg",
+        "light": "puck-light.svg",
+        "dark": "puck-dark.svg",
+        "wide": "puck-wide.svg",
+        "stacked": "puck-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://puckeditor.com/favicon.svg (github.com/puckeditor/puck, MIT)",
+      "terms": "MIT repository asset; Puck trademark belongs to its owner; no endorsement implied",
       "checked": "2026-09-29"
     },
     {
@@ -612,6 +745,25 @@
       "checked": "2026-09-29"
     },
     {
+      "slug": "spacetimedb",
+      "name": "SpacetimeDB",
+      "short": "SpacetimeDB",
+      "colour": "#D7D8D9",
+      "needs_dark_tile": true,
+      "files": {
+        "colour": "spacetimedb.svg",
+        "mono": "spacetimedb-mono.svg",
+        "light": "spacetimedb-light.svg",
+        "dark": "spacetimedb-dark.svg",
+        "wide": "spacetimedb-wide.svg",
+        "stacked": "spacetimedb-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://spacetimedb.com/images/logo.svg (site header mark; repo github.com/clockworklabs/SpacetimeDB)",
+      "terms": "Vendor mark used to identify SpacetimeDB; SpacetimeDB trademark belongs to Clockwork Labs; no endorsement implied",
+      "checked": "2026-09-29"
+    },
+    {
       "slug": "stripe",
       "name": "Stripe",
       "short": "Stripe",
@@ -730,7 +882,7 @@
       "name": "Vitest",
       "short": "Vitest",
       "colour": "#00FF74",
-      "needs_dark_tile": false,
+      "needs_dark_tile": true,
       "files": {
         "colour": "vitest.svg",
         "mono": "vitest-mono.svg",
@@ -799,6 +951,25 @@
       "lockups_are_ours": true,
       "source": "https://simpleicons.org/?q=x (cdn.simpleicons.org/x)",
       "terms": "Simple Icons collection CC0-1.0; X (xAI / Grok) trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "yjs",
+      "name": "Yjs",
+      "short": "Yjs",
+      "colour": "#6EEB83",
+      "needs_dark_tile": true,
+      "files": {
+        "colour": "yjs.svg",
+        "mono": "yjs-mono.svg",
+        "light": "yjs-light.svg",
+        "dark": "yjs-dark.svg",
+        "wide": "yjs-wide.svg",
+        "stacked": "yjs-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://yjs.dev/icon.svg (site icon; repo github.com/yjs/yjs, MIT)",
+      "terms": "MIT repository asset; Yjs trademark belongs to its owner; no endorsement implied",
       "checked": "2026-09-29"
     },
     {

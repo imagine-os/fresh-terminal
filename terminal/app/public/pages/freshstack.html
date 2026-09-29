@@ -88,7 +88,8 @@ h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1
 
 .grid { display: grid; gap: clamp(14px, 1.6vw, 24px); grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
 .card { display: grid; gap: .7rem; padding: 1.1rem 1.2rem 1.2rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); }
-.card header { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.card header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: .6rem; row-gap: .2rem; }
+.card header .role { grid-column: 1 / -1; }
 .card header .mark { width: 22px; height: 22px; color: var(--fg); flex: none; }
 .nest { display: grid; gap: .6rem; padding-top: .4rem; border-top: 1px dashed var(--line); }
 .nest-label { font: 600 .74rem ui-monospace, monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
@@ -96,7 +97,7 @@ h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1
 .card[data-nested='true'] h2 { font-size: 1rem; }
 .card h2 { margin: 0; font-size: 1.15rem; font-weight: 600; letter-spacing: -.01em; }
 .role { font-size: .85rem; color: var(--muted); }
-.pill { margin-left: auto; font: 600 .74rem var(--mono); letter-spacing: .02em; text-transform: uppercase; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.pill { justify-self: end; font: 600 .74rem var(--mono); letter-spacing: .02em; text-transform: uppercase; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
 .pill.live { color: var(--live); border-color: color-mix(in srgb, var(--live) 45%, transparent); }
 .pill.written { color: var(--written); border-color: color-mix(in srgb, var(--written) 45%, transparent); }
 .card p { margin: 0; }
@@ -125,7 +126,7 @@ h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1
       <a href="../">Fresh Terminal</a><span aria-hidden="true">/</span><a href="library.html">Library</a><span aria-hidden="true">/</span><span>FreshStack</span>
     </nav>
     <h1>FreshStack</h1>
-    <p class="lede">The default stack under every Fresh Terminal box. <strong>Each piece has one job and a documented exit</strong>, so the kit stays simple and no dependency is forever. Switch the mode to see how each piece works when you use our system, bring your own keys, or hold everything yourself.</p>
+    <p class="lede">The default stack under every Fresh Terminal stage. <strong>Each piece has one job and a documented exit</strong>, so the kit stays simple and no dependency is forever. Switch the mode to see how each piece works when you use our system, bring your own keys, or hold everything yourself.</p>
   </header>
 
   <div class="counter" role="toolbar" aria-label="Mode and legend">
@@ -188,9 +189,9 @@ var STACK = [
     exit: 'The decisions tier is one row in the routing table.', link: 'https://openrouter.ai/typesafe/jev-1.13'
   },
   {
-    name: 'SpacetimeDB', role: 'live store and presence', status: 'written',
-    does: 'The realtime database: boxes, lines, pages, menus, cards, ledger entries and presence rows sync to every viewer the moment they change. Module is written and type-checked; today the app runs on a per-browser store until the module is published.',
-    modes: { ours: 'Our Maincloud database `fresh-terminal`; needs one token from the owner to publish.', byo: 'Your own Maincloud database; set VITE_SPACETIMEDB_URI and VITE_SPACETIMEDB_NAME.', self: 'Run `spacetime start` on your own machine and publish the same module to it.' },
+    name: 'SpacetimeDB', mark: 'spacetimedb', role: 'live store and presence', status: 'written',
+    does: 'The realtime database: stages, lines, pages, menus, cards, ledger entries and presence rows sync to every viewer the moment they change. The module is published on Maincloud (14 tables, 19 reducers, 2026-09-29) and the client bindings are generated; the app still runs on a per-browser store until the next pass connects it.',
+    modes: { ours: 'Our Maincloud database `fresh-terminal`, published from GitHub Actions on every change to the module.', byo: 'Your own Maincloud database; set VITE_SPACETIMEDB_URI and VITE_SPACETIMEDB_NAME.', self: 'Run `spacetime start` on your own machine and publish the same module to it.' },
     exit: 'SpacetimeDB is open source and self-hostable; the store interface has a local fallback already.', link: 'https://spacetimedb.com/'
   },
   {
@@ -212,19 +213,19 @@ var STACK = [
     exit: 'Nothing depends on it.', link: 'https://platform.openai.com/docs/guides/realtime'
   },
   {
-    name: 'Clerk', mark: 'clerk', role: 'sign-in and organizations', status: 'written',
-    does: 'Anonymous first, like Excalidraw: sign in only to save or share. Organizations map to tenants. The auth seam exists; anonymous identity is in use today.',
+    name: 'Clerk', mark: 'clerk', role: 'sign-in, organizations, billing', status: 'live',
+    does: 'Anonymous first, like Excalidraw: sign in only to save to your account or share. Sign-in is live on freshterminal.ai; the $5 starter kit and friend credits attach to the account. Organizations map to tenants.',
     modes: { ours: 'Our Clerk instance behind freshterminal.ai.', byo: 'Your Clerk keys in the router env.', self: 'Swap the provider behind the seam for Better Auth or any OpenID Connect issuer.' },
     exit: 'One provider class behind a seam; SpacetimeDB accepts standard OpenID Connect tokens.', link: 'https://clerk.com/'
   },
   {
-    name: 'Stripe', mark: 'stripe', role: 'settlement', status: 'planned',
-    does: 'Turns the ledger balance into a charge. The ledger itself (micro-dollars, hash-linked, verifiable) is ours and already live.',
-    modes: { ours: 'We settle your balance monthly.', byo: 'No settlement needed: you pay your vendors directly.', self: 'Any processor, or none; the ledger stands alone.' },
-    exit: 'The ledger is the product; the processor is a plug.', link: 'https://stripe.com/'
+    name: 'Clerk Billing', mark: 'stripe', parent: 'Clerk', role: 'credit packs (Stripe underneath)', status: 'written',
+    does: 'Credits are bought first, as refill packs that renew through Clerk Billing; Stripe is the processor inside Clerk and nothing is built in Stripe itself. The webhook is written; plans and the signing secret are the remaining setup. The ledger (micro-dollars, hash-linked, verifiable) is ours and already live.',
+    modes: { ours: 'Model cost + 10%, no account fees; packs renew on their own.', byo: 'No settlement needed: you pay your vendors directly.', self: 'Any processor, or none; the ledger stands alone.' },
+    exit: 'The ledger is the product; the processor is a plug.', link: 'https://clerk.com/docs/guides/billing/overview'
   },
   {
-    name: 'Streamed browser', role: 'logged-in browsers in the window system', status: 'planned',
+    name: 'Streamed browser', mark: 'hyperbeam', role: 'logged-in browsers in the window system', status: 'planned',
     does: 'Real Chrome running on a server, streamed into a window so sites that block iframes still work and stay logged in. Hyperbeam for people, Browserbase or our own machine for agents.',
     modes: { ours: 'Our Hyperbeam account; sessions persist per box.', byo: 'Your Hyperbeam or Browserbase key.', self: 'A Linux machine with Chrome and a WebRTC streamer (Fly.io or your own).' },
     exit: 'Both vendors stream standard Chromium; the window type does not care which.', link: 'https://hyperbeam.com/'
@@ -242,7 +243,7 @@ var STACK = [
     exit: 'Standard fetch handlers; portable by design.', link: 'https://hono.dev/'
   },
   {
-    name: 'Playwright', role: 'responsive and end-to-end checks', status: 'live',
+    name: 'Playwright', mark: 'playwright', role: 'responsive and end-to-end checks', status: 'live',
     does: 'Screenshots every page at seven widths from phone to 4K wall on each push, so the shell never breaks silently.',
     modes: { ours: 'Runs in Actions.', byo: 'Same.', self: 'Same.' },
     exit: 'Test tooling only; nothing ships with it.', link: 'https://playwright.dev/'
