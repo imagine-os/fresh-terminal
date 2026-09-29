@@ -24,6 +24,10 @@ export const SHELL_ACTIONS: ActionDecl[] = [
   { id: 'dev.toggle', intent: 'toggle dev mode', permission: 'anyone', shortcut: 'd' },
   { id: 'lang.toggle', intent: 'switch language', permission: 'anyone', shortcut: 'l' },
   { id: 'canvas.open', intent: 'open the master canvas', permission: 'anyone', shortcut: 'c' },
+  { id: 'settings.open', intent: 'open settings (two ways to pay)', permission: 'anyone', shortcut: 'k' },
+  { id: 'library.open', intent: 'browse the library of terminals', permission: 'anyone', shortcut: 'b' },
+  { id: 'pay.mode', intent: 'use our key or bring your own key', permission: 'anyone' },
+  { id: 'pay.key.delete', intent: 'delete my key from this browser', permission: 'anyone' },
   { id: 'auth.save', intent: 'save or sign in', permission: 'anyone', notWired: true },
 ];
 

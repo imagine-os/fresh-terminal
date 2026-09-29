@@ -9,8 +9,10 @@ Honest status: most of this is planned. What exists is listed as such.
 
 ## API (router)
 
-- **Exists:** `GET /health` → `{ ok, product, version, keyConfigured }`; `GET /rules` → resolved route table; `POST /route` `{ boxId, text, chips, history? }` → SSE `meta | delta | error | done`. 503 without a key, 501 for a pending tier, 400 for a bad body.
-- **Planned:** `POST /tag` (model-based chips through the JEV tier); `GET /ledger/:owner` once entries live in SpacetimeDB.
+- **Exists:** `GET /health` → `{ ok, product, version, keyConfigured }`; `GET /rules` → resolved route table plus `allowed_models`; `POST /route` `{ boxId, text, chips, history?, model? }` → SSE `meta` (`route`, `routing` = Jev decision or rules fallback) | `delta` | `error` | `done` (`usage`, `served_model`, `routing`, `entry`). 503 without a key, 400 for a bad body or an unlisted model. `POST /tag { text }` → `{ chips, model, ok, cost_micro, ref }` from the tagger tier.
+- **Browser-direct (own key):** the same chat completion call from the browser (`app/src/lib/openrouterDirect.ts`); our router is not involved.
+- **Decisions (Jev):** `router/src/jev.ts` `decide()`, `routeIntent()`, `needsOwner()` over `POST https://openrouter.ai/api/alpha/decisions`.
+- **Planned:** `GET /ledger/:owner` once entries live in SpacetimeDB; enforcing `needsOwner()` once identities exist server-side.
 
 ## SpacetimeDB (data API)
 

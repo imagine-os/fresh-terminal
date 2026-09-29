@@ -154,3 +154,11 @@ export function resolveThemeId(requested: string, themes: Theme[] = SEED_THEMES)
   }
   return { id: DEFAULT_THEME_ID, built: false, requested: clean };
 }
+
+/**
+ * Themes that are whole pages today rather than token sets. /box/new?theme=<id>
+ * sends the visitor to the page. The koi surface becomes an in-app theme in pass 3.
+ */
+export const THEME_SURFACE_PAGES: Record<string, string> = {
+  'koi-pond': 'pages/koi.html',
+};

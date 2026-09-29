@@ -12,6 +12,10 @@ export interface Prefs {
   devMode: boolean;
   dialectText: string;
   leftOpen: boolean;
+  /** 'ours' = our router and key (default); 'own' = the visitor's own OpenRouter key, browser-direct. */
+  payMode: 'ours' | 'own';
+  /** Dev toggle: also ask the router's tagger tier for chips on keystroke pause. */
+  modelTagger: boolean;
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -23,6 +27,8 @@ const defaults: Prefs = {
   devMode: false,
   dialectText: defaultSpecText,
   leftOpen: false,
+  payMode: 'ours',
+  modelTagger: false,
 };
 
 interface PrefsValue {

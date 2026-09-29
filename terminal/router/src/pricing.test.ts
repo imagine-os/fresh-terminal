@@ -24,6 +24,18 @@ describe('pricing', () => {
     expect(result).toEqual({ costMicro: 1000 + 1500, source: 'price-table' });
   });
 
+  it('keys the fallback table on the served model, not the route model', () => {
+    const table = {
+      default: { input_micro_per_million: 1_000_000, output_micro_per_million: 1_000_000 },
+      models: {
+        'served/model': { input_micro_per_million: 2_000_000, output_micro_per_million: 4_000_000 },
+      },
+    };
+    const usage = { prompt_tokens: 1_000_000, completion_tokens: 1_000_000, total_tokens: 2_000_000 };
+    expect(costMicroFor('served/model', usage, table).costMicro).toBe(6_000_000);
+    expect(costMicroFor('openrouter/auto', usage, table).costMicro).toBe(2_000_000);
+  });
+
   it('applies margins from basis points', () => {
     expect(priceMicroFor(1000, 0)).toBe(1000);
     expect(priceMicroFor(1000, 500)).toBe(1050);

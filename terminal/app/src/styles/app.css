@@ -1379,3 +1379,81 @@ textarea {
   content: '…';
   color: var(--fg-faint);
 }
+
+/* ---------- settings (two ways to pay) ---------- */
+
+.settings {
+  position: absolute;
+  z-index: 40;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92cqi, 34rem);
+  max-height: 90%;
+  overflow: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-roomy);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-roomy);
+}
+.settings h2 {
+  margin: 0;
+  font-size: var(--type-heading);
+}
+.pay-options {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-cozy);
+}
+.pay-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: var(--space-cozy) var(--space-roomy);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  min-height: var(--target);
+}
+.pay-option[data-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.pay-option[data-disabled='true'] {
+  opacity: 0.6;
+}
+.pay-option input {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.2rem;
+}
+.pay-option small {
+  display: block;
+  color: var(--fg-muted);
+}
+.key-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.key-row input {
+  flex: 1 1 12rem;
+  font-family: var(--font-mono);
+}
+.key-saved {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: var(--space-cozy) var(--space-roomy);
+}

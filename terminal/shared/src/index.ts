@@ -6,3 +6,4 @@ export * from './billing';
 export * from './themes';
 export * from './starters';
 export * from './canvas';
+export * from './routing';

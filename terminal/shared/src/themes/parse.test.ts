@@ -67,3 +67,10 @@ describe('theme fallbacks', () => {
     expect(Object.keys(THEME_FALLBACKS)).toHaveLength(13);
   });
 });
+
+describe('theme surface pages', () => {
+  it('maps koi-pond to its page', async () => {
+    const { THEME_SURFACE_PAGES } = await import('./seed');
+    expect(THEME_SURFACE_PAGES['koi-pond']).toBe('pages/koi.html');
+  });
+});

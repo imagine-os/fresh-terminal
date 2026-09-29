@@ -19,6 +19,7 @@ for (let round = 0; round < 3; round += 1) {
           owner_identity: owner.id,
           kind: 'charge',
           what: 'model.call',
+          model: 'anthropic/claude-haiku-4.5',
           units: 1,
           unit_kind: 'call',
           cost_micro: 100 * counter,

@@ -17,6 +17,7 @@ export default defineConfig({
     alias: {
       '@shared': resolve(here, '../shared/src'),
       '@docs': resolve(here, '../docs'),
+      '@router': resolve(here, '../router'),
     },
   },
   server: {

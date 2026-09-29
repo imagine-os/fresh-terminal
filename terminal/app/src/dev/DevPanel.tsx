@@ -18,6 +18,8 @@ interface Props {
   widthEm: number;
   theme: Theme;
   onPickTheme: (id: string) => void;
+  modelTagger: boolean;
+  onModelTagger: (enabled: boolean) => void;
 }
 
 function downloadJson(name: string, data: unknown): void {
@@ -30,7 +32,7 @@ function downloadJson(name: string, data: unknown): void {
   URL.revokeObjectURL(url);
 }
 
-export function DevPanel({ dialectText, onDialectChange, sizeClass, widthEm, theme, onPickTheme }: Props) {
+export function DevPanel({ dialectText, onDialectChange, sizeClass, widthEm, theme, onPickTheme, modelTagger, onModelTagger }: Props) {
   const { t } = useI18n();
   const snapshot = useStoreSnapshot();
   const [verdict, setVerdict] = useState<string | null>(null);
@@ -113,6 +115,14 @@ export function DevPanel({ dialectText, onDialectChange, sizeClass, widthEm, the
         <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)' }}>{printTheme(theme)}</pre>
       </section>
 
+      <section>
+        <h3>{t('dev.tagger')}</h3>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', minHeight: 'var(--target)' }}>
+          <input type="checkbox" checked={modelTagger} onChange={(event) => onModelTagger(event.target.checked)} style={{ width: '1.5rem', height: '1.5rem' }} />
+          {t('dev.taggerToggle')}
+        </label>
+      </section>
+
       <PlanViewer />
 
       <section>
@@ -148,6 +158,7 @@ export function DevPanel({ dialectText, onDialectChange, sizeClass, widthEm, the
               <tr>
                 <th>kind</th>
                 <th>what</th>
+                <th>model</th>
                 <th>cost</th>
                 <th>price</th>
                 <th>hash</th>
@@ -158,6 +169,7 @@ export function DevPanel({ dialectText, onDialectChange, sizeClass, widthEm, the
                 <tr key={entry.id}>
                   <td>{entry.kind}</td>
                   <td>{entry.what}</td>
+                  <td title={entry.model}>{entry.model.split('/').pop()}</td>
                   <td>{formatMicro(entry.cost_micro)}</td>
                   <td>{formatMicro(entry.price_micro)}</td>
                   <td title={entry.hash}>{entry.hash.slice(0, 10)}…</td>

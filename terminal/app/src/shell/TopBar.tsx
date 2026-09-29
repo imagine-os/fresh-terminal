@@ -6,7 +6,7 @@ import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { NotWiredButton } from '../ui/NotWiredButton';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconLang, IconPlus, IconSave, IconSidebar, IconTheme } from '../ui/icons';
+import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconSave, IconSidebar, IconTheme } from '../ui/icons';
 
 interface Props {
   boxName: string;
@@ -22,6 +22,9 @@ interface Props {
   onHome: () => void;
   onCanvas: () => void;
   canvasActive: boolean;
+  onSettings: () => void;
+  payMode: 'ours' | 'own';
+  libraryHref: string;
 }
 
 function key(id: string): string {
@@ -51,7 +54,7 @@ export function TopBar(props: Props) {
       <span className="tagline">{props.boxName ? `/ ${props.boxName}` : t('landing.tagline')}</span>
       <span className="topbar-spacer" />
       <span className="balance" data-live={props.usedMicro > 0} data-testid="balance" aria-label={`${formatMicro(props.usedMicro)} ${t('topbar.used')}`}>
-        {formatMicro(props.usedMicro)} {t('topbar.used')}
+        {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
       </span>
       <span className="topbar-group">
         <Tooltip label={t('topbar.newBox')} shortcut={key('box.new')}>
@@ -63,6 +66,11 @@ export function TopBar(props: Props) {
           <Button icon variant="ghost" aria-label={t('topbar.canvas')} aria-pressed={props.canvasActive} onClick={props.onCanvas} data-testid="canvas-link">
             <IconBox />
           </Button>
+        </Tooltip>
+        <Tooltip label={t('topbar.library')} shortcut={key('library.open')}>
+          <a className="btn" data-variant="ghost" data-icon="true" aria-label={t('topbar.library')} href={props.libraryHref} data-testid="library-link">
+            <IconLibrary />
+          </a>
         </Tooltip>
         <Tooltip label={t('topbar.toggleSidebar')} shortcut={key('sidebar.toggle')}>
           <Button icon variant="ghost" aria-label={t('topbar.toggleSidebar')} onClick={props.onToggleSidebar}>
@@ -78,6 +86,11 @@ export function TopBar(props: Props) {
           <Button icon variant="ghost" aria-label={t('topbar.language')} onClick={props.onToggleLang}>
             <IconLang />
             <span className="sr-only">{lang}</span>
+          </Button>
+        </Tooltip>
+        <Tooltip label={t('topbar.settings')} shortcut={key('settings.open')}>
+          <Button icon variant="ghost" aria-label={t('topbar.settings')} onClick={props.onSettings} data-testid="settings-link">
+            <IconKey />
           </Button>
         </Tooltip>
         <Tooltip label={t('topbar.devMode')} shortcut={key('dev.toggle')} align="end">

@@ -5,7 +5,9 @@ import type { Theme } from '@shared/themes';
 import { verifyLedger } from '@shared/ledger';
 import { listActions } from '../actions/registry';
 import { useI18n } from '../i18n';
-import { streamRoute } from '../lib/routerClient';
+import { streamDirect } from '../lib/openrouterDirect';
+import { streamRoute, type RouteHandlers } from '../lib/routerClient';
+import { readOwnKey } from '../settings/ownKey';
 import { store, useStoreSnapshot, type Box } from '../store';
 import { Composer } from './Composer';
 import { Doodles } from './Doodles';
@@ -16,6 +18,8 @@ export interface AppCommands {
   setDialect: (text: string) => void;
   setLang: (lang: 'en' | 'es') => void;
   dialectText: string;
+  payMode: 'ours' | 'own';
+  modelTagger: boolean;
 }
 
 interface Props {
@@ -126,9 +130,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         .slice(-12)
         .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
 
-      await streamRoute(
-        { boxId: box.id, text, chips, history },
-        {
+      const handlers: RouteHandlers = {
           onDelta: (delta) => {
             assembled += delta;
             store.updateLine(reply.id, assembled, true);
@@ -154,8 +156,14 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             }
             store.appendLine(box.id, 'system', message, []);
           },
-        },
-      );
+      };
+      const ownKey = commands.payMode === 'own' ? readOwnKey() : '';
+      if (ownKey) {
+        // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
+        await streamDirect({ boxId: box.id, text, chips, history }, { apiKey: ownKey, referer: window.location.origin }, handlers);
+      } else {
+        await streamRoute({ boxId: box.id, text, chips, history }, handlers);
+      }
       setBusy(false);
     },
     [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands],
@@ -214,6 +222,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         hasLines={!isEmpty}
         busy={busy}
         onSend={onSend}
+        modelTagger={commands.modelTagger}
       />
     </>
   );
@@ -229,6 +238,7 @@ import { createPortal } from 'react-dom';
 function ComposerSlot(props: {
   boxId: string;
   theme: Theme;
+  modelTagger: boolean;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -246,6 +256,7 @@ function ComposerSlot(props: {
       boxId={props.boxId}
       cursor={props.theme.cursor}
       themeId={props.theme.id}
+      modelTagger={props.modelTagger}
       hasBoxes={props.hasBoxes}
       hasLines={props.hasLines}
       busy={props.busy}

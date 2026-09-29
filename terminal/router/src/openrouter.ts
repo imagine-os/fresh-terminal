@@ -16,10 +16,12 @@ export interface ChatMessage {
 }
 
 export interface StreamEvent {
-  type: 'delta' | 'usage' | 'id' | 'error';
+  type: 'delta' | 'usage' | 'id' | 'model' | 'error';
   text?: string;
   usage?: Usage;
   id?: string;
+  /** The model OpenRouter actually served (matters for openrouter/auto). */
+  model?: string;
   message?: string;
 }
 
@@ -50,6 +52,7 @@ function parseSseLine(line: string): unknown | null {
 
 interface ChunkShape {
   id?: string;
+  model?: string;
   choices?: Array<{ delta?: { content?: string | null } }>;
   usage?: Usage;
   error?: { message?: string };
@@ -96,6 +99,7 @@ export async function* streamChat(options: OpenRouterOptions): AsyncGenerator<St
   const decoder = new TextDecoder();
   let buffer = '';
   let sentId = false;
+  let sentModel = false;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -119,6 +123,10 @@ export async function* streamChat(options: OpenRouterOptions): AsyncGenerator<St
       if (!sentId && chunk.id) {
         sentId = true;
         yield { type: 'id', id: chunk.id };
+      }
+      if (!sentModel && chunk.model) {
+        sentModel = true;
+        yield { type: 'model', model: chunk.model };
       }
       const content = chunk.choices?.[0]?.delta?.content;
       if (typeof content === 'string' && content.length > 0) {

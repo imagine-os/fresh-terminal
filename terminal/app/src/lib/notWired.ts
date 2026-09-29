@@ -9,7 +9,6 @@ export class NotWiredError extends Error {
 export const NOT_WIRED = [
   { id: 'auth.clerk', label: 'Clerk sign-in (save / sign in button)' },
   { id: 'store.spacetimedb', label: 'SpacetimeDB live store (module written, not published)' },
-  { id: 'tagger.model', label: 'Model-based chip tagger (JEV tier)' },
   { id: 'billing.stripe', label: 'Stripe settlement' },
   { id: 'chain.shared.publish', label: 'Publishing the shared chain outside this browser' },
   { id: 'presence.others', label: 'Presence of other people in a box' },

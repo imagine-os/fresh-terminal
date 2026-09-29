@@ -96,6 +96,8 @@ const entry = table(
     /** 'charge' | 'credit' | 'settle' */
     kind: t.string(),
     what: t.string(),
+    /** Served model id for model calls ('' otherwise). */
+    model: t.string(),
     units: t.u64(),
     /** 'token_in' | 'token_out' | 'byte' | 'call' */
     unit_kind: t.string(),
@@ -255,6 +257,7 @@ export const append_entry = spacetimedb.reducer(
     box_id: t.u64(),
     kind: t.string(),
     what: t.string(),
+    model: t.string(),
     units: t.u64(),
     unit_kind: t.string(),
     cost_micro: t.u64(),
@@ -286,6 +289,7 @@ export const append_entry = spacetimedb.reducer(
       owner_identity: ctx.sender,
       kind: args.kind,
       what: args.what,
+      model: args.model,
       units: args.units,
       unit_kind: args.unit_kind,
       cost_micro: args.cost_micro,

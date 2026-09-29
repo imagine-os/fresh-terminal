@@ -25,6 +25,8 @@ export const entryDraftSchema = z.object({
   owner_identity: z.string(),
   kind: z.enum(ENTRY_KINDS),
   what: z.string().min(1),
+  /** Served model id for model calls ('' otherwise). */
+  model: z.string(),
   units: nonNegativeInteger,
   unit_kind: z.enum(UNIT_KINDS),
   cost_micro: nonNegativeInteger,

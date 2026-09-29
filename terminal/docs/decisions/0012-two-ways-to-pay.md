@@ -1,0 +1,8 @@
+# 0012 — two ways to pay
+
+- `prefs.payMode` is `'ours'` (default) or `'own'`. The visitor's own OpenRouter key lives only in `localStorage` under `fresh-terminal.own-openrouter-key` (`app/src/settings/ownKey.ts`), separate from prefs, never logged, never posted to our router, shown masked, deletable with one button.
+- Path selection happens in `BoxView.onSend`: `payMode === 'own'` and a stored key → `streamDirect` (`app/src/lib/openrouterDirect.ts`, browser → `https://openrouter.ai/api/v1/chat/completions` with `Authorization`, `HTTP-Referer: location.origin`, `X-Title: Fresh Terminal`, `stream: true`, `usage: { include: true }`); otherwise `streamRoute` through our router.
+- Route resolution is shared (`shared/src/routing`) so both paths pick the same tier and model from `router/rules.json`. Non-chat tiers (Jev decisions, tagger) never answer the user; the default chat tier does.
+- Ledger: own-key calls write a `charge` with `what: 'model.call.own-key'`, `price_micro = cost_micro` (OpenRouter's reported cost), margin 0, `model` = the served model. The "$x used" readout therefore means "what your key was charged" in own-key mode. The chain does not care which path produced an entry.
+- Both handlers share `RouteHandlers`, so failure states, streaming and entry recording are identical from the transcript's point of view.
+- Server-side: entries now carry `model` (served model), the `done` event carries `served_model`, the fallback price table is keyed by the served model, and a request may name an allowed `model` explicitly. The fast tier defaults to `anthropic/claude-haiku-4.5` until Justin confirms (see 0013).

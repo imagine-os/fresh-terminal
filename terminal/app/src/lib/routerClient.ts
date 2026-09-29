@@ -18,6 +18,7 @@ export interface RouteMeta {
 export interface RouteDone {
   ok: boolean;
   usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost?: number };
+  served_model: string;
   costSource: string;
   entry: EntryDraft | null;
   chars: number;
@@ -40,6 +41,8 @@ export interface RouteRequest {
   boxId: string;
   text: string;
   chips: Chip[];
+  /** Optional explicit model from the allowlist. */
+  model?: string;
   history: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
 }
 

@@ -100,3 +100,20 @@ export function IconClose(props: IconProps) {
     </svg>
   );
 }
+
+export function IconKey(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="8" cy="14" r="4" />
+      <path d="M11 11l9-9M16 4l3 3M13 7l3 3" />
+    </svg>
+  );
+}
+
+export function IconLibrary(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 5h4v14H4zM10 5h4v14h-4zM16 6l4-1v14l-4 1z" />
+    </svg>
+  );
+}

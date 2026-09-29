@@ -1,7 +1,49 @@
 {
-  "$comment": "Fallback prices in micro-dollars per 1,000,000 tokens (integers). Used only when OpenRouter does not return usage.cost. These are placeholders to be verified against openrouter.ai/models before real billing.",
-  "default": { "input_micro_per_million": 1000000, "output_micro_per_million": 3000000 },
+  "$comment": "Fallback prices in micro-dollars per 1,000,000 tokens (integers), keyed by the SERVED model id. Used only when OpenRouter does not return usage.cost. Values copied from openrouter.ai/api/v1/models on 2026-09-28 (pricing.prompt / pricing.completion per token x 1e12).",
+  "default": {
+    "input_micro_per_million": 1000000,
+    "output_micro_per_million": 3000000
+  },
   "models": {
-    "openrouter/auto": { "input_micro_per_million": 1000000, "output_micro_per_million": 3000000 }
+    "typesafe/jev-1.13": {
+      "input_micro_per_million": 42,
+      "output_micro_per_million": 0
+    },
+    "google/gemini-2.5-flash-lite": {
+      "input_micro_per_million": 100000,
+      "output_micro_per_million": 400000
+    },
+    "openai/gpt-4.1-nano": {
+      "input_micro_per_million": 100000,
+      "output_micro_per_million": 400000
+    },
+    "openai/gpt-4o-mini": {
+      "input_micro_per_million": 150000,
+      "output_micro_per_million": 600000
+    },
+    "anthropic/claude-haiku-4.5": {
+      "input_micro_per_million": 1000000,
+      "output_micro_per_million": 5000000
+    },
+    "anthropic/claude-sonnet-4.5": {
+      "input_micro_per_million": 3000000,
+      "output_micro_per_million": 15000000
+    },
+    "anthropic/claude-opus-5": {
+      "input_micro_per_million": 5000000,
+      "output_micro_per_million": 25000000
+    },
+    "anthropic/claude-opus-5.5": {
+      "input_micro_per_million": 4000000,
+      "output_micro_per_million": 20000000
+    },
+    "anthropic/claude-fable-5.1": {
+      "input_micro_per_million": 10000000,
+      "output_micro_per_million": 50000000
+    },
+    "openrouter/auto": {
+      "input_micro_per_million": 1000000,
+      "output_micro_per_million": 5000000
+    }
   }
 }

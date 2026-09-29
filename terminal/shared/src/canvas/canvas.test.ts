@@ -3,17 +3,22 @@ import { SEED_CARDS } from './index';
 import { DEFAULT_THICKNESS_MM, cardSchema, makeCard } from './types';
 
 describe('canvas cards', () => {
-  it('seeds the five starting cards with valid records', () => {
+  it('seeds the starting cards with valid records', () => {
     expect(SEED_CARDS.map((card) => card.id)).toEqual([
       'audit-recommendation',
       'start-page-themes',
       'plan-pm-viewer',
       'docs-start-here',
       'first-box',
+      'koi-pond',
     ]);
     for (const card of SEED_CARDS) {
       expect(cardSchema.safeParse(card).success).toBe(true);
     }
+    expect(SEED_CARDS.find((card) => card.id === 'start-page-themes')).toMatchObject({
+      title: 'Library of terminals',
+      href: 'pages/library.html',
+    });
   });
 
   it('gives paper 1 mm and images 10 mm by default', () => {

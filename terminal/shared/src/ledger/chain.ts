@@ -16,6 +16,7 @@ const HASHED_FIELDS = [
   'owner_identity',
   'kind',
   'what',
+  'model',
   'units',
   'unit_kind',
   'cost_micro',

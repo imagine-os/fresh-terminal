@@ -8,3 +8,5 @@
 - Opening a card: select shows a detail panel; our own same-origin pages render inside a shadow root with scripts removed (no iframe); "Full screen" opens the real page; `route:/plan` opens the in-app plan; `box:first` opens the visitor's first box.
 - Rule from here: every new deliverable (page, doc, image, box) is added as a card in the same push.
 - Pass 2 (Opus 5): grouping, long-paper scroll cards, image upload, live cursors on the canvas.
+
+- 2026-09-29: card "Koi Pond" added (`pages/koi.html`); `THEME_SURFACE_PAGES` in `shared/src/themes/seed.ts` sends `/box/new?theme=koi-pond` to the page until pass 3 makes it an in-app theme.

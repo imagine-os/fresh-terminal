@@ -7,7 +7,7 @@ Everything about the product lives in this folder. Numbered files are append-onl
 | [plan.md](plan.md) / [plan.json](plan.json) | development plan, order of operations, model per task. The dev-mode PM viewer reads plan.json. |
 | [prompts/](prompts/) | Justin's prompts verbatim, with the reply summary once known; `starters.json` seeds the suggestion strip and the verb vocabulary |
 | [decisions/](decisions/) | one decision per file: repo shape, SpacetimeDB, router, dialect, homepage, hosting, auth, ledger, themes |
-| [changelog/](changelog/) | what shipped per pass and what is not wired yet |
+| [changelog/](changelog/) | what shipped per pass and what is not wired yet (`0001` pass 1, `0002` pass 2) |
 | [reference/surfaces.md](reference/surfaces.md) | MCP / WebMCP / CLI / API abilities as of this pass |
 | [pages/](pages/) | per-page spec: purpose, regions, actions, states, i18n keys |
 | [canvas/cards.json](canvas/cards.json) | master canvas seed: every deliverable is a card (append with `pnpm -C terminal canvas:add`) |

@@ -23,6 +23,7 @@ function draft(overrides: Partial<EntryDraft> = {}): EntryDraft {
     owner_identity: 'owner-a',
     kind: 'charge',
     what: 'model.call',
+    model: 'test/model',
     units: 1,
     unit_kind: 'call',
     cost_micro: 420,
@@ -59,6 +60,12 @@ describe('ledger chain', () => {
     const entries = buildChain(5, true);
     expect(verifyOwnerChain(entries)).toEqual({ ok: true, count: 5, brokenAt: null, reason: null });
     expect(verifySharedChain(entries)).toEqual({ ok: true, count: 5, brokenAt: null, reason: null });
+  });
+
+  it('detects a tampered model id', () => {
+    const entries = buildChain(2, false);
+    (entries[0] as Entry).model = 'other/model';
+    expect(verifyOwnerChain(entries)).toMatchObject({ ok: false, brokenAt: 0, reason: 'hash mismatch' });
   });
 
   it('detects a tampered amount', () => {
@@ -101,7 +108,7 @@ describe('ledger chain', () => {
   it('computes balance and usage with integers', () => {
     const entries = buildChain(3, false);
     entries.push(
-      chainEntry(draft({ kind: 'credit', what: 'promo', price_micro: 5_000, cost_micro: 0 }), {
+      chainEntry(draft({ kind: 'credit', what: 'promo', model: '', price_micro: 5_000, cost_micro: 0 }), {
         id: 'credit-1',
         onChain: false,
         heads: headsAfter(entries, 'owner-a'),

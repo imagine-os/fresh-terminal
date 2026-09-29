@@ -369,6 +369,80 @@
       "pass": 1
     },
     {
+      "id": "two-ways-to-pay",
+      "title": "Two ways to pay: our key (router) or bring your own key (browser-direct), ledger complete either way",
+      "status": "done",
+      "depends_on": [
+        "router",
+        "ledger",
+        "auth-seam"
+      ],
+      "model": "Fable 5.1",
+      "pass": 2
+    },
+    {
+      "id": "served-model-ledger",
+      "title": "Served model on entries and done event; fallback prices keyed by served model; per-request model allowlist",
+      "status": "done",
+      "depends_on": [
+        "pass-through"
+      ],
+      "model": "Fable 5.1",
+      "pass": 2
+    },
+    {
+      "id": "jev-routing",
+      "title": "Jev (typesafe/jev-1.13) via Decisions API routes intents with rules fallback; needsOwner() yes/no check",
+      "status": "done",
+      "depends_on": [
+        "router"
+      ],
+      "model": "Fable 5.1",
+      "pass": 2
+    },
+    {
+      "id": "tagger-tier",
+      "title": "Tagger tier: POST /tag on gemini-2.5-flash-lite with JSON schema; dev toggle in the composer",
+      "status": "done",
+      "depends_on": [
+        "chips-ui",
+        "router"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "library-page",
+      "title": "Library of terminals page ships under /pages/; themes.html redirects; Library link (B)",
+      "status": "done",
+      "depends_on": [
+        "pages-ported"
+      ],
+      "model": "Sonnet 5",
+      "pass": 2
+    },
+    {
+      "id": "koi-page",
+      "title": "Koi Pond terminal page (pages/koi.html) from the library",
+      "status": "done",
+      "depends_on": [
+        "library-page"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
+      "id": "jev-permission-enforce",
+      "title": "Enforce needsOwner() on owner-only routes once identities exist server-side",
+      "status": "todo",
+      "depends_on": [
+        "jev-routing",
+        "clerk-wiring"
+      ],
+      "model": "Opus 5",
+      "pass": 2
+    },
+    {
       "id": "stdb-publish",
       "title": "Publish module, generate bindings, wire SpacetimeStore",
       "status": "todo",
@@ -408,17 +482,6 @@
       "depends_on": [
         "ledger",
         "stdb-publish"
-      ],
-      "model": "Opus 5",
-      "pass": 2
-    },
-    {
-      "id": "jev-tagger",
-      "title": "Model-based chip tagger through the JEV tier",
-      "status": "todo",
-      "depends_on": [
-        "router",
-        "chips-ui"
       ],
       "model": "Opus 5",
       "pass": 2
@@ -557,6 +620,17 @@
       ],
       "model": "Opus 5",
       "pass": 2
+    },
+    {
+      "id": "koi-in-app-theme",
+      "title": "Koi Pond as an in-app theme (WebGL surface behind the shell)",
+      "status": "todo",
+      "depends_on": [
+        "koi-page",
+        "themes-3"
+      ],
+      "model": "Opus 5",
+      "pass": 3
     }
   ]
 }

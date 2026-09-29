@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { localTagger, type Chip } from '@shared/chips';
 import type { CursorSpec } from '@shared/themes';
 import { useI18n } from '../i18n';
+import { mergeChips, tagRemote } from '../lib/modelTagger';
 import { useSpeech } from '../lib/speech';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
@@ -13,6 +14,8 @@ interface Props {
   boxId: string;
   cursor: CursorSpec;
   themeId: string;
+  /** Dev toggle: also ask the model tagger tier on keystroke pause. */
+  modelTagger?: boolean;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -30,14 +33,35 @@ export interface ComposerHandle {
  * inserts a newline. A mirror layer paints chips and the theme cursor over
  * the real textarea, which keeps native editing, IME and accessibility.
  */
-export function Composer({ boxId, cursor, themeId, hasBoxes, hasLines, busy, onSend, onActivity }: Props) {
+export function Composer({ boxId, cursor, themeId, modelTagger = false, hasBoxes, hasLines, busy, onSend, onActivity }: Props) {
   const { t, lang } = useI18n();
   const [text, setText] = useState('');
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const spokenBase = useRef('');
 
-  const chips = useMemo<Chip[]>(() => localTagger.tag(text), [text]);
+  const localChips = useMemo<Chip[]>(() => localTagger.tag(text), [text]);
+  const [remoteChips, setRemoteChips] = useState<Chip[]>([]);
+  const chips = useMemo<Chip[]>(() => (modelTagger ? mergeChips(localChips, remoteChips) : localChips), [localChips, remoteChips, modelTagger]);
+
+  useEffect(() => {
+    if (!modelTagger || text.trim().length < 4) {
+      setRemoteChips([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void tagRemote(text, controller.signal).then((found) => {
+        if (!controller.signal.aborted) {
+          setRemoteChips(found);
+        }
+      });
+    }, 600);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [text, modelTagger]);
 
   const resize = useCallback(() => {
     const element = textareaRef.current;
