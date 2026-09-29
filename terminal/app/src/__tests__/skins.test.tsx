@@ -4,7 +4,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SKIN_LIBRARY, libraryToSkin, type SkinRun } from '@shared/skins';
 import { I18nProvider } from '../i18n';
-import { skinProps } from '../shell/Shell';
+import { skinProps, skinReadability } from '../shell/Shell';
+import { blend, contrastRgb, parseColor } from '@shared/ui';
 import { store } from '../store';
 import { RefineBlock } from '../terminal/RefineBlock';
 
@@ -86,4 +87,30 @@ describe('skin runs in the transcript', () => {
     const image = skinProps({ ...skin, image: { ref: 'idb:abcd1234', title: 't', creator: 'c', license: 'CC0', license_url: '', source_url: '', provider: 'openverse' } }, { 'idb:abcd1234': 'blob:x' });
     expect(image.style?.['--skin-layers']).toMatch(/^url\("blob:x"\), repeating-linear-gradient/);
   });
+
+  it('adds a readability layer over photo skins: AA text, neutral small text, a lighter veil', () => {
+    const photo = {
+      ...libraryToSkin(SKIN_LIBRARY[0]!, 'stage', 'moss', 'p1', 1),
+      path: 'image_search' as const,
+      tokens: {},
+      background: null,
+      veil: 72,
+      image: { ref: 'https://example.org/moss.jpg', title: 'Moss', creator: 'c', license: 'CC BY 2.0', license_url: '', source_url: '', provider: 'openverse' as const },
+    };
+    const theme = { '--bg': '#050805', '--fg': '#33ff66', '--fg-faint': '#177a31', '--accent': '#33ff66' };
+    const moss = { dark: [22, 30, 14] as [number, number, number], light: [196, 206, 150] as [number, number, number], mean: [90, 110, 50] as [number, number, number] };
+    const readable = skinReadability(photo, theme, moss)!;
+    const props = skinProps(photo, { [photo.image.ref]: photo.image.ref }, readable);
+    expect(props['data-readable']).toBe('image');
+    expect(props.style?.['--skin-veil']).toBe('25%');
+    expect(props.style?.['--fg-faint']).not.toBe('#177a31');
+    expect(props.style?.['--accent']).toBe('#f5f5f0');
+    const behind = blend(readable.scrim, blend([5, 8, 5], moss.light, 0.25), readable.alpha);
+    expect(contrastRgb(parseColor(props.style!['--fg-faint']!)!, behind)).toBeGreaterThanOrEqual(4.5);
+    // Unsampled images get the worst-case scrim, never none.
+    expect(skinReadability(photo, theme, null)!.alpha).toBeGreaterThan(readable.alpha);
+    // Token-only skins have no image behind text and get no layer.
+    expect(skinReadability({ ...photo, image: null }, theme, null)).toBeNull();
+  });
 });
+

@@ -91,6 +91,7 @@ Read this first.
 | [changelog/0006.md](changelog/0006.md) | Replay: a playback scrubber over every step of a session; the tagline | 2026-09-29 |
 | [changelog/0007.md](changelog/0007.md) | freshterminal.ai, api.freshterminal.ai, Clerk sign-in and D1 sync, with the live check | 2026-09-29 |
 | [changelog/0008.md](changelog/0008.md) | Free credits enforced by the router, with the live check | 2026-09-29 |
+| [changelog/0009.md](changelog/0009.md) | Readable text over photo and material skins: sampled scrim, AA text, neutral small text | 2026-09-29 |
 
 ## 6. Reference
 
