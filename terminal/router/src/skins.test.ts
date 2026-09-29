@@ -26,6 +26,7 @@ describe('skins', () => {
     expect(Object.keys(question.criteria ?? {}).sort()).toEqual(['css_tokens', 'image_generate', 'image_search', 'library', 'procedural_code']);
     expect(body.entries).toEqual([expect.objectContaining({ what: 'skin.plan', cost_micro: 13 })]);
     expect(body.params.cap_micro).toBe(30000);
+    expect((body as unknown as { estimate: { micro: number; certainty: string } }).estimate).toEqual({ micro: 733, low_micro: 253, high_micro: 1213, certainty: 'fairly sure' });
   });
 
   it('library variants are free and never repeat excluded ones', async () => {

@@ -36,6 +36,7 @@ function run(boxId: string): SkinRun {
     reason: 'plateau',
     error: null,
     note: null,
+    estimate: { micro: 2100, low_micro: 700, high_micro: 3500, certainty: 'fairly sure' },
     spent_micro: 420,
     cap_micro: 30000,
     draft: null,
@@ -68,6 +69,7 @@ describe('skin runs in the transcript', () => {
     expect(buttons[0]?.textContent).toContain('4.2');
     expect(host.querySelector('[data-testid="refine-done"]')?.textContent).toContain('no better version for two rounds');
     expect(host.querySelector('[data-testid="skin-stop"]')).toBeNull();
+    expect(host.querySelector('[data-testid="refine-estimate"]')?.textContent).toBe('Estimate ≈0.2¢ (0.07¢–0.3¢), fairly sure · actual 0.04¢');
     act(() => (buttons[2] as HTMLButtonElement).click());
     expect(store.boxUi(box.id).skins.sidebar?.name).toBe('Frosted glass');
     expect(store.getSnapshot().edits.at(-1)?.summary).toContain("skinned the sidebar as 'Frosted glass'");

@@ -21,6 +21,7 @@ interface PlanResponse {
   params: RefineParams & { estimate_micro?: Record<string, number> };
   entries: EntryDraft[];
   note?: string | null;
+  estimate?: SkinRun['estimate'];
 }
 
 interface VariantResponse {
@@ -141,6 +142,7 @@ export async function startSkinRun(options: { boxId: string; text: string; lineI
     reason: null,
     error: null,
     note: null,
+    estimate: null,
     spent_micro: 0,
     cap_micro: DEFAULT_REFINE.cap_micro,
     draft: null,
@@ -176,7 +178,7 @@ export async function startSkinRun(options: { boxId: string; text: string; lineI
   } catch (error) {
     return finish({ reason: controller.signal.aborted ? 'stopped' : 'error', error: controller.signal.aborted ? null : String(error instanceof Error ? error.message : error) });
   }
-  run = { ...run, note: plan.note ?? null, path: plan.path, path_source: plan.source, spent_micro: run.spent_micro + ledger(plan.entries), cap_micro: plan.params.cap_micro, status: 'running' };
+  run = { ...run, estimate: plan.estimate ?? null, note: plan.note ?? null, path: plan.path, path_source: plan.source, spent_micro: run.spent_micro + ledger(plan.entries), cap_micro: plan.params.cap_micro, status: 'running' };
   emit(run);
   const params: RefineParams = {
     variants: plan.params.variants,

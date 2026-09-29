@@ -6,6 +6,12 @@ import { useI18n } from '../i18n';
 import { resolveImageRef } from '../lib/blobs';
 import { adoptRun, applyRunSkin, isRunning, stopRun, useLiveRun } from '../skins/runner';
 
+/** 0.4¢ style: cents with one decimal below 10¢. */
+function formatCents(micro: number): string {
+  const cents = micro / 10_000;
+  return cents < 10 ? `${cents.toFixed(cents < 0.1 && cents > 0 ? 2 : 1)}¢` : `${Math.round(cents)}¢`;
+}
+
 function Swatch({ skin }: { skin: Skin }) {
   const [url, setUrl] = useState<string | null>(null);
   const ref = skin.image?.thumb ?? skin.image?.ref ?? null;
@@ -58,6 +64,17 @@ export function RefineBlock({ run: saved }: { run: SkinRun }) {
           </button>
         ) : null}
       </div>
+      {run.estimate ? (
+        <p className="rf-estimate" data-testid="refine-estimate">
+          {t('skin.estimate', {
+            cost: formatCents(run.estimate.micro),
+            low: formatCents(run.estimate.low_micro),
+            high: formatCents(run.estimate.high_micro),
+            certainty: t(`skin.certainty.${run.estimate.certainty === 'fairly sure' ? 'fairly' : run.estimate.certainty === 'rough guess' ? 'rough' : 'sure'}`),
+          })}
+          {run.status === 'done' ? ` · ${t('skin.actual', { cost: formatCents(run.spent_micro) })}` : ''}
+        </p>
+      ) : null}
       {run.note ? <p className="rb-note" data-testid="refine-note">{run.note}</p> : null}
       {run.draft ? (
         <div className="rf-row" data-kind="draft">

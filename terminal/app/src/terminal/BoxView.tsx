@@ -21,6 +21,9 @@ import { looksLikeSkinRequest } from '@shared/skins';
 import { startSkinRun } from '../skins/runner';
 import { Doodles } from './Doodles';
 import { Transcript } from './Transcript';
+import { PageView } from '../pages/PageView';
+import { downloadSession } from '../lib/exportSession';
+import { FirstRun } from './FirstRun';
 
 export interface AppCommands {
   setLang: (lang: 'en' | 'es') => void;
@@ -41,6 +44,10 @@ interface Props {
   box: Box;
   theme: Theme;
   landing: boolean;
+  /** A page of this box shown in the stage instead of the transcript; the composer stays. */
+  pageId?: string | null;
+  /** Sending from a page returns to the transcript so the reply is seen. */
+  onLeavePage?: () => void;
   showNewBoxDoodle: boolean;
   onOpenBox: (id: string) => void;
   commands: AppCommands;
@@ -100,7 +107,7 @@ function assemble(meta: ReplyMeta | null, modelBlocks: ReplyBlock[], batch: { id
  * The terminal: transcript above, composer below. Used for both `/` (landing,
  * with the one-line headline and the how-it-works row) and `/box/:id`.
  */
-export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, commands }: Props) {
+export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, commands, pageId = null, onLeavePage }: Props) {
   const { t, lang } = useI18n();
   const snapshot = useStoreSnapshot();
   const [busy, setBusy] = useState(false);
@@ -196,6 +203,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         sentOnce.current = true;
         setFading(true);
       }
+      if (pageId) onLeavePage?.();
       store.appendLine(box.id, 'user', text, chips);
 
       // Skins and materials run the refine loop (pass 5).
@@ -205,6 +213,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         return;
       }
 
+      const localStarted = performance.now();
       const { matchLocalCommand } = await import('./localCommands');
       const local = matchLocalCommand(text, chips, {
         boxes: snapshot.boxes,
@@ -221,10 +230,17 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             return;
           }
           case 'system':
-            store.appendLine(box.id, 'system', t(local.key, local.vars ?? {}), [], { reveal: local.reveal });
+            store.appendLine(box.id, 'system', t(local.key, local.vars ?? {}), [], {
+              reveal: local.reveal,
+              reply: { meta: { intent: 'local', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] },
+            });
             return;
           case 'text':
-            store.appendLine(box.id, 'assistant', local.text, [], { reveal: local.reveal });
+            store.appendLine(box.id, 'assistant', local.text, [], {
+              reveal: local.reveal,
+              // A header line only (no blocks): the transcript keeps the plain text and its reveal.
+              reply: { meta: { intent: 'local', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] },
+            });
             if (local.speak && 'speechSynthesis' in window) {
               window.speechSynthesis.speak(new SpeechSynthesisUtterance(local.text));
             }
@@ -235,7 +251,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               'assistant',
               local.wired ? `${local.component} (live data)` : `${local.component} (${t('notWired').toLowerCase()}: demo composition)`,
               [],
-              { component: local.component, reveal: local.reveal },
+              { component: local.component, reveal: local.reveal, reply: { meta: { intent: 'draw', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] } },
             );
             return;
           case 'ops': {
@@ -279,113 +295,125 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       }
 
       setBusy(true);
-      const started = performance.now();
-      const reply = store.appendLine(box.id, 'assistant', '', []);
-      let assembled = '';
-      let modelBlocks: ReplyBlock[] = [];
-      let batch: { id: string; summary: string; changes: Change[] } | null = null;
-      const extra: ReplyBlock[] = [];
-      let intent = 'chat';
-      let skinRequested = false;
-      const promptText = text;
-      const history = lines
-        .filter((line) => line.kind !== 'system')
-        .slice(-12)
-        .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
-      const boxSnapshot = store.snapshotFor(box.id, commands.effectiveThemeId);
+      let replyLineId: string | null = null;
+      try {
+        const started = performance.now();
+        const reply = store.appendLine(box.id, 'assistant', '', []);
+        replyLineId = reply.id;
+        let assembled = '';
+        let modelBlocks: ReplyBlock[] = [];
+        let batch: { id: string; summary: string; changes: Change[] } | null = null;
+        const extra: ReplyBlock[] = [];
+        let intent = 'chat';
+        let skinRequested = false;
+        const promptText = text;
+        const history = lines
+          .filter((line) => line.kind !== 'system')
+          .slice(-12)
+          .map((line) => ({ role: line.kind as 'user' | 'assistant', content: line.text }));
+        const boxSnapshot = store.snapshotFor(box.id, commands.effectiveThemeId);
 
-      const handlers: RouteHandlers = {
-        onMeta: (meta) => {
-          intent = meta.routing?.intent ?? meta.route.intent;
-        },
-        onDelta: (delta) => {
-          assembled += delta;
-          store.updateLine(reply.id, assembled, true);
-        },
-        onOps: (payload) => {
-          if (payload.ops.length === 0) {
-            if (payload.rejected.length > 0) {
-              extra.push({ kind: 'error', text: payload.rejected.join('; ').slice(0, 600) });
+        const handlers: RouteHandlers = {
+          onMeta: (meta) => {
+            intent = meta.routing?.intent ?? meta.route.intent;
+          },
+          onDelta: (delta) => {
+            assembled += delta;
+            store.updateLine(reply.id, assembled, true);
+          },
+          onOps: (payload) => {
+            if (payload.ops.length === 0) {
+              if (payload.rejected.length > 0) {
+                extra.push({ kind: 'error', text: payload.rejected.join('; ').slice(0, 600) });
+              }
+              return;
             }
+            const applied = store.applyOps(box.id, payload.ops as Op[], 'assistant');
+            if (applied.ok) {
+              batch = { id: applied.batch.id, summary: applied.batch.summary, changes: applied.batch.changes };
+            } else {
+              extra.push({ kind: 'error', text: `Not applied: ${applied.reason}` });
+            }
+          },
+          onReply: (blocks) => {
+            modelBlocks = blocks;
+          },
+          onSkin: () => {
+            skinRequested = true;
+          },
+          onDone: (done) => {
+            if (done.entry) {
+              const { owner_identity: _ignored, ...draft } = done.entry;
+              store.appendEntry(draft);
+            }
+            if (skinRequested) {
+              store.updateLine(reply.id, promptText, false);
+              void startSkinRun({ boxId: box.id, text: promptText, lineId: reply.id });
+              return;
+            }
+            const meta: ReplyMeta = {
+              intent,
+              model: done.served_model,
+              ms: performance.now() - started,
+              cost_micro: done.entry?.price_micro ?? 0,
+            };
+            const summaryText = modelBlocks.find((block) => block.kind === 'summary');
+            const text = summaryText && summaryText.kind === 'summary' ? summaryText.text : assembled || batch?.summary || '';
+            store.updateLine(reply.id, text, false);
+            const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
+            store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
+          },
+          onFail: (failure) => {
+            store.updateLine(reply.id, assembled, false);
+            let message: string;
+            if (failure.kind === 'no-router') {
+              message = t('system.noRouter');
+            } else if (failure.kind === 'no-key') {
+              message = t('system.noKey');
+            } else if (failure.kind === 'pending') {
+              message = t('system.pending', { note: failure.note });
+            } else {
+              message = t('system.error', { message: failure.message });
+            }
+            store.appendLine(box.id, 'system', message, []);
+          },
+        };
+        const ownKey = commands.payMode === 'own' ? readOwnKey() : '';
+        if (ownKey) {
+          // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
+          await streamDirect(
+            { boxId: box.id, text, chips, history, snapshot: boxSnapshot },
+            { apiKey: ownKey, referer: window.location.origin },
+            handlers,
+          );
+        } else {
+          // Never POST to a static host: a missing router used to surface as "HTTP 405".
+          const health = await probeRouter();
+          if (health.state !== 'ok') {
+            store.updateLine(reply.id, '', false);
+            store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
             return;
           }
-          const applied = store.applyOps(box.id, payload.ops as Op[], 'assistant');
-          if (applied.ok) {
-            batch = { id: applied.batch.id, summary: applied.batch.summary, changes: applied.batch.changes };
-          } else {
-            extra.push({ kind: 'error', text: `Not applied: ${applied.reason}` });
-          }
-        },
-        onReply: (blocks) => {
-          modelBlocks = blocks;
-        },
-        onSkin: () => {
-          skinRequested = true;
-        },
-        onDone: (done) => {
-          if (done.entry) {
-            const { owner_identity: _ignored, ...draft } = done.entry;
-            store.appendEntry(draft);
-          }
-          if (skinRequested) {
-            store.updateLine(reply.id, promptText, false);
-            void startSkinRun({ boxId: box.id, text: promptText, lineId: reply.id });
-            return;
-          }
-          const meta: ReplyMeta = {
-            intent,
-            model: done.served_model,
-            ms: performance.now() - started,
-            cost_micro: done.entry?.price_micro ?? 0,
-          };
-          const summaryText = modelBlocks.find((block) => block.kind === 'summary');
-          const text = summaryText && summaryText.kind === 'summary' ? summaryText.text : assembled || batch?.summary || '';
-          store.updateLine(reply.id, text, false);
-          const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
-          store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
-        },
-        onFail: (failure) => {
-          store.updateLine(reply.id, assembled, false);
-          let message: string;
-          if (failure.kind === 'no-router') {
-            message = t('system.noRouter');
-          } else if (failure.kind === 'no-key') {
-            message = t('system.noKey');
-          } else if (failure.kind === 'pending') {
-            message = t('system.pending', { note: failure.note });
-          } else {
-            message = t('system.error', { message: failure.message });
-          }
-          store.appendLine(box.id, 'system', message, []);
-        },
-      };
-      const ownKey = commands.payMode === 'own' ? readOwnKey() : '';
-      if (ownKey) {
-        // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
-        await streamDirect(
-          { boxId: box.id, text, chips, history, snapshot: boxSnapshot },
-          { apiKey: ownKey, referer: window.location.origin },
-          handlers,
-        );
-      } else {
-        // Never POST to a static host: a missing router used to surface as "HTTP 405".
-        const health = await probeRouter();
-        if (health.state !== 'ok') {
-          store.updateLine(reply.id, '', false);
-          store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
-          setBusy(false);
-          return;
+          await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers);
         }
-        await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers);
+      } catch (error) {
+        // Nothing may end in silence: a thrown turn leaves a visible line.
+        if (replyLineId) store.updateLine(replyLineId, '', false);
+        const message = error instanceof Error ? error.message : String(error);
+        store.appendLine(box.id, 'system', t('system.turnFailed', { message: message.slice(0, 200) }), [], { reveal: 'none' });
+      } finally {
+        setBusy(false);
       }
-      setBusy(false);
     },
-    [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands],
+    [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands, pageId, onLeavePage],
   );
 
   return (
     <>
-      {isEmpty ? (
+      <FirstRun onExport={() => downloadSession(box.id)} />
+      {pageId ? (
+        <PageView pageId={pageId} />
+      ) : isEmpty ? (
         <section className="empty" data-fading={fading} aria-label={PRODUCT_NAME}>
           {landing ? (
             <>

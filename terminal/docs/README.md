@@ -16,8 +16,8 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-070) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
-| [canon/prompts.md](canon/prompts.md) | All 65 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-074) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 69 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
 | [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, replay, step, wiki and more | 2026-09-29 |
@@ -89,7 +89,7 @@ Read this first.
 | [changelog/0005.md](changelog/0005.md) | Pass 5: skins, the material library and the refine loop, with live results | 2026-09-29 |
 | [changelog/0006.md](changelog/0006.md) | Replay: a playback scrubber over every step of a session; the tagline | 2026-09-29 |
 | [changelog/0007.md](changelog/0007.md) | freshterminal.ai, api.freshterminal.ai, Clerk sign-in and D1 sync, with the live check | 2026-09-29 |
-| [changelog/0008.md](changelog/0008.md) | Product Hunt strategy page (proposed launch plan, C-070) | 2026-09-29 |
+| [changelog/0008.md](changelog/0008.md) | Product Hunt strategy page (proposed launch plan, C-074) | 2026-09-29 |
 
 ## 6. Reference
 
@@ -102,6 +102,7 @@ Read this first.
 | [pages/producthunt.md](pages/producthunt.md) | Page doc: the Product Hunt strategy (`/pages/producthunt.html`): the call, pitch pick, readiness, costs; proposed | 2026-09-29 |
 | [brand/registry.md](brand/registry.md) | Every brand mark in the repo: file, source, licence, date checked; what is still missing | 2026-09-29 |
 | [qa/responsive-latest.md](qa/responsive-latest.md) | The latest responsive check: 28 pages and widths (landing, box, canvas, replay), 360 to 3840 | 2026-09-29 |
+| [qa/skins/](qa/skins/) | Pass 5 live skin runs (before and after), the refine block at 390 and 1280, and three library "Open terminal" boxes | 2026-09-29 |
 
 Data files: [canvas/cards.json](canvas/cards.json) (master canvas seed; add with `pnpm -C terminal canvas:add`), [prompts/starters.json](prompts/starters.json) (starter prompts), `qa/*.png` (screenshots), [qa/ledger-sample.json](qa/ledger-sample.json).
 

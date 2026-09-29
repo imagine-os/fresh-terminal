@@ -201,7 +201,7 @@ details.faq > div p { margin: 0 0 .5rem; }
     </nav>
     <h1>Product Hunt strategy</h1>
     <p class="lede">How Fresh Terminal launches on Product Hunt. <strong>Launch the product people can use today, tell the FreshStack story inside it, and go only when the blockers below are green.</strong> Nothing here is scheduled; the order is set by dependencies, not dates.</p>
-    <p class="meta"><span><b>Status</b> proposed, waiting on Justin</span><span><b>Written</b> 2026-09-29 by Opus 5.5 (research and page)</span><span><b>Asked</b> <a href="https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&amp;cid=C0C2YAS5TL5">Justin, 03:14 UTC</a></span><span><b>Canon</b> C-070</span></p>
+    <p class="meta"><span><b>Status</b> proposed, waiting on Justin</span><span><b>Written</b> 2026-09-29 by Opus 5.5 (research and page)</span><span><b>Asked</b> <a href="https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&amp;cid=C0C2YAS5TL5">Justin, 03:14 UTC</a></span><span><b>Canon</b> C-074</span></p>
   </header>
 
   <nav class="toc" aria-label="On this page">
@@ -227,7 +227,7 @@ details.faq > div p { margin: 0 0 .5rem; }
       <ol>
         <li><strong>Lead with what nothing else does:</strong> you type, the terminal changes itself, and every change can be undone or replayed. That is live today and shows in a three-second clip.</li>
         <li><strong>FreshStack is the story in the maker's comment and the GitHub link.</strong> It grows on GitHub and developer forums, not on the leaderboard. It gets its own launch later only if it becomes a working product (for example, one command that deploys a live multiplayer game) on its own domain.</li>
-        <li><strong>Five blockers before scheduling:</strong> Clerk production sign-in (development is capped at 100 users), free credits with a per-browser cap, a global daily spend limit on our key, a first-run screen that says where your work is saved, and a licence on the repo (it has none, so "open" can't be claimed yet).</li>
+        <li><strong>Five blockers before scheduling:</strong> Clerk production sign-in (development is capped at 100 users), free credits with a per-browser cap, a launch-day spend limit on our key, a first-run screen that says where your work is saved (shipped 03:25 UTC, C-072), and a licence on the repo (it has none, so "open" can't be claimed yet). Four are still open.</li>
         <li><strong>Don't claim realtime multiplayer on launch day.</strong> SpacetimeDB isn't published yet. Save "game-first realtime" for the second launch, where it counts as the significant update Product Hunt requires.</li>
       </ol>
     </div>
@@ -267,7 +267,7 @@ details.faq > div p { margin: 0 0 .5rem; }
   <section class="block" id="ready">
     <header>
       <h2>Launch readiness</h2>
-      <p>Each line shows its state today (2026-09-29 03:25 UTC), with a link where it's live. A red edge marks a blocker: we don't schedule until it's green.</p>
+      <p>Each line shows its state today (2026-09-29 03:45 UTC), with a link where it's live. A red edge marks a blocker: we don't schedule until it's green.</p>
     </header>
     <div class="toolbar">
       <div class="seg" role="group" aria-label="Filter the checklist" id="check-filter">
@@ -346,7 +346,7 @@ details.faq > div p { margin: 0 0 .5rem; }
   </section>
 
   <section class="block" id="costs">
-    <header><h2>Cost estimate</h2><p>Every paid item has a certainty level. <b>High</b> means the vendor's pricing page, checked 2026-09-29. <b>Medium</b> means our own measured costs, scaled up. <b>Low</b> means third-party traffic estimates or a guess. Launch-day model spend is the only large unknown, and the daily spend limit (P5) caps it.</p></header>
+    <header><h2>Cost estimate</h2><p>Every paid item has a certainty, in the words of the estimate rule (C-070). <b>Sure</b> means fixed or free, from the vendor's pricing page checked 2026-09-29. <b>Fairly sure</b> means our own measured costs, scaled up. <b>Rough guess</b> means third-party traffic estimates or a guess. Launch-day model spend is the only large unknown, and the daily spend limit (P5) caps it.</p></header>
     <div class="table-wrap"><table><thead><tr><th>Item</th><th>Estimate</th><th>Certainty</th><th>Basis</th></tr></thead><tbody id="cost-body"></tbody></table></div>
     <p class="foot" id="cost-total"></p>
   </section>
@@ -357,7 +357,7 @@ details.faq > div p { margin: 0 0 .5rem; }
       <ol>
         <li><strong>Pick the pitch.</strong> Option A is recommended. Or send your own words and we'll check them against the 60-character limit.</li>
         <li><strong>Create the Clerk production instance.</strong> The steps are in Canon C-065. The development instance stops at 100 users and shows a "Development mode" badge.</li>
-        <li><strong>Choose the free-credit size and the daily spend limit.</strong> Suggested: $0.25 per browser (about 20 edits) and $150 a day in total. When the limit is hit, new visitors see "free credits are paused for today; use your own key or sign in."</li>
+        <li><strong>Choose the free-credit size and the launch-day spend limit.</strong> Proposed: 25¢ per device (about 20 edits) and $2 a day on normal days (C-072); for launch day, $150. When the limit is hit, new visitors see "free credits are paused for today; use your own key or sign in."</li>
         <li><strong>Choose a licence for the repo</strong> (MIT or Apache-2.0 are the usual picks for a starter kit). Until there is one, FreshStack isn't open source, however we describe it.</li>
         <li><strong>Get your Product Hunt account ready.</strong> It must be personal, with a photo and headline, and you should comment on a few launches over the coming weeks. You post the launch yourself; we don't hire a hunter.</li>
         <li><strong>Rewrite the blue lines in the first comment</strong> so the story is yours, and decide whether to record the voice-over for the 60-second video.</li>
@@ -368,7 +368,7 @@ details.faq > div p { margin: 0 0 .5rem; }
     </div>
   </section>
 
-  <p class="foot">This page renders its lists from the arrays at the bottom of its own source (FINDINGS, EXAMPLES, PITCHES, SHOTS, CHECKLIST, PHASES, FAQS, METRICS, RISKS, COSTS). To change a status, change one <code>status</code> word: <code>live</code>, <code>progress</code>, <code>notwired</code>, <code>justin</code>. The tally updates by itself. Live-state source of truth: <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/state.md">Canon: state</a>. Decision: <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/decisions.md">Canon C-070</a>.</p>
+  <p class="foot">This page renders its lists from the arrays at the bottom of its own source (FINDINGS, EXAMPLES, PITCHES, SHOTS, CHECKLIST, PHASES, FAQS, METRICS, RISKS, COSTS). To change a status, change one <code>status</code> word: <code>live</code>, <code>progress</code>, <code>notwired</code>, <code>justin</code>. The tally updates by itself. Live-state source of truth: <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/state.md">Canon: state</a>. Decision: <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/decisions.md">Canon C-074</a>. Certainty words follow the estimate rule C-070.</p>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -440,7 +440,7 @@ var SHOTS = [
   { n: '4', size: '1270×760', what: 'Replay. The scrubber halfway through a session, with the interface as it was at that step. Caption: "Every step, replayable."', from: PAGES + '/', status: 'live' },
   { n: '5', size: '1270×760', what: 'Cost in the open. The top-bar counter, the cost of each reply, and the "use your own key" dialog. Caption: "Pay what the model costs, or bring your own key."', from: SITE, status: 'live' },
   { n: '6', size: '1270×760', what: 'FreshStack. The stack cards in "Ours" mode with the exits visible. Caption: "Built on a stack you can leave."', from: PAGES + '/pages/freshstack.html', status: 'live' },
-  { n: '7', size: '1270×760', what: 'The typewriter page. Rough notes in the pad, and the formatted page growing above them. Caption: "Write rough, read clean."', from: 'box composer', status: 'progress', note: 'Queued in the composer work. Use this shot only if it ships before the gallery is made.' },
+  { n: '7', size: '1270×760', what: 'The typewriter page. Rough notes in the pad, and the formatted page growing above them. Caption: "Write rough, read clean."', from: SITE, status: 'live', note: 'The page above the pad shipped 03:20 UTC (C-071). Editing on the page itself is next.' },
   { n: 'Video', size: 'YouTube, 45–60 s, public, full URL', what: 'Cold open on a blank terminal. Three prompts change it (rail, skin, menu), then Undo and Replay. Show the cost counter and end on "Evolve as we grow." Captions burned in. Voice-over is optional (Justin).', from: 'recorded on the live site', status: 'justin' }
 ];
 
@@ -456,11 +456,11 @@ var CHECKLIST = [
   { what: 'English and Spanish', status: 'live', link: SITE, note: 'In the app. This strategy page is English only; Spanish fill is a later pass.' },
   { what: 'freshterminal.ai and api.freshterminal.ai', status: 'live', link: SITE, note: 'Router health reports the key set, Clerk on and D1 on.' },
   { what: 'Sign-in on a production Clerk instance', status: 'justin', blocker: true, note: 'Today it runs on the development instance: 100-user cap and a "Development mode" badge. Steps in C-065.' },
-  { what: 'Free credits with a per-browser cap and two soft sign-in prompts', status: 'progress', blocker: true, note: 'Being built in another session (Justin, 03:14 UTC). Not on main at 03:25 UTC. Without it, launch traffic spends our key with no ceiling.' },
-  { what: 'Daily spend limit for the whole router', status: 'notwired', blocker: true, note: 'A hard daily dollar cap on our key. When it trips, free use pauses and BYO-key keeps working. New task P5.' },
-  { what: 'First run: "saved in this browser; sign in to keep it in the cloud", plus controls in the top-right', status: 'progress', blocker: true, note: 'From Justin\'s 03:14 UTC message: as simple as Excalidraw, with a save/sign-in icon at the top right.' },
+  { what: 'Free credits with a per-browser cap and two soft sign-in prompts', status: 'progress', blocker: true, note: 'Being built in another session (C-072). Proposed default: 25¢ per anonymous device. Not on main at 03:45 UTC. Without it, launch traffic spends our key with no ceiling.' },
+  { what: 'Daily spend limit for the whole router, raised for launch day', status: 'notwired', blocker: true, note: 'Part of the same free-credits work (proposed $2/day on a normal day, C-072). $2 pauses free use after about 180 edits, so launch day needs its own limit (suggested $150) and an hourly check. When it trips, BYO-key and signed-in use keep working (P5).' },
+  { what: 'First run: "Saved in this browser. Sign in to save to the cloud", session export, hide the top bar', status: 'live', blocker: true, link: SITE, note: 'Shipped 03:25 UTC (C-072). The free-credits figure in that line is still a placeholder until the router\'s credits land. Rehearse it with fresh browsers (P15).' },
   { what: 'A licence on the repo', status: 'justin', blocker: true, note: 'The repo is public with no licence file, so "open" can\'t be claimed for FreshStack.' },
-  { what: 'Every turn ends with a visible line, even when the stream drops', status: 'progress', note: 'Two prompts went unanswered on 2026-09-29. It must not happen on launch day.' },
+  { what: 'Every turn ends with a visible line, even when the stream drops', status: 'live', link: SITE, note: 'A failed turn now leaves "No reply: the turn failed" (C-071). Two prompts went unanswered earlier on 2026-09-29; the 10× rehearsal (P15) checks it under load.' },
   { what: 'Privacy policy and terms pages', status: 'notwired', note: 'Needed for Clerk production and for the launch-day email list.' },
   { what: 'Social cards (Open Graph images and titles)', status: 'notwired', note: 'The app\'s index.html has no og: tags, so links shared on launch day show no preview.' },
   { what: 'Launch analytics: visits, first prompt, sign-in, with the referrer kept', status: 'notwired', note: 'We don\'t measure page views yet. Product Hunt links add a ref parameter (unverified; check on the day).' },
@@ -542,17 +542,17 @@ var RISKS = [
   { r: 'The FreshStack launch slot gets used up', level: 'low', body: 'Same root domain means one six-month gap. If FreshStack ever gets its own Product Hunt launch, it needs its own domain and has to be a working product.', status: 'justin' }
 ];
 
-/* certainty: high | medium | low */
+/* certainty words follow rule C-070: sure | fairly sure | rough guess */
 var COSTS = [
-  { item: 'Product Hunt listing and featuring', est: '$0', certainty: 'high', basis: 'Product Hunt: "100% free to use." No hunter fee, because we post it ourselves.' },
-  { item: 'Model spend on launch day (free credits)', est: '$25–$150 expected; capped at the daily limit', certainty: 'low', basis: 'Measured: about $0.0002 per plain reply and about $0.011 per self-edit turn (4 turns cost $0.0437 on 2026-09-29). Assumes 1,000–5,000 visitors (third-party range), 40% sending about 4 turns, half of them edits: roughly $9–$45. Times 3 for skins, retries and abuse. The daily limit is the true ceiling.' },
-  { item: 'Model spend, worst case with no global limit', est: 'About $1,250 or more', certainty: 'low', basis: '5,000 browsers × a $0.25 free credit, used in full. This is why P5 is a blocker.' },
-  { item: 'OpenRouter fee on the credits we buy', est: '5.5% of top-ups', certainty: 'high', basis: 'OpenRouter pricing (read 2026-09-29). BYO-key users cost us nothing.' },
-  { item: 'Clerk production', est: '$0 on Hobby (50,000 retained users); Pro $25/mo if we need its features', certainty: 'high', basis: 'Clerk pricing page (read 2026-09-29). "First Day Free": sign-ups who never return aren\'t billed.' },
-  { item: 'Cloudflare Workers Paid', est: '$5/mo', certainty: 'high', basis: 'The free plan allows 100,000 requests a day. Paid includes 10M a month plus $0.30 per million. D1 free: 5M rows read and 100k written a day. Buy it before launch as insurance.' },
-  { item: 'Video and gallery', est: '$0', certainty: 'medium', basis: 'Playwright capture from the live site plus free editing. YouTube hosting is free. A paid screen recorder is optional and not priced here.' },
-  { item: 'Domain', est: '$0 now', certainty: 'high', basis: 'freshterminal.ai was bought 2026-09-29 (C-045). Renewal isn\'t included here.' },
-  { item: 'Paid hunters, launch services, bought votes, Product Hunt ads', est: 'Not spent', certainty: 'high', basis: 'Product Hunt says a hunter gives no advantage, and bought votes break the rules. We don\'t price ads.' }
+  { item: 'Product Hunt listing and featuring', est: '$0', certainty: 'sure', basis: 'Product Hunt: "100% free to use." No hunter fee, because we post it ourselves.' },
+  { item: 'Model spend on launch day (free credits)', est: '$25–$150 expected; capped at the daily limit', certainty: 'rough guess', basis: 'Measured: about $0.0002 per plain reply and about $0.011 per self-edit turn (4 turns cost $0.0437 on 2026-09-29). Assumes 1,000–5,000 visitors (third-party range), 40% sending about 4 turns, half of them edits: roughly $9–$45. Times 3 for skins, retries and abuse. The daily limit is the true ceiling.' },
+  { item: 'Model spend, worst case with no global limit', est: 'About $1,250 or more', certainty: 'rough guess', basis: '5,000 browsers × a $0.25 free credit, used in full. This is why P5 is a blocker.' },
+  { item: 'OpenRouter fee on the credits we buy', est: '5.5% of top-ups', certainty: 'sure', basis: 'OpenRouter pricing (read 2026-09-29). BYO-key users cost us nothing.' },
+  { item: 'Clerk production', est: '$0 on Hobby (50,000 retained users); Pro $25/mo if we need its features', certainty: 'sure', basis: 'Clerk pricing page (read 2026-09-29). "First Day Free": sign-ups who never return aren\'t billed.' },
+  { item: 'Cloudflare Workers Paid', est: '$5/mo', certainty: 'sure', basis: 'The free plan allows 100,000 requests a day. Paid includes 10M a month plus $0.30 per million. D1 free: 5M rows read and 100k written a day. Buy it before launch as insurance.' },
+  { item: 'Video and gallery', est: '$0', certainty: 'fairly sure', basis: 'Playwright capture from the live site plus free editing. YouTube hosting is free. A paid screen recorder is optional and not priced here.' },
+  { item: 'Domain', est: '$0 now', certainty: 'sure', basis: 'freshterminal.ai was bought 2026-09-29 (C-045). Renewal isn\'t included here.' },
+  { item: 'Paid hunters, launch services, bought votes, Product Hunt ads', est: 'Not spent', certainty: 'sure', basis: 'Product Hunt says a hunter gives no advantage, and bought votes break the rules. We don\'t price ads.' }
 ];
 
 (function () {
@@ -682,9 +682,9 @@ var COSTS = [
 
   var cb = document.getElementById('cost-body');
   COSTS.forEach(function (x) {
-    cb.appendChild(el('tr', null, [el('td', { 'data-k': 'Item' }, [el('strong', { text: x.item })]), el('td', { 'data-k': 'Estimate', 'class': 'num', text: x.est }), el('td', { 'data-k': 'Certainty' }, [el('span', { 'class': 'v ' + (x.certainty === 'high' ? 'ok' : 'no'), text: x.certainty })]), el('td', { 'data-k': 'Basis', text: x.basis })]));
+    cb.appendChild(el('tr', null, [el('td', { 'data-k': 'Item' }, [el('strong', { text: x.item })]), el('td', { 'data-k': 'Estimate', 'class': 'num', text: x.est }), el('td', { 'data-k': 'Certainty' }, [el('span', { 'class': 'v ' + (x.certainty === 'sure' ? 'ok' : 'no'), text: x.certainty })]), el('td', { 'data-k': 'Basis', text: x.basis })]));
   });
-  document.getElementById('cost-total').textContent = 'Expected cash for launch month: about $30–$180 (Cloudflare $5, model spend $25–$150 plus the 5.5% OpenRouter fee, Clerk $0). Certainty: low, because model spend depends on traffic. The ceiling is whatever daily spend limit Justin picks.';
+  document.getElementById('cost-total').textContent = 'Expected cash for launch month: about $30–$180 (Cloudflare $5, model spend $25–$150 plus the 5.5% OpenRouter fee, Clerk $0). Certainty: rough guess, because model spend depends on traffic. The ceiling is whatever launch-day spend limit Justin picks. Time: about one working day of agent passes for the blockers after Justin\'s steps (rough guess).';
 
   var text = document.getElementById('comment-text');
   var words = (text.innerText || text.textContent).trim().split(/\s+/).length;

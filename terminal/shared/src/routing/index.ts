@@ -38,6 +38,10 @@ export interface RefineRule {
   max_rounds: number;
   cap_micro: number;
   estimate_micro: Record<string, number>;
+  /** Rounds a run usually takes before a stop rule fires. */
+  typical_rounds?: number;
+  /** Paths whose estimate comes from live runs. */
+  measured?: Record<string, boolean | string>;
 }
 
 export interface RouteTable {

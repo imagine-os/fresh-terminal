@@ -196,3 +196,31 @@ export function IconReplay(props: IconProps) {
     </svg>
   );
 }
+
+export function IconTray(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="4" y="4" width="6" height="6" rx="1.2" />
+      <rect x="14" y="4" width="6" height="6" rx="1.2" />
+      <rect x="4" y="14" width="6" height="6" rx="1.2" />
+      <path d="M17 14v6M14 17h6" />
+    </svg>
+  );
+}
+
+export function IconPin(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" />
+    </svg>
+  );
+}
+
+export function IconTopBar(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+    </svg>
+  );
+}
