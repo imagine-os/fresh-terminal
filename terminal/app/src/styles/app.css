@@ -2454,3 +2454,49 @@ textarea.field-input {
   padding-left: 0.6rem;
   margin-left: -0.6rem;
 }
+
+/* ---------- first-run line, show-bar chip, inline reply meta (C-072) ---------- */
+
+.first-run {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  margin-bottom: var(--space-cozy);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg-muted);
+  font-size: var(--type-whisper);
+}
+.first-run-text b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.first-run-credits {
+  color: var(--fg-faint);
+  text-decoration: underline dotted;
+}
+.first-run-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: none;
+}
+.show-bar {
+  position: fixed;
+  top: 0.4rem;
+  right: 0.6rem;
+  z-index: 30;
+  font-size: var(--type-whisper);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+.rb-header-inline {
+  margin-bottom: 0.15rem;
+}

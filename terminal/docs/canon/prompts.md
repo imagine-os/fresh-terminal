@@ -569,3 +569,19 @@ Justin's session: The page opened in the stage and unmounted the box view, takin
 **What happened:** Made a rule (C-070). Skin runs show an estimate with a certainty before the rounds and the actual cost after (pass 5). The logos page button went to the logo work (another session).
 Justin's session: Rule C-070: estimates carry money, time and certainty. The brands page got the estimate block for the 12 text marks and a "Start in the terminal" button.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651442483669?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651442.483669
+
+## 67. Mon Sep 28, 10:14 PM CDT · 2026-09-29 03:14:22 UTC
+
+> Think about the 1st time user experience. they need to know the info is saving to their browser but they need an account to save to the cloud, or maybe they can export their session? But ultimately we need as simple or simpler than excalidraw. The top right corner can have an icon with options to turn things on and off like top and left sidebar. and maybe an icon to the right that represents save or login or something like that?  We do need to let them know they have some free credits to start. But we will need to give them 1 or 2 chances before the paywall becomes necessary for them to login.
+>
+> PS: we need to be smart about our own costs, because people might abuse the free start from multiple browser sessions or whatever other methods they might do.
+
+**What happened:** Split. Justin's session: the first-run line, the session export, the hide-the-top-bar switch in the tray (C-072). The other session: free credits enforced on the router, soft sign-in prompts, abuse limits, moving browser boxes to D1 on sign-in (proposed defaults 25¢ per device, $2/day cap). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651953157019?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651662236069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651662.236069
+
+## 68. Mon Sep 28, 10:14 PM CDT · 2026-09-29 03:14:40 UTC
+
+> start thinking about the product hunt strategy. you can make a page for product hunt strategy
+
+**What happened:** Taken by the other session (a Product Hunt strategy page).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651680.495959

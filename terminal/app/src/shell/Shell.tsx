@@ -27,6 +27,8 @@ interface ShellProps {
   /** Per-box style token overrides (style.set ops), layered over the theme. */
   styleOverrides?: Record<string, string>;
   /** Per-box skins by target (skin.apply ops). */
+  /** The tray's hide-the-top-bar switch. */
+  hideTopBar?: boolean;
   skins?: Partial<Record<SkinTarget, Skin>>;
 }
 
@@ -102,7 +104,7 @@ export function skinProps(skin: Skin | undefined, urls: Record<string, string>):
   return { style, 'data-skinned': skin.target, 'data-skin-path': skin.path };
 }
 
-export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins }: ShellProps) {
+export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false }: ShellProps) {
   const ref = useRef<HTMLDivElement>(null);
   const readout = useSizeClass(ref);
 
@@ -111,6 +113,9 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
   }, [readout, onSize]);
 
   const regions = resolveRegions(spec, readout.sizeClass, devMode);
+  if (hideTopBar) {
+    regions.topBar = 'hidden';
+  }
   const left = effectiveBehaviour(regions.leftSidebar, leftOpen);
   const right = effectiveBehaviour(regions.rightSidebar, rightOpen || (devMode && regions.rightSidebar === 'floating'));
   const anyFloatingOpen =

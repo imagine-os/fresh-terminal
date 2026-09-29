@@ -5,7 +5,7 @@ import type { NavItem, NavTarget } from '@shared/ui';
 import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme } from '../ui/icons';
+import { IconBox, IconDev, IconDownload, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme, IconTopBar } from '../ui/icons';
 import { AccountButton } from './AccountButton';
 import { Tray, type Tool } from './Tray';
 
@@ -32,6 +32,8 @@ interface Props {
   onPinned: (ids: string[]) => void;
   nav: NavItem[];
   onNavigate: (target: NavTarget, item: NavItem) => void;
+  onExport: () => void;
+  onHideTopBar: () => void;
 }
 
 function key(id: string): string {
@@ -41,7 +43,7 @@ function key(id: string): string {
 
 /**
  * Top bar: brand, the money counter, the sign-in slot and the tray. Every
- * other tool lives in the tray until it is pinned (decision C-070).
+ * other tool lives in the tray until it is pinned (decision C-071).
  */
 export function TopBar(props: Props) {
   const { t, lang } = useI18n();
@@ -55,6 +57,8 @@ export function TopBar(props: Props) {
     { id: 'lang.toggle', label: `${t('topbar.language')} (${lang})`, icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
     { id: 'settings.open', label: t('topbar.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
     { id: 'dev.toggle', label: t('topbar.devMode'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },
+    { id: 'session.export', label: t('firstRun.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
+    { id: 'bar.toggle', label: t('topbar.hide'), icon: <IconTopBar />, onClick: props.onHideTopBar, shortcut: key('bar.toggle'), testId: 'hide-bar' },
   ];
   return (
     <>

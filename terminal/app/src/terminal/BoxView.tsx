@@ -22,6 +22,8 @@ import { startSkinRun } from '../skins/runner';
 import { Doodles } from './Doodles';
 import { Transcript } from './Transcript';
 import { PageView } from '../pages/PageView';
+import { downloadSession } from '../lib/exportSession';
+import { FirstRun } from './FirstRun';
 
 export interface AppCommands {
   setLang: (lang: 'en' | 'es') => void;
@@ -211,6 +213,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         return;
       }
 
+      const localStarted = performance.now();
       const { matchLocalCommand } = await import('./localCommands');
       const local = matchLocalCommand(text, chips, {
         boxes: snapshot.boxes,
@@ -227,10 +230,17 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             return;
           }
           case 'system':
-            store.appendLine(box.id, 'system', t(local.key, local.vars ?? {}), [], { reveal: local.reveal });
+            store.appendLine(box.id, 'system', t(local.key, local.vars ?? {}), [], {
+              reveal: local.reveal,
+              reply: { meta: { intent: 'local', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] },
+            });
             return;
           case 'text':
-            store.appendLine(box.id, 'assistant', local.text, [], { reveal: local.reveal });
+            store.appendLine(box.id, 'assistant', local.text, [], {
+              reveal: local.reveal,
+              // A header line only (no blocks): the transcript keeps the plain text and its reveal.
+              reply: { meta: { intent: 'local', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] },
+            });
             if (local.speak && 'speechSynthesis' in window) {
               window.speechSynthesis.speak(new SpeechSynthesisUtterance(local.text));
             }
@@ -241,7 +251,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               'assistant',
               local.wired ? `${local.component} (live data)` : `${local.component} (${t('notWired').toLowerCase()}: demo composition)`,
               [],
-              { component: local.component, reveal: local.reveal },
+              { component: local.component, reveal: local.reveal, reply: { meta: { intent: 'draw', model: '', ms: performance.now() - localStarted, cost_micro: 0, source: 'local' }, blocks: [] } },
             );
             return;
           case 'ops': {
@@ -400,6 +410,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
 
   return (
     <>
+      <FirstRun onExport={() => downloadSession(box.id)} />
       {pageId ? (
         <PageView pageId={pageId} />
       ) : isEmpty ? (

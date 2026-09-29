@@ -14,6 +14,7 @@ import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
 import { I18nProvider, useI18n } from './i18n';
 import { newId } from './lib/ids';
+import { downloadSession } from './lib/exportSession';
 import { hrefFor, routeForPath, useRoute } from './lib/router';
 import { PlaybackView } from './playback/PlaybackView';
 import { usePlayback } from './playback/usePlayback';
@@ -271,6 +272,12 @@ function Product() {
     [edit, effectiveThemeId, snapshot.themes],
   );
   const toggleDev = useCallback(() => update({ devMode: !prefs.devMode }), [prefs.devMode, update]);
+  const toggleBar = useCallback(() => set('topBarHidden', !prefs.topBarHidden), [prefs.topBarHidden, set]);
+  const exportSession = useCallback(() => {
+    if (!currentBox) return;
+    const name = downloadSession(currentBox.id);
+    toast(t('firstRun.exported', { name }));
+  }, [currentBox, toast, t]);
   const toggleLang = useCallback(() => set('lang', prefs.lang === 'en' ? 'es' : 'en'), [prefs.lang, set]);
   const openCanvas = useCallback(() => {
     navigate(route.name === 'canvas' ? { name: 'landing' } : { name: 'canvas' });
@@ -343,6 +350,8 @@ function Product() {
       'edit.undo': () => undoLast(),
       'edit.redo': () => redoLast(),
       'play.open': () => toggleReplay(),
+      'bar.toggle': () => toggleBar(),
+      'session.export': () => exportSession(),
     };
     const onAction = (event: Event) => {
       const id = (event as CustomEvent<{ id?: string }>).detail?.id ?? '';
@@ -352,7 +361,7 @@ function Product() {
     };
     window.addEventListener('ft:action', onAction);
     return () => window.removeEventListener('ft:action', onAction);
-  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toggleReplay, toast, t]);
+  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toggleReplay, toggleBar, exportSession, toast, t]);
 
   // Shortcuts: single key outside the composer, Ctrl/Cmd+key inside it.
   useEffect(() => {
@@ -391,10 +400,11 @@ function Product() {
         action();
       };
       // While replaying, the scrubber owns space and the arrows; edits stay off.
-      if (replaying && !['p', '[', 'd', 'l', 'k', 'c', 'escape'].includes(key)) {
+      if (replaying && !['p', '[', 'd', 'l', 'k', 'c', 'h', 'escape'].includes(key)) {
         return;
       }
       if (key === 'p') run(toggleReplay);
+      else if (key === 'h') run(toggleBar);
       else if (key === 'n') run(newBox);
       else if (key === '[') run(toggleSidebar);
       else if (key === 't') run(cycleTheme);
@@ -411,7 +421,7 @@ function Product() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [newBox, toggleSidebar, cycleTheme, toggleDev, toggleLang, openCanvas, update, undoLast, redoLast, replaying, toggleReplay]);
+  }, [newBox, toggleSidebar, cycleTheme, toggleDev, toggleLang, openCanvas, update, undoLast, redoLast, replaying, toggleReplay, toggleBar]);
 
   const closeFloating = useCallback(() => {
     update({ leftOpen: false });
@@ -479,6 +489,7 @@ function Product() {
       onCloseFloating={closeFloating}
       onSize={setSize}
       styleOverrides={boxUi?.style}
+      hideTopBar={prefs.topBarHidden}
       skins={boxUi?.skins}
       slots={{
         topBar: (
@@ -516,6 +527,8 @@ function Product() {
             onPinned={(ids) => set('pinnedTools', ids)}
             nav={replayView?.state.nav ?? (currentBox ? snapshot.navItems.filter((item) => item.box_id === currentBox.id) : [])}
             onNavigate={navigateTo}
+            onExport={exportSession}
+            onHideTopBar={toggleBar}
           />
         ),
         leftSidebar: (
@@ -543,6 +556,11 @@ function Product() {
         ) : null,
         stage: (
           <>
+            {prefs.topBarHidden ? (
+              <button type="button" className="btn show-bar" data-variant="ghost" onClick={toggleBar} aria-label={t('topbar.show')} data-testid="show-bar">
+                {t('topbar.show')} <kbd className="kbd">H</kbd>
+              </button>
+            ) : null}
             {stage}
             <SettingsPanel
               open={settingsOpen}

@@ -28,6 +28,8 @@ export const SHELL_ACTIONS: ActionDecl[] = [
   { id: 'play.open', intent: 'replay this session step by step', permission: 'anyone', shortcut: 'p' },
   { id: 'tray.open', intent: 'open the tools tray', permission: 'anyone' },
   { id: 'tray.pin', intent: 'pin a tool to the top bar or send it back to the tray', permission: 'anyone' },
+  { id: 'bar.toggle', intent: 'hide or show the top bar', permission: 'anyone', shortcut: 'h' },
+  { id: 'session.export', intent: 'export this session as a file', permission: 'anyone' },
   { id: 'play.branch', intent: 'branch the session from this step', permission: 'anyone', notWired: true },
   { id: 'edit.undo', intent: 'undo the last change', permission: 'anyone', shortcut: 'mod+z' },
   { id: 'edit.redo', intent: 'redo the change', permission: 'anyone', shortcut: 'mod+shift+z' },

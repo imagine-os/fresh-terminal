@@ -19,6 +19,10 @@ export interface Prefs {
   voiceMode: 'toggle' | 'hold';
   /** Tool ids pinned back onto the top bar; the rest live in the tray (C-071). */
   pinnedTools: string[];
+  /** The first-run line was dismissed. */
+  firstRunSeen: boolean;
+  /** Top bar hidden by the tray switch (H brings it back). */
+  topBarHidden: boolean;
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -34,6 +38,8 @@ const defaults: Prefs = {
   voiceProvider: 'webspeech',
   voiceMode: 'toggle',
   pinnedTools: [],
+  firstRunSeen: false,
+  topBarHidden: false,
 };
 
 interface PrefsValue {
