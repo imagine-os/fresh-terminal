@@ -103,6 +103,7 @@ As of 2026-09-29:
 | **Logos and icons skill** | Added 2026-09-29 02:25 UTC at `terminal/skills/logos-and-icons/SKILL.md`: source order (official → official repo → Simple Icons → text mark), licence check, sizes, registry at `docs/brand/registry.md`, generate only for our own marks. First use: marks on the FreshStack cards and brand chips. Assets not gathered yet. |
 | **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 157 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
+| **Tighter tools menu** (C-095) | Shipped 2026-09-29 05:40 UTC. |
 | **Rename in place, perspective grid, publish workflow** (C-094) | Shipped 2026-09-29 05:30 UTC. First SpacetimeDB publish run from Actions: see the thread; live store still pending. |
 | **Uniform bar, minimal tray, Actions, voice fails once** (C-090) | Shipped 2026-09-29 05:10 UTC. Terminal-talk is a switch + demo; the voice agent is next after SpacetimeDB. |
 | **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |

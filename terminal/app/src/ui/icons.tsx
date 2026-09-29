@@ -268,3 +268,12 @@ export function IconList(props: IconProps) {
     </svg>
   );
 }
+
+export function IconCoin(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5v9M9.6 10.2c0-1 1.1-1.7 2.4-1.7s2.4.7 2.4 1.7-1.1 1.6-2.4 1.8-2.4.8-2.4 1.8 1.1 1.7 2.4 1.7 2.4-.7 2.4-1.7" />
+    </svg>
+  );
+}

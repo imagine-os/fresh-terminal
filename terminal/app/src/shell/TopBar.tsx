@@ -8,7 +8,7 @@ import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconDev, IconDownload, IconKey, IconLang, IconList, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
+import { IconCoin, IconDev, IconDownload, IconKey, IconLang, IconList, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
 import { redeemInviteCode, startTopUp } from '../credits/billing';
 import { useToast } from '../ui/Toast';
 import { AccountButton } from './AccountButton';
@@ -106,15 +106,15 @@ export function TopBar(props: Props) {
     { id: 'actions.open', group: 'go', label: t('topbar.actions'), short: t('tool.actions'), icon: <IconList />, onClick: props.onActions, testId: 'actions-link' },
     { id: 'play.open', group: 'go', label: t('topbar.replay'), short: t('tool.replay'), detail: t('tray.experimental'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
     { id: 'lang.toggle', group: 'session', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
-    { id: 'session.export', group: 'session', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
-    { id: 'session.import', group: 'session', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
+    { id: 'session.export', group: 'session', pair: 'files', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
+    { id: 'session.import', group: 'session', pair: 'files', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
     {
       id: 'billing.topup',
       group: 'session',
-      label: paymentsWired ? t('billing.topup') : t('billing.topupNotWired'),
-      short: t('tool.topup'),
+      label: paymentsWired ? t('tool.buyCreditsTip') : t('billing.topupNotWired'),
+      short: t('tool.buyCredits'),
       detail: paymentsWired ? undefined : t('notWired'),
-      icon: <IconKey />,
+      icon: <IconCoin />,
       onClick: () => void onTopUp(),
       testId: 'billing-topup',
     },
