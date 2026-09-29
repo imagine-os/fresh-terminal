@@ -17,6 +17,8 @@ export interface Prefs {
   /** Voice provider and mic behaviour. */
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
   voiceMode: 'toggle' | 'hold';
+  /** Tool ids pinned back onto the top bar; the rest live in the tray (C-071). */
+  pinnedTools: string[];
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -31,6 +33,7 @@ const defaults: Prefs = {
   modelTagger: true,
   voiceProvider: 'webspeech',
   voiceMode: 'toggle',
+  pinnedTools: [],
 };
 
 interface PrefsValue {
@@ -46,6 +49,9 @@ function loadPrefs(): Prefs {
   // Layout text moved to the box store in pass 4 (box_ui.dialect_text).
   const { dialectText: _legacy, ...rest } = saved as Partial<Prefs> & { dialectText?: string };
   const merged: Prefs = { ...defaults, ...rest };
+  if (!Array.isArray(merged.pinnedTools)) {
+    merged.pinnedTools = [];
+  }
   if (merged.lang !== 'en' && merged.lang !== 'es') {
     merged.lang = 'en';
   }

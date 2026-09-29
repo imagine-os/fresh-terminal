@@ -88,6 +88,18 @@ function Product() {
     installActionsRegistry();
   }, []);
 
+  // ?prompt=… on arrival fills the composer (static pages hand work to the terminal this way).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const prompt = params.get('prompt');
+    if (!prompt) return;
+    params.delete('prompt');
+    const rest = params.toString();
+    window.history.replaceState(null, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
+    const timer = window.setTimeout(() => window.dispatchEvent(new CustomEvent('ft:composer-insert', { detail: { text: prompt } })), 300);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   // First visit: create the visitor's first box. Landing shows the most recent box.
   useEffect(() => {
     if (snapshot.boxes.length === 0) {
@@ -417,7 +429,7 @@ function Product() {
         <PlanViewer />
       </div>
     );
-  } else if (route.name === 'page') {
+  } else if (route.name === 'page' && !currentBox) {
     stage = <PageView pageId={route.id} />;
   } else if (replaying && currentBox) {
     stage = (
@@ -437,6 +449,8 @@ function Product() {
         box={currentBox}
         theme={theme}
         landing={landing}
+        pageId={route.name === 'page' ? route.id : null}
+        onLeavePage={() => navigate({ name: 'box', id: currentBox.id })}
         showNewBoxDoodle={snapshot.boxes.length === 1}
         onOpenBox={openBox}
         commands={{
@@ -498,6 +512,10 @@ function Product() {
             libraryHref={`${import.meta.env.BASE_URL}pages/library.html`}
             onReplay={toggleReplay}
             replayActive={replaying}
+            pinned={prefs.pinnedTools}
+            onPinned={(ids) => set('pinnedTools', ids)}
+            nav={replayView?.state.nav ?? (currentBox ? snapshot.navItems.filter((item) => item.box_id === currentBox.id) : [])}
+            onNavigate={navigateTo}
           />
         ),
         leftSidebar: (

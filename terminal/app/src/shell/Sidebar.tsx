@@ -15,11 +15,13 @@ interface Props {
   onNew: () => void;
   onNavigate: (target: NavTarget, item: NavItem) => void;
   onRemove?: (id: string) => void;
+  /** The menu moved to the top-bar tray (C-071); the sidebar shows it only when asked. */
+  showMenu?: boolean;
   /** Replay: the menu as it was at the chosen step, instead of the live one. */
   navOverride?: NavItem[] | null;
 }
 
-export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove, navOverride = null }: Props) {
+export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove, navOverride = null, showMenu = false }: Props) {
   const { t } = useI18n();
   const snapshot = useStoreSnapshot();
   const mountedAt = useRef(Date.now());
@@ -34,7 +36,7 @@ export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove,
 
   return (
     <nav className="sidebar" aria-label={t('sidebar.boxes')}>
-      {items.length > 0 ? (
+      {items.length > 0 && showMenu ? (
         <>
           <div className="sidebar-title">{t('nav.menu')}</div>
           <Reveal key={fresh ? `${lastNavEdit?.id}:${lastNavEdit?.state}` : 'static'} pattern={fresh ? 'beam-horizontal' : 'none'}>

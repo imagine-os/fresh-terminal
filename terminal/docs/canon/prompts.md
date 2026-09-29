@@ -559,6 +559,7 @@ Justin's session, same message: FreshStack nesting (Jev under OpenRouter, Gemini
 > writing make a page called notes removed ny prompt box from the bottom of the terminal. but it was fast.
 
 **What happened:** Handed to the composer work in progress (another session).
+Justin's session: The page opened in the stage and unmounted the box view, taking the composer with it. Fixed: pages open inside the box view so the pad stays; sending from a page returns to the transcript (C-071).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651360900509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651360.900509
 
 ## 66. Mon Sep 28, 10:10 PM CDT · 2026-09-29 03:10:42 UTC
@@ -566,4 +567,5 @@ Justin's session, same message: FreshStack nesting (Jev under OpenRouter, Gemini
 > include cost estimates and level of sureity for stuff. for instacne how much will it cost to finish the ungathered text marks, and a button to start the process would be nice in the page with logos and icons
 
 **What happened:** Made a rule (C-070). Skin runs show an estimate with a certainty before the rounds and the actual cost after (pass 5). The logos page button went to the logo work (another session).
+Justin's session: Rule C-070: estimates carry money, time and certainty. The brands page got the estimate block for the 12 text marks and a "Start in the terminal" button.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651442483669?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651442.483669
