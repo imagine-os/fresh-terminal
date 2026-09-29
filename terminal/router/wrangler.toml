@@ -19,6 +19,12 @@ routes = [
 
 [vars]
 ALLOWED_ORIGINS = "https://freshterminal.ai,https://www.freshterminal.ai,https://imagine-os.github.io,http://localhost:5173,http://localhost:4173"
+# Hub admins (C-087, C-088): Clerk user ids, comma-separated. Ids are not secret.
+# Emails stay out of this public repo: they come from the ADMIN_EMAILS repository secret.
+ADMIN_USER_IDS = ""
+SITE_URL = "https://freshterminal.ai"
+# The signed-in starter kit in dollars (C-089). It is also the pass-through threshold: once it is spent, paying starts.
+ACCOUNT_STARTER_USD = "5"
 
 [[d1_databases]]
 binding = "DB"

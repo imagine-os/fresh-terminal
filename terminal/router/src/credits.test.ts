@@ -136,15 +136,34 @@ describe('anonymous credits', () => {
 });
 
 describe('signed-in credits', () => {
-  it('uses the account grant ($1) and answers 402 when it is used up', async () => {
-    const h = harness();
+  it('gives the $5 starter kit (C-089), labelled "starter kit", and answers 402 payment_required once it is spent', async () => {
+    const h = harness({ ACCOUNT_DAILY_MICRO: '10000000' });
     const status = (await h.call('/credits', { method: 'GET', token: 'good-user_1' })).body as unknown as CreditsStatus;
-    expect(status).toMatchObject({ signed_in: true, mode: 'account', granted_micro: 1_000_000 });
-    await h.call('/paid/json?cost=995000', { token: 'good-user_1' });
+    expect(status).toMatchObject({ signed_in: true, mode: 'account', granted_micro: 5_000_000, granted: 5_000_000, label: 'starter kit', remaining_micro: 5_000_000 });
+    expect(status.billing).toMatchObject({ threshold_micro: 5_000_000, credit_limit_micro: 5_000_000 });
+    await h.call('/paid/json?cost=4995000', { token: 'good-user_1' });
     const out = await h.call('/paid/json?cost=1', { token: 'good-user_1' });
     expect(out.status).toBe(402);
-    expect(out.body.code).toBe('account_credits_exhausted');
+    expect(out.body.code).toBe('payment_required');
     expect((await h.call('/paid/json', { token: 'bad' })).status).toBe(401);
+    // Anonymous devices stay at 25¢ and keep the "free usage" label.
+    const device = await h.newDevice();
+    expect(device.credits).toMatchObject({ granted_micro: 250_000, label: 'free usage' });
+  });
+
+  it('tops accounts from the old $1 up to the starter once, and follows ACCOUNT_STARTER_USD', async () => {
+    const h = harness();
+    await h.call('/credits', { method: 'GET', token: 'good-user_old' });
+    // An account from before the starter kit: $1 grant, starter not folded in, $0.40 spent.
+    await h.db.prepare("UPDATE accounts SET grant_micro = 1000000, starter_micro = 0, spent_micro = 400000 WHERE id = 'acct_user_old'").run();
+    const once = (await h.call('/credits', { method: 'GET', token: 'good-user_old' })).body as unknown as CreditsStatus;
+    expect(once).toMatchObject({ granted_micro: 5_000_000, remaining_micro: 4_600_000 });
+    const twice = (await h.call('/credits', { method: 'GET', token: 'good-user_old' })).body as unknown as CreditsStatus;
+    expect(twice.granted_micro).toBe(5_000_000);
+    const ten = harness({ ACCOUNT_STARTER_USD: '10' });
+    const status = (await ten.call('/credits', { method: 'GET', token: 'good-user_x' })).body as unknown as CreditsStatus;
+    expect(status).toMatchObject({ granted_micro: 10_000_000 });
+    expect(status.billing?.threshold_micro).toBe(10_000_000);
   });
 });
 

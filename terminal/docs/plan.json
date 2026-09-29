@@ -1086,6 +1086,66 @@
       ],
       "model": "Sonnet 5",
       "pass": 6
+    },
+    {
+      "id": "billing-research",
+      "title": "Check what Clerk Billing supports (official pages) and pick the pass-through route",
+      "status": "done",
+      "depends_on": [
+        "free-credits"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "billing-threshold",
+      "title": "$5 billing threshold per account; 402 payment_required; your key never blocked",
+      "status": "done",
+      "depends_on": [
+        "billing-research"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "friend-credits",
+      "title": "Admin grants and invite codes on the ledger",
+      "status": "done",
+      "depends_on": [
+        "billing-threshold"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "hub",
+      "title": "Hub at freshterminal.ai/hub: admins only, work items, library, Canon, wiki, plan, credits, secrets",
+      "status": "done",
+      "depends_on": [
+        "friend-credits"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "stripe-topups",
+      "title": "Switch on Stripe Checkout top-ups (Justin adds STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET), then test live",
+      "status": "todo",
+      "depends_on": [
+        "billing-threshold"
+      ],
+      "model": "Opus 5.5",
+      "pass": 7
+    },
+    {
+      "id": "auto-topup",
+      "title": "Charge the saved card when the balance runs low (real pass-through)",
+      "status": "todo",
+      "depends_on": [
+        "stripe-topups"
+      ],
+      "model": "Opus 5.5",
+      "pass": 7
     }
   ]
 }

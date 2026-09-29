@@ -688,7 +688,14 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** Folded into C-085: mood tags show 🙁 / 🙂 emoji; emoji are fine in the interface where they read better than a glyph, until our own icons exist.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790656150155999?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790656150.155999
 
-## 80. Mon Sep 28, 11:53 PM CDT · 2026-09-29 04:53:19 UTC
+## 80. Mon Sep 28, 11:13 PM CDT · 2026-09-29 04:13:38 UTC (recorded after 78 and 79)
+
+> I think Clerk has payments so we can skip stripe for now?  We need to be able to turn on customer passthrough billing after $5 in spending for now.  and ill need a way to give friends more credit easily. Connect this to our domain on cloudflair please . Also freshterminal.ai/hub should take us to our hub system (similar to how we do it in hoy or between-gigs) though between gigs is a bit overcrowded right now. But i need a hub with each of the pages and items we're working on for this. Including all the documentation and prompt/response library from this session, etc.
+
+**What happened:** C-086, C-087, C-088 (Opus 5.5, decision 0024, changelog 0014). Clerk Billing checked on Clerk's own pages: subscriptions only, usage billing "not yet", needs a Stripe account anyway, 0.7% + Stripe's 2.9% + $0.30. So it cannot do pass-through; recommended Stripe Checkout prepaid credit packs (proposed). Built without new keys: the $5 billing threshold per account (402 `payment_required`, your key never blocked), a "Top up / add payment" hook marked not wired until the Stripe keys exist, admin credit grants and invite codes on the ledger, and the hub at https://freshterminal.ai/hub (admins only, checked by the server) with every page and item, the wiki, the Canon, a searchable prompt/response library, the plan, the credits panel and a names-only secrets checklist. The domain was already on Cloudflare (C-064); the hub is on it.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655218716499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790655218.716499
+
+## 81. Mon Sep 28, 11:53 PM CDT · 2026-09-29 04:53:19 UTC
 
 > why in the world would spacetime make me install someting on my mac adn then login through that and give me token in terminal instead of just on the site. that was stupid. i have no idea why i have it installed on my mac. is my mac the server? i was thinking its hosted on their coloud or mine or sometihng... I deff dont want it on my mac because it turns off all the time. Login system looks good. Is there anything i need to do so my friend can login?  Is Spacetime DB and Clerk related somehow? are my customer data private from me or shared? etc.
 >
@@ -710,17 +717,17 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 (With two screenshots: a phone start on a cached build; a desktop stage full of "Voice: network" lines.)
 
-**What happened:** C-090, all of the interface and voice parts; the SpacetimeDB answer; the Terminal-talk demo in docs/voice-experience.md. Clerk (friends, privacy, the $5 starter grant) went to the other session.
+**What happened:** C-090 (this session): the interface and voice parts, the SpacetimeDB answer, the Terminal-talk demo in docs/voice-experience.md. Other session: Split. This pass took the starter kit and the privacy question: C-089, a $5 starter kit per signed-in account that is also the pass-through threshold, `GET /credits` returns `granted` and the label "starter kit" for "of $5 starter kit"; open question 19 on end-to-end encryption, linked from the hub (changelog 0014). Justin's session took the rest (top bar, tray, mobile, Actions, voice, the currency switch, the SpacetimeDB answer).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657599.470899
 
-## 81. Mon Sep 28, 11:55 PM CDT · 2026-09-29 04:55:43 UTC
+## 82. Mon Sep 28, 11:55 PM CDT · 2026-09-29 04:55:43 UTC
 
 > please give me a sales wesbite for this product. simple clean strong easy to understand. can be more than one page and have pricing based on what you think is best checkout, and or whatever calls to action you want. Make it nice and simple. You can look at omarchy for some simplicity inspiration though we can be way better.
 
 **What happened:** Taken by the other session (billing and the freshterminal.ai site are its build); this session asked it to keep the headline pair, the tagline and the brand set.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657743245569?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657743.245569
 
-## 82. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
+## 83. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
 
 > no daily cap . just $5 on us.
 >
@@ -733,7 +740,7 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** The offline prompt queue landed in C-090 (a line typed offline is held, marked, and sent, edited or discarded when the connection is back; stale after 10 min). The cap, storage costs, the privacy checkbox and SpacetimeDB live sync went to the other session.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658094.470499
 
-## 83. Tue Sep 29, 12:03 AM CDT · 2026-09-29 05:03:40 UTC
+## 84. Tue Sep 29, 12:03 AM CDT · 2026-09-29 05:03:40 UTC
 
 > when i share the website link freshterminal.ai it should have an image thumbnail and the tagline for sharing. the tagline should be something different than the tagline in the thumbnail. it should be something like the terminal for everyone, or something better . terminal that just works.  i dunn. if computers started smart, the terminal would be like this.... I dunno.
 

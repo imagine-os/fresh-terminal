@@ -9,7 +9,7 @@
     "dev:app": "vite --config app/vite.config.ts",
     "dev:router": "tsx watch router/src/node.ts",
     "build": "pnpm build:app && pnpm build:router",
-    "build:app": "vite build --config app/vite.config.ts && node scripts/spa-fallback.mjs && tsx scripts/build-wiki.ts",
+    "build:app": "vite build --config app/vite.config.ts && node scripts/spa-fallback.mjs && tsx scripts/build-wiki.ts && tsx scripts/build-hub.ts",
     "build:router": "esbuild router/src/node.ts --bundle --platform=node --target=node22 --format=esm --outfile=router/dist/node.mjs --log-level=warning && tsc -p router/tsconfig.json --noEmit",
     "preview": "vite preview --config app/vite.config.ts",
     "typecheck": "tsc -p app/tsconfig.json --noEmit && tsc -p router/tsconfig.json --noEmit && tsc -p module/tsconfig.json --noEmit && tsc -p scripts/tsconfig.json --noEmit && tsc -p site/tsconfig.json --noEmit",

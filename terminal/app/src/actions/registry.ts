@@ -4,7 +4,7 @@
  * controller's vocabulary (docs/reference/surfaces.md). Every UI change that
  * adds or removes a control updates this file.
  */
-export type Permission = 'anyone' | 'owner' | 'dev';
+export type Permission = 'anyone' | 'signed-in' | 'owner' | 'dev' | 'admin';
 
 export interface ActionDecl {
   id: string;
@@ -31,6 +31,8 @@ export const SHELL_ACTIONS: ActionDecl[] = [
   { id: 'bar.toggle', intent: 'hide or show the top bar', permission: 'anyone', shortcut: 'h' },
   { id: 'session.export', intent: 'export this session as a file', permission: 'anyone' },
   { id: 'session.import', intent: 'import a session file as a new box', permission: 'anyone' },
+  { id: 'billing.topup', intent: 'top up or add a payment method (pass-through after free usage)', permission: 'signed-in', notWired: true },
+  { id: 'invite.redeem', intent: 'redeem an invite code for free usage', permission: 'signed-in' },
   { id: 'play.branch', intent: 'branch the session from this step', permission: 'anyone', notWired: true },
   { id: 'edit.undo', intent: 'undo the last change', permission: 'anyone', shortcut: 'mod+z' },
   { id: 'edit.redo', intent: 'redo the change', permission: 'anyone', shortcut: 'mod+shift+z' },

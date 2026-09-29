@@ -8,7 +8,9 @@ import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconDev, IconDownload, IconKey, IconLang, IconList, IconMic, IconPlus, IconReplay, IconSidebar, IconUpload } from '../ui/icons';
+import { IconDev, IconDownload, IconKey, IconLang, IconList, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
+import { redeemInviteCode, startTopUp } from '../credits/billing';
+import { useToast } from '../ui/Toast';
 import { AccountButton } from './AccountButton';
 import { useAccount } from '../auth/Account';
 import { Tray, type Tool } from './Tray';
@@ -69,6 +71,32 @@ export function TopBar(props: Props) {
   const credits = useCredits();
   const grantedMicro = credits.status?.granted_micro ?? 5_000_000;
   // Fewer tools, one list (C-090): Look is gone, Library and Canvas live on their own pages.
+  const { toast } = useToast();
+  // C-086: wired only when the router says a payment provider is connected.
+  const paymentsWired = credits.status?.billing?.provider === 'stripe';
+  const onTopUp = async () => {
+    if (!account.signedIn) {
+      toast(t('billing.signInFirst'));
+      return;
+    }
+    const result = await startTopUp();
+    if (result.kind === 'redirect') {
+      toast(t('billing.opening'));
+      window.location.assign(result.url);
+    } else if (result.kind === 'not-wired') toast(t('billing.notWired'));
+    else if (result.kind === 'sign-in') toast(t('billing.signInFirst'));
+    else toast(result.message);
+  };
+  const onInvite = async () => {
+    if (!account.signedIn) {
+      toast(t('invite.signIn'));
+      return;
+    }
+    const code = window.prompt(t('invite.prompt'))?.trim();
+    if (!code) return;
+    const result = await redeemInviteCode(code);
+    toast(result.ok ? t('invite.done', { amount: result.amount }) : result.signIn ? t('invite.signIn') : result.message);
+  };
   const tools: Tool[] = [
     { id: 'box.new', group: 'go', label: t('topbar.newBox'), short: t('tool.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
     { id: 'actions.open', group: 'go', label: t('topbar.actions'), short: t('tool.actions'), icon: <IconList />, onClick: props.onActions, testId: 'actions-link' },
@@ -76,6 +104,28 @@ export function TopBar(props: Props) {
     { id: 'lang.toggle', group: 'session', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
     { id: 'session.export', group: 'session', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
     { id: 'session.import', group: 'session', label: t('import.label'), short: t('tool.import'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
+    {
+      id: 'billing.topup',
+      group: 'session',
+      label: paymentsWired ? t('billing.topup') : t('billing.topupNotWired'),
+      short: t('tool.topup'),
+      detail: paymentsWired ? undefined : t('notWired'),
+      icon: <IconKey />,
+      onClick: () => void onTopUp(),
+      testId: 'billing-topup',
+    },
+    { id: 'invite.redeem', group: 'session', label: t('invite.label'), short: t('tool.invite'), icon: <IconSpark />, onClick: () => void onInvite(), testId: 'invite-redeem' },
+    {
+      id: 'billing.topup',
+      group: 'session',
+      label: paymentsWired ? t('billing.topup') : t('billing.topupNotWired'),
+      short: t('tool.topup'),
+      detail: paymentsWired ? undefined : t('notWired'),
+      icon: <IconKey />,
+      onClick: () => void onTopUp(),
+      testId: 'billing-topup',
+    },
+    { id: 'invite.redeem', group: 'session', label: t('invite.label'), short: t('tool.invite'), icon: <IconSpark />, onClick: () => void onInvite(), testId: 'invite-redeem' },
     { id: 'settings.open', group: 'session', label: t('topbar.settings'), short: t('tool.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
     { id: 'talk.toggle', group: 'session', label: t('tray.talk'), short: t('tray.talk'), detail: t('tray.talkSoon'), icon: <IconMic />, onClick: props.onToggleTalk, pressed: props.talkOn, testId: 'talk-toggle' },
     { id: 'dev.toggle', group: 'session', label: t('topbar.devMode'), short: t('tool.dev'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },

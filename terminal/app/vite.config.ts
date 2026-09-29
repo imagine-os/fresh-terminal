@@ -35,5 +35,9 @@ export default defineConfig({
   build: {
     outDir: resolve(here, 'dist'),
     emptyOutDir: true,
+    rollupOptions: {
+      // The hub (C-088) is its own page at /hub/: a shell with no content; data loads from the gated /hub/data/*.
+      input: { main: resolve(here, 'index.html'), hub: resolve(here, 'hub/index.html') },
+    },
   },
 });

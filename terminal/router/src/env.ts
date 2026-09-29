@@ -48,6 +48,10 @@ export function bindingsFromProcessEnv(): RouterBindings {
     'GEMINI_LIVE_MODEL',
     'CLERK_SECRET_KEY',
     'CLERK_JWT_KEY',
+    'ADMIN_USER_IDS',
+    'ADMIN_EMAILS',
+    'STRIPE_SECRET_KEY',
+    'STRIPE_WEBHOOK_SECRET',
   ];
   for (const key of keys) {
     const value = process.env[key];
