@@ -4109,3 +4109,23 @@ textarea.field-input {
   margin: 0;
   font-weight: 600;
 }
+
+/* ---------- C-108: demos at /demo/<name> ---------- */
+.demo-head { display: grid; gap: 0.35rem; padding: 1rem 1rem 0.25rem; max-width: 70ch; }
+.demo-head h1 { margin: 0; font-size: var(--type-title, 1.4rem); line-height: 1.15; }
+.demo-head p { margin: 0; color: var(--fg-muted); }
+.demo-badge { justify-self: start; font-size: var(--type-whisper); text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 0.15rem 0.6rem; }
+.demo-meta { font-size: var(--type-whisper); }
+.demo-meta a { color: var(--accent); }
+.demo-list { margin: 0; padding: 0 1rem 1rem 2rem; display: grid; gap: 0.4rem; }
+.demo-list a { color: var(--accent); }
+.demo-list small { color: var(--fg-muted); font-family: var(--mono); }
+.tags-graph svg[data-dense='true'] .tag-node-label { font-size: 12px; font-weight: 600; }
+.tags-graph svg[data-dense='true'] { max-height: none; }
+.tags-graph svg[data-dense='true'] .tag-node circle { fill: hsl(var(--tag-hue) 55% 45% / 0.7); }
+.tags-graph svg[data-many='true'] .tag-link { stroke-opacity: 0.32; }
+.tags-graph svg[data-many='true'] .tag-link[data-dim='true'] { stroke-opacity: 0.04; }
+.demo-head { padding: 0.75rem 1rem 0; }
+.demo-head p { font-size: var(--type-whisper); max-width: 80ch; }
+.demo-head h1 { font-size: 1.25rem; }
+@media (max-width: 40rem) { .demo-head p:not(.demo-meta) { display: none; } }

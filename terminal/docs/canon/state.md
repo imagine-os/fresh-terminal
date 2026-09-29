@@ -109,6 +109,7 @@ As of 2026-09-29:
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
 | **Actions: ledger cost, filters, arrows; plan to docs/plan** (C-095) | 2026-09-29 (Opus 5.5): model and cost per row from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, a remembered and keyboard-resizable label column, typed undo; our build plan moved to `docs/plan/` (hub and wiki), `/plan` stays the dev viewer. Live check in changelog 0015. |
 | **Account window fits** (C-099) | Shipped 2026-09-29 (Opus 5.5): the Clerk account window is 1126 px at 1280 and 1227 px on a 1908 px screen (was ~450), full width on phones; checked signed in at seven widths by `pnpm check:clerk` and the `clerk-modal` workflow. |
+| **Demos** (C-108) | Shipped 2026-09-29 06:50 UTC: `/demo/harness`, a year of made-up lines across five stages (three companies, Family, Personal) with a few hundred tags, on the Tags page; unknown names list the demos. Not yet: more demos, Actions/Replay over demo data, load-into-a-stage. |
 | **Tags page** (C-100) | Shipped 2026-09-29 06:20 UTC at `/tags`: graph (default), table, list, board, timeline over every tag the person typed; tray row, seed nav, intent. Not yet: a tag's own page, rename/merge, graph on the stage. |
 | **Tighter tools menu** (C-096) | Shipped 2026-09-29 05:40 UTC. |
 | **Share previews everywhere** (C-102) | Shipped 2026-09-29 06:45 UTC (Opus 5.5): every public page gets tags and its own card on every build; the build fails without them. |

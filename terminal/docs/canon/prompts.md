@@ -887,3 +887,8 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** C-102 (Opus 5.5): a standing rule. `scripts/share-pages.ts` runs in every build (so every publish): each public page (the app root, /about, /pricing, /faq, every pages/*.html, the wiki, /canvas, /actions, /tags) gets og:, twitter: and canonical tags from its own title and description, and its own 1200×630 card rendered from a template into /og/<page>.png. The hub gets a generic noindex card. The build fails when a public page has no tags or card. Rule written into the root README, the Canon and docs/reference/share-previews.md.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790661391091509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790661391.091509
 
+## 102. Tue Sep 29, 1:42 AM CDT · 2026-09-29 06:42:12 UTC
+
+> Give me another example of a much larger tag graph,  something eay more complete for someone using this as a full harness for multi tenant companh os and personal and family life stuff too all in one.  Make this a demo that lives at  /demo/demoname
+
+**What happened:** C-108: `/demo/harness` shipped, a year of made-up lines across five stages with a few hundred tags, and the graph tuned for that size.

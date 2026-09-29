@@ -9,6 +9,7 @@ export type Route =
   | { name: 'plan' }
   | { name: 'actions' }
   | { name: 'tags' }
+  | { name: 'demo'; id: string }
   | { name: 'page'; id: string }
   | { name: 'play'; id: string; step: number | null };
 
@@ -27,6 +28,10 @@ function parse(pathname: string, search: string): Route {
   }
   if (/^\/tags\/?$/.test(path)) {
     return { name: 'tags' };
+  }
+  const demo = /^\/demo\/([^/]+)\/?$/.exec(path);
+  if (demo !== null && demo[1]) {
+    return { name: 'demo', id: decodeURIComponent(demo[1]) };
   }
   const page = /^\/page\/([^/]+)\/?$/.exec(path);
   if (page !== null && page[1]) {
@@ -63,6 +68,8 @@ export function hrefFor(route: Route): string {
       return `${base}/actions`;
     case 'tags':
       return `${base}/tags`;
+    case 'demo':
+      return `${base}/demo/${encodeURIComponent(route.id)}`;
     case 'page':
       return `${base}/page/${encodeURIComponent(route.id)}`;
     case 'play':

@@ -14,6 +14,7 @@ import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
 import { ActionsView } from './actions-view/ActionsView';
 import { TagsView } from './tags-view/TagsView';
+import { DemoView } from './demo/DemoView';
 import { nextCurrency } from './lib/currency';
 import { I18nProvider, useI18n } from './i18n';
 import { newId } from './lib/ids';
@@ -487,6 +488,8 @@ function Product() {
     stage = <ActionsView boxId={currentBox?.id ?? null} />;
   } else if (route.name === 'tags') {
     stage = <TagsView boxId={currentBox?.id ?? null} />;
+  } else if (route.name === 'demo') {
+    stage = <DemoView name={route.id} />;
   } else if (route.name === 'page' && !currentBox) {
     stage = <PageView pageId={route.id} />;
   } else if (replaying && currentBox) {

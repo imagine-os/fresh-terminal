@@ -269,10 +269,17 @@ var STACK = [
     return n;
   }
 
+  /* <img> cannot inherit currentColor, so the mark uses the fixed-colour file for the page theme (-dark on dark pages, -light on light). */
+  function pageIsDark() {
+    var forced = document.documentElement.getAttribute('data-theme');
+    if (forced === 'light' || forced === 'dark') return forced === 'dark';
+    return !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+  }
   function markOf(p) {
     if (!p.mark) return null;
-    return el('img', { 'class': 'mark', src: '../brand/' + p.mark + '/' + p.mark + '-mono.svg', alt: '', width: '22', height: '22', loading: 'lazy' });
+    return el('img', { 'class': 'mark', src: '../brand/' + p.mark + '/' + p.mark + (pageIsDark() ? '-dark.svg' : '-light.svg'), alt: '', width: '22', height: '22', loading: 'lazy' });
   }
+  if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () { render(); }); } catch (e) {} }
 
   function card(p, children) {
     var kids = (children || []).map(function (c) { return card(c, []); });

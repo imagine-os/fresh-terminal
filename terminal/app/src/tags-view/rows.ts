@@ -223,7 +223,8 @@ export function layoutGraph(rows: TagRow[], links: TagLink[], options: GraphOpti
   const cx = width / 2;
   const cy = height / 2;
   const maxCount = Math.max(1, ...rows.map((row) => row.count));
-  const radius = (row: TagRow) => (options.size === 'equal' ? 9 : 7 + Math.sqrt(row.count / maxCount) * 15);
+  const dense = rows.length > 80;
+  const radius = (row: TagRow) => (options.size === 'equal' ? (dense ? 6 : 9) : (dense ? 5 : 7) + Math.sqrt(row.count / maxCount) * (dense ? 11 : 15));
   const kinds = [...new Set(rows.map((row) => row.kind))].sort();
   const arc = new Map(kinds.map((kind, index) => [kind, (index / kinds.length) * Math.PI * 2 - Math.PI / 2] as const));
   const ring = Math.min(width, height) * 0.36;
@@ -238,7 +239,7 @@ export function layoutGraph(rows: TagRow[], links: TagLink[], options: GraphOpti
   const vx = new Float64Array(nodes.length);
   const vy = new Float64Array(nodes.length);
   const indexOf = new Map(nodes.map((node, index) => [node.id, index]));
-  const iterations = nodes.length > 150 ? 120 : 220;
+  const iterations = nodes.length > 150 ? 110 : 220;
   for (let step = 0; step < iterations; step += 1) {
     const cooling = 1 - step / iterations;
     // Repulsion, so labels have room.
@@ -254,11 +255,12 @@ export function layoutGraph(rows: TagRow[], links: TagLink[], options: GraphOpti
           dy = random() - 0.5;
           d2 = 1;
         }
-        const min = a.r + b.r + 26;
+        const min = a.r + b.r + (dense ? 30 : 26);
         const force = (min * min) / d2;
         const d = Math.sqrt(d2);
-        const fx = (dx / d) * force * 0.9;
-        const fy = (dy / d) * force * 0.9;
+        const push = dense ? 1.6 : 0.9;
+        const fx = (dx / d) * force * push;
+        const fy = (dy / d) * force * push;
         vx[i] = (vx[i] as number) + fx;
         vy[i] = (vy[i] as number) + fy;
         vx[j] = (vx[j] as number) - fx;
@@ -274,8 +276,8 @@ export function layoutGraph(rows: TagRow[], links: TagLink[], options: GraphOpti
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      const rest = a.r + b.r + 60;
-      const k = 0.015 * Math.min(4, link.weight);
+      const rest = a.r + b.r + (dense ? 70 : 60);
+      const k = (dense ? 0.006 : 0.015) * Math.min(4, link.weight);
       const f = (d - rest) * k;
       vx[i] = (vx[i] as number) + (dx / d) * f;
       vy[i] = (vy[i] as number) + (dy / d) * f;
@@ -292,8 +294,9 @@ export function layoutGraph(rows: TagRow[], links: TagLink[], options: GraphOpti
         tx = cx + Math.cos(angle) * ring;
         ty = cy + Math.sin(angle) * ring;
       }
-      vx[i] = ((vx[i] as number) + (tx - node.x) * (options.layout === 'kind' ? 0.05 : 0.012)) * 0.6 * cooling;
-      vy[i] = ((vy[i] as number) + (ty - node.y) * (options.layout === 'kind' ? 0.05 : 0.012)) * 0.6 * cooling;
+      const pull = options.layout === 'kind' ? (dense ? 0.03 : 0.05) : dense ? 0.004 : 0.012;
+      vx[i] = ((vx[i] as number) + (tx - node.x) * pull) * 0.6 * cooling;
+      vy[i] = ((vy[i] as number) + (ty - node.y) * pull) * 0.6 * cooling;
       node.x = Math.min(width - node.r - 4, Math.max(node.r + 4, node.x + (vx[i] as number)));
       node.y = Math.min(height - node.r - 4, Math.max(node.r + 4, node.y + (vy[i] as number)));
     }
@@ -316,7 +319,7 @@ export function layoutGraph(rows: TagRow[], links: TagLink[], options: GraphOpti
     }
   }
   if (options.labels === 'top') {
-    const cut = [...rows].sort((a, b) => b.count - a.count)[Math.min(rows.length - 1, 11)]?.count ?? 1;
+    const cut = [...rows].sort((a, b) => b.count - a.count)[Math.min(rows.length - 1, dense ? 39 : 11)]?.count ?? 1;
     for (const node of nodes) node.labelled = node.row.count >= cut;
   } else if (options.labels === 'none') {
     for (const node of nodes) node.labelled = false;

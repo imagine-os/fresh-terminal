@@ -16,8 +16,8 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-107) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
-| [canon/prompts.md](canon/prompts.md) | All 101 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-108) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 102 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
 | [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, replay, step, wiki and more | 2026-09-29 |
@@ -123,6 +123,7 @@ Read this first.
 | [pages/koi.md](pages/koi.md) | Page spec: koi pond v3 (`/pages/koi.html`): views, controls, URL options, versions | 2026-09-29 |
 | [pages/actions.md](pages/actions.md) | Page doc: Actions (`/actions`): rows, statuses, model and cost from the ledger, filters, sort, views, the resizable timeline column, typed undo | 2026-09-29 |
 | [pages/tags.md](pages/tags.md) | Page doc: Tags (`/tags`): every tag the person typed as a graph (default), table, list, board and timeline; filters, sort, graph options | 2026-09-29 |
+| [pages/demo.md](pages/demo.md) | Page doc: Demos (`/demo/<name>`): made-up data on the Tags page; the harness demo (three companies, a family, a life) | 2026-09-29 |
 | [reference/share-previews.md](reference/share-previews.md) | Share previews: every public page gets tags and its own card on every build; how a new page gets one | 2026-09-29 |
 | [pages/sales.md](pages/sales.md) | Page doc: the sales pages (/about, /pricing, /faq): sections, pricing, actions, languages, share tags, how to change them | 2026-09-29 |
 | [pages/auth.md](pages/auth.md) | Page doc: sign-in and the account window (Clerk): where they open, sizes per width, targets, checks | 2026-09-29 |

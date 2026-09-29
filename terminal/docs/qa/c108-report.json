@@ -1,0 +1,38 @@
+{
+  "base": "http://localhost:4181",
+  "errors": [],
+  "overflow": {
+    "table-1280": false,
+    "board-1280": false,
+    "timeline-1280": false,
+    "graph-390": false,
+    "graph-3840": false
+  },
+  "firstPaintMs": 379,
+  "graphDefault": {
+    "nodes": 263,
+    "links": 637,
+    "labels": 50
+  },
+  "graphAllLabels": {
+    "nodes": 263,
+    "links": 637,
+    "labels": 263
+  },
+  "graphHeavy": {
+    "nodes": 263,
+    "links": 616,
+    "labels": 50
+  },
+  "dimmedOnHover": 243,
+  "stages": [
+    "All stages",
+    "Northwind Dental",
+    "Family",
+    "Loma Coffee Roasters",
+    "Personal",
+    "Harbor Bakery"
+  ],
+  "familyNodes": 68,
+  "unknownDemoText": "There is no demo called \"nope\". These exist:"
+}

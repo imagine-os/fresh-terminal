@@ -3,6 +3,7 @@ import { CHIP_KINDS, type ChipKind } from '@shared/chips';
 import { useI18n } from '../i18n';
 import { readJson, writeJson } from '../lib/storage';
 import { useStoreSnapshot } from '../store';
+import type { Box, Line } from '../store/types';
 import { chipIcon } from '../terminal/ChipText';
 import { Button } from '../ui/Button';
 import { DEFAULT_GRAPH, filterTags, layoutGraph, sortTags, tagFacets, tagLinks, tagRows, type GraphOptions, type TagRow, type TagSort } from './rows';
@@ -25,8 +26,11 @@ const GRAPH_KEY = 'fresh-terminal.tags.graph';
 const GRAPH_W = 960;
 const GRAPH_H = 600;
 
-function when(at: number): string {
-  return new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+/** Time of day when everything happened today; day and month once the rows span more than a day. */
+function whenFor(spanMs: number): (at: number) => string {
+  return spanMs > 86_400_000
+    ? (at) => new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    : (at) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
 
 /** One hue per kind, spread around the wheel; the same in every view. */
@@ -35,9 +39,11 @@ export function kindHue(kind: ChipKind): number {
   return Math.round((index * 360) / CHIP_KINDS.length);
 }
 
-export function TagsView({ boxId }: { boxId: string | null }) {
+export function TagsView({ boxId, source }: { boxId: string | null; source?: { lines: Line[]; boxes: Box[] } }) {
   const { t } = useI18n();
   const snapshot = useStoreSnapshot();
+  const lines = source ? source.lines : snapshot.lines;
+  const boxes = source ? source.boxes : snapshot.boxes;
   const [view, setView] = useState<View>('graph');
   const [sort, setSort] = useState<TagSort>('count');
   const [filter, setFilter] = useState('');
@@ -55,12 +61,17 @@ export function TagsView({ boxId }: { boxId: string | null }) {
   };
 
   const kindLabel = (candidate: ChipKind) => t(`chipKind.${candidate}`);
-  const all = useMemo(() => tagRows(snapshot.lines, null), [snapshot.lines]);
+  const all = useMemo(() => tagRows(lines, null), [lines]);
   const facets = useMemo(() => tagFacets(all), [all]);
-  const stageName = useMemo(() => new Map(snapshot.boxes.map((box) => [box.id, box.name] as const)), [snapshot.boxes]);
+  const stageName = useMemo(() => new Map(boxes.map((box) => [box.id, box.name] as const)), [boxes]);
   const rows = useMemo(() => sortTags(filterTags(all, { text: filter, kind, stage }, kindLabel), sort), [all, filter, kind, stage, sort, t]);
   const links = useMemo(() => tagLinks(rows), [rows]);
-  const laid = useMemo(() => layoutGraph(rows, links, graph, GRAPH_W, GRAPH_H), [rows, links, graph]);
+  // A few hundred tags need more room and fewer labels by default; the person's own choice always wins.
+  const dense = rows.length > 80;
+  const graphW = dense ? 1400 : GRAPH_W;
+  const graphH = dense ? 900 : GRAPH_H;
+  const effective = useMemo<GraphOptions>(() => ({ ...graph, labels: graph.labels === 'all' && dense && !readJson<Partial<GraphOptions>>(GRAPH_KEY, {})?.labels ? 'top' : graph.labels }), [graph, dense]);
+  const laid = useMemo(() => layoutGraph(rows, links, effective, graphW, graphH), [rows, links, effective, graphW, graphH]);
   const neighbours = useMemo(() => {
     if (!hover) return new Set<string>();
     const set = new Set<string>([hover]);
@@ -74,6 +85,7 @@ export function TagsView({ boxId }: { boxId: string | null }) {
   const first = rows.length ? Math.min(...rows.map((row) => row.first_at)) : 0;
   const last = rows.length ? Math.max(...rows.map((row) => row.last_at)) : 1;
   const span = Math.max(1, last - first);
+  const when = whenFor(all.length ? Math.max(...all.map((row) => row.last_at)) - Math.min(...all.map((row) => row.first_at)) : 0);
   const maxWeight = Math.max(1, ...laid.links.map((link) => link.weight));
 
   const pick = (row: TagRow) => setFilter((current) => (current.trim().toLowerCase() === row.text.toLowerCase() ? '' : row.text));
@@ -140,7 +152,7 @@ export function TagsView({ boxId }: { boxId: string | null }) {
               <option value="2">{t('tags.graph.links.twice')}</option>
               <option value="3">{t('tags.graph.links.often')}</option>
             </select>
-            <select className={selectClass} aria-label={t('tags.graph.labels')} value={graph.labels} onChange={(event) => setGraphOption('labels', event.target.value as GraphOptions['labels'])} data-testid="tags-graph-labels">
+            <select className={selectClass} aria-label={t('tags.graph.labels')} value={effective.labels} onChange={(event) => setGraphOption('labels', event.target.value as GraphOptions['labels'])} data-testid="tags-graph-labels">
               <option value="all">{t('tags.graph.labels.all')}</option>
               <option value="top">{t('tags.graph.labels.top')}</option>
               <option value="none">{t('tags.graph.labels.none')}</option>
@@ -153,7 +165,7 @@ export function TagsView({ boxId }: { boxId: string | null }) {
 
       {view === 'graph' && rows.length > 0 ? (
         <figure className="tags-graph" data-testid="tags-graph">
-          <svg viewBox={`0 0 ${GRAPH_W} ${GRAPH_H}`} role="img" aria-label={t('tags.graph.alt', { tags: String(rows.length), links: String(laid.links.length) })} onClick={(event) => {
+          <svg viewBox={`0 0 ${graphW} ${graphH}`} data-dense={dense ? 'true' : undefined} data-many={laid.links.length > 200 ? 'true' : undefined} role="img" aria-label={t('tags.graph.alt', { tags: String(rows.length), links: String(laid.links.length) })} onClick={(event) => {
             if (event.target === event.currentTarget) setFilter('');
           }}>
             <g className="tag-links">
