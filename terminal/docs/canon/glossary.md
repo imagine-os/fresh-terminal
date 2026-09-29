@@ -46,3 +46,7 @@ The house words and what they mean. Written 2026-09-29. When a meaning changed, 
 | **Recipe** | Saved know-how for a task: a first run's trace turned into steps that replay, checked by Jev, until it runs as plain code with no model calls. | 2026-09-29 (proposed, C-056) |
 | **Shape / binding** | The two halves of a recipe. The shape (steps and calls, no values) can be shared; the binding (tenant, keys, ids, personal data) stays private. | 2026-09-29 (proposed, C-056) |
 | **Wiki** | The docs folder `terminal/docs`, read by people and agents: one start-here index, `llms.txt`, and a rendered copy at `/wiki/` on the site. Updated every pass. | 2026-09-29 (C-057) |
+| **Replay** | Watching a box's session step by step with the scrubber (`P`). The transcript and the interface show as they were at the chosen step; nothing can be sent or edited while replaying. | 2026-09-29 (C-058) |
+| **Step** | One saved event in a session: the session opening, a line spoken by you or the assistant, an interface edit, an undo or a redo. Every step knows its parents, so branches and merges fit later. | 2026-09-29 (C-058) |
+| **Timeline** | All of a box's steps in order, on branches. Only `main` exists today. Saved as one `timeline.v0` file when you press Save in the scrubber. | 2026-09-29 (C-058) |
+| **Branch** (of a session) | A second line of steps forked from one step, to try something else without losing the first path; merging joins two back. Planned, not wired (`playback.branch`). | 2026-09-29 (C-058, planned) |

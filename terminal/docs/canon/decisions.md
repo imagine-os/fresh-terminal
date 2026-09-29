@@ -249,7 +249,7 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Justin bought freshterminal.ai on Cloudflare Registrar for 2 years ("OK i paid $160 for 2 years freshterminal.ai on cloudflair").
 - Plan: freshterminal.ai serves the app from a Cloudflare Worker with static assets. api.freshterminal.ai serves the router. GitHub Pages stays as a mirror.
 - Status: current as the decision; **not live yet**. Supersedes C-033b; partly supersedes C-010.
-- 2026-09-29: **built** (C-058): app Worker `fresh-terminal-app` on freshterminal.ai (www redirects), router on api.freshterminal.ai, GitHub Pages kept as the fallback. Live status in [state.md](state.md).
+- 2026-09-29: **built** (C-060): app Worker `fresh-terminal-app` on freshterminal.ai (www redirects), router on api.freshterminal.ai, GitHub Pages kept as the fallback. Live status in [state.md](state.md).
 
 **C-046 · 2026-09-29 · Cloudflare automation runs from CI with an API token**
 - Decided: automation uses a Cloudflare API token held as a CI secret, not the laptop OAuth MCP setup, so Justin never has to open Cloudflare ("Make it so i dont need to go to cloudflare and you can do everything please").
@@ -263,14 +263,14 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Why: avoids another sign-up; the router already runs on Cloudflare.
 - SpacetimeDB stays the plan for live multiplayer and presence.
 - Status: current, and Justin can override it. Partly supersedes C-004c. Not built yet.
-- 2026-09-29: **built** (C-060): D1 database `fresh-terminal`, accounts, boxes and a ledger mirror, synced for signed-in people only.
+- 2026-09-29: **built** (C-062): D1 database `fresh-terminal`, accounts, boxes and a ledger mirror, synced for signed-in people only.
 
 **C-048 · 2026-09-29 · Auth is Clerk, starting on development instance keys**
 - Decided: start with the Clerk development instance. Keys are held as the secrets `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` (names only; values never in the repo or Slack).
 - Moving to production later is one click in the Clerk dashboard, plus DNS records we add through the Cloudflare token (C-046).
 - Why: Justin wants to use his own Fresh Terminal account personally and start connecting it to things ("i'd like to start using my terminal account personally").
 - Status: current. Wiring not built yet. Builds on C-009.
-- 2026-09-29: **built** on the development instance (C-059). Verified 02:31 UTC: `pk_test_` / `sk_test_`, Frontend API relevant-flea-5813.clerk.accounts.dev, JWKS reachable, 0 users. "Moving to production is one click" was too short: it also needs Google and GitHub OAuth credentials of our own; steps in C-059.
+- 2026-09-29: **built** on the development instance (C-061). Verified 02:31 UTC: `pk_test_` / `sk_test_`, Frontend API relevant-flea-5813.clerk.accounts.dev, JWKS reachable, 0 users. "Moving to production is one click" was too short: it also needs Google and GitHub OAuth credentials of our own; steps in C-061.
 
 **C-049 · 2026-09-29 · No Liveblocks, no Colyseus: SpacetimeDB plus our own house rules**
 - Justin asked: "do we need liveblocks or colyseus for this? or does spacetimedb handle realtime, and the rest of the rules we can study other tools like liveblocks and make our own simpler cleaner rules?"
@@ -336,14 +336,14 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 
 ## Domain, sign-in and accounts (2026-09-29, infra pass)
 
-**C-058 · 2026-09-29 02:50 · freshterminal.ai runs on a Worker; the router answers on api.freshterminal.ai**
+**C-060 · 2026-09-29 02:50 · freshterminal.ai runs on a Worker; the router answers on api.freshterminal.ai**
 - Justin, 02:28 UTC: "i already did cloudflare clerk" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648903521149?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
 - Decided: the app is Worker `fresh-terminal-app` (`terminal/site`) with static assets and SPA fallback, on custom domains freshterminal.ai and www.freshterminal.ai; the Worker sends www to the apex with a 301. The router Worker adds custom domain api.freshterminal.ai. Custom domains make Cloudflare create the DNS records and certificates, so there is no DNS step. Both keep their workers.dev URLs; GitHub Pages keeps its own build as the fallback.
 - The app picks its router by where it is served from: api.freshterminal.ai on the domain, the workers.dev router everywhere else, so Pages is not moved until the domain is proven.
 - Deploys: `site-deploy.yml` (app) and `router-deploy.yml` (router) on push to main and on demand, from GitHub Actions with `CLOUDFLARE_API_TOKEN`.
-- Status: current. Repo: [0019-domain-clerk-d1.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0019-domain-clerk-d1.md). Builds C-045 and C-046.
+- Status: current. Repo: [0020-domain-clerk-d1.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0020-domain-clerk-d1.md). Builds C-045 and C-046.
 
-**C-059 · 2026-09-29 02:50 · Sign-in is Clerk, anonymous-first, on the development instance for now**
+**C-061 · 2026-09-29 02:50 · Sign-in is Clerk, anonymous-first, on the development instance for now**
 - Decided: everyone starts signed out and everything works as before. A **Sign in** button in the header opens Clerk; signed in adds cloud sync. The app uses `@clerk/react` (Clerk's current React package). The router checks the Clerk session token itself, without a network call (the instance's public key is pushed as `CLERK_JWT_KEY` by the deploy; `CLERK_SECRET_KEY` is the fallback). Only `/me` and `/sync/*` need a session.
 - Limit (Clerk docs, read 2026-09-29): a development instance works from any domain, including freshterminal.ai, but shows a "Development mode" badge, holds at most 100 users, and should not carry real users. Its users cannot be moved to production.
 - Before inviting anyone, Justin does these steps once (about 15 minutes):
@@ -355,7 +355,7 @@ These are plans Claude answered with. Justin has not decided them, and none is b
   6. Back in the Clerk dashboard: wait for the **Domains** checks to pass, then press **Deploy certificates**.
 - Status: current. Development instance live; production not started (waiting on Justin). Builds C-048 and C-009.
 
-**C-060 · 2026-09-29 02:50 · Signed-in accounts, boxes and a ledger mirror live in D1; signed out stays in the browser**
+**C-062 · 2026-09-29 02:50 · Signed-in accounts, boxes and a ledger mirror live in D1; signed out stays in the browser**
 - Decided: D1 database `fresh-terminal`, created by the deploy if missing. Tables: `accounts` (clerk_user_id, plan, created_at, updated_at), `boxes` (id, account_id, name, state_json, created_at, updated_at, deleted_at), `ledger_entries` (the chained entry plus account_id and updated_at). Every row keeps a stable id and `updated_at` for later multiplayer.
 - Sync rule: last writer wins per box on `updated_at`; a box edited on this device since the last sync wins over an older server copy; an untouched box takes the newer server copy. Nobody can overwrite or read another account's box. The ledger mirror is append-only.
 - What syncs: each box's name, menu, pages, layout, theme, style, skins and glossary, and the ledger. Transcript lines stay in the browser for now (not wired yet). Sync runs on sign-in, after edits and when the window gets focus; it is not realtime.
@@ -401,3 +401,16 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Owner's one-time step: install `lk`, run `lk cloud auth` (browser sign-in, picks the project, mints a key), then copy the three values into the repo secrets. After that no dashboard visits are needed.
 - Status: decided, not started. Depends on the router exposing `/mcp` (see the integrations plan in the thread, 02:07 UTC).
 
+
+## Replay and the tagline (2026-09-29)
+
+**C-058 · 2026-09-29 02:29 · Every step is a saved event; replay first, branches and merges later**
+- Justin: "i need a playback scrubber that then evolves to have branching and merging capability if needed to watch through every step of our interactions with a terminal session please. Everything saved beatuifully. in the future we can save video adn audio and whatever else also, for now get us started and we can evolve as we grow" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648981706729?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: a session is a list of steps, each with `parent_ids` (a list, so a branch or a merge fits without a new shape) and a `branch_id` (only `main` today). Steps are derived from what the store already records (sessions, lines, edit batches, undo/redo ledger entries), so every existing box already replays from its first line. The interface at any step is rebuilt by reversing later edits with their stored inverses, never stored twice. Replay is read-only. One JSON file (`timeline.v0`) saves branches, steps, lines and edits. Media (audio, video, pointer) will be steps of new kinds pointing at media rows (C-053), on the same wall-clock lane.
+- Surface: `/box/<id>/play?step=N`, key `P`, replay button in the top bar; scrubber with lane marks, range, transport, speed, save, "Branch from here" (not wired yet).
+- Status: current. Shipped 2026-09-29 (changelog 0006, decision 0019). Branching and media are listed as not wired (`playback.branch`, `playback.media`).
+
+**C-059 · 2026-09-29 02:29 · Tagline: "Evolve as we grow."**
+- Justin: ""evolve as we grow" is great tagline" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), eleven seconds after the replay ask.
+- Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
+- Status: current.

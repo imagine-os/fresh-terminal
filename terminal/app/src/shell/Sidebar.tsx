@@ -13,19 +13,22 @@ interface Props {
   onOpen: (id: string) => void;
   onNew: () => void;
   onNavigate: (target: NavTarget, item: NavItem) => void;
+  /** Replay: the menu as it was at the chosen step, instead of the live one. */
+  navOverride?: NavItem[] | null;
 }
 
-export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate }: Props) {
+export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, navOverride = null }: Props) {
   const { t } = useI18n();
   const snapshot = useStoreSnapshot();
   const mountedAt = useRef(Date.now());
-  const items = useMemo(() => snapshot.navItems.filter((item) => item.box_id === currentId), [snapshot.navItems, currentId]);
+  const liveItems = useMemo(() => snapshot.navItems.filter((item) => item.box_id === currentId), [snapshot.navItems, currentId]);
+  const items = navOverride ?? liveItems;
 
   // Beam the menu in again when an edit just changed it.
   const lastNavEdit = [...snapshot.edits]
     .reverse()
     .find((edit) => edit.box_id === currentId && edit.changes.some((change) => change.region === 'nav'));
-  const fresh = lastNavEdit !== undefined && lastNavEdit.created_at > mountedAt.current;
+  const fresh = navOverride === null && lastNavEdit !== undefined && lastNavEdit.created_at > mountedAt.current;
 
   return (
     <nav className="sidebar" aria-label={t('sidebar.boxes')}>

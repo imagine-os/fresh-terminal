@@ -1936,6 +1936,203 @@ textarea.field-input {
   background: var(--surface);
 }
 
+/* ---------- replay: scrubber and banner ---------- */
+
+.replay-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: center;
+  margin-inline: auto;
+  margin-bottom: var(--space-cozy);
+  padding: 0.2rem 0.8rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+}
+.replay-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.replay-empty {
+  justify-content: center;
+  align-items: center;
+  color: var(--fg-muted);
+}
+.replay-empty-text {
+  margin: 0;
+  text-align: center;
+  max-width: 32rem;
+}
+.line[data-current='true'] .line-text {
+  border-radius: var(--radius);
+  box-shadow: inset 3px 0 0 var(--accent);
+  padding-left: 0.6rem;
+  margin-left: -0.6rem;
+}
+.line[data-current='true'] .line-glyph {
+  color: var(--accent);
+}
+
+.scrubber {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border: 1px solid var(--border-strong);
+  border-radius: calc(var(--radius) + 0.3rem);
+  background: var(--surface);
+}
+.scrubber-lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.scrubber-lane {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 0.9rem;
+}
+.scrubber-lane-name {
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+}
+.scrubber-track {
+  position: relative;
+  height: 0.9rem;
+  margin-inline: 0.55rem; /* the range thumb radius, so marks sit under the thumb */
+}
+.scrubber-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: var(--border-strong);
+}
+.scrubber-mark {
+  position: absolute;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--fg-faint);
+  opacity: 0.55;
+}
+.scrubber-mark[data-kind='user'] {
+  background: var(--accent);
+}
+.scrubber-mark[data-kind='assistant'] {
+  background: var(--chip-entity);
+}
+.scrubber-mark[data-kind='edit'],
+.scrubber-mark[data-kind='undo'],
+.scrubber-mark[data-kind='redo'] {
+  background: var(--chip-object);
+  border-radius: 2px;
+  width: 0.5rem;
+  height: 0.5rem;
+}
+.scrubber-mark[data-kind='session'] {
+  background: transparent;
+  border: 1.5px solid var(--fg-faint);
+}
+.scrubber-mark[data-reached='true'] {
+  opacity: 1;
+}
+.scrubber-mark[data-current='true'] {
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.scrubber-range {
+  width: 100%;
+  min-height: var(--target);
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.scrubber-range:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.scrubber-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.scrubber-transport,
+.scrubber-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: none;
+}
+.scrubber-speed {
+  font-family: var(--font-mono);
+  min-width: var(--target);
+}
+.scrubber-label {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: var(--type-whisper);
+  color: var(--fg-muted);
+  overflow: hidden;
+}
+.scrubber-count,
+.scrubber-time {
+  font-family: var(--font-mono);
+  flex: none;
+}
+.scrubber-summary {
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.scrubber-summary[data-kind='user'] {
+  color: var(--accent);
+}
+.scrubber-summary[data-kind='edit'],
+.scrubber-summary[data-kind='undo'],
+.scrubber-summary[data-kind='redo'] {
+  color: var(--chip-object);
+}
+.scrubber-approx {
+  color: var(--warn);
+  flex: none;
+}
+@media (max-width: 40rem) {
+  .scrubber-label {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .scrubber-tools {
+    margin-left: auto;
+  }
+  .scrubber-tools .btn-label {
+    display: none;
+  }
+}
+
 /* ---------- pass 5: skins ---------- */
 
 [data-skinned].region,

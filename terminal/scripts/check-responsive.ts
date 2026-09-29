@@ -15,6 +15,7 @@ const PAGES = [
   { name: 'landing', path: '/', composer: true, ready: '[data-testid="composer"]' },
   { name: 'box', path: '/box/demo', composer: true, ready: '[data-testid="composer"]' },
   { name: 'canvas', path: '/canvas', composer: false, ready: '[data-testid="canvas-surface"]' },
+  { name: 'replay', path: '/box/demo/play', composer: false, ready: '[data-testid="scrubber"]' },
 ];
 const PORT = 4173;
 const MIN_TARGET = 44;

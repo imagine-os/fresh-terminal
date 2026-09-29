@@ -1,6 +1,6 @@
 # Responsive check (latest)
 
-Run: 2026-09-29T02:54:52.695Z. Widths: 360, 390, 768, 1280, 1920, 2560, 3840. Pages: /, /box/demo, /canvas.
+Run: 2026-09-29T03:02:06.649Z. Widths: 360, 390, 768, 1280, 1920, 2560, 3840. Pages: /, /box/demo, /canvas, /box/demo/play.
 Asserts: no horizontal overflow, composer visible, interactive targets >= 44px.
 
 | page | width | overflow | composer | small targets | screenshot |
@@ -26,5 +26,12 @@ Asserts: no horizontal overflow, composer visible, interactive targets >= 44px.
 | canvas | 1920 | no | yes | 0 | canvas-1920.png |
 | canvas | 2560 | no | yes | 0 | canvas-2560.png |
 | canvas | 3840 | no | yes | 0 | canvas-3840.png |
+| replay | 360 | no | yes | 0 | replay-360.png |
+| replay | 390 | no | yes | 0 | replay-390.png |
+| replay | 768 | no | yes | 0 | replay-768.png |
+| replay | 1280 | no | yes | 0 | replay-1280.png |
+| replay | 1920 | no | yes | 0 | replay-1920.png |
+| replay | 2560 | no | yes | 0 | replay-2560.png |
+| replay | 3840 | no | yes | 0 | replay-3840.png |
 
 Result: PASS
