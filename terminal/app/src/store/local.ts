@@ -164,7 +164,7 @@ export class LocalStore implements Store {
     const box: Box = {
       id: newId('box'),
       owner_identity: this.identity,
-      name: name.trim() || 'Untitled box',
+      name: name.trim() || 'Untitled stage',
       created_at: now,
       updated_at: now,
     };

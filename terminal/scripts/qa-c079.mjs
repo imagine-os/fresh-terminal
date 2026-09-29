@@ -13,7 +13,7 @@ try {
   page.on('pageerror', (e) => console.error('pageerror', e.message));
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
   await page.waitForSelector('[data-testid="composer"]');
-  await page.click('[data-testid="first-run-dismiss"]'); await page.waitForTimeout(300);
+  await page.waitForTimeout(300);
   await page.screenshot({ path: 'docs/qa/c079-start-1440.png' });
   await page.click('[data-testid="tray-toggle"]'); await page.waitForTimeout(300);
   await page.screenshot({ path: 'docs/qa/c079-tray-1440.png' });

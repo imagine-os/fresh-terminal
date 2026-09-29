@@ -23,8 +23,6 @@ import { startSkinRun } from '../skins/runner';
 import { Doodles } from './Doodles';
 import { Transcript } from './Transcript';
 import { PageView } from '../pages/PageView';
-import { downloadSession } from '../lib/exportSession';
-import { FirstRun } from './FirstRun';
 import { creditsSnapshot, reportCreditsError } from '../credits';
 
 export interface AppCommands {
@@ -472,7 +470,6 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
 
   return (
     <>
-      <FirstRun onExport={() => downloadSession(box.id)} />
       {pageId ? (
         <PageView pageId={pageId} />
       ) : isEmpty ? (

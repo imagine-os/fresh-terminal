@@ -3308,3 +3308,53 @@ textarea.field-input {
   color: var(--fg-faint);
   text-decoration: underline;
 }
+
+/* ---------- C-085: where your work lives, one line in the top bar; voice key in the placeholder ---------- */
+.region-top {
+  position: relative;
+}
+.topbar-note {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-size: var(--type-whisper);
+  color: var(--fg-muted);
+  pointer-events: none;
+}
+.topbar-note b {
+  font-weight: 600;
+  color: var(--fg);
+}
+.topbar-note-link {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  border: 0;
+  background: none;
+  padding: 0 0.2rem;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.topbar-note-link:disabled {
+  color: var(--fg-faint);
+  cursor: default;
+  text-decoration: none;
+}
+@media (max-width: 60rem) {
+  .topbar-note {
+    display: none;
+  }
+}
+
+/* mood faces are emoji: full size, not the mono glyph treatment */
+.chip[data-kind='mood'] .chip-icon {
+  font-size: 1em;
+  font-family: inherit;
+  color: inherit;
+}
