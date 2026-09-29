@@ -585,3 +585,10 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 
 **What happened:** Taken by the other session (a Product Hunt strategy page).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651680.495959
+
+## 69. Mon Sep 28, 10:25 PM CDT · 2026-09-29 03:25:36 UTC
+
+> Format and streamline your responses to me better. by the way you used to be able to give me screenshots here in slack thread.
+
+**What happened:** Rule C-073: Done / Try it / Next, images posted in the thread. Applied from the reply onward.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652336159989?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652336.159989
