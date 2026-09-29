@@ -209,7 +209,9 @@ export function Composer({
   const showSuggestions = showStarters && focused && text.trim().length === 0;
   // The blank in "____ turns voice on and off" is the real key on this machine (C-085).
   const voiceKey = `${/Mac|iPhone|iPad/.test(typeof navigator === 'undefined' ? '' : navigator.platform) ? 'Option' : 'Alt'}+V`;
-  const placeholder = t('composer.placeholder', { key: voiceKey });
+  // Phones have no Alt, Shift+Enter or hover: the placeholder says only what is true there.
+  const touch = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+  const placeholder = touch ? t('composer.placeholderTouch') : t('composer.placeholder', { key: voiceKey });
 
   return (
     <div className="composer" data-testid="composer">
@@ -329,13 +331,6 @@ export function Composer({
               </Button>
             </Tooltip>
           )}
-          {voice.active && voice.state !== 'idle' ? (
-            <Tooltip label={voice.muted ? t('voice.unmute') : t('voice.mute')} side="top" align="end">
-              <Button icon variant="ghost" aria-pressed={voice.muted} aria-label={voice.muted ? t('voice.unmute') : t('voice.mute')} onClick={() => voice.setMuted(!voice.muted)}>
-                {voice.muted ? '🔇' : '🔊'}
-              </Button>
-            </Tooltip>
-          ) : null}
           <Tooltip label={t('composer.send')} shortcut="↵" side="top" align="end">
             <Button icon variant="primary" aria-label={t('composer.send')} onClick={send} disabled={busy || text.trim().length === 0}>
               <IconSend />

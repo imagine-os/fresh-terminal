@@ -88,7 +88,31 @@ export class WebSpeechVoice implements VoiceProvider {
       if (event.error === 'no-speech' || event.error === 'aborted') {
         return;
       }
-      this.events.onError(event.error ?? 'speech error');
+      // A real error ends the session: no restart loop, one line, state error (C-090).
+      this.stopping = true;
+      const code = event.error ?? 'speech error';
+      const why =
+        code === 'network'
+          ? 'the browser could not reach its speech service (network). Chrome and Edge need Google\'s service; Safari and Firefox have none. Try again, or switch the voice provider in Settings.'
+          : code === 'not-allowed' || code === 'service-not-allowed'
+            ? 'microphone access was refused. Allow the mic for this site and try again.'
+            : code === 'audio-capture'
+              ? 'no microphone was found.'
+              : code;
+      this.events.onError(why);
+      this.events.onState('error');
+      try {
+        recognition.stop();
+      } catch {
+        // already stopped
+      }
+      this.recognition = null;
+      this.meter.stop();
+      for (const track of this.stream?.getTracks() ?? []) {
+        track.stop();
+      }
+      this.stream = null;
+      this.events.onLevel(0);
     };
     this.recognition = recognition;
     this.startedAt = Date.now();

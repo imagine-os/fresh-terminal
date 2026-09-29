@@ -259,3 +259,12 @@ export function IconHint(props: IconProps) {
     </svg>
   );
 }
+
+export function IconList(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M8 6h12M8 12h12M8 18h12" />
+      <path d="M4 6h.01M4 12h.01M4 18h.01" strokeWidth={2.4} />
+    </svg>
+  );
+}

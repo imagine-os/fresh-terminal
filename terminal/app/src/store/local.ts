@@ -64,6 +64,10 @@ export class LocalStore implements Store {
   constructor(identity: string) {
     this.identity = identity;
     const saved = readJson<Persisted>(STORAGE_KEY, emptyPersisted());
+    // Older stages seeded Library, Canvas and Plan into the menu; the menu now starts with Actions only (C-090).
+    saved.navItems = (saved.navItems ?? [])
+      .filter((item) => !(item.target?.kind === 'url' && item.target.ref === 'pages/library.html' && item.label === 'Library') && !(item.target?.kind === 'action' && item.target.ref === 'canvas.open' && item.label === 'Canvas'))
+      .map((item) => (item.target?.kind === 'action' && item.target.ref === 'plan.open' && item.label === 'Plan' ? { ...item, label: 'Actions', target: { kind: 'action' as const, ref: 'actions.open' } } : item));
     this.snapshot = {
       boxes: saved.boxes.filter((box) => box.owner_identity === identity),
       sessions: saved.sessions,

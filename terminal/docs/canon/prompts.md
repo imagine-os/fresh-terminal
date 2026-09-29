@@ -687,3 +687,55 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** Folded into C-085: mood tags show 🙁 / 🙂 emoji; emoji are fine in the interface where they read better than a glyph, until our own icons exist.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790656150155999?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790656150.155999
+
+## 80. Mon Sep 28, 11:53 PM CDT · 2026-09-29 04:53:19 UTC
+
+> why in the world would spacetime make me install someting on my mac adn then login through that and give me token in terminal instead of just on the site. that was stupid. i have no idea why i have it installed on my mac. is my mac the server? i was thinking its hosted on their coloud or mine or sometihng... I deff dont want it on my mac because it turns off all the time. Login system looks good. Is there anything i need to do so my friend can login?  Is Spacetime DB and Clerk related somehow? are my customer data private from me or shared? etc.
+>
+> on mobile the line is getting cut off... also on mobile does shift enter apply, as well as the voice shortcut? prob not. on mobile the A terminal that adapts line cna be centered until its no longer needed. get rid of library and canvas. Plan can keep track of any actions we gave it and the status so thats good. I also like that you can show the order of operations in timeline, and anything that had dependencies. make sure the lists are filterable and sortable. but keep it very very simple. The plan is for the users activity not for our project plan. our project plan can go elsewhere. Maybe just called it Actions instead of plan. Look can go away for now. Language can stay. Make the icon for tools green and not so thick. sign in can be same font size as the other text in that row. It can all be the same font size.  except fresh terminal which can stay green and a bit larger and bold. I dont know about the icon. What do you think. the Left sidebar icon can be same green. Sign in box can be better sized as well. table should be in option in plan. Kanban should be called board. timeline needs ability to adjust the width of left column. we'll make this smarter as we go.
+>
+> when i hover fresh terminal it says fresh terminal again. thats not necessary. maybe on hover it shows version number. that will clean up some space. Make fresh terminal on top left corner  same font size as the items on the right.   Same with Sign in. Everything can be more uniform.   Fresh Terminal has its color, and Sign in is white and in a box. thats good enough.
+>
+> tools can probably be hover over, and way more minimal and clean now. since it has almost nothing.
+>
+> The drop down can be super basic. on hover. or on tap on mobile. or click
+>
+> the voice is having an issue. the mute icon totally doesnt match when it comes up.
+>
+> The tool tip on sign in hover is awful. simple. Sign in to save progress. is enough. Rollover on free useage is "you're welcome".   $ used should be switchable to cop, bitcoin, usd. but usd by default. rollover the amount used and it shows of $5 starter kit.
+>
+> v is still triggering voice. it needs to be something not as easy to trigger. voice is still screwed up doesnt trasncribe and the terminal starts going crazy with #voice network
+>
+> Mute the voice assistant can go away for now because we're not having it talk back to us yet. That will come later. I'm not sure how to implement that with what we're building. Perhaps give me a option in the tool menu to enable terminal-talk, and give me a demo of how that will work, i'm very curious what the perfect voice experience is for this. Maybe even use fable to think that through deepr or extra on opus 5.5 since opus 5.5. is supposed to be the best model.
+
+(With two screenshots: a phone start on a cached build; a desktop stage full of "Voice: network" lines.)
+
+**What happened:** C-090, all of the interface and voice parts; the SpacetimeDB answer; the Terminal-talk demo in docs/voice-experience.md. Clerk (friends, privacy, the $5 starter grant) went to the other session.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657599.470899
+
+## 81. Mon Sep 28, 11:55 PM CDT · 2026-09-29 04:55:43 UTC
+
+> please give me a sales wesbite for this product. simple clean strong easy to understand. can be more than one page and have pricing based on what you think is best checkout, and or whatever calls to action you want. Make it nice and simple. You can look at omarchy for some simplicity inspiration though we can be way better.
+
+**What happened:** Taken by the other session (billing and the freshterminal.ai site are its build); this session asked it to keep the headline pair, the tagline and the brand set.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657743245569?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657743.245569
+
+## 82. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
+
+> no daily cap . just $5 on us.
+>
+> Of note, even with openrouter key supplied by then we have other basic costs like their data storegae if its alot.
+>
+> spacetimedb is important or at least real time db is because if they're logged into multiple devices of their own they need to stay in sync. Also we will need good handling if theyre not online and put in a prompt that may or may not meant to be going through late.r thats important.
+>
+> they can have a cehckbox to share their data with us or not. But of course they need to be able to have that checked off by default and know their data is private from us unless chosen to share. Unless we add them personally as a client, then we shouldnt have acess to their data unless they grant it to us.
+
+**What happened:** The offline prompt queue landed in C-090 (a line typed offline is held, marked, and sent, edited or discarded when the connection is back; stale after 10 min). The cap, storage costs, the privacy checkbox and SpacetimeDB live sync went to the other session.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658094.470499
+
+## 83. Tue Sep 29, 12:03 AM CDT · 2026-09-29 05:03:40 UTC
+
+> when i share the website link freshterminal.ai it should have an image thumbnail and the tagline for sharing. the tagline should be something different than the tagline in the thumbnail. it should be something like the terminal for everyone, or something better . terminal that just works.  i dunn. if computers started smart, the terminal would be like this.... I dunno.
+
+**What happened:** Taken by the other session with its sales-site build (card, og tags on the app and the site). This session suggested the copy: card "A terminal that adapts to you."; share title "Fresh Terminal — the terminal for everyone"; description "If computers had started smart, the terminal would look like this. Type or talk; it builds itself around you."
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658220851259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658220.851259

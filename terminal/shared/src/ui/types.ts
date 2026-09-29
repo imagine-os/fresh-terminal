@@ -99,10 +99,9 @@ export const SITE_PAGES = [
 ] as const;
 
 /** Default menu for a new box: things that used to be hard-coded links. */
+/** One item to start: the person's own actions (C-090). Library and Canvas live in the tray and the library page. */
 export const SEED_NAV: Array<{ label: string; icon: string; target: NavTarget }> = [
-  { label: 'Library', icon: '▤', target: { kind: 'url', ref: 'pages/library.html' } },
-  { label: 'Canvas', icon: '◫', target: { kind: 'action', ref: 'canvas.open' } },
-  { label: 'Plan', icon: '≡', target: { kind: 'action', ref: 'plan.open' } },
+  { label: 'Actions', icon: '≡', target: { kind: 'action', ref: 'actions.open' } },
 ];
 
 export function defaultBoxUi(boxId: string, now: number): BoxUi {

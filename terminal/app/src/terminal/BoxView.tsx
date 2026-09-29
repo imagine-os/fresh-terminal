@@ -17,6 +17,7 @@ import { store, useStoreSnapshot, type Box } from '../store';
 import type { GlossaryTerm } from '@shared/ui';
 import type { ChipDecision, ChipRecords } from './ChipPopover';
 import { Composer } from './Composer';
+import { Button } from '../ui/Button';
 import { matchLocalCommand } from './localCommands';
 import { looksLikeSkinRequest } from '@shared/skins';
 import { startSkinRun } from '../skins/runner';
@@ -115,6 +116,47 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
   const { t, lang } = useI18n();
   const snapshot = useStoreSnapshot();
   const [busy, setBusy] = useState(false);
+  // A line typed while offline waits here and never sends on its own (C-090).
+  const queueKey = `fresh-terminal.queue.${box.id}`;
+  const [queued, setQueued] = useState<{ text: string; chips: Chip[]; at: number } | null>(() => {
+    try {
+      const raw = localStorage.getItem(queueKey);
+      return raw ? (JSON.parse(raw) as { text: string; chips: Chip[]; at: number }) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  useEffect(() => {
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
+    };
+  }, []);
+  const holdOffline = useCallback(
+    (text: string, chips: Chip[]) => {
+      const entry = { text, chips, at: Date.now() };
+      setQueued(entry);
+      try {
+        localStorage.setItem(queueKey, JSON.stringify(entry));
+      } catch {
+        // storage blocked: the queue lives in memory for this tab
+      }
+    },
+    [queueKey],
+  );
+  const clearQueue = useCallback(() => {
+    setQueued(null);
+    try {
+      localStorage.removeItem(queueKey);
+    } catch {
+      // nothing to clear
+    }
+  }, [queueKey]);
   // The running turn; Esc aborts it (C-079).
   const turnAbort = useRef<AbortController | null>(null);
   const lastNudge = useRef(0);
@@ -173,7 +215,11 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       store.appendLine(box.id, 'system', t('voice.sessionEntry', { seconds: String(summary.seconds), model: summary.model }), [], { reveal: 'none' });
     },
     onError: (message) => {
-      store.appendLine(box.id, 'system', t('voice.error', { message }), [], { reveal: 'none' });
+      // One line per problem: the same voice error within 5 s is not repeated (C-090).
+      const text = t('voice.error', { message });
+      const recent = store.getSnapshot().lines.filter((line) => line.box_id === box.id).slice(-1)[0];
+      if (recent && recent.kind === 'system' && recent.text === text && Date.now() - recent.created_at < 5000) return;
+      store.appendLine(box.id, 'system', text, [], { reveal: 'none' });
     },
   });
 
@@ -213,6 +259,15 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         setFading(true);
       }
       if (pageId) onLeavePage?.();
+      const offline = typeof navigator !== 'undefined' && !navigator.onLine;
+      const localNow = offline
+        ? matchLocalCommand(text, chips, { boxes: snapshot.boxes, lang, dialectText: commands.dialectText, actionIntents: listActions().filter((action) => !action.notWired).map((action) => action.intent) })
+        : null;
+      if (offline && localNow === null) {
+        // No network: hold the line, say so, and let the person decide when it comes back.
+        holdOffline(text, chips);
+        return;
+      }
       store.appendLine(box.id, 'user', text, chips);
 
       // Skins and materials run the refine loop (pass 5).
@@ -503,6 +558,44 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       ) : (
         <Transcript lines={lines} />
       )}
+      {queued ? (
+        <div className="queued" data-online={online} data-testid="queued-prompt" role="status">
+          <div className="queued-text">
+            <span className="queued-note">
+              {online ? t('queue.back') : t('queue.waiting')}
+              {Date.now() - queued.at > 10 * 60_000 ? ` ${t('queue.stale', { minutes: String(Math.round((Date.now() - queued.at) / 60_000)) })}` : ''}
+            </span>
+            <span className="queued-line">{queued.text}</span>
+          </div>
+          <div className="queued-actions">
+            <Button
+              variant="primary"
+              disabled={!online || busy}
+              onClick={() => {
+                const entry = queued;
+                clearQueue();
+                void onSend(entry.text, entry.chips);
+              }}
+              data-testid="queued-send"
+            >
+              {t('queue.send')}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                const entry = queued;
+                clearQueue();
+                window.dispatchEvent(new CustomEvent('ft:composer-insert', { detail: { text: entry.text } }));
+              }}
+            >
+              {t('queue.edit')}
+            </Button>
+            <Button variant="ghost" onClick={clearQueue} data-testid="queued-discard">
+              {t('queue.discard')}
+            </Button>
+          </div>
+        </div>
+      ) : null}
       <ComposerSlot
         inline={centered}
         boxId={box.id}
