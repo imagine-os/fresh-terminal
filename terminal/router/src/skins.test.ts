@@ -46,6 +46,7 @@ describe('skins', () => {
           { id: 'a1', title: 'Rusty plate', url: 'https://live.staticflickr.com/1/a.jpg', thumbnail: 'https://api.openverse.org/v1/images/a1/thumb/', creator: 'Ann', license: 'by', license_version: '2.0', license_url: 'https://creativecommons.org/licenses/by/2.0/', foreign_landing_url: 'https://flickr.com/a', width: 1024, height: 768 },
           { id: 'a2', title: 'Plain http', url: 'http://example.com/b.jpg', license: 'cc0' },
           { id: 'a3', title: 'Rust CC0', url: 'https://example.org/c.jpg', creator: 'Bo', license: 'cc0', license_version: '1.0' },
+          { id: 'a4', title: 'Non-commercial', url: 'https://example.org/d.jpg', creator: 'Cy', license: 'by-nc-sa', license_version: '2.0' },
         ],
       });
     };

@@ -590,7 +590,7 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
     </dl>
   </div>
   <div class="actions">
-    <a class="btn primary" id="openFull" href="../box/new?theme=blank-page">Open full screen</a>
+    <a class="btn primary" id="openFull" href="../box/new?theme=blank-page&amp;from=blank-page">Open terminal</a>
     <span class="ph">
       <button class="btn" type="button" id="setDefault" aria-describedby="setDefaultTip">Set as default</button>
       <span class="tip" id="setDefaultTip" role="tooltip">Not wired yet</span>
@@ -845,7 +845,7 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
     var pool = vis.length ? vis.map(function (c) { return byId[c.dataset.themeId]; }) : T;
     var t = pool[Math.floor(Math.random() * pool.length)];
     surprise.href = href(t);
-    surprise.setAttribute('aria-label', 'Surprise me: open ' + t.name + ' full screen');
+    surprise.setAttribute('aria-label', 'Surprise me: open ' + t.name + ' in a new box');
   }
   surprise.addEventListener('pointerdown', pickSurprise);
   surprise.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') pickSurprise(); });
@@ -913,7 +913,7 @@ footer { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--lin
     els.dotsSr.textContent = dotsSr(t.simp);
     els.prompt.textContent = t.prompt;
     els.open.href = href(t);
-    els.open.setAttribute('aria-label', 'Open ' + t.name + ' full screen');
+    els.open.setAttribute('aria-label', 'Open ' + t.name + ' in a new box');
     grid.querySelectorAll('.card').forEach(function (c) { c.setAttribute('aria-expanded', c.dataset.themeId === t.id ? 'true' : 'false'); });
     els.body.scrollTop = 0;
   }
