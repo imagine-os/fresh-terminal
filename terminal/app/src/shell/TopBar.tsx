@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
 import { IconBox, IconDev, IconDownload, IconHint, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconSpark, IconTheme, IconTopBar, IconUpload } from '../ui/icons';
 import { AccountButton } from './AccountButton';
+import { useAccount } from '../auth/Account';
 import { Tray, type Tool } from './Tray';
 
 interface Props {
@@ -54,6 +55,7 @@ function key(id: string): string {
  */
 export function TopBar(props: Props) {
   const { t, lang } = useI18n();
+  const account = useAccount();
   const tools: Tool[] = [
     { id: 'box.new', group: 'go', label: t('topbar.newBox'), short: t('tool.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
     { id: 'canvas.open', group: 'go', label: t('topbar.canvas'), short: t('tool.canvas'), icon: <IconBox />, onClick: props.onCanvas, shortcut: key('canvas.open'), pressed: props.canvasActive, testId: 'canvas-link' },
@@ -95,6 +97,19 @@ export function TopBar(props: Props) {
       </Tooltip>
       {props.boxName ? <span className="tagline">/ {props.boxName}</span> : null}
       <span className="topbar-spacer" />
+      {/* Where your work lives, one line, top center (C-085). */}
+      <span className="topbar-note" data-testid="topbar-note">
+        {account.signedIn ? (
+          t('topbar.savedCloud')
+        ) : (
+          <>
+            <b>{t('topbar.saved')}</b>{' '}
+            <button type="button" className="topbar-note-link" onClick={account.signIn} disabled={!account.loaded}>
+              {t('topbar.signInToSave')}
+            </button>
+          </>
+        )}
+      </span>
       <span className="balance" data-live={props.usedMicro > 0} data-testid="balance" aria-label={`${formatMicro(props.usedMicro)} ${t('topbar.used')}`}>
         {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
       </span>

@@ -671,3 +671,19 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655000670529?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790655000.670529
 
 **Follow-up to 77 (2026-09-29 04:30 UTC):** "signin system should match style" shipped as C-084 (Opus 5.5): Clerk themed from the active theme. Prompt file 0019.
+
+## 78. Mon Sep 28, 11:27 PM CDT · 2026-09-29 04:27:01 UTC
+
+> put savide in theis browser. Sign in to save to the coloud centered top center.  Export goes in the top right dropdown menu. . in the prompt box. ____ turns voice on and off.
+
+(With a marked-up screenshot of the start screen.)
+
+**What happened:** C-085: the banner is gone; one centered line in the top bar; Export only in the tray; the placeholder names the voice key.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790656021722259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790656021.722259
+
+## 79. Mon Sep 28, 11:29 PM CDT · 2026-09-29 04:29:10 UTC
+
+> those faces arent readable, you can use emojis when appropriate. soon we'll make our own icons and stuff.
+
+**What happened:** Folded into C-085: mood tags show 🙁 / 🙂 emoji; emoji are fine in the interface where they read better than a glyph, until our own icons exist.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790656150155999?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790656150.155999

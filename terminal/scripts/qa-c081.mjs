@@ -12,7 +12,7 @@ try {
   page.on('pageerror', (e) => console.error('pageerror', e.message));
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
   await page.waitForSelector('[data-testid="composer"]');
-  await page.click('[data-testid="first-run-dismiss"]'); await page.waitForTimeout(200);
+  await page.waitForTimeout(300);
   const input = page.locator('textarea').first();
   for (const line of ['make a page called Notes', 'make a page called Theme Gallery', 'show today']) {
     await input.click(); await input.fill(line); await page.keyboard.press('Enter'); await page.waitForTimeout(700);
