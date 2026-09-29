@@ -44,7 +44,7 @@
       "kind": "image",
       "model": "openai/gpt-5-image-mini",
       "alternate": "google/gemini-2.5-flash-image",
-      "note": "Skin images (pass 5). Cheapest image-output model on OpenRouter by image-output token price on 2026-09-29 ($8 per million image tokens); gemini-2.5-flash-image is about $0.039 per image, over the 3\u00a2 refine cap on its own."
+      "note": "Skin images (pass 5). Cheapest image-output model on OpenRouter by listed image-token price on 2026-09-29, but a live call cost $0.0417 for one image, more than the 3\u00a2 refine cap, so the image path only runs if the cap is raised."
     },
     "vision": {
       "kind": "vision",
@@ -145,7 +145,7 @@
     "max_pages": 10
   },
   "refine": {
-    "$comment": "refine() best-of-3 loop for skins. Stops at target_score, after patience rounds without a better best, at max_rounds, when cap_micro is spent, or on Stop. estimate_micro is per variant (generate + score) and keeps the loop under the cap before it spends.",
+    "$comment": "refine() best-of-3 loop for skins. Stops at target_score, after patience rounds without a better best, at max_rounds, when cap_micro is spent, or on Stop. estimate_micro is per variant (generate + score) and keeps the loop under the cap before it spends. image_generate measured 2026-09-29: openai/gpt-5-image-mini cost 41,709 micro-dollars for one image, over the cap, so plans that pick it fall back to the next affordable path.",
     "variants": 3,
     "target_score": 4.5,
     "patience": 2,
@@ -156,7 +156,7 @@
       "css_tokens": 2500,
       "procedural_code": 2500,
       "image_search": 400,
-      "image_generate": 9000
+      "image_generate": 42000
     }
   }
 }

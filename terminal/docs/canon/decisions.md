@@ -383,3 +383,27 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Justin: ""evolve as we grow" is great tagline" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), eleven seconds after the replay ask.
 - Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
 - Status: current.
+
+## Pass 5 additions (2026-09-29)
+
+**C-060 · 2026-09-29 02:46 · "Open terminal" in the library opens a new box that is already skinned**
+- Justin: "open terminal from the library should simply take us to a fresh terminal window thats arleady skinned." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649998972349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: each of the 17 library entries links to `box/new?theme=<built theme>&skin=<material>&from=<library id>` (relative, so it works under `/fresh-terminal/`). The new box opens with that theme and the material as the stage skin, with no toast and no screen in between. The mapping lives in `shared/src/skins/terminals.ts` and a test keeps the page in step with it.
+- Terminals whose look is not fully built open the closest built look with a line naming what is not wired yet: Bezel and Glass (moving bezel), You as the Camera (camera reflection), Tilt Window (phone tilt), Koi Pond (the live 3D pond inside a box; its own page stays linked), Night Sky (drifting stars).
+- Status: current. Built in pass 5.
+- Found then: the old links were `/box/new?...` from the site root, which on GitHub Pages leaves `/fresh-terminal/` and cannot open the app.
+
+**C-061 · 2026-09-29 02:47 · Ontology: one edge per relation, named both ways**
+- Asked: "ontology should be a big part of how you think. often 2 way connections have different meaning in each direction" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: each relation is stored once as an edge with a forward label and an inverse label ("Hoy employs Sergio" / "Sergio works at Hoy"). Some relations are symmetric ("partners with"). Every edge carries its source and date. Chips and Jev share one list of types.
+- Status: proposed.
+
+**C-062 · 2026-09-29 02:47 · Connectors: one managed OAuth layer that can also be self-hosted**
+- Asked: "How will we handle connectors for thingsl ike dropbox, google drive, email, whatsapp, sms, etc." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: one managed OAuth connector layer that can also be self-hosted (so it fits ours, your keys and self-host), chosen after verifying the options. First set: Google Drive, Dropbox and email over IMAP. WhatsApp and restricted Gmail scopes need vendor approval (Meta, Google) and come later.
+- Status: proposed. No connector layer chosen or verified yet.
+
+**C-063 · 2026-09-29 02:47 · Migration: originals kept, records mapped with source ids, duplicates flagged**
+- Asked: "migration is a huge ability we need to build out" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Proposed: raw originals go to storage untouched. Records are mapped onto the ontology (C-061) with their source ids, so an import can be re-run. Possible duplicates are flagged for review, never merged silently. First formats: Google Takeout, Dropbox, mbox email and WhatsApp chat export. Between Gigs and Company OS are the first real imports.
+- Status: proposed.

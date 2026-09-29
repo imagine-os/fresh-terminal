@@ -2,7 +2,7 @@ import { ensureReadable, type Skin, type SkinTarget } from '../ui/skin';
 
 /**
  * The material library: original procedural materials written for Fresh
- * Terminal (MIT, same as the repo). CSS gradients only, so they cost nothing,
+ * Terminal (MIT, same as the repo). 18 materials. CSS gradients only, so they cost nothing,
  * load instantly and serve as the draft while better versions are made.
  */
 export interface LibraryMaterial {
@@ -122,6 +122,59 @@ export const SKIN_LIBRARY: LibraryMaterial[] = [
     tokens: { '--bg': '#1e2a26', '--surface': '#26342f', '--fg': '#eef3ee', '--accent': '#f2e28a', '--border': '#43574f' },
     background: 'radial-gradient(circle at 40% 35%, rgba(255,255,255,0.05), rgba(0,0,0,0) 50%), linear-gradient(180deg, #25332e, #19231f)',
     veil: 35,
+  },
+  {
+    id: 'phosphor',
+    name: 'Green phosphor',
+    keywords: ['phosphor', 'crt', 'green', 'terminal', 'matrix', 'hacker', 'monitor'],
+    tokens: { '--bg': '#030d05', '--surface': '#071a0b', '--fg': '#7dff9a', '--accent': '#39ff6a', '--border': '#15562a' },
+    background:
+      'repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0px, rgba(0,0,0,0.28) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px), radial-gradient(120% 90% at 50% 45%, rgba(57,255,106,0.16), rgba(0,0,0,0) 70%), linear-gradient(180deg, #041208, #020803)',
+    veil: 20,
+  },
+  {
+    id: 'amber',
+    name: 'Amber CRT',
+    keywords: ['amber', 'orange', 'crt', 'retro', 'vt220', 'monitor'],
+    tokens: { '--bg': '#120a02', '--surface': '#1f1204', '--fg': '#ffc46b', '--accent': '#ff9f1c', '--border': '#5a3a10' },
+    background:
+      'repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px), radial-gradient(120% 90% at 50% 45%, rgba(255,159,28,0.16), rgba(0,0,0,0) 70%), linear-gradient(180deg, #180d02, #0a0501)',
+    veil: 20,
+  },
+  {
+    id: 'ledger',
+    name: 'Ledger lines',
+    keywords: ['ledger', 'ruled', 'lined', 'accounting', 'notebook', 'margin'],
+    tokens: { '--bg': '#fbfaf3', '--surface': '#ffffff', '--fg': '#1f2a36', '--accent': '#c0392b', '--border': '#cfd8e3' },
+    background:
+      'linear-gradient(90deg, rgba(0,0,0,0) 3.9rem, rgba(192,57,43,0.55) 3.9rem, rgba(192,57,43,0.55) 4rem, rgba(0,0,0,0) 4rem), repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 27px, rgba(70,120,190,0.28) 27px, rgba(70,120,190,0.28) 28px), linear-gradient(180deg, #fdfcf6, #f4f2e6)',
+    veil: 10,
+  },
+  {
+    id: 'hardware',
+    name: 'Hardware panel',
+    keywords: ['hardware', 'panel', 'steel', 'aluminium', 'aluminum', 'instrument', 'rack', 'machine'],
+    tokens: { '--bg': '#1c1f23', '--surface': '#262a30', '--fg': '#e9edf2', '--accent': '#ffb000', '--border': '#4a5058' },
+    background:
+      'repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0) 3px), radial-gradient(circle at 12px 12px, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 3px, rgba(0,0,0,0) 4px), linear-gradient(180deg, #2c3036, #1a1d21)',
+    veil: 35,
+  },
+  {
+    id: 'night-sky',
+    name: 'Night sky',
+    keywords: ['night', 'sky', 'stars', 'starry', 'space', 'galaxy', 'cosmos'],
+    tokens: { '--bg': '#070b1c', '--surface': '#0e1430', '--fg': '#eaf0ff', '--accent': '#9ab8ff', '--border': '#26335e' },
+    background:
+      'radial-gradient(circle at 12% 18%, rgba(255,255,255,0.9) 0px, rgba(255,255,255,0) 1.5px), radial-gradient(circle at 73% 12%, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0) 1.5px), radial-gradient(circle at 41% 36%, rgba(255,255,255,0.7) 0px, rgba(255,255,255,0) 1px), radial-gradient(circle at 88% 44%, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0) 1.5px), radial-gradient(circle at 24% 62%, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0) 1px), radial-gradient(circle at 63% 74%, rgba(255,255,255,0.7) 0px, rgba(255,255,255,0) 1.5px), radial-gradient(circle at 6% 88%, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0) 1px), radial-gradient(120% 70% at 70% 110%, rgba(80,70,180,0.45), rgba(0,0,0,0) 60%), linear-gradient(180deg, #050816, #0b1230)',
+    veil: 15,
+  },
+  {
+    id: 'e-ink',
+    name: 'E-ink',
+    keywords: ['eink', 'e-ink', 'kindle', 'reader', 'grayscale', 'greyscale', 'calm'],
+    tokens: { '--bg': '#e9e8e3', '--surface': '#f2f1ec', '--fg': '#1a1a1a', '--accent': '#444444', '--border': '#c4c3bd' },
+    background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.5), rgba(0,0,0,0) 50%), linear-gradient(180deg, #ebeae5, #dfded8)',
+    veil: 10,
   },
 ];
 

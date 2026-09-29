@@ -58,6 +58,7 @@ export function RefineBlock({ run: saved }: { run: SkinRun }) {
           </button>
         ) : null}
       </div>
+      {run.note ? <p className="rb-note" data-testid="refine-note">{run.note}</p> : null}
       {run.draft ? (
         <div className="rf-row" data-kind="draft">
           <span className="rf-round">{t('skin.draft')}</span>

@@ -35,6 +35,7 @@ function run(boxId: string): SkinRun {
     status: 'done',
     reason: 'plateau',
     error: null,
+    note: null,
     spent_micro: 420,
     cap_micro: 30000,
     draft: null,

@@ -6,6 +6,7 @@ import { usedMicro } from '@shared/ledger';
 import { THEME_SURFACE_PAGES, findTheme, nextThemeId, resolveThemeId } from '@shared/themes';
 import { deriveTimeline, stateAt, type Step } from '@shared/timeline';
 import type { EngineContext } from '@shared/ops';
+import { findLibraryTerminal, findMaterial, libraryToSkin } from '@shared/skins';
 import { installActionsRegistry, listActions } from './actions/registry';
 import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
@@ -159,26 +160,52 @@ function Product() {
     }
   }, [route, requested, mostRecent]);
 
-  // /box/new?theme=<id>: new box with that theme (or the closest built one), then focus the composer.
+  // /box/new?theme=<id>&skin=<material>&from=<library id>: a new box, already
+  // themed and skinned, then the composer. The library's "Open terminal" uses it.
   useEffect(() => {
     if (route.name !== 'new-box') {
       return;
     }
-    const surfacePage = route.theme ? THEME_SURFACE_PAGES[route.theme.toLowerCase()] : undefined;
+    const terminal = findLibraryTerminal(route.from);
+    const surfacePage = !terminal && route.theme ? THEME_SURFACE_PAGES[route.theme.toLowerCase()] : undefined;
     if (surfacePage !== undefined) {
-      // A whole-page surface (koi pond) until it becomes an in-app theme in pass 3.
+      // Legacy /box/new?theme=koi-pond links still open the koi page.
       window.location.replace(`${import.meta.env.BASE_URL}${surfacePage}`);
       return;
     }
-    const created = store.createBox(`${t('box.untitled')} ${snapshot.boxes.length + 1}`);
-    if (route.theme) {
-      const resolution = resolveThemeId(route.theme, snapshot.themes);
-      store.applyOps(created.id, [{ op: 'theme.set', theme_id: resolution.id }], 'system');
-      const name = findTheme(resolution.id, snapshot.themes).name;
-      if (!resolution.built) {
-        toast(t('theme.notBuilt', { name: route.theme, fallback: name }));
+    const created = store.createBox(terminal ? terminal.name : `${t('box.untitled')} ${snapshot.boxes.length + 1}`);
+    const themeId = terminal?.theme ?? route.theme;
+    const materialId = terminal ? terminal.skin : route.skin ?? null;
+    const ops: Op[] = [];
+    let themeName: string | null = null;
+    if (themeId) {
+      const resolution = resolveThemeId(themeId, snapshot.themes);
+      themeName = findTheme(resolution.id, snapshot.themes).name;
+      ops.push({ op: 'theme.set', theme_id: resolution.id });
+      if (!resolution.built && !terminal) {
+        store.appendLine(created.id, 'system', t('theme.notBuilt', { name: themeId, fallback: themeName }) + ` (${t('notWired').toLowerCase()})`, [], { reveal: 'none' });
       }
-      store.appendLine(created.id, 'system', t('system.newBoxTheme', { name }), [], { reveal: 'none' });
+    }
+    const material = findMaterial(materialId);
+    if (material) {
+      ops.push({ op: 'skin.apply', skin: libraryToSkin(material, 'stage', terminal?.name ?? material.name, newId('skin'), Date.now()) });
+    }
+    if (ops.length > 0) {
+      store.applyOps(created.id, ops, 'system');
+    }
+    const lookName = terminal?.name ?? [themeName, material?.name].filter(Boolean).join(' + ');
+    if (terminal && (!terminal.built || terminal.notWired)) {
+      const closest = [themeName, material?.name].filter(Boolean).join(' with ');
+      store.appendLine(
+        created.id,
+        'system',
+        t(terminal.built ? 'system.terminalPartly' : 'system.terminalClosest', { name: terminal.name, missing: terminal.notWired ?? '', closest }) +
+          (terminal.page ? ` ${t('system.terminalPage', { page: `${import.meta.env.BASE_URL}${terminal.page}` })}` : ''),
+        [],
+        { reveal: 'none', component: 'not-wired' },
+      );
+    } else if (lookName) {
+      store.appendLine(created.id, 'system', t('system.newBoxTheme', { name: lookName }), [], { reveal: 'none' });
     } else {
       store.appendLine(created.id, 'system', t('system.newBox'), [], { reveal: 'none' });
     }

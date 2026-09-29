@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 export type Route =
   | { name: 'landing' }
   | { name: 'box'; id: string }
-  | { name: 'new-box'; theme: string | null }
+  | { name: 'new-box'; theme: string | null; skin?: string | null; from?: string | null }
   | { name: 'canvas' }
   | { name: 'plan' }
   | { name: 'page'; id: string }
@@ -31,7 +31,8 @@ function parse(pathname: string, search: string): Route {
     return { name: 'play', id: decodeURIComponent(play[1]), step };
   }
   if (/^\/box\/new\/?$/.test(path)) {
-    return { name: 'new-box', theme: new URLSearchParams(search).get('theme') };
+    const params = new URLSearchParams(search);
+    return { name: 'new-box', theme: params.get('theme'), skin: params.get('skin'), from: params.get('from') };
   }
   const match = /^\/box\/([^/]+)\/?$/.exec(path);
   if (match !== null && match[1]) {
