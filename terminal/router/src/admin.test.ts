@@ -85,15 +85,15 @@ describe('friend credits', () => {
   it('an admin grant by email lands on the account, the grants list and the ledger', async () => {
     const h = harness();
     const before = (await h.call('/credits', { token: 'good-user_friend' })).body as unknown as CreditsStatus;
-    expect(before.granted_micro).toBe(1_000_000);
+    expect(before.granted_micro).toBe(5_000_000);
     const out = await h.call('/admin/grant', { token: 'good-user_admin', body: { email: 'friend@example.com', amount_usd: 7.5, note: 'thanks for testing' } });
     expect(out.status).toBe(200);
     expect(out.body.grant).toMatchObject({ clerk_user_id: 'user_friend', amount_micro: 7_500_000, source: 'admin', granted_by: 'user_admin', note: 'thanks for testing' });
-    // 8.5 of grant: the threshold rises to it, so the whole gift is spendable.
-    expect(out.body.account).toMatchObject({ grant_micro: 8_500_000, billing_threshold_micro: 8_500_000, credit_limit_micro: 8_500_000 });
+    // $5 starter + $7.50: the threshold rises to it, so the whole gift is spendable.
+    expect(out.body.account).toMatchObject({ grant_micro: 12_500_000, billing_threshold_micro: 12_500_000, credit_limit_micro: 12_500_000 });
     const after = (await h.call('/credits', { token: 'good-user_friend' })).body as unknown as CreditsStatus;
-    expect(after.remaining_micro).toBe(8_500_000);
-    expect(after.billing).toMatchObject({ state: 'free', threshold_micro: 8_500_000, provider: 'not-wired' });
+    expect(after.remaining_micro).toBe(12_500_000);
+    expect(after.billing).toMatchObject({ state: 'free', threshold_micro: 12_500_000, provider: 'not-wired' });
     const grants = await h.call('/admin/grants', { token: 'good-user_admin' });
     expect(grants.body.grants).toHaveLength(1);
     const ledger = await h.call('/admin/ledger', { token: 'good-user_admin' });
@@ -121,7 +121,7 @@ describe('friend credits', () => {
     expect((await h.call('/credits/redeem', { body: { code } })).status).toBe(401);
     const first = await h.call('/credits/redeem', { token: 'good-user_friend', body: { code: code.toLowerCase() } });
     expect(first.status).toBe(200);
-    expect(first.body.account).toMatchObject({ grant_micro: 4_000_000 });
+    expect(first.body.account).toMatchObject({ grant_micro: 8_000_000 });
     expect((await h.call('/credits/redeem', { token: 'good-user_friend', body: { code } })).body.code).toBe('invite_already_redeemed');
     expect((await h.call('/credits/redeem', { token: 'good-user_other', body: { code } })).status).toBe(200);
     const third = await h.call('/credits/redeem', { token: 'good-user_admin', body: { code } });
@@ -167,14 +167,15 @@ describe('pass-through billing gate', () => {
     await h.db.prepare("UPDATE accounts SET spent_micro = 5000000 WHERE id = 'acct_user_friend'").run();
     expect((await h.call('/route', { token: 'good-user_friend', body: { boxId: 'b', text: 'hi', chips: [] } })).status).toBe(402);
     const regrant = await h.call('/admin/grant', { token: 'good-user_admin', body: { user_id: 'user_friend', amount_usd: 2, note: 'keep going' } });
-    expect(regrant.body.account).toMatchObject({ billing_state: 'free', billing_threshold_micro: 13_000_000 });
+    expect(regrant.body.account).toMatchObject({ billing_state: 'free', billing_threshold_micro: 17_000_000 });
     expect((await h.call('/route', { token: 'good-user_friend', body: { boxId: 'b', text: 'hi', chips: [] } })).status).toBe(503);
   });
 
-  it('with the $1 starter grant, running out says credits exhausted (the grant binds before the threshold)', async () => {
+  it('with a threshold above the grant, running out says credits exhausted (the grant binds first)', async () => {
     const h = harness();
     await h.call('/credits', { token: 'good-user_friend' });
-    await h.db.prepare("UPDATE accounts SET spent_micro = 1000000 WHERE id = 'acct_user_friend'").run();
+    await h.call('/admin/account', { token: 'good-user_admin', body: { user_id: 'user_friend', billing_threshold_usd: 50 } });
+    await h.db.prepare("UPDATE accounts SET spent_micro = 5000000 WHERE id = 'acct_user_friend'").run();
     const out = await h.call('/tag', { token: 'good-user_friend', body: { text: 'hello' } });
     expect(out.status).toBe(402);
     expect(out.body.code).toBe('account_credits_exhausted');
@@ -208,7 +209,7 @@ describe('pass-through billing gate', () => {
     const again = await h.call('/billing/stripe/webhook', { raw: event, headers: { 'Stripe-Signature': signature } });
     expect(again.body).toMatchObject({ credited: false, duplicate: true });
     const credits = (await h.call('/credits', { token: 'good-user_friend' })).body as unknown as CreditsStatus;
-    expect(credits.granted_micro).toBe(11_000_000);
+    expect(credits.granted_micro).toBe(15_000_000);
     expect(credits.billing).toMatchObject({ state: 'active', paid_micro: 10_000_000, provider: 'stripe' });
   });
 });

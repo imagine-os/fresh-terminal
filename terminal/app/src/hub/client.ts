@@ -46,7 +46,7 @@ export function sampleClient(): HubClient {
           grants: { n: grants.length, total: grants.reduce((sum, row) => sum + Number(row.amount_micro), 0) },
           invites: { n: invites.length, open: 1 },
           devices: { n: 41, spent: 3_100_000, cost: 2_600_000 },
-          billing: { provider: 'not-wired', default_threshold_micro: 5_000_000, topup_amounts_usd: [5, 10, 20, 50] },
+          billing: { provider: 'not-wired', default_threshold_micro: 5_000_000, starter_micro: 5_000_000, topup_amounts_usd: [5, 10, 20, 50] },
           admins: { ids: 1, emails: 1, you_via: 'id' },
           max_grant_micro: 100_000_000,
         });

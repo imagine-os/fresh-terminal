@@ -5,11 +5,16 @@
  */
 export interface CreditsStatus {
   signed_in: boolean;
-  /** What people see for this mode (Justin, 2026-09-29: "free usage"; bring-your-own stays "your key"). */
+  /**
+   * What people see for this mode. Anonymous devices: "free usage" (Justin, 2026-09-29); signed-in
+   * accounts: "starter kit", shown as "of $5 starter kit" (C-089). Bring-your-own stays "your key".
+   */
   label: string;
   /** Who pays for this browser's calls: a signed-in account, an anonymous device, or nobody yet. */
   mode: 'account' | 'device' | 'none';
   granted_micro: number;
+  /** Same as granted_micro (USD micro-dollars), for the "of $5 starter kit" line (C-089). */
+  granted: number;
   spent_micro: number;
   remaining_micro: number;
   /** Soft "sign in to keep going" prompts still available before sign-in is required (anonymous only). */

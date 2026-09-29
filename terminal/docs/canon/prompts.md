@@ -694,3 +694,28 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-086, C-087, C-088 (Opus 5.5, decision 0024, changelog 0014). Clerk Billing checked on Clerk's own pages: subscriptions only, usage billing "not yet", needs a Stripe account anyway, 0.7% + Stripe's 2.9% + $0.30. So it cannot do pass-through; recommended Stripe Checkout prepaid credit packs (proposed). Built without new keys: the $5 billing threshold per account (402 `payment_required`, your key never blocked), a "Top up / add payment" hook marked not wired until the Stripe keys exist, admin credit grants and invite codes on the ledger, and the hub at https://freshterminal.ai/hub (admins only, checked by the server) with every page and item, the wiki, the Canon, a searchable prompt/response library, the plan, the credits panel and a names-only secrets checklist. The domain was already on Cloudflare (C-064); the hub is on it.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790655218716499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790655218.716499
+
+## 81. Mon Sep 28, 11:53 PM CDT · 2026-09-29 04:53:19 UTC
+
+> why in the world would spacetime make me install someting on my mac adn then login through that and give me token in terminal instead of just on the site. that was stupid. i have no idea why i have it installed on my mac. is my mac the server? i was thinking its hosted on their coloud or mine or sometihng... I deff dont want it on my mac because it turns off all the time. Login system looks good. Is there anything i need to do so my friend can login?  Is Spacetime DB and Clerk related somehow? are my customer data private from me or shared? etc.
+>
+> on mobile the line is getting cut off... also on mobile does shift enter apply, as well as the voice shortcut? prob not. on mobile the A terminal that adapts line cna be centered until its no longer needed. get rid of library and canvas. Plan can keep track of any actions we gave it and the status so thats good. I also like that you can show the order of operations in timeline, and anything that had dependencies. make sure the lists are filterable and sortable. but keep it very very simple. The plan is for the users activity not for our project plan. our project plan can go elsewhere. Maybe just called it Actions instead of plan. Look can go away for now. Language can stay. Make the icon for tools green and not so thick. sign in can be same font size as the other text in that row. It can all be the same font size.  except fresh terminal which can stay green and a bit larger and bold. I dont know about the icon. What do you think. the Left sidebar icon can be same green. Sign in box can be better sized as well. table should be in option in plan. Kanban should be called board. timeline needs ability to adjust the width of left column. we'll make this smarter as we go.
+>
+> when i hover fresh terminal it says fresh terminal again. thats not necessary. maybe on hover it shows version number. that will clean up some space. Make fresh terminal on top left corner  same font size as the items on the right.   Same with Sign in. Everything can be more uniform.   Fresh Terminal has its color, and Sign in is white and in a box. thats good enough.
+>
+> tools can probably be hover over, and way more minimal and clean now. since it has almost nothing.
+>
+> The drop down can be super basic. on hover. or on tap on mobile. or click
+>
+> the voice is having an issue. the mute icon totally doesnt match when it comes up.
+>
+> The tool tip on sign in hover is awful. simple. Sign in to save progress. is enough. Rollover on free useage is "you're welcome".   $ used should be switchable to cop, bitcoin, usd. but usd by default. rollover the amount used and it shows of $5 starter kit.
+>
+> v is still triggering voice. it needs to be something not as easy to trigger. voice is still screwed up doesnt trasncribe and the terminal starts going crazy with #voice network
+>
+> Mute the voice assistant can go away for now because we're not having it talk back to us yet. That will come later. I'm not sure how to implement that with what we're building. Perhaps give me a option in the tool menu to enable terminal-talk, and give me a demo of how that will work, i'm very curious what the perfect voice experience is for this. Maybe even use fable to think that through deepr or extra on opus 5.5 since opus 5.5. is supposed to be the best model.
+
+(With two screenshots.)
+
+**What happened:** Split. This pass took the starter kit and the privacy question: C-089, a $5 starter kit per signed-in account that is also the pass-through threshold, `GET /credits` returns `granted` and the label "starter kit" for "of $5 starter kit"; open question 19 on end-to-end encryption, linked from the hub (changelog 0014). Justin's session took the rest (top bar, tray, mobile, Actions, voice, the currency switch, the SpacetimeDB answer).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657599.470899

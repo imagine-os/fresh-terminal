@@ -16,7 +16,7 @@ interface Overview {
   grants: Row;
   invites: Row;
   devices: Row;
-  billing: { provider: string; default_threshold_micro: number };
+  billing: { provider: string; default_threshold_micro: number; starter_micro?: number };
   max_grant_micro: number;
 }
 
@@ -81,6 +81,10 @@ export function CreditsPanel({ client }: { client: HubClient }) {
             <dd>
               {usd(Number(overview.grants.total))} <span className="hub-muted">in {String(overview.grants.n ?? 0)}</span>
             </dd>
+          </div>
+          <div>
+            <dt>Starter kit per account</dt>
+            <dd>{usd(Number(overview.billing.starter_micro ?? overview.billing.default_threshold_micro))}</dd>
           </div>
           <div>
             <dt>Open invite codes</dt>

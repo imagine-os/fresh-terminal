@@ -38,6 +38,8 @@ export interface CreditsBindings extends AuthBindings {
   ACCOUNT_DAILY_MICRO?: string;
   ACCOUNT_DAILY_TOTAL_COST_MICRO?: string;
   ACCOUNT_GRANT_MICRO?: string;
+  /** The signed-in starter kit in dollars (C-089, default 5). It is also the default pass-through threshold. */
+  ACCOUNT_STARTER_USD?: string;
   MIN_BALANCE_MICRO?: string;
   DEVICES_PER_IP_DAY?: string;
   DEVICES_PER_NET_DAY?: string;
@@ -70,8 +72,8 @@ export const CREDIT_DEFAULTS = {
   accountDailyMicro: 1_000_000,
   /** $10 of provider cost per UTC day across all signed-in accounts on free usage. */
   accountDailyTotalCostMicro: 10_000_000,
-  /** $1 of price per signed-in account (Stripe is not wired yet). */
-  accountGrantMicro: 1_000_000,
+  /** The $5 starter kit per signed-in account (C-089; was $1). ACCOUNT_STARTER_USD sets it. */
+  accountGrantMicro: 5_000_000,
   /** A call needs at least 1¢ left to start. */
   minBalanceMicro: 10_000,
   devicesPerIpDay: 3,
@@ -81,6 +83,43 @@ export const CREDIT_DEFAULTS = {
 } as const;
 
 export type CreditConfig = { -readonly [K in keyof typeof CREDIT_DEFAULTS]: number };
+
+/** ACCOUNT_STARTER_USD (dollars) wins; then the older ACCOUNT_GRANT_MICRO; else $5. */
+export function starterMicro(bindings: CreditsBindings): number {
+  const usd = Number(bindings.ACCOUNT_STARTER_USD);
+  if (bindings.ACCOUNT_STARTER_USD !== undefined && bindings.ACCOUNT_STARTER_USD !== '' && Number.isFinite(usd) && usd >= 0) return Math.round(usd * 1_000_000);
+  const micro = Number(bindings.ACCOUNT_GRANT_MICRO);
+  if (bindings.ACCOUNT_GRANT_MICRO !== undefined && bindings.ACCOUNT_GRANT_MICRO !== '' && Number.isFinite(micro) && micro >= 0) return Math.floor(micro);
+  return CREDIT_DEFAULTS.accountGrantMicro;
+}
+
+/** What the 0002 column default gave every account before the starter kit (C-089). */
+const LEGACY_STARTER_MICRO = 1_000_000;
+
+/**
+ * Folds the configured starter kit into an account's grant, once per change of
+ * ACCOUNT_STARTER_USD, and lifts the billing threshold to at least the new grant.
+ * Idempotent and race-safe (the update is conditional on the old starter value).
+ */
+export async function applyStarter(db: D1Database, accountId: string, starter: number, now: number): Promise<void> {
+  const row = await db.prepare('SELECT starter_micro FROM accounts WHERE id = ?1').bind(accountId).first<{ starter_micro: number }>();
+  if (!row) return;
+  const current = Number(row.starter_micro ?? 0);
+  const had = current === 0 ? LEGACY_STARTER_MICRO : current;
+  if (current !== 0 && current === starter) return;
+  const delta = starter - had;
+  await db
+    .prepare(
+      `UPDATE accounts SET
+         grant_micro = MAX(0, grant_micro + ?1),
+         billing_threshold_micro = MAX(billing_threshold_micro, grant_micro + ?1),
+         starter_micro = ?2,
+         updated_at = ?3
+       WHERE id = ?4 AND starter_micro = ?5`,
+    )
+    .bind(delta, starter, now, accountId, current)
+    .run();
+}
 
 export function creditConfig(bindings: CreditsBindings): CreditConfig {
   const pick = (value: string | undefined, fallback: number) => {
@@ -92,7 +131,7 @@ export function creditConfig(bindings: CreditsBindings): CreditConfig {
     chanceMicro: pick(bindings.ANON_CHANCE_MICRO, CREDIT_DEFAULTS.chanceMicro),
     chances: pick(bindings.ANON_CHANCES, CREDIT_DEFAULTS.chances),
     anonDailyCostCapMicro: pick(bindings.ANON_DAILY_COST_CAP_MICRO, CREDIT_DEFAULTS.anonDailyCostCapMicro),
-    accountGrantMicro: pick(bindings.ACCOUNT_GRANT_MICRO, CREDIT_DEFAULTS.accountGrantMicro),
+    accountGrantMicro: starterMicro(bindings),
     accountDailyMicro: pick(bindings.ACCOUNT_DAILY_MICRO, CREDIT_DEFAULTS.accountDailyMicro),
     accountDailyTotalCostMicro: pick(bindings.ACCOUNT_DAILY_TOTAL_COST_MICRO, CREDIT_DEFAULTS.accountDailyTotalCostMicro),
     minBalanceMicro: pick(bindings.MIN_BALANCE_MICRO, CREDIT_DEFAULTS.minBalanceMicro),
@@ -228,7 +267,8 @@ export const DAILY_FREE_USAGE_REACHED = 'Daily free usage reached. It resets at 
 async function accountCredits(db: D1Database, clerkUserId: string, now: number, config: CreditConfig): Promise<AccountCreditRow> {
   await ensureAccount(db, clerkUserId, now);
   const id = accountIdFor(clerkUserId);
-  // Accounts created before this migration carry the column default; apply the configured grant once.
+  // The starter kit (C-089): the column default is the old $1; fold in the configured starter once.
+  await applyStarter(db, id, config.accountGrantMicro, now);
   const row = await db
     .prepare('SELECT id, grant_micro, spent_micro, billing_threshold_micro, billing_state, paid_micro FROM accounts WHERE id = ?1')
     .bind(id)
@@ -289,7 +329,8 @@ async function resolvePayer(c: Context, options: MeterOptions, db: D1Database, c
 
 export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: boolean, bindings: CreditsBindings = {}): CreditsStatus {
   const turnstile = bindings.TURNSTILE_SECRET && bindings.TURNSTILE_SITEKEY ? { turnstile: 'on' as const, turnstile_sitekey: bindings.TURNSTILE_SITEKEY } : { turnstile: 'not-wired' as const };
-  const base = { ...turnstile, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'free usage · signed in' : 'free usage' };
+  // C-089: signed-in accounts see "of $5 starter kit"; anonymous devices keep "free usage".
+  const base = { ...turnstile, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'starter kit' : 'free usage' };
   if (payer.kind === 'account') {
     const limit = creditLimitMicro(payer.row);
     const remaining = Math.max(0, limit - payer.row.spent_micro);
@@ -300,15 +341,15 @@ export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: b
       paid_micro: payer.row.paid_micro,
       provider: billingProvider(bindings),
     };
-    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false, billing };
+    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, granted: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false, billing };
   }
   if (payer.kind === 'device') {
     const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
     const left = Math.max(0, config.chances - payer.row.chances_used);
     const out = remaining < config.minBalanceMicro && left === 0;
-    return { ...base, signed_in: false, mode: 'device', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: left, sign_in_required: out || dailyCapReached, limited: payer.row.limited === 1 };
+    return { ...base, signed_in: false, mode: 'device', granted_micro: payer.row.grant_micro, granted: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: left, sign_in_required: out || dailyCapReached, limited: payer.row.limited === 1 };
   }
-  return { ...base, signed_in: false, mode: 'none', granted_micro: 0, spent_micro: 0, remaining_micro: 0, soft_prompts_left: config.chances, sign_in_required: false, limited: false };
+  return { ...base, signed_in: false, mode: 'none', granted_micro: 0, granted: 0, spent_micro: 0, remaining_micro: 0, soft_prompts_left: config.chances, sign_in_required: false, limited: false };
 }
 
 function deny(c: Context, status: 401 | 402 | 403 | 413 | 429, code: CreditsErrorCode, error: string, credits?: CreditsStatus) {

@@ -2,21 +2,208 @@
   "$comment": "What the hub lists (C-088). Status words: live, in progress, not wired, planned. Edit this file when a page moves; build-hub.ts copies it into the gated hub data.",
   "updated": "2026-09-29",
   "items": [
-    { "id": "terminal", "name": "The terminal", "status": "live", "href": "/", "about": "The prompt-first terminal: stages, tags, free usage or your key.", "links": [{ "label": "Page doc", "href": "/wiki/pages/landing.html" }, { "label": "Stage doc", "href": "/wiki/pages/box.html" }] },
-    { "id": "replay", "name": "Replay", "status": "live", "href": "/box/demo/play", "about": "Scrub back through a stage's history.", "links": [{ "label": "Decision 0019", "href": "/wiki/decisions/0019-playback.html" }] },
-    { "id": "canvas", "name": "Canvas", "status": "live", "href": "/canvas", "about": "Every page on one board: paper sheets, sections, minimap (v2).", "links": [{ "label": "Page doc", "href": "/wiki/pages/canvas.html" }], "canon": ["C-083"] },
-    { "id": "library", "name": "Library of terminals", "status": "live", "href": "/pages/library.html", "about": "Terminal looks and references in one place." },
-    { "id": "brands", "name": "Brands", "status": "live", "href": "/pages/brands.html", "about": "Logo set and the estimate.", "links": [{ "label": "Brand registry", "href": "/wiki/brand/registry.html" }] },
-    { "id": "freshstack", "name": "FreshStack", "status": "live", "href": "/pages/freshstack.html", "about": "The stack story behind Fresh Terminal." },
-    { "id": "producthunt", "name": "Product Hunt", "status": "in progress", "href": "/pages/producthunt.html", "about": "Launch strategy; the launch itself waits on its gates.", "links": [{ "label": "Page doc", "href": "/wiki/pages/producthunt.html" }], "canon": ["C-077"] },
-    { "id": "koi", "name": "Koi pond", "status": "in progress", "href": "/pages/koi.html", "about": "v3: looks down at the water, then tilts up into the garden.", "links": [{ "label": "v1", "href": "/pages/koi-v1.html" }, { "label": "v2", "href": "/pages/koi-v2.html" }], "canon": ["C-082"] },
-    { "id": "wiki", "name": "Wiki", "status": "live", "href": "/wiki/", "about": "Every doc in terminal/docs, rendered on each deploy.", "links": [{ "label": "llms.txt", "href": "/llms.txt" }] },
-    { "id": "skins", "name": "Skins", "status": "live", "href": "/", "about": "Photo and material skins for the stage and bars, with a readability layer.", "links": [{ "label": "Decision 0018", "href": "/wiki/decisions/0018-skins-and-refine.html" }], "canon": ["C-079"] },
-    { "id": "skills", "name": "Skills", "status": "live", "href": "https://github.com/imagine-os/fresh-terminal/tree/main/terminal/skills", "about": "Agent skills kept in the repo (logos and icons)." },
-    { "id": "plan", "name": "Plan and kanban", "status": "live", "href": "#plan", "about": "The development plan as data, by status and dependency.", "links": [{ "label": "plan.md", "href": "/wiki/plan.html" }] },
-    { "id": "hub", "name": "Hub", "status": "live", "href": "/hub", "about": "This page: admins only, checked on the server.", "canon": ["C-088"] },
-    { "id": "friend-credits", "name": "Friend credits", "status": "live", "href": "#credits", "about": "Grants by email or user id, and invite codes worth $X for N uses.", "canon": ["C-087"] },
-    { "id": "billing", "name": "Pass-through billing", "status": "not wired", "href": "#credits", "about": "The $5 threshold is enforced (402 payment_required). Paying needs Stripe keys: not wired yet.", "canon": ["C-086"] },
-    { "id": "clerk-production", "name": "Clerk production instance", "status": "planned", "href": "/wiki/canon/state.html", "about": "Development instance today (100-user cap)." }
+    {
+      "id": "terminal",
+      "name": "The terminal",
+      "status": "live",
+      "href": "/",
+      "about": "The prompt-first terminal: stages, tags, free usage or your key.",
+      "links": [
+        {
+          "label": "Page doc",
+          "href": "/wiki/pages/landing.html"
+        },
+        {
+          "label": "Stage doc",
+          "href": "/wiki/pages/box.html"
+        }
+      ]
+    },
+    {
+      "id": "replay",
+      "name": "Replay",
+      "status": "live",
+      "href": "/box/demo/play",
+      "about": "Scrub back through a stage's history.",
+      "links": [
+        {
+          "label": "Decision 0019",
+          "href": "/wiki/decisions/0019-playback.html"
+        }
+      ]
+    },
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "status": "live",
+      "href": "/canvas",
+      "about": "Every page on one board: paper sheets, sections, minimap (v2).",
+      "links": [
+        {
+          "label": "Page doc",
+          "href": "/wiki/pages/canvas.html"
+        }
+      ],
+      "canon": [
+        "C-083"
+      ]
+    },
+    {
+      "id": "library",
+      "name": "Library of terminals",
+      "status": "live",
+      "href": "/pages/library.html",
+      "about": "Terminal looks and references in one place."
+    },
+    {
+      "id": "brands",
+      "name": "Brands",
+      "status": "live",
+      "href": "/pages/brands.html",
+      "about": "Logo set and the estimate.",
+      "links": [
+        {
+          "label": "Brand registry",
+          "href": "/wiki/brand/registry.html"
+        }
+      ]
+    },
+    {
+      "id": "freshstack",
+      "name": "FreshStack",
+      "status": "live",
+      "href": "/pages/freshstack.html",
+      "about": "The stack story behind Fresh Terminal."
+    },
+    {
+      "id": "producthunt",
+      "name": "Product Hunt",
+      "status": "in progress",
+      "href": "/pages/producthunt.html",
+      "about": "Launch strategy; the launch itself waits on its gates.",
+      "links": [
+        {
+          "label": "Page doc",
+          "href": "/wiki/pages/producthunt.html"
+        }
+      ],
+      "canon": [
+        "C-077"
+      ]
+    },
+    {
+      "id": "koi",
+      "name": "Koi pond",
+      "status": "in progress",
+      "href": "/pages/koi.html",
+      "about": "v3: looks down at the water, then tilts up into the garden.",
+      "links": [
+        {
+          "label": "v1",
+          "href": "/pages/koi-v1.html"
+        },
+        {
+          "label": "v2",
+          "href": "/pages/koi-v2.html"
+        }
+      ],
+      "canon": [
+        "C-082"
+      ]
+    },
+    {
+      "id": "wiki",
+      "name": "Wiki",
+      "status": "live",
+      "href": "/wiki/",
+      "about": "Every doc in terminal/docs, rendered on each deploy.",
+      "links": [
+        {
+          "label": "llms.txt",
+          "href": "/llms.txt"
+        }
+      ]
+    },
+    {
+      "id": "skins",
+      "name": "Skins",
+      "status": "live",
+      "href": "/",
+      "about": "Photo and material skins for the stage and bars, with a readability layer.",
+      "links": [
+        {
+          "label": "Decision 0018",
+          "href": "/wiki/decisions/0018-skins-and-refine.html"
+        }
+      ],
+      "canon": [
+        "C-079"
+      ]
+    },
+    {
+      "id": "skills",
+      "name": "Skills",
+      "status": "live",
+      "href": "https://github.com/imagine-os/fresh-terminal/tree/main/terminal/skills",
+      "about": "Agent skills kept in the repo (logos and icons)."
+    },
+    {
+      "id": "plan",
+      "name": "Plan and kanban",
+      "status": "live",
+      "href": "#plan",
+      "about": "The development plan as data, by status and dependency.",
+      "links": [
+        {
+          "label": "plan.md",
+          "href": "/wiki/plan.html"
+        }
+      ]
+    },
+    {
+      "id": "hub",
+      "name": "Hub",
+      "status": "live",
+      "href": "/hub",
+      "about": "This page: admins only, checked on the server.",
+      "canon": [
+        "C-088"
+      ]
+    },
+    {
+      "id": "friend-credits",
+      "name": "Friend credits",
+      "status": "live",
+      "href": "#credits",
+      "about": "Grants by email or user id, and invite codes worth $X for N uses.",
+      "canon": [
+        "C-087"
+      ]
+    },
+    {
+      "id": "billing",
+      "name": "Pass-through billing",
+      "status": "not wired",
+      "href": "#credits",
+      "about": "$5 starter kit per account, then pass-through (402 payment_required); paying needs the Stripe keys: not wired yet.",
+      "canon": [
+        "C-086",
+        "C-089"
+      ]
+    },
+    {
+      "id": "clerk-production",
+      "name": "Clerk production instance",
+      "status": "planned",
+      "href": "/wiki/canon/state.html",
+      "about": "Development instance today (100-user cap)."
+    },
+    {
+      "id": "privacy-e2e",
+      "name": "Customer data privacy (end-to-end encryption)",
+      "status": "planned",
+      "href": "/wiki/canon/open-questions.html",
+      "about": "Open question 19: today the owner can read stages, the ledger and credits (D1) and identities (Clerk). Should user content be unreadable even to us, and which data?"
+    }
   ]
 }

@@ -1,7 +1,7 @@
 import type { Context, Hono } from 'hono';
 import { z } from 'zod';
 import { authenticate, type AuthResult, type TokenVerifier } from './auth';
-import { billingProvider, creditLimitMicro, sha256Hex, type CreditsBindings, type CreditsResources } from './credits';
+import { applyStarter, billingProvider, creditLimitMicro, sha256Hex, starterMicro, type CreditsBindings, type CreditsResources } from './credits';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
 
 /**
@@ -384,7 +384,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
       grants,
       invites,
       devices,
-      billing: { provider: billingProvider(bindings), default_threshold_micro: 5_000_000, topup_amounts_usd: TOPUP_AMOUNTS_USD },
+      billing: { provider: billingProvider(bindings), default_threshold_micro: 5_000_000, starter_micro: starterMicro(bindings), topup_amounts_usd: TOPUP_AMOUNTS_USD },
       admins: { ids: list(bindings.ADMIN_USER_IDS).length, emails: list(bindings.ADMIN_EMAILS).length, you_via: gate.via },
       max_grant_micro: maxGrantMicro(bindings),
     });
@@ -400,6 +400,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const target = await resolveUser(gate.bindings, parsed.data);
     if (!target.ok) return c.json({ error: target.error }, target.status);
     const grant = await applyCredit(gate.db, { clerkUserId: target.userId, amountMicro, source: 'admin', grantedBy: gate.userId, note: parsed.data.note }, options.now());
+    await applyStarter(gate.db, accountIdFor(target.userId), starterMicro(gate.bindings), options.now());
     const account = await accountView(gate.db, target.userId);
     return c.json({ grant, account, email: target.email });
   });
@@ -456,6 +457,8 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     const now = options.now();
     await ensureAccount(gate.db, target.userId, now);
     const id = accountIdFor(target.userId);
+    // Starter kit first (C-089), so a threshold set here is not lifted again by it.
+    await applyStarter(gate.db, id, starterMicro(gate.bindings), now);
     if (parsed.data.billing_threshold_usd !== undefined) {
       await gate.db.prepare('UPDATE accounts SET billing_threshold_micro = ?1, updated_at = ?2 WHERE id = ?3').bind(usdToMicro(parsed.data.billing_threshold_usd), now, id).run();
     }
@@ -501,6 +504,7 @@ export function mountAdminRoutes(app: Hono<any>, options: AdminOptions): void {
     if (typeof body.code !== 'string' || body.code.trim().length < 6 || body.code.length > 40) return c.json({ error: 'Send {code}', code: 'invite_unknown' }, 400);
     const result = await redeemInvite(db, body.code, auth.userId, options.now());
     if (!result.ok) return c.json({ error: result.error, code: result.code }, result.status);
+    await applyStarter(db, accountIdFor(auth.userId), starterMicro(options.bindings(c.env)), options.now());
     return c.json({ ok: true, amount_micro: result.grant.amount_micro, account: await accountView(db, auth.userId) });
   });
 

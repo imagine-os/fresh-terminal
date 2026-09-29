@@ -32,7 +32,7 @@ The requirement: after an account has used $5 of free usage it must add a paymen
 
 - **Credit limit** = min(grant, billing threshold). Grant = the $1 starter credit plus friend grants, invite codes and paid top-ups. Threshold = lifetime free usage before a payment method is needed, **$5 by default** (`accounts.billing_threshold_micro`). A credit raises the grant, and raises the threshold to at least the new grant, so a gift is always spendable.
 - **The gate** is in the router's meter. Past the limit a paid call answers `402 payment_required` ("You have used your free usage. Adding a payment method is not wired yet; your key still works.") when the threshold is what binds, or `402 account_credits_exhausted` when the grant binds first. The account's `billing_state` moves `free` → `needs_payment`; a credit moves it back to `free`, a paid top-up to `active`. "Your key" calls go from the browser to OpenRouter and never reach the meter, so they are never blocked.
-- **With today's $1 starter grant, free usage ends at $1, before the $5 threshold.** The threshold starts to bind when the starter grant is raised or an account gets credit. Making it $5 for everyone is one number (the `accounts.grant_micro` default, or a grant); Justin's call, because it is five times the cost per sign-up.
+- ~~**With today's $1 starter grant, free usage ends at $1, before the $5 threshold.**~~ Superseded by the addendum below (C-089): the starter kit is $5. The threshold starts to bind when the starter grant is raised or an account gets credit. Making it $5 for everyone is one number (the `accounts.grant_micro` default, or a grant); Justin's call, because it is five times the cost per sign-up.
 - **Daily caps** (C-080) apply while an account is on free usage; an `active` account spends its own money and is not capped.
 - **Top up / add payment**: `POST /billing/checkout {amount_usd}` → a Stripe Checkout URL, or `501 not_wired` until both `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are Worker secrets. `POST /billing/stripe/webhook` checks the `Stripe-Signature` (HMAC-SHA256, five-minute tolerance) and credits `checkout.session.completed` once per session id. The tray tile says "not wired yet" until `GET /credits` reports `billing.provider: stripe`. **Not tested against live Stripe.**
 
@@ -57,3 +57,10 @@ The requirement: after an account has used $5 of free usage it must add a paymen
 - Hub, grants, invite codes: no new services; Worker requests and D1 rows inside the current Cloudflare plan. **Fairly sure.**
 - Friend credit: at most the amount granted in provider cost (price is cost plus margin, so cost ≤ price). **Sure.**
 - `hub-smoke` runs: no model calls (the 402 stops at the meter), Actions minutes free on a public repo. **Sure.**
+
+## Addendum 2026-09-29 05:05: the $5 starter kit (C-089)
+
+- Justin ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657599470899?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)): "rollover the amount used and it shows of $5 starter kit." Signed-in accounts now start with **$5** (Worker var `ACCOUNT_STARTER_USD = "5"`), not $1. Anonymous devices stay at 25¢. The $1/day per-account and $10/day all-accounts caps stay.
+- The starter kit and the threshold are one number: the starter is folded into the grant once (`accounts.starter_micro`, migration `0004`), the threshold is lifted to at least the grant, so a new account has $5 of free usage and then `402 payment_required`. Existing accounts are topped up from $1 to $5 on their next metered call. The rule above ("with today's $1 starter grant, free usage ends at $1") is superseded.
+- `GET /credits`: `granted` (= `granted_micro`, USD micro-dollars) and `label` ("starter kit" signed in, "free usage" anonymous).
+- Cost: at most $5 per signed-in account, bounded by the $10/day all-accounts cap and, on the development instance, by its 100 users ($500). **Sure.**
