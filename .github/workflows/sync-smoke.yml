@@ -51,7 +51,7 @@ jobs:
           JWT="$jwt"
           auth=(-H "Authorization: Bearer $JWT" -H 'Content-Type: application/json' -H 'Origin: https://freshterminal.ai')
           now=$(date +%s%3N)
-          echo "GET /me: $(curl -sS "${auth[@]}" "$API/me" | jq -c '{signedIn, plan: .account.plan, sync}')"
+          echo "GET /me: $(curl -sS "${auth[@]}" "$API/me" | jq -c '{signedIn, error, plan: .account.plan, sync}')"
           box="{\"id\":\"box-smoke-$GITHUB_RUN_ID\",\"name\":\"Smoke\",\"state_json\":\"{\\\"nav\\\":[]}\",\"created_at\":$now,\"updated_at\":$now,\"deleted_at\":null}"
           echo "PUT /sync/boxes: $(curl -sS "${auth[@]}" -X PUT "$API/sync/boxes" -d "{\"boxes\":[$box]}" | jq -c '{accepted: (.accepted|length), conflicts: (.conflicts|length), rejected: (.rejected|length)}')"
           echo "PUT older copy: $(curl -sS "${auth[@]}" -X PUT "$API/sync/boxes" -d "{\"boxes\":[$(echo "$box" | jq -c ".updated_at = $((now-1000)) | .name = \"stale\"")]}" | jq -c '{accepted: (.accepted|length), conflicts: [.conflicts[].name]}')"
