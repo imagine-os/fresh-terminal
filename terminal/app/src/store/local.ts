@@ -188,6 +188,56 @@ export class LocalStore implements Store {
     });
   }
 
+  importSession(file: { box: Box | null; timeline: { lines: Array<{ kind: LineKind; text: string; chips_json?: string; component?: string; reveal?: string; blocks_json?: string; created_at: number }> }; ui: UiState }): Box {
+    const now = Date.now();
+    const box: Box = {
+      id: newId('box'),
+      owner_identity: this.identity,
+      name: `${(file.box?.name ?? 'Imported box').trim() || 'Imported box'} (imported)`,
+      created_at: file.box?.created_at ?? now,
+      updated_at: now,
+    };
+    // New ids everywhere so an import into the same browser never collides; menu parents and page targets follow.
+    const pageIds = new Map<string, string>();
+    const pages: Page[] = file.ui.pages.map((page) => {
+      const id = newId('page');
+      pageIds.set(page.id, id);
+      return { ...page, id, box_id: box.id };
+    });
+    const navIds = new Map<string, string>();
+    for (const item of file.ui.nav) navIds.set(item.id, newId('nav'));
+    const navItems: NavItem[] = file.ui.nav.map((item) => ({
+      ...item,
+      id: navIds.get(item.id) ?? newId('nav'),
+      box_id: box.id,
+      parent_id: item.parent_id ? navIds.get(item.parent_id) ?? null : null,
+      target: item.target && item.target.kind === 'page' ? { kind: 'page', ref: pageIds.get(item.target.ref) ?? item.target.ref } : item.target,
+    }));
+    const glossary: GlossaryTerm[] = file.ui.glossary.map((term) => ({ ...term, id: newId('term'), box_id: box.id }));
+    const ui: BoxUi = { ...file.ui.boxUi, box_id: box.id, seeded: true, updated_at: now };
+    const lines: Line[] = file.timeline.lines.map((line) => ({
+      id: newId('line'),
+      box_id: box.id,
+      kind: line.kind,
+      text: line.text,
+      chips_json: line.chips_json ?? '[]',
+      component: line.component ?? '',
+      reveal: 'none',
+      blocks_json: line.blocks_json ?? '',
+      created_at: line.created_at,
+      streaming: false,
+    }));
+    this.commit({
+      boxes: [...this.snapshot.boxes, box],
+      lines: [...this.snapshot.lines, ...lines],
+      pages: [...this.snapshot.pages, ...pages],
+      navItems: [...this.snapshot.navItems, ...navItems],
+      glossary: [...this.snapshot.glossary, ...glossary],
+      boxUis: [...this.snapshot.boxUis, ui],
+    });
+    return box;
+  }
+
   openSession(boxId: string): Session {
     const session: Session = { id: newId('session'), box_id: boxId, created_at: Date.now() };
     this.commit({ sessions: [...this.snapshot.sessions.slice(-50), session] });

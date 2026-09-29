@@ -121,6 +121,8 @@ export interface Store {
   createBox(name: string): Box;
   /** Deletes a box with its lines, sessions, menu, pages, edits and box UI. Ledger entries stay (the chain is append-only). */
   removeBox(id: string): void;
+  /** Rebuilds a box from an exported session file's final state (new ids; edits and ledger stay in the file). */
+  importSession(file: { box: Box | null; timeline: { lines: Array<{ kind: LineKind; text: string; chips_json?: string; component?: string; reveal?: string; blocks_json?: string; created_at: number }> }; ui: UiState }): Box;
   openSession(boxId: string): Session;
   appendLine(boxId: string, kind: LineKind, text: string, chips: Chip[], options?: LineOptions): Line;
   updateLine(lineId: string, text: string, streaming: boolean): void;

@@ -603,3 +603,19 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 
 **What happened:** C-075: Alt/Option shortcuts while typing, "free usage", sidebar hidden with a top-left icon and its own settings, starters and hints behind switches in the prompt box, a calmer tray.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652625.835259
+
+## 71. Mon Sep 28, 10:34 PM CDT · 2026-09-29 03:34:36 UTC
+
+> spacetimedb doesnt seem to have a token , maybe u need to cli into it or something? I think i got you everything else you asked for.
+>
+> PS: include emojis in all your responses to make it easier to read stuff
+
+**What happened:** The token comes from the CLI (`spacetime login`, then `spacetime login show --token`) into the `SPACETIMEDB_TOKEN` secret. Emojis in every reply from then on (adds to C-073). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652910618299?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652876963799?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652876.963799
+
+## 72. Mon Sep 28, 10:37 PM CDT · 2026-09-29 03:37:43 UTC
+
+> put some human text at the top of the export , including some askii art or something cool so its branded to us and tells them what they need to know to come back, and even import into the fresh terminal
+
+**What happened:** C-076: the export opens with a readme (ASCII mark, what it is, come back, how to import); import from the tray or by dropping the file; live credits in the first-run line.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653063786309?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790653063.786309
