@@ -19,7 +19,7 @@ describe('routerFetch', () => {
     const body = (await response.json()) as { mode: string; remaining_micro: number };
     expect(body.mode).toBe('device');
     expect(body.remaining_micro).toBe(250_000);
-    expect(seen).toEqual(['POST /credits/device device=false', 'GET /credits device=true']);
+    expect(seen).toEqual(['GET /credits device=false', 'POST /credits/device device=false', 'GET /credits device=true']);
   });
 
   it('reads the soft-prompt header and resolves router paths', () => {

@@ -234,3 +234,11 @@ export function IconMore(props: IconProps) {
     </svg>
   );
 }
+
+export function IconUpload(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 15V4M7 9l5-5 5 5M5 19h14" />
+    </svg>
+  );
+}

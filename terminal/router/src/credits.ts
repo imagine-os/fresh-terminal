@@ -19,6 +19,8 @@ import { accountIdFor, ensureAccount, type D1Database } from './d1';
  * - A global cap on anonymous provider cost per UTC day, per-IP and per-network
  *   rate limits (Workers Rate Limiting bindings), and a request-size cap and
  *   default-models-only rule for anonymous calls bound the worst case.
+ * - With TURNSTILE_SECRET set, a new device needs a passing invisible
+ *   Turnstile token (Cloudflare siteverify) first.
  * - Own-key (BYOK) calls go from the browser straight to OpenRouter and never
  *   reach these endpoints, so they are never blocked.
  * Without a D1 binding (local Node dev, most tests) metering is off.
@@ -26,6 +28,9 @@ import { accountIdFor, ensureAccount, type D1Database } from './d1';
 
 export interface CreditsBindings extends AuthBindings {
   DEVICE_SIGNING_KEY?: string;
+  /** Cloudflare Turnstile (invisible widget "fresh-terminal", created by router-deploy). */
+  TURNSTILE_SECRET?: string;
+  TURNSTILE_SITEKEY?: string;
   ANON_GRANT_MICRO?: string;
   ANON_CHANCE_MICRO?: string;
   ANON_CHANCES?: string;
@@ -195,6 +200,23 @@ export interface MeterOptions {
   authorizedParties: (env: unknown) => string[];
   verifier?: TokenVerifier;
   now: () => number;
+  fetchImpl?: typeof fetch;
+}
+
+/** Checks a Turnstile token with Cloudflare. */
+export async function verifyTurnstile(secret: string, token: string, ip: string, fetchImpl: typeof fetch = fetch): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const form = new FormData();
+    form.append('secret', secret);
+    form.append('response', token);
+    if (ip && ip !== '0.0.0.0') form.append('remoteip', ip);
+    const response = await fetchImpl('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form });
+    const body = (await response.json().catch(() => ({}))) as { success?: boolean };
+    return body.success === true;
+  } catch {
+    return false;
+  }
 }
 
 async function resolvePayer(c: Context, options: MeterOptions, db: D1Database, config: CreditConfig): Promise<Payer> {
@@ -215,8 +237,9 @@ async function resolvePayer(c: Context, options: MeterOptions, db: D1Database, c
   return row ? { kind: 'device', id, row } : { kind: 'none' };
 }
 
-export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: boolean): CreditsStatus {
-  const base = { turnstile: 'not-wired' as const, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'free usage · signed in' : 'free usage' };
+export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: boolean, bindings: CreditsBindings = {}): CreditsStatus {
+  const turnstile = bindings.TURNSTILE_SECRET && bindings.TURNSTILE_SITEKEY ? { turnstile: 'on' as const, turnstile_sitekey: bindings.TURNSTILE_SITEKEY } : { turnstile: 'not-wired' as const };
+  const base = { ...turnstile, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'free usage · signed in' : 'free usage' };
   if (payer.kind === 'account') {
     const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
     return { ...base, daily_cap_reached: false, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false };
@@ -339,7 +362,7 @@ export function meter(options: MeterOptions): MiddlewareHandler {
 
     if (payer.kind === 'account') {
       if (payer.row.grant_micro - payer.row.spent_micro < config.minBalanceMicro) {
-        return deny(c, 402, 'account_credits_exhausted', 'Your free account credits are used up. Paying for more is not wired yet; your key (K, your own OpenRouter key) still works.', statusFor(payer, config, false));
+        return deny(c, 402, 'account_credits_exhausted', 'Your free account credits are used up. Paying for more is not wired yet; your key (K, your own OpenRouter key) still works.', statusFor(payer, config, false, bindings));
       }
     } else {
       const length = Number(c.req.header('Content-Length') ?? '0');
@@ -348,11 +371,11 @@ export function meter(options: MeterOptions): MiddlewareHandler {
       }
       const dailyCapReached = (await dailyAnonCost(db, now)) >= config.anonDailyCostCapMicro;
       if (dailyCapReached) {
-        return deny(c, 402, 'daily_cap', 'Free use for signed-out visitors is full for today. Sign in to keep going, or use your key (K).', statusFor(payer, config, true));
+        return deny(c, 402, 'daily_cap', 'Free use for signed-out visitors is full for today. Sign in to keep going, or use your key (K).', statusFor(payer, config, true, bindings));
       }
       if (payer.row.grant_micro - payer.row.spent_micro < config.minBalanceMicro) {
         if (payer.row.chances_used >= config.chances) {
-          return deny(c, 402, 'sign_in_required', 'Your free credits are used up. Sign in to keep going, or use your key (K).', statusFor(payer, config, false));
+          return deny(c, 402, 'sign_in_required', 'Your free credits are used up. Sign in to keep going, or use your key (K).', statusFor(payer, config, false, bindings));
         }
         // Soft prompt: let this call through with a small chance, once per prompt.
         const used = payer.row.chances_used + 1;
@@ -362,7 +385,7 @@ export function meter(options: MeterOptions): MiddlewareHandler {
           .bind(Math.max(config.chanceMicro, topUp), used, now, payer.id, payer.row.chances_used)
           .run();
         if ((result.meta?.changes ?? 1) === 0) {
-          return deny(c, 402, 'sign_in_required', 'Your free credits are used up. Sign in to keep going.', statusFor(payer, config, false));
+          return deny(c, 402, 'sign_in_required', 'Your free credits are used up. Sign in to keep going.', statusFor(payer, config, false, bindings));
         }
         c.header(SOFT_PROMPT_HEADER, `${used}/${config.chances}`);
       }
@@ -404,7 +427,7 @@ export function mountCreditRoutes(app: { get: (path: string, handler: (c: Contex
     const payer = await resolvePayer(c, options, db, config);
     if (payer.kind === 'invalid') return c.json({ error: payer.reason, code: 'sign_in_required' }, 401);
     const cap = payer.kind === 'device' ? (await dailyAnonCost(db, options.now())) >= config.anonDailyCostCapMicro : false;
-    return c.json(statusFor(payer, config, cap));
+    return c.json(statusFor(payer, config, cap, bindings));
   });
 
   app.post('/credits/device', async (c) => {
@@ -422,7 +445,14 @@ export function mountCreditRoutes(app: { get: (path: string, handler: (c: Contex
     const existing = await verifyDevice(c.req.header(DEVICE_HEADER), bindings.DEVICE_SIGNING_KEY);
     if (existing) {
       const row = await db.prepare('SELECT id, grant_micro, spent_micro, cost_micro, chances_used, limited FROM anon_devices WHERE id = ?1').bind(existing).first<DeviceRow>();
-      if (row) return c.json({ device: c.req.header(DEVICE_HEADER), credits: statusFor({ kind: 'device', id: existing, row }, config, false) });
+      if (row) return c.json({ device: c.req.header(DEVICE_HEADER), credits: statusFor({ kind: 'device', id: existing, row }, config, false, bindings) });
+    }
+    // Bot check before a new device (and so before the first free call), when Turnstile is set up.
+    if (bindings.TURNSTILE_SECRET) {
+      const body = (await c.req.json().catch(() => ({}))) as { turnstile?: string };
+      if (!(await verifyTurnstile(bindings.TURNSTILE_SECRET, body.turnstile ?? '', ip, options.fetchImpl))) {
+        return deny(c, 403, 'turnstile_failed', 'The browser check did not pass. Reload the page, or use your key (K).');
+      }
     }
     const now = options.now();
     const since = now - 24 * 60 * 60 * 1000;
@@ -440,6 +470,6 @@ export function mountCreditRoutes(app: { get: (path: string, handler: (c: Contex
       .bind(id, ipHash, netHash, grant, chancesUsed, limited ? 1 : 0, now)
       .run();
     const row: DeviceRow = { id, grant_micro: grant, spent_micro: 0, cost_micro: 0, chances_used: chancesUsed, limited: limited ? 1 : 0 };
-    return c.json({ device: await signDevice(id, bindings.DEVICE_SIGNING_KEY), credits: statusFor({ kind: 'device', id, row }, config, false) });
+    return c.json({ device: await signDevice(id, bindings.DEVICE_SIGNING_KEY), credits: statusFor({ kind: 'device', id, row }, config, false, bindings) });
   });
 }

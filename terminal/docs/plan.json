@@ -1020,6 +1020,34 @@
       ],
       "model": "Opus 5.5",
       "pass": 6
+    },
+    {
+      "id": "producthunt-strategy",
+      "title": "Product Hunt strategy page: research, pitch, shot list, readiness, timeline, costs (pages/producthunt.html)",
+      "status": "done",
+      "depends_on": [],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "producthunt-gates",
+      "title": "Product Hunt blockers: Clerk production, free credits + per-browser cap, daily spend limit, first-run screen, repo licence",
+      "status": "todo",
+      "depends_on": [
+        "producthunt-strategy"
+      ],
+      "model": "Opus 5.5 (Fable for limits)",
+      "pass": 6
+    },
+    {
+      "id": "producthunt-launch",
+      "title": "Product Hunt launch: gallery, video, first comment, schedule, launch day, retro (tasks P10-P16, L1-L5, A1-A4 on the page)",
+      "status": "todo",
+      "depends_on": [
+        "producthunt-gates"
+      ],
+      "model": "Sonnet 5 (captures), Fable (comments)",
+      "pass": 7
     }
   ]
 }

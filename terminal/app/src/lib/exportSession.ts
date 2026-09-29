@@ -1,18 +1,25 @@
+import { PRODUCT_NAME, PRODUCT_VERSION } from '@shared/brand';
 import { exportTimeline } from '@shared/timeline';
 import { store } from '../store';
+import { SESSION_VERSION, SITE_URL, readmeFor, type SessionFile } from './sessionFile';
 
 /**
- * One file with everything about a box: its timeline (steps, lines, edits),
- * the interface records (menu, pages, layout, theme, glossary) and its ledger
- * entries. Nobody is locked into a browser: this is the export the first-run
- * notice and the tray offer, and the shape a future import reads.
+ * One file with everything about a box: a human header first (our mark, what
+ * it is, how to come back, how to import), then the timeline (steps, lines,
+ * edits), the interface records and the ledger entries. Nobody is locked
+ * into a browser.
  */
-export function sessionExport(boxId: string, now = Date.now()) {
+export function sessionExport(boxId: string, now = Date.now()): SessionFile {
   const snapshot = store.getSnapshot();
   const box = snapshot.boxes.find((candidate) => candidate.id === boxId) ?? null;
   return {
-    version: 'session.v0' as const,
+    readme: readmeFor(box?.name ?? 'box', now),
+    product: PRODUCT_NAME,
+    product_version: PRODUCT_VERSION,
+    version: SESSION_VERSION,
     exported_at: now,
+    come_back: SITE_URL,
+    how_to_import: 'Tools icon (top right) → Import a session → pick this file. Or drag the file onto the terminal.',
     box,
     timeline: exportTimeline(snapshot, boxId, now),
     ui: store.uiState(boxId),

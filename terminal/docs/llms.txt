@@ -11,13 +11,13 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-075 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-077 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
 
 - [canon/vision.md](canon/vision.md): what we are building and why, in Justin's words
-- [canon/prompts.md](canon/prompts.md): all 70 of Justin's messages verbatim with outcomes
+- [canon/prompts.md](canon/prompts.md): all 72 of Justin's messages verbatim with outcomes
 - [canon/glossary.md](canon/glossary.md): house words (box, chip, dialect, Jev, recipe, wiki)
 - [canon/people-and-access.md](canon/people-and-access.md): people, repos, secret names
 
@@ -39,10 +39,12 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [pages/box.md](pages/box.md): the box page spec
 - [pages/landing.md](pages/landing.md): the landing page spec
 - [pages/canvas.md](pages/canvas.md): the master canvas spec
+- [pages/producthunt.md](pages/producthunt.md): Product Hunt launch strategy (proposed 2026-09-29): launch Fresh Terminal not FreshStack, five blockers, tagline pick, costs with certainty; live page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html
 
 ## Changelog
 
-- [changelog/0009.md](changelog/0009.md): readable text over photo and material skins (sampled scrim, AA, neutral small text)
+- [changelog/0010.md](changelog/0010.md): readable text over photo and material skins (sampled scrim, AA, neutral small text)
+- [changelog/0009.md](changelog/0009.md): Product Hunt strategy page
 - [changelog/0008.md](changelog/0008.md): free credits enforced by the router, live check
 - [changelog/0007.md](changelog/0007.md): freshterminal.ai, Clerk sign-in, D1 sync, live check
 - [changelog/0006.md](changelog/0006.md): replay scrubber over every step of a session; tagline "Evolve as we grow."
