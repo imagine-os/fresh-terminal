@@ -858,7 +858,7 @@
     {
       "id": "skin-apply-op",
       "title": "skin.apply op and material record (css_tokens, procedural_code, image_generate, image_search via Openverse, library MIT/CC0 only)",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "op-language"
       ],
@@ -868,7 +868,7 @@
     {
       "id": "draft-material",
       "title": "Instant draft material as the first result while better versions are made",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "skin-apply-op"
       ],
@@ -878,7 +878,7 @@
     {
       "id": "refine-loop",
       "title": "Shared refine() best-of-3 beam loop: vision + Jev scoring 1–5; stop at 4.5, 2 rounds without gain, 5 rounds, 3¢ cap or Stop; loop parameters in the route table; ledger per round",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "skin-apply-op",
         "jev-routing"
@@ -889,7 +889,7 @@
     {
       "id": "refine-ui",
       "title": "Refine UI: one row per round, winner outlined, user can pick any variant",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "refine-loop",
         "super-cli-replies"

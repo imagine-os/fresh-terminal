@@ -1,6 +1,6 @@
 # Fresh Terminal
 
-> A prompt-first terminal that routes what you type to the right model and can edit its own interface through undoable ops. This is the docs wiki: plain Markdown, dated facts, one start-here index. Updated every pass in the same commit as the work. Last updated 2026-09-29 (pass 4).
+> A prompt-first terminal that routes what you type to the right model and can edit its own interface through undoable ops. This is the docs wiki: plain Markdown, dated facts, one start-here index. Updated every pass in the same commit as the work. Last updated 2026-09-29 (pass 5).
 
 Base URLs: GitHub https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/ · raw https://raw.githubusercontent.com/imagine-os/fresh-terminal/main/terminal/docs/ · rendered https://imagine-os.github.io/fresh-terminal/wiki/ (each page also at /wiki/<path>.md as plain Markdown). Links below are relative to terminal/docs/.
 
@@ -31,6 +31,8 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag), ops as tools, action runner, window.pond, SpacetimeDB, CLI, MCP
 - [decisions/0016-self-editing.md](decisions/0016-self-editing.md): how the interface edits itself (ops, undo, tool calling, escalation)
 - [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md): chip kinds, glossary, reply blocks
+- [decisions/0018-skins-and-refine.md](decisions/0018-skins-and-refine.md): skins as records, the refine() best-of-3 loop, stop rules, /skin endpoints
+- [brand/registry.md](brand/registry.md): brand marks registry (source, terms, date per file)
 - [decisions/0019-playback.md](decisions/0019-playback.md): replay, steps with parent ids, state rebuilt at any step, branches later
 - [pages/box.md](pages/box.md): the box page spec
 - [pages/landing.md](pages/landing.md): the landing page spec
@@ -38,6 +40,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0005.md](changelog/0005.md): pass 5, skins, material library, refine loop, live results
 - [changelog/0004.md](changelog/0004.md): pass 4, the terminal edits itself, chips v2, replies, koi v2, Canon, wiki
 - [changelog/0006.md](changelog/0006.md): replay scrubber over every step of a session; tagline "Evolve as we grow."
 - [changelog/0003.md](changelog/0003.md): pass 3, voice, router health, router live
@@ -47,5 +50,5 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Optional
 
 - [prompts/](prompts/README.md): build prompts 0001 to 0015, verbatim with reply summaries
-- [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0017, one per file
+- [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0018, one per file
 - [qa/responsive-latest.md](qa/responsive-latest.md): latest responsive check

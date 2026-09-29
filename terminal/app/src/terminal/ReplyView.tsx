@@ -3,6 +3,7 @@ import type { Reply, ReplyBlock } from '@shared/reply';
 import { useI18n } from '../i18n';
 import { store, useStoreSnapshot } from '../store';
 import { Button } from '../ui/Button';
+import { RefineBlock } from './RefineBlock';
 import { useToast } from '../ui/Toast';
 
 const STEP_MARK = { done: '✓', active: '✱', todo: '○' } as const;
@@ -133,6 +134,8 @@ function Block({ block }: { block: ReplyBlock }) {
       return <p className="rb-error">✗ {block.text}</p>;
     case 'text':
       return <p className="rb-text">{block.text}</p>;
+    case 'refine':
+      return <RefineBlock run={block.run} />;
   }
 }
 

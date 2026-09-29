@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { CHIP_KINDS } from '../chips/types';
+import { STYLE_TOKEN, STYLE_VALUE } from './style';
+import { skinSchema } from './skin';
 
 /**
  * Everything the interface shows that a person might ask to change is a
@@ -62,8 +64,7 @@ export const pageSchema = z.object({
 });
 export type Page = z.infer<typeof pageSchema>;
 
-export const STYLE_TOKEN = /^--[a-z0-9-]{1,40}$/;
-export const STYLE_VALUE = /^[^;{}<>\\]{1,80}$/;
+export { STYLE_TOKEN, STYLE_VALUE } from './style';
 
 export const boxUiSchema = z.object({
   box_id: z.string().min(1),
@@ -72,6 +73,8 @@ export const boxUiSchema = z.object({
   /** null = the visitor's default theme. */
   theme_id: z.string().nullable(),
   style: z.record(z.string().regex(STYLE_TOKEN), z.string().regex(STYLE_VALUE)),
+  /** Skins per target (pass 5). Missing on records saved before pass 5. */
+  skins: z.record(z.string(), skinSchema).default({}),
   seeded: z.boolean(),
   updated_at: z.number(),
 });
@@ -103,5 +106,5 @@ export const SEED_NAV: Array<{ label: string; icon: string; target: NavTarget }>
 ];
 
 export function defaultBoxUi(boxId: string, now: number): BoxUi {
-  return { box_id: boxId, dialect_text: null, theme_id: null, style: {}, seeded: false, updated_at: now };
+  return { box_id: boxId, dialect_text: null, theme_id: null, style: {}, skins: {}, seeded: false, updated_at: now };
 }

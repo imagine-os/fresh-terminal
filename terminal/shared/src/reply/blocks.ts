@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { skinRunSchema } from '../skins/run';
 
 /**
  * Super-CLI reply blocks. The model answers with these through the `respond`
@@ -26,6 +27,8 @@ export const replyBlockSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('note'), text: z.string().min(1).max(600) }),
   z.object({ kind: z.literal('error'), text: z.string().min(1).max(600) }),
   z.object({ kind: z.literal('text'), text: z.string().max(8000) }),
+  /** A skin run: rounds of variants with scores (client-only, pass 5). */
+  z.object({ kind: z.literal('refine'), run: skinRunSchema }),
 ]);
 export type ReplyBlock = z.infer<typeof replyBlockSchema>;
 
@@ -55,11 +58,11 @@ export function parseBlocks(raw: unknown): { blocks: ReplyBlock[]; dropped: stri
   const list = Array.isArray(raw) ? raw : [];
   for (const item of list) {
     const parsed = replyBlockSchema.safeParse(item);
-    if (parsed.success && parsed.data.kind !== 'edits') {
+    if (parsed.success && parsed.data.kind !== 'edits' && parsed.data.kind !== 'refine') {
       blocks.push(parsed.data);
     } else {
       const kind = typeof item === 'object' && item !== null && 'kind' in item ? String((item as { kind: unknown }).kind) : '?';
-      dropped.push(`block "${kind}": ${parsed.success ? 'edits blocks are added by the client' : parsed.error.issues[0]?.message ?? 'invalid'}`);
+      dropped.push(`block "${kind}": ${parsed.success ? 'edits and refine blocks are added by the client' : parsed.error.issues[0]?.message ?? 'invalid'}`);
     }
   }
   return { blocks, dropped };

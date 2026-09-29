@@ -27,4 +27,4 @@ Date: 2026-09-29. Model: Opus 5.5 (Justin's session). Prompt: 0016. Canon: C-058
 
 ## Tests
 
-`shared/src/timeline/timeline.test.ts` (derive order and parents, exact state at each step through edit → undo → redo, export shape), `app/src/__tests__/playback.test.tsx` (a real LocalStore box: steps, menu and page at each step; the scrubber's range, label, buttons and keys). 137 tests, typecheck, build and 28/28 responsive checks green.
+`shared/src/timeline/timeline.test.ts` (derive order and parents, exact state at each step through edit → undo → redo, export shape), `app/src/__tests__/playback.test.tsx` (a real LocalStore box: steps, menu and page at each step; the scrubber's range, label, buttons and keys). 157 tests after merging pass 5, typecheck, build and 28/28 responsive checks green.

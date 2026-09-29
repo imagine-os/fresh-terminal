@@ -17,6 +17,8 @@ import { store, useStoreSnapshot, type Box } from '../store';
 import type { GlossaryTerm } from '@shared/ui';
 import type { ChipDecision, ChipRecords } from './ChipPopover';
 import { Composer } from './Composer';
+import { looksLikeSkinRequest } from '@shared/skins';
+import { startSkinRun } from '../skins/runner';
 import { Doodles } from './Doodles';
 import { Transcript } from './Transcript';
 
@@ -196,6 +198,13 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       }
       store.appendLine(box.id, 'user', text, chips);
 
+      // Skins and materials run the refine loop (pass 5).
+      if (looksLikeSkinRequest(text)) {
+        const line = store.appendLine(box.id, 'assistant', text, []);
+        void startSkinRun({ boxId: box.id, text, lineId: line.id });
+        return;
+      }
+
       const { matchLocalCommand } = await import('./localCommands');
       const local = matchLocalCommand(text, chips, {
         boxes: snapshot.boxes,
@@ -277,6 +286,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       let batch: { id: string; summary: string; changes: Change[] } | null = null;
       const extra: ReplyBlock[] = [];
       let intent = 'chat';
+      let skinRequested = false;
+      const promptText = text;
       const history = lines
         .filter((line) => line.kind !== 'system')
         .slice(-12)
@@ -308,10 +319,18 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         onReply: (blocks) => {
           modelBlocks = blocks;
         },
+        onSkin: () => {
+          skinRequested = true;
+        },
         onDone: (done) => {
           if (done.entry) {
             const { owner_identity: _ignored, ...draft } = done.entry;
             store.appendEntry(draft);
+          }
+          if (skinRequested) {
+            store.updateLine(reply.id, promptText, false);
+            void startSkinRun({ boxId: box.id, text: promptText, lineId: reply.id });
+            return;
           }
           const meta: ReplyMeta = {
             intent,

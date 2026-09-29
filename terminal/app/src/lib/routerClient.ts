@@ -51,6 +51,8 @@ export interface RouteHandlers {
   onOps?: (payload: OpsPayload) => void;
   /** The structured reply. */
   onReply?: (blocks: ReplyBlock[]) => void;
+  /** Jev routed the prompt to the skin loop (pass 5); the app runs it. */
+  onSkin?: (payload: { text: string }) => void;
   onDone: (done: RouteDone) => void;
   onFail: (failure: RouteFailure) => void;
 }
@@ -112,6 +114,8 @@ export async function streamRoute(request: RouteRequest, handlers: RouteHandlers
       handlers.onMeta?.(JSON.parse(data) as RouteMeta);
     } else if (eventName === 'ops') {
       handlers.onOps?.(JSON.parse(data) as OpsPayload);
+    } else if (eventName === 'skin') {
+      handlers.onSkin?.(JSON.parse(data) as { text: string });
     } else if (eventName === 'reply') {
       handlers.onReply?.((JSON.parse(data) as { blocks: ReplyBlock[] }).blocks);
     } else if (eventName === 'done') {

@@ -1,6 +1,6 @@
 # Fresh Terminal wiki — start here
 
-Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (pass 4, Opus 5.5).
+Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (pass 5, Opus 5.5).
 
 - Read it rendered: https://imagine-os.github.io/fresh-terminal/wiki/
 - Read it on GitHub: https://github.com/imagine-os/fresh-terminal/tree/main/terminal/docs
@@ -73,6 +73,7 @@ Read this first.
 | [decisions/0015-router-deploy.md](decisions/0015-router-deploy.md) | Router deploy and the "no router" state | 2026-09-29 |
 | [decisions/0016-self-editing.md](decisions/0016-self-editing.md) | The interface is data, changed only by undoable ops | 2026-09-29 |
 | [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md) | Chip types you can set, a glossary per box, structured replies | 2026-09-29 |
+| [decisions/0018-skins-and-refine.md](decisions/0018-skins-and-refine.md) | Skins as records and the best-of-3 refine loop with its stop rules | 2026-09-29 |
 | [decisions/0019-playback.md](decisions/0019-playback.md) | Every step is a saved event with parents; replay first, branches and merges later | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
@@ -83,13 +84,14 @@ Read this first.
 | [changelog/0002.md](changelog/0002.md) | Pass 2: two ways to pay, Jev routing, tagger tier, library, koi pond v1 | 2026-09-29 |
 | [changelog/0003.md](changelog/0003.md) | Pass 3: voice with live transcript, router health, router live on Cloudflare | 2026-09-29 |
 | [changelog/0004.md](changelog/0004.md) | Pass 4: the terminal edits itself, chips v2, structured replies, koi pond v2, the Canon, this wiki | 2026-09-29 |
+| [changelog/0005.md](changelog/0005.md) | Pass 5: skins, the material library and the refine loop, with live results | 2026-09-29 |
 | [changelog/0006.md](changelog/0006.md) | Replay: a playback scrubber over every step of a session; the tagline | 2026-09-29 |
 
 ## 6. Reference
 
 | Page | What it says | Updated |
 | --- | --- | --- |
-| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API, ops as tools, `window.pond`, SpacetimeDB, CLI, MCP | 2026-09-29 |
+| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API (incl. `/skin/*`), ops as tools, `refine()`, `window.pond`, SpacetimeDB, CLI, MCP | 2026-09-29 |
 | [pages/landing.md](pages/landing.md) | Page spec: landing (`/`) | 2026-09-29 |
 | [pages/box.md](pages/box.md) | Page spec: a box (`/box/:id`), with pass 4's menu, edits and chips | 2026-09-29 |
 | [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas (`/canvas`) | 2026-09-28 |

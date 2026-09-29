@@ -39,6 +39,17 @@
       "model": "google/gemini-2.5-flash-lite",
       "alternate": "openai/gpt-4.1-nano",
       "note": "Chips as JSON on keystroke pause when the dev toggle is on. $0.10/$0.40 per million. Not Haiku (10x the price)."
+    },
+    "image": {
+      "kind": "image",
+      "model": "openai/gpt-5-image-mini",
+      "alternate": "google/gemini-2.5-flash-image",
+      "note": "Skin images (pass 5). Cheapest image-output model on OpenRouter by image-output token price on 2026-09-29 ($8 per million image tokens); gemini-2.5-flash-image is about $0.039 per image, over the 3\u00a2 refine cap on its own."
+    },
+    "vision": {
+      "kind": "vision",
+      "model": "google/gemini-2.5-flash-lite",
+      "note": "Describes skin variants (images in, JSON out) before Jev scores them."
     }
   },
   "rules": [
@@ -119,6 +130,12 @@
       "tier": "tagger",
       "permission": "anyone",
       "margin_bp": 0
+    },
+    {
+      "intent": "skin",
+      "tier": "fast",
+      "permission": "anyone",
+      "margin_bp": 0
     }
   ],
   "escalation": {
@@ -126,5 +143,20 @@
     "min_confidence": 0.6,
     "max_nav_items": 40,
     "max_pages": 10
+  },
+  "refine": {
+    "$comment": "refine() best-of-3 loop for skins. Stops at target_score, after patience rounds without a better best, at max_rounds, when cap_micro is spent, or on Stop. estimate_micro is per variant (generate + score) and keeps the loop under the cap before it spends.",
+    "variants": 3,
+    "target_score": 4.5,
+    "patience": 2,
+    "max_rounds": 5,
+    "cap_micro": 30000,
+    "estimate_micro": {
+      "library": 150,
+      "css_tokens": 2500,
+      "procedural_code": 2500,
+      "image_search": 400,
+      "image_generate": 9000
+    }
   }
 }

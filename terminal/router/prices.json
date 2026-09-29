@@ -48,6 +48,14 @@
     "anthropic/claude-sonnet-5.5": {
       "input_micro_per_million": 2000000,
       "output_micro_per_million": 10000000
+    },
+    "openai/gpt-5-image-mini": {
+      "input_micro_per_million": 2500000,
+      "output_micro_per_million": 2000000
+    },
+    "google/gemini-2.5-flash-image": {
+      "input_micro_per_million": 300000,
+      "output_micro_per_million": 2500000
     }
   },
   "realtime": {
