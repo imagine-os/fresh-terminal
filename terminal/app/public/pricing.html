@@ -63,10 +63,15 @@
     },
     {
       "id": "sales.markup.preview",
-      "intent": "preview a markup between 5% and 50% (not saved)",
+      "intent": "see what a markup between 5% and 100% costs on $1 of model spend",
       "permission": "anyone",
-      "notWired": true,
       "target": "#markup"
+    },
+    {
+      "id": "sales.markup.set",
+      "intent": "set my markup in Settings (signed in)",
+      "permission": "signed-in",
+      "target": "a[data-action='sales.markup.set']"
     },
     {
       "id": "sales.payment.add",
@@ -156,10 +161,11 @@
             <li data-i18n="plan.payg.2">The minimum is 5%, so card fees are covered.</li>
             <li><span data-i18n="plan.payg.3">Credits in packs of $5, $10 or $25 that refill on their own</span> <span class="pill inline" data-status="soon" data-i18n="pill.soon">coming</span></li>
           </ul>
-          <div class="markup" data-not-wired-block>
+          <div class="markup">
             <label for="markup"><span data-i18n="markup.label">Your markup</span> <output id="markup-out" for="markup">10%</output></label>
-            <input id="markup" type="range" min="5" max="50" step="1" value="10" aria-describedby="markup-ex" data-tip="Not wired yet: a preview. The setting arrives with billing." data-i18n-attr="data-tip:markup.tip">
-            <p class="ex" id="markup-ex"><span data-i18n="markup.ex">On $1.00 of model cost you pay</span> <b data-markup-total>$1.10</b>. <span class="pill inline" data-status="not-wired" data-i18n="pill.notWired">not wired yet</span></p>
+            <input id="markup" type="range" min="5" max="100" step="1" value="10" aria-describedby="markup-ex">
+            <p class="ex" id="markup-ex"><span data-i18n="markup.ex">On $1.00 of model cost you pay</span> <b data-markup-total>$1.10</b>.</p>
+            <a class="btn" href="./?open=settings" data-action="sales.markup.set" data-i18n="markup.set">Set yours in Settings</a>
           </div>
           <div class="ctas"><button type="button" class="btn" data-action="sales.payment.add" data-not-wired
             data-tip="Not wired yet: credit packs through Clerk are coming soon. Until then, the starter kit and your key both work."

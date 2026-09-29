@@ -5,6 +5,7 @@ describe('arrival intent from the sales pages', () => {
   it('reads ?signin=1 and ?open=key and keeps other parameters', () => {
     expect(arrivalIntent('?signin=1')).toEqual({ intent: 'signin', rest: '' });
     expect(arrivalIntent('?open=key&prompt=hi')).toEqual({ intent: 'key', rest: '?prompt=hi' });
+    expect(arrivalIntent('?open=settings')).toEqual({ intent: 'key', rest: '' });
     expect(arrivalIntent('?lang=es&signin=1')).toEqual({ intent: 'signin', rest: '?lang=es' });
   });
 

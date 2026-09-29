@@ -146,11 +146,10 @@
     document.querySelectorAll('[data-offer]').forEach(function (el) { el.hidden = true; });
   }
 
-  // Pay what you want: an illustrative slider (not wired yet; nothing is saved).
+  // Pay what you want: this slider shows the math; the real setting is in the app's Settings (C-105).
   var markup = document.getElementById('markup');
   if (markup) {
     markup.min = String(PAYG_FEE.min);
-    var shownToast = false;
     var update = function () {
       var pct = Number(markup.value);
       var out = document.getElementById('markup-out');
@@ -158,11 +157,6 @@
       document.querySelectorAll('[data-markup-total]').forEach(function (el) { el.textContent = '$' + (1 + pct / 100).toFixed(2); });
     };
     markup.addEventListener('input', update);
-    markup.addEventListener('change', function () {
-      if (shownToast) return;
-      shownToast = true;
-      toast(root.getAttribute('lang') === 'es' ? (window.FT_ES || {})['markup.toast'] || '' : 'A preview only: choosing your markup is not wired yet. It arrives with billing.');
-    });
     update();
   }
 

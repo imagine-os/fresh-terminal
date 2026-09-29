@@ -1,6 +1,6 @@
 /**
  * Links from the sales pages (/about, /pricing, /faq) open the app with an
- * intent (2026-09-29): ?signin=1 opens sign-in, ?open=key opens Settings on the
+ * intent (2026-09-29): ?signin=1 opens sign-in, ?open=key or ?open=settings opens Settings on the
  * key. The parameter is removed from the address bar once read.
  */
 export type ArrivalIntent = 'signin' | 'key';
@@ -9,9 +9,9 @@ export function arrivalIntent(search: string): { intent: ArrivalIntent | null; r
   const params = new URLSearchParams(search);
   let intent: ArrivalIntent | null = null;
   if (params.get('signin') === '1') intent = 'signin';
-  else if (params.get('open') === 'key') intent = 'key';
+  else if (params.get('open') === 'key' || params.get('open') === 'settings') intent = 'key';
   params.delete('signin');
-  if (params.get('open') === 'key') params.delete('open');
+  if (params.get('open') === 'key' || params.get('open') === 'settings') params.delete('open');
   const rest = params.toString();
   return { intent, rest: rest ? `?${rest}` : '' };
 }
