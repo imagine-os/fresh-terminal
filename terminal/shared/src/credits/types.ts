@@ -1,3 +1,5 @@
+import type { StorageStatus } from './storage';
+
 /**
  * Free credits, as the router reports them (2026-09-29). Money is integer
  * micro-dollars. The router enforces every number here; the browser only
@@ -31,6 +33,10 @@ export interface CreditsStatus {
   turnstile_sitekey?: string;
   /** Signed-in accounts only: the pass-through billing gate (C-086). */
   billing?: AccountBilling;
+  /** Signed-in accounts only (GET /credits): what the account stores with us (C-092; measured, not billed yet). */
+  storage?: StorageStatus;
+  /** Signed-in accounts only: the person chose to share their data with Fresh Terminal (C-091; off by default). */
+  share_data?: boolean;
 }
 
 /**
@@ -49,8 +55,8 @@ export interface AccountBilling {
   credit_limit_micro: number;
   /** What a payment provider has charged this account in total. */
   paid_micro: number;
-  /** "not-wired" until a payment provider (Stripe Checkout) is connected on the router. */
-  provider: 'stripe' | 'not-wired';
+  /** "not-wired" until a payment provider is connected on the router: Stripe Checkout top-ups, or Clerk Billing refill plans (C-093). */
+  provider: 'stripe' | 'clerk' | 'not-wired';
 }
 
 /** Error codes a paid endpoint answers with (HTTP 401/402/403/413/429). */

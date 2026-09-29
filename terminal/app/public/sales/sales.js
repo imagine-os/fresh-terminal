@@ -9,9 +9,13 @@
 (function () {
   'use strict';
 
-  /** The pay-as-you-go fee over model cost. One place. Placeholder until billing is decided. */
-  var PAYG_FEE = { percent: 5, final: false };
-  /** Storage for "your key" accounts beyond the free allowance. Placeholder, not billed yet. */
+  /**
+   * Pricing numbers the copy depends on, in one place. The fee over model cost
+   * is undecided (margin 0 in the route table), so the pages say "at cost for
+   * now" and show no percentage; set percent and add a [data-fee] element to show one.
+   * Storage matches STORAGE_PRICING in shared/src/credits/storage.ts (not final, not billed).
+   */
+  var PAYG_FEE = { percent: null, final: false };
   var STORAGE = { freeMb: 100, usdPerGbMonth: 0.05, final: false };
 
   var PREFS = 'fresh-terminal.prefs';
@@ -31,7 +35,7 @@
   }
 
   function fill() {
-    document.querySelectorAll('[data-fee]').forEach(function (el) { el.textContent = PAYG_FEE.percent + '%'; });
+    if (PAYG_FEE.percent !== null) document.querySelectorAll('[data-fee]').forEach(function (el) { el.textContent = PAYG_FEE.percent + '%'; });
     document.querySelectorAll('[data-storage-free]').forEach(function (el) { el.textContent = STORAGE.freeMb + ' MB'; });
     document.querySelectorAll('[data-storage-price]').forEach(function (el) { el.textContent = '$' + STORAGE.usdPerGbMonth.toFixed(2); });
   }

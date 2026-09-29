@@ -25,9 +25,9 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | api.freshterminal.ai (same router, custom domain) | https://api.freshterminal.ai/health | 2026-09-29, infra pass (C-064) |
 | Sign in (Clerk development instance) and cloud sync (D1) | Header **Sign in** button on freshterminal.ai and on Pages | 2026-09-29, infra pass (C-065, C-066) |
 | Free credits, enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day signed-out cap) | `GET https://api.freshterminal.ai/credits`; live check in changelog 0008 | 2026-09-29 (C-074) |
-| $5 starter kit per signed-in account (C-089), which is also the pass-through threshold (past it `402 payment_required`), friend credits and invite codes | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
+| $5 starter kit per signed-in account (C-089), no per-account daily cap (C-091), which is also the pass-through threshold (past it `402 payment_required`), friend credits and invite codes; privacy by default (`share_data` off, access grants, admin sees totals only; C-091); storage measured per account (100 MB free, not billed; C-092) | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
 | The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-088) |
-| Sales site: about, pricing, FAQ (EN/ES, share cards) | https://freshterminal.ai/about, https://freshterminal.ai/pricing, https://freshterminal.ai/faq (also on Pages under /fresh-terminal/) | 2026-09-29 (C-091) |
+| Sales site: about, pricing, FAQ (EN/ES, share cards) | https://freshterminal.ai/about, https://freshterminal.ai/pricing, https://freshterminal.ai/faq (also on Pages under /fresh-terminal/) | 2026-09-29 (C-094) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |
 
@@ -104,7 +104,7 @@ As of 2026-09-29:
 | **Logos and icons skill** | Added 2026-09-29 02:25 UTC at `terminal/skills/logos-and-icons/SKILL.md`: source order (official → official repo → Simple Icons → text mark), licence check, sizes, registry at `docs/brand/registry.md`, generate only for our own marks. First use: marks on the FreshStack cards and brand chips. Assets not gathered yet. |
 | **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 157 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
-| **Sales site and share cards** (C-091) | Shipped 2026-09-29 05:30 UTC (Opus 5.5). Not wired yet: "Add payment" (pay as you go) and "Tell me when" (teams and self-host). Coming soon on the site: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, share-my-data, encryption with your own key. |
+| **Sales site and share cards** (C-094) | Shipped 2026-09-29 05:30 UTC (Opus 5.5). Not wired yet: "Add payment" (pay as you go) and "Tell me when" (teams and self-host). Coming soon on the site: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, encryption with your own key, teams and self-host. |
 | **Uniform bar, minimal tray, Actions, voice fails once** (C-090) | Shipped 2026-09-29 05:10 UTC. Terminal-talk is a switch + demo; the voice agent is next after SpacetimeDB. |
 | **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |
 | **Review pass** (C-081) | Shipped 2026-09-29 04:45 UTC: no-op edits refused, names not ids, one Undo bar, created pages open, screen context, mood tags. |

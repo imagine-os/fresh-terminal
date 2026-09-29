@@ -1,6 +1,6 @@
 # 0025 — the sales site: /about, /pricing, /faq, and share cards
 
-Date: 2026-09-29. Model: Opus 5.5 (all of it: research, copy, design, build, checks). Prompts: Canon 82 (the brief, ts 1790657743.245569), 83 (pricing and privacy notes, ts 1790658094.470499), 84 (share thumbnail, ts 1790658220.851259). Canon C-091.
+Date: 2026-09-29. Model: Opus 5.5 (all of it: research, copy, design, build, checks). Prompts: Canon 82 (the brief, ts 1790657743.245569), 83 (pricing and privacy notes, ts 1790658094.470499), 84 (share thumbnail, ts 1790658220.851259). Canon C-094.
 
 ## What Omarchy's site does that makes it feel simple (read 2026-09-29, https://omarchy.org; information only, nothing copied)
 
@@ -24,16 +24,16 @@ Screenshots of every variant: scratchpad `sales/bo3/` (not committed).
 
 | Plan | Price | What you get | State |
 | --- | --- | --- | --- |
-| Free | $0 | No sign-up, free usage to try (about 40 prompts), saved in this browser | live (25¢ per browser, C-074) |
-| Starter kit | $5 on us | Sign in with GitHub, Google or email; cloud save for stages | live (C-089). The router still caps free usage at $1/day per account: open question 20 |
-| Pay as you go | model cost + fee | After the starter kit. The fee is one constant (`PAYG_FEE` in `app/public/sales/sales.js`), shown as 5%, labelled "not final" | **not wired yet**: "Add payment" shows a tooltip and a toast (billing provider still being chosen, C-086) |
-| Your key | $0 for models | Your OpenRouter key, kept in your browser, calls go straight to OpenRouter, never blocked. Storage 100 MB free, then about $0.05/GB-month (`STORAGE` in `sales.js`), "not final" | live (key); storage pricing not billed |
+| Free | $0 | No sign-up, a little free usage (no number advertised), saved in this browser | live (25¢ per device, C-074) |
+| Starter kit | $5 on us, no daily cap | Sign in with GitHub, Google or email; cloud save for stages; invite codes add credit | live (C-089); no daily cap (C-091) |
+| Pay as you go | at cost for now | After the starter kit. The fee is undecided (margin 0), so no percentage is shown (`PAYG_FEE` in `app/public/sales/sales.js` is null; a first draft showed 5%, withdrawn). Monthly refill plans $5/$10/$25 coming soon | **not wired yet**: "Add payment" shows a tooltip and a toast (Clerk Billing refill plans are built but switched off until the webhook secret exists, C-093) |
+| Your key | $0 from us for models | Your OpenRouter key, kept in your browser, calls go straight to OpenRouter, never blocked. Storage above 100 MB may be metered later, about $0.05/GB-month (`STORAGE` in `sales.js`), "not final" | live (key); storage is measured, not billed (C-092) |
 | Teams and self-host | — | "Tell me when" | coming soon; the button is **not wired yet** (tooltip + toast) |
 
 ## Honesty rules applied
 
-- Live claims are only what the app does today (C-091 list). Coming soon: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, share-my-data, access only when granted, encryption with your own key, teams and self-host. The offline queue (C-090) is live and is said so.
-- Privacy copy says what reaches us: signed out, nothing but the request that the router passes to the model provider (through OpenRouter; the router keeps the cost line); signed in, stages (menus, pages, looks) in D1, not the conversation lines.
+- Live claims are only what the app does today (C-094 list). Coming soon: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, encryption with your own key, teams and self-host. Live and said so: the offline queue (C-090), the share-my-data switch (off by default) and access grants (C-091).
+- Privacy copy says what reaches us: signed out, nothing but the request that the router passes to the model provider (through OpenRouter; the router keeps the cost line); signed in, stages (menus, pages, looks) in D1, not the conversation lines; staff tools never show another account's content unless the person shares or grants access (C-091), a rule the code keeps, not encryption.
 
 ## Share cards
 

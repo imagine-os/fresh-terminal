@@ -31,6 +31,9 @@ try {
         if (rect.width === 0 || rect.height === 0 || style.visibility === 'hidden') continue;
         if (el.closest('.hub-md, .hub-verbatim, .hub-foot, .hub-lead, .hub-muted, td, p:not(.hub-links):not(.hub-actions):not(.hub-code)') && el.tagName === 'A') continue; // inline links in running text
         if (el.classList.contains('hub-skip')) continue;
+        // A checkbox's target is its whole label.
+        const box = el.matches('input[type="checkbox"], input[type="radio"]') ? el.closest('label')?.getBoundingClientRect() : null;
+        if (box && box.height >= 43.5 && box.width >= 43.5) continue;
         if (rect.height < 43.5 || rect.width < 43.5) small.push(`${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 30)}" ${Math.round(rect.width)}x${Math.round(rect.height)}`);
       }
       return { overflow, small: small.slice(0, 8), smallCount: small.length };

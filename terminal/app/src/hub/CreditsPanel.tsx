@@ -16,6 +16,7 @@ interface Overview {
   grants: Row;
   invites: Row;
   devices: Row;
+  privacy?: Row;
   billing: { provider: string; default_threshold_micro: number; starter_micro?: number };
   max_grant_micro: number;
 }
@@ -35,6 +36,7 @@ export function CreditsPanel({ client }: { client: HubClient }) {
   const [grants, setGrants] = useState<Row[]>([]);
   const [invites, setInvites] = useState<Row[]>([]);
   const [ledger, setLedger] = useState<Row[]>([]);
+  const [privateTotals, setPrivateTotals] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -43,12 +45,13 @@ export function CreditsPanel({ client }: { client: HubClient }) {
         client.get<Overview>('/admin/overview'),
         client.get<{ grants: Row[] }>('/admin/grants?limit=25'),
         client.get<{ invites: Row[] }>('/admin/invites'),
-        client.get<{ entries: Row[] }>('/admin/ledger?limit=25'),
+        client.get<{ entries: Row[]; private_totals?: Row[] }>('/admin/ledger?limit=25'),
       ]);
       setOverview(o);
       setGrants(g.grants);
       setInvites(i.invites);
       setLedger(l.entries);
+      setPrivateTotals(l.private_totals ?? []);
       setError(null);
     } catch (caught) {
       setError(message(caught));
@@ -93,6 +96,16 @@ export function CreditsPanel({ client }: { client: HubClient }) {
           <div>
             <dt>Need a payment method</dt>
             <dd>{String(overview.accounts.needs_payment ?? 0)}</dd>
+          </div>
+          <div>
+            <dt>Sharing their data</dt>
+            <dd>
+              {String(overview.privacy?.sharing ?? 0)} <span className="hub-muted">of {String(overview.accounts.n ?? 0)}</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Stored with us</dt>
+            <dd>{(Number(overview.privacy?.stored_bytes ?? 0) / 1_000_000).toFixed(1)} MB</dd>
           </div>
           <div>
             <dt>Payments</dt>
@@ -146,12 +159,21 @@ export function CreditsPanel({ client }: { client: HubClient }) {
       />
 
       <h3>Recent ledger</h3>
+      <p className="hub-muted">Credit lines are ours. Everything else shows line by line only for people who share their data or granted access; the rest are totals.</p>
       <Table
         label="Recent ledger"
-        empty="Nothing on the ledger yet."
+        empty="No lines you can see."
         head={['When', 'Account', 'Kind', 'What', 'Price', 'Cost']}
         rows={ledger.map((entry) => [when(Number(entry.created_at)), <code key="a">{String(entry.account_id)}</code>, String(entry.kind), String(entry.what) + (entry.model ? ` · ${String(entry.model)}` : ''), usd(Number(entry.price_micro), 4), usd(Number(entry.cost_micro), 4)])}
       />
+      <h3>Private accounts (totals only)</h3>
+      <Table
+        label="Private accounts, totals only"
+        empty="None in the recent lines."
+        head={['Account', 'Lines', 'Price', 'Cost', 'Last']}
+        rows={privateTotals.map((total) => [<code key="a">{String(total.account_id)}</code>, String(total.entries), usd(Number(total.price_micro), 4), usd(Number(total.cost_micro), 4), when(Number(total.last_at))])}
+      />
+      <PrivacySelf client={client} />
     </div>
   );
 }
@@ -328,5 +350,42 @@ function ThresholdForm({ client, onDone }: { client: HubClient; onDone: () => Pr
       </button>
       <Result text={result?.text ?? null} tone={result?.tone ?? 'ok'} />
     </form>
+  );
+}
+
+/** The admin's own switch, the same one every account has in Settings (C-091). */
+function PrivacySelf({ client }: { client: HubClient }) {
+  const [share, setShare] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    client
+      .get<{ share_data: boolean }>('/me/privacy')
+      .then((body) => setShare(body.share_data))
+      .catch((caught: unknown) => setError(message(caught)));
+  }, [client]);
+  return (
+    <section className="hub-form" aria-labelledby="privacy-title">
+      <h3 id="privacy-title">Your privacy</h3>
+      <label className="hub-check">
+        <input
+          type="checkbox"
+          checked={share === true}
+          disabled={share === null}
+          onChange={(event) => {
+            const next = event.target.checked;
+            void client
+              .put<{ share_data: boolean }>('/me/privacy', { share_data: next })
+              .then((body) => setShare(body.share_data))
+              .catch((caught: unknown) => setError(message(caught)));
+          }}
+        />
+        <span>Share my data with Fresh Terminal to improve it (off by default)</span>
+      </label>
+      <p className="hub-muted">
+        Off for everyone unless they turn it on. Without it, or an access grant from them, this hub shows their totals only. Honest limits and the next step (encryption with a key the person holds) are in{' '}
+        <a href="/wiki/canon/open-questions.html">open question 19</a>.
+      </p>
+      {error ? <p className="hub-alert">{error}</p> : null}
+    </section>
   );
 }

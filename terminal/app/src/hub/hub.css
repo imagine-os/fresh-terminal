@@ -152,3 +152,6 @@ label { display: grid; gap: 0.25rem; font-size: 0.9rem; color: var(--fg-muted); 
 html { scroll-behavior: smooth; }
 .hub-tile h3 a, .hub-list a { min-width: var(--target); }
 .hub-list a { display: inline-flex; align-items: center; min-height: var(--target); }
+.hub-check { display: flex; align-items: center; gap: 0.7rem; min-height: var(--target); color: var(--fg); font-size: 1rem; cursor: pointer; }
+.hub-check input { width: 1.4rem; height: 1.4rem; min-height: 0; accent-color: var(--accent); flex: none; }
+.hub-credits > .hub-form { margin-top: 1.5rem; }

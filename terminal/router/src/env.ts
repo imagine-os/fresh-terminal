@@ -52,6 +52,8 @@ export function bindingsFromProcessEnv(): RouterBindings {
     'ADMIN_EMAILS',
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
+    'CLERK_WEBHOOK_SIGNING_SECRET',
+    'BILLING_PROVIDER',
   ];
   for (const key of keys) {
     const value = process.env[key];

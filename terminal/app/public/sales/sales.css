@@ -208,3 +208,4 @@ figcaption { color: var(--faint); font-size: 0.85rem; font-family: var(--mono); 
 .hero .cap { margin-top: 0.7rem; }
 .page-title { font-size: clamp(1.9rem, 1.1rem + 2.2vw, 3.4rem); }
 .plan .btn { font-size: 0.92rem; padding-left: 0.8rem; padding-right: 0.8rem; }
+.price small { display: inline-block; line-height: 1.25; }

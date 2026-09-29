@@ -91,7 +91,8 @@ jobs:
 
           printf '%s' "$admin" | npx --yes wrangler@4 secret put ADMIN_USER_IDS_SMOKE --name fresh-terminal-router > /dev/null
           echo "smoke admin id set on the router"
-          for i in $(seq 1 20); do r=$(call "$sa" GET "$API/admin/whoami"); [ "$(status "$r")" = "200" ] && break; sleep 3; done
+          # A new Worker secret reaches every location within seconds, not at once: wait for the router and for the site's path to it.
+          for i in $(seq 1 30); do r=$(call "$sa" GET "$API/admin/whoami"); r2=$(call "$sa" GET "$SITE/hub/api/session"); [ "$(status "$r")" = "200" ] && [ "$(status "$r2")" = "200" ] && break; sleep 3; done
           echo "admin /admin/whoami: HTTP $(status "$r") $(body "$r" | jq -c '{admin, via}')"
           r=$(call "$sa" GET "$SITE/hub/api/session"); echo "admin /hub/api/session: HTTP $(status "$r")"
           r=$(call "$sa" GET "$SITE/hub/data/library.json"); echo "admin /hub/data/library.json: HTTP $(status "$r") $(body "$r" | jq -c '{prompts: (.prompts|length), canon: (.canon|length), records: (.records|length)}')"
@@ -112,6 +113,13 @@ jobs:
 
           r=$(call "$sa" GET "$API/admin/grants?limit=5"); echo "GET /admin/grants: $(body "$r" | jq -c --arg f "$friend" '[.grants[] | select(.clerk_user_id == $f) | {source, amount_micro, note}]')"
           r=$(call "$sa" GET "$API/admin/ledger?limit=10"); echo "GET /admin/ledger: $(body "$r" | jq -c --arg a "acct_$friend" '[.entries[] | select(.account_id == $a) | {kind, what, price_micro}]')"
+
+          # Privacy by default (C-091): the admin gets totals, not the friend's stages, until the friend shares.
+          r=$(call "$sf" GET "$API/me/privacy"); echo "friend /me/privacy: HTTP $(status "$r") $(body "$r" | jq -c '{share_data}') (want false)"
+          r=$(call "$sa" GET "$API/admin/account-content?user_id=$friend"); echo "admin reads friend's stages: HTTP $(status "$r") $(body "$r" | jq -r '.code') (want 403 private)"
+          r=$(call "$sf" PUT "$API/me/privacy" '{"share_data":true}'); echo "friend shares: HTTP $(status "$r") $(body "$r" | jq -c '{share_data}')"
+          r=$(call "$sa" GET "$API/admin/account-content?user_id=$friend"); echo "admin reads friend's stages after sharing: HTTP $(status "$r") $(body "$r" | jq -c '{access}') (want 200 shared)"
+          r=$(call "$sf" GET "$API/credits"); echo "friend /credits: $(body "$r" | jq -c '{label, granted, storage: (.storage | {used_bytes, free_bytes, enforced})}')"
 
           # The billing gate: threshold $0 for the friend, then one paid call. It stops at the meter (402), before any model runs.
           r=$(call "$sa" POST "$API/admin/account" "{\"user_id\":\"$friend\",\"billing_threshold_usd\":0}"); echo "set friend threshold \$0: HTTP $(status "$r")"

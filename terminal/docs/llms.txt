@@ -11,13 +11,13 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-091 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-094 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
 
 - [canon/vision.md](canon/vision.md): what we are building and why, in Justin's words
-- [canon/prompts.md](canon/prompts.md): all 84 of Justin's messages verbatim with outcomes
+- [canon/prompts.md](canon/prompts.md): all 85 of Justin's messages verbatim with outcomes
 - [canon/glossary.md](canon/glossary.md): house words (box, chip, dialect, Jev, recipe, wiki)
 - [canon/people-and-access.md](canon/people-and-access.md): people, repos, secret names
 
@@ -30,7 +30,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Reference
 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
-- [decisions/0025-sales-site.md](decisions/0025-sales-site.md): the sales site at freshterminal.ai/about, /pricing, /faq; pricing (free, $5 starter kit, pay as you go at cost + 5% not final and not wired, your key $0 for models); share tags from shared/src/share.ts
+- [decisions/0025-sales-site.md](decisions/0025-sales-site.md): the sales site at freshterminal.ai/about, /pricing, /faq; pricing (free, $5 starter kit, pay as you go at cost for now and not wired, your key $0 for models); share tags from shared/src/share.ts
 - [pages/sales.md](pages/sales.md): the sales pages doc (sections, actions, EN/ES, share tags)
 - [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md): Clerk Billing checked (subscriptions only, no usage billing), the $5 pass-through threshold (402 payment_required), Stripe Checkout top-ups proposed, friend credits and invite codes, the admin API, the hub at freshterminal.ai/hub, costs
 - [pages/hub.md](pages/hub.md): the hub page doc (admins only, server-checked; work items, prompt/response library, Canon, wiki, plan, credits, secrets checklist)
