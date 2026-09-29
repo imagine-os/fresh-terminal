@@ -119,6 +119,8 @@ export interface Store {
   subscribe(listener: () => void): () => void;
   getSnapshot(): StoreSnapshot;
   createBox(name: string): Box;
+  /** Deletes a box with its lines, sessions, menu, pages, edits and box UI. Ledger entries stay (the chain is append-only). */
+  removeBox(id: string): void;
   openSession(boxId: string): Session;
   appendLine(boxId: string, kind: LineKind, text: string, chips: Chip[], options?: LineOptions): Line;
   updateLine(lineId: string, text: string, streaming: boolean): void;

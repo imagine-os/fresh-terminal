@@ -1,0 +1,824 @@
+{
+  "version": "brand.v1",
+  "generated": "2026-09-29",
+  "note": "Icon-only marks are the vendors' (see terms). -wide and -stacked are our own icon+name lockups in the house font, not official wordmarks. -light/-dark are fixed-colour copies for places without currentColor. All files are transparent SVG.",
+  "marks": [
+    {
+      "slug": "anthropic",
+      "name": "Anthropic",
+      "short": "Anthropic",
+      "colour": "#191919",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "anthropic.svg",
+        "mono": "anthropic-mono.svg",
+        "light": "anthropic-light.svg",
+        "dark": "anthropic-dark.svg",
+        "wide": "anthropic-wide.svg",
+        "stacked": "anthropic-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=anthropic (cdn.simpleicons.org/anthropic)",
+      "terms": "Simple Icons collection CC0-1.0; Anthropic trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "betterauth",
+      "name": "Better Auth",
+      "short": "Better Auth",
+      "colour": "#FFFFFF",
+      "needs_dark_tile": true,
+      "files": {
+        "colour": "betterauth.svg",
+        "mono": "betterauth-mono.svg",
+        "light": "betterauth-light.svg",
+        "dark": "betterauth-dark.svg",
+        "wide": "betterauth-wide.svg",
+        "stacked": "betterauth-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=betterauth (cdn.simpleicons.org/betterauth)",
+      "terms": "Simple Icons collection CC0-1.0; Better Auth trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "claude",
+      "name": "Claude",
+      "short": "Claude",
+      "colour": "#D97757",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "claude.svg",
+        "mono": "claude-mono.svg",
+        "light": "claude-light.svg",
+        "dark": "claude-dark.svg",
+        "wide": "claude-wide.svg",
+        "stacked": "claude-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=claude (cdn.simpleicons.org/claude)",
+      "terms": "Simple Icons collection CC0-1.0; Claude trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "clerk",
+      "name": "Clerk",
+      "short": "Clerk",
+      "colour": "#6C47FF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "clerk.svg",
+        "mono": "clerk-mono.svg",
+        "light": "clerk-light.svg",
+        "dark": "clerk-dark.svg",
+        "wide": "clerk-wide.svg",
+        "stacked": "clerk-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=clerk (cdn.simpleicons.org/clerk)",
+      "terms": "Simple Icons collection CC0-1.0; Clerk trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "cloudflare",
+      "name": "Cloudflare",
+      "short": "Cloudflare",
+      "colour": "#F38020",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "cloudflare.svg",
+        "mono": "cloudflare-mono.svg",
+        "light": "cloudflare-light.svg",
+        "dark": "cloudflare-dark.svg",
+        "wide": "cloudflare-wide.svg",
+        "stacked": "cloudflare-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=cloudflare (cdn.simpleicons.org/cloudflare)",
+      "terms": "Simple Icons collection CC0-1.0; Cloudflare trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "convex",
+      "name": "Convex",
+      "short": "Convex",
+      "colour": "#EE342F",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "convex.svg",
+        "mono": "convex-mono.svg",
+        "light": "convex-light.svg",
+        "dark": "convex-dark.svg",
+        "wide": "convex-wide.svg",
+        "stacked": "convex-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=convex (cdn.simpleicons.org/convex)",
+      "terms": "Simple Icons collection CC0-1.0; Convex trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "cursor",
+      "name": "Cursor",
+      "short": "Cursor",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "cursor.svg",
+        "mono": "cursor-mono.svg",
+        "light": "cursor-light.svg",
+        "dark": "cursor-dark.svg",
+        "wide": "cursor-wide.svg",
+        "stacked": "cursor-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=cursor (cdn.simpleicons.org/cursor)",
+      "terms": "Simple Icons collection CC0-1.0; Cursor trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "drizzle",
+      "name": "Drizzle ORM",
+      "short": "Drizzle ORM",
+      "colour": "#C5F74F",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "drizzle.svg",
+        "mono": "drizzle-mono.svg",
+        "light": "drizzle-light.svg",
+        "dark": "drizzle-dark.svg",
+        "wide": "drizzle-wide.svg",
+        "stacked": "drizzle-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=drizzle (cdn.simpleicons.org/drizzle)",
+      "terms": "Simple Icons collection CC0-1.0; Drizzle ORM trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "excalidraw",
+      "name": "Excalidraw",
+      "short": "Excalidraw",
+      "colour": "#6965DB",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "excalidraw.svg",
+        "mono": "excalidraw-mono.svg",
+        "light": "excalidraw-light.svg",
+        "dark": "excalidraw-dark.svg",
+        "wide": "excalidraw-wide.svg",
+        "stacked": "excalidraw-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=excalidraw (cdn.simpleicons.org/excalidraw)",
+      "terms": "Simple Icons collection CC0-1.0; Excalidraw trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "fastify",
+      "name": "Fastify",
+      "short": "Fastify",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "fastify.svg",
+        "mono": "fastify-mono.svg",
+        "light": "fastify-light.svg",
+        "dark": "fastify-dark.svg",
+        "wide": "fastify-wide.svg",
+        "stacked": "fastify-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=fastify (cdn.simpleicons.org/fastify)",
+      "terms": "Simple Icons collection CC0-1.0; Fastify trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "firefox",
+      "name": "Firefox",
+      "short": "Firefox",
+      "colour": "#FF7139",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "firefox.svg",
+        "mono": "firefox-mono.svg",
+        "light": "firefox-light.svg",
+        "dark": "firefox-dark.svg",
+        "wide": "firefox-wide.svg",
+        "stacked": "firefox-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=firefox (cdn.simpleicons.org/firefox)",
+      "terms": "Simple Icons collection CC0-1.0; Firefox trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "flydotio",
+      "name": "Fly.io",
+      "short": "Fly.io",
+      "colour": "#24175B",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "flydotio.svg",
+        "mono": "flydotio-mono.svg",
+        "light": "flydotio-light.svg",
+        "dark": "flydotio-dark.svg",
+        "wide": "flydotio-wide.svg",
+        "stacked": "flydotio-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=flydotio (cdn.simpleicons.org/flydotio)",
+      "terms": "Simple Icons collection CC0-1.0; Fly.io trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "github",
+      "name": "GitHub",
+      "short": "GitHub",
+      "colour": "#181717",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "github.svg",
+        "mono": "github-mono.svg",
+        "light": "github-light.svg",
+        "dark": "github-dark.svg",
+        "wide": "github-wide.svg",
+        "stacked": "github-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=github (cdn.simpleicons.org/github)",
+      "terms": "Simple Icons collection CC0-1.0; GitHub trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "googlechrome",
+      "name": "Google Chrome",
+      "short": "Google Chrome",
+      "colour": "#4285F4",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "googlechrome.svg",
+        "mono": "googlechrome-mono.svg",
+        "light": "googlechrome-light.svg",
+        "dark": "googlechrome-dark.svg",
+        "wide": "googlechrome-wide.svg",
+        "stacked": "googlechrome-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=googlechrome (cdn.simpleicons.org/googlechrome)",
+      "terms": "Simple Icons collection CC0-1.0; Google Chrome trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "googlegemini",
+      "name": "Google Gemini",
+      "short": "Google Gemini",
+      "colour": "#8E75B2",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "googlegemini.svg",
+        "mono": "googlegemini-mono.svg",
+        "light": "googlegemini-light.svg",
+        "dark": "googlegemini-dark.svg",
+        "wide": "googlegemini-wide.svg",
+        "stacked": "googlegemini-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=googlegemini (cdn.simpleicons.org/googlegemini)",
+      "terms": "Simple Icons collection CC0-1.0; Google Gemini trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "hono",
+      "name": "Hono",
+      "short": "Hono",
+      "colour": "#E36002",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "hono.svg",
+        "mono": "hono-mono.svg",
+        "light": "hono-light.svg",
+        "dark": "hono-dark.svg",
+        "wide": "hono-wide.svg",
+        "stacked": "hono-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=hono (cdn.simpleicons.org/hono)",
+      "terms": "Simple Icons collection CC0-1.0; Hono trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "livekit",
+      "name": "LiveKit",
+      "short": "LiveKit",
+      "colour": "#FFFFFF",
+      "needs_dark_tile": true,
+      "files": {
+        "colour": "livekit.svg",
+        "mono": "livekit-mono.svg",
+        "light": "livekit-light.svg",
+        "dark": "livekit-dark.svg",
+        "wide": "livekit-wide.svg",
+        "stacked": "livekit-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=livekit (cdn.simpleicons.org/livekit)",
+      "terms": "Simple Icons collection CC0-1.0; LiveKit trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "lottiefiles",
+      "name": "LottieFiles",
+      "short": "LottieFiles",
+      "colour": "#00DDB3",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "lottiefiles.svg",
+        "mono": "lottiefiles-mono.svg",
+        "light": "lottiefiles-light.svg",
+        "dark": "lottiefiles-dark.svg",
+        "wide": "lottiefiles-wide.svg",
+        "stacked": "lottiefiles-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=lottiefiles (cdn.simpleicons.org/lottiefiles)",
+      "terms": "Simple Icons collection CC0-1.0; LottieFiles trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "mediapipe",
+      "name": "MediaPipe",
+      "short": "MediaPipe",
+      "colour": "#0097A7",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "mediapipe.svg",
+        "mono": "mediapipe-mono.svg",
+        "light": "mediapipe-light.svg",
+        "dark": "mediapipe-dark.svg",
+        "wide": "mediapipe-wide.svg",
+        "stacked": "mediapipe-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=mediapipe (cdn.simpleicons.org/mediapipe)",
+      "terms": "Simple Icons collection CC0-1.0; MediaPipe trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "meta",
+      "name": "Meta",
+      "short": "Meta",
+      "colour": "#0467DF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "meta.svg",
+        "mono": "meta-mono.svg",
+        "light": "meta-light.svg",
+        "dark": "meta-dark.svg",
+        "wide": "meta-wide.svg",
+        "stacked": "meta-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=meta (cdn.simpleicons.org/meta)",
+      "terms": "Simple Icons collection CC0-1.0; Meta trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "nextdotjs",
+      "name": "Next.js",
+      "short": "Next.js",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "nextdotjs.svg",
+        "mono": "nextdotjs-mono.svg",
+        "light": "nextdotjs-light.svg",
+        "dark": "nextdotjs-dark.svg",
+        "wide": "nextdotjs-wide.svg",
+        "stacked": "nextdotjs-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=nextdotjs (cdn.simpleicons.org/nextdotjs)",
+      "terms": "Simple Icons collection CC0-1.0; Next.js trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "nodedotjs",
+      "name": "Node.js",
+      "short": "Node.js",
+      "colour": "#5FA04E",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "nodedotjs.svg",
+        "mono": "nodedotjs-mono.svg",
+        "light": "nodedotjs-light.svg",
+        "dark": "nodedotjs-dark.svg",
+        "wide": "nodedotjs-wide.svg",
+        "stacked": "nodedotjs-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=nodedotjs (cdn.simpleicons.org/nodedotjs)",
+      "terms": "Simple Icons collection CC0-1.0; Node.js trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "openrouter",
+      "name": "OpenRouter",
+      "short": "OpenRouter",
+      "colour": "#94A3B8",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "openrouter.svg",
+        "mono": "openrouter-mono.svg",
+        "light": "openrouter-light.svg",
+        "dark": "openrouter-dark.svg",
+        "wide": "openrouter-wide.svg",
+        "stacked": "openrouter-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=openrouter (cdn.simpleicons.org/openrouter)",
+      "terms": "Simple Icons collection CC0-1.0; OpenRouter trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "pnpm",
+      "name": "pnpm",
+      "short": "pnpm",
+      "colour": "#F69220",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "pnpm.svg",
+        "mono": "pnpm-mono.svg",
+        "light": "pnpm-light.svg",
+        "dark": "pnpm-dark.svg",
+        "wide": "pnpm-wide.svg",
+        "stacked": "pnpm-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=pnpm (cdn.simpleicons.org/pnpm)",
+      "terms": "Simple Icons collection CC0-1.0; pnpm trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "postgresql",
+      "name": "PostgreSQL",
+      "short": "PostgreSQL",
+      "colour": "#4169E1",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "postgresql.svg",
+        "mono": "postgresql-mono.svg",
+        "light": "postgresql-light.svg",
+        "dark": "postgresql-dark.svg",
+        "wide": "postgresql-wide.svg",
+        "stacked": "postgresql-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=postgresql (cdn.simpleicons.org/postgresql)",
+      "terms": "Simple Icons collection CC0-1.0; PostgreSQL trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "radixui",
+      "name": "Radix UI",
+      "short": "Radix UI",
+      "colour": "#161618",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "radixui.svg",
+        "mono": "radixui-mono.svg",
+        "light": "radixui-light.svg",
+        "dark": "radixui-dark.svg",
+        "wide": "radixui-wide.svg",
+        "stacked": "radixui-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=radixui (cdn.simpleicons.org/radixui)",
+      "terms": "Simple Icons collection CC0-1.0; Radix UI trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "railway",
+      "name": "Railway",
+      "short": "Railway",
+      "colour": "#0B0D0E",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "railway.svg",
+        "mono": "railway-mono.svg",
+        "light": "railway-light.svg",
+        "dark": "railway-dark.svg",
+        "wide": "railway-wide.svg",
+        "stacked": "railway-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=railway (cdn.simpleicons.org/railway)",
+      "terms": "Simple Icons collection CC0-1.0; Railway trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "react",
+      "name": "React",
+      "short": "React",
+      "colour": "#61DAFB",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "react.svg",
+        "mono": "react-mono.svg",
+        "light": "react-light.svg",
+        "dark": "react-dark.svg",
+        "wide": "react-wide.svg",
+        "stacked": "react-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=react (cdn.simpleicons.org/react)",
+      "terms": "Simple Icons collection CC0-1.0; React trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "resend",
+      "name": "Resend",
+      "short": "Resend",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "resend.svg",
+        "mono": "resend-mono.svg",
+        "light": "resend-light.svg",
+        "dark": "resend-dark.svg",
+        "wide": "resend-wide.svg",
+        "stacked": "resend-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=resend (cdn.simpleicons.org/resend)",
+      "terms": "Simple Icons collection CC0-1.0; Resend trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "rive",
+      "name": "Rive",
+      "short": "Rive",
+      "colour": "#1D1D1D",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "rive.svg",
+        "mono": "rive-mono.svg",
+        "light": "rive-light.svg",
+        "dark": "rive-dark.svg",
+        "wide": "rive-wide.svg",
+        "stacked": "rive-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=rive (cdn.simpleicons.org/rive)",
+      "terms": "Simple Icons collection CC0-1.0; Rive trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "safari",
+      "name": "Safari",
+      "short": "Safari",
+      "colour": "#006CFF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "safari.svg",
+        "mono": "safari-mono.svg",
+        "light": "safari-light.svg",
+        "dark": "safari-dark.svg",
+        "wide": "safari-wide.svg",
+        "stacked": "safari-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=safari (cdn.simpleicons.org/safari)",
+      "terms": "Simple Icons collection CC0-1.0; Safari trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "shadcnui",
+      "name": "shadcn/ui",
+      "short": "shadcn/ui",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "shadcnui.svg",
+        "mono": "shadcnui-mono.svg",
+        "light": "shadcnui-light.svg",
+        "dark": "shadcnui-dark.svg",
+        "wide": "shadcnui-wide.svg",
+        "stacked": "shadcnui-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=shadcnui (cdn.simpleicons.org/shadcnui)",
+      "terms": "Simple Icons collection CC0-1.0; shadcn/ui trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "stripe",
+      "name": "Stripe",
+      "short": "Stripe",
+      "colour": "#635BFF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "stripe.svg",
+        "mono": "stripe-mono.svg",
+        "light": "stripe-light.svg",
+        "dark": "stripe-dark.svg",
+        "wide": "stripe-wide.svg",
+        "stacked": "stripe-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=stripe (cdn.simpleicons.org/stripe)",
+      "terms": "Simple Icons collection CC0-1.0; Stripe trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "supabase",
+      "name": "Supabase",
+      "short": "Supabase",
+      "colour": "#3FCF8E",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "supabase.svg",
+        "mono": "supabase-mono.svg",
+        "light": "supabase-light.svg",
+        "dark": "supabase-dark.svg",
+        "wide": "supabase-wide.svg",
+        "stacked": "supabase-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=supabase (cdn.simpleicons.org/supabase)",
+      "terms": "Simple Icons collection CC0-1.0; Supabase trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "tailwindcss",
+      "name": "Tailwind CSS",
+      "short": "Tailwind CSS",
+      "colour": "#06B6D4",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "tailwindcss.svg",
+        "mono": "tailwindcss-mono.svg",
+        "light": "tailwindcss-light.svg",
+        "dark": "tailwindcss-dark.svg",
+        "wide": "tailwindcss-wide.svg",
+        "stacked": "tailwindcss-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=tailwindcss (cdn.simpleicons.org/tailwindcss)",
+      "terms": "Simple Icons collection CC0-1.0; Tailwind CSS trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "typescript",
+      "name": "TypeScript",
+      "short": "TypeScript",
+      "colour": "#3178C6",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "typescript.svg",
+        "mono": "typescript-mono.svg",
+        "light": "typescript-light.svg",
+        "dark": "typescript-dark.svg",
+        "wide": "typescript-wide.svg",
+        "stacked": "typescript-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=typescript (cdn.simpleicons.org/typescript)",
+      "terms": "Simple Icons collection CC0-1.0; TypeScript trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "vercel",
+      "name": "Vercel",
+      "short": "Vercel",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "vercel.svg",
+        "mono": "vercel-mono.svg",
+        "light": "vercel-light.svg",
+        "dark": "vercel-dark.svg",
+        "wide": "vercel-wide.svg",
+        "stacked": "vercel-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=vercel (cdn.simpleicons.org/vercel)",
+      "terms": "Simple Icons collection CC0-1.0; Vercel trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "vite",
+      "name": "Vite",
+      "short": "Vite",
+      "colour": "#9135FF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "vite.svg",
+        "mono": "vite-mono.svg",
+        "light": "vite-light.svg",
+        "dark": "vite-dark.svg",
+        "wide": "vite-wide.svg",
+        "stacked": "vite-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=vite (cdn.simpleicons.org/vite)",
+      "terms": "Simple Icons collection CC0-1.0; Vite trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "vitest",
+      "name": "Vitest",
+      "short": "Vitest",
+      "colour": "#00FF74",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "vitest.svg",
+        "mono": "vitest-mono.svg",
+        "light": "vitest-light.svg",
+        "dark": "vitest-dark.svg",
+        "wide": "vitest-wide.svg",
+        "stacked": "vitest-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=vitest (cdn.simpleicons.org/vitest)",
+      "terms": "Simple Icons collection CC0-1.0; Vitest trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "webflow",
+      "name": "Webflow",
+      "short": "Webflow",
+      "colour": "#146EF5",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "webflow.svg",
+        "mono": "webflow-mono.svg",
+        "light": "webflow-light.svg",
+        "dark": "webflow-dark.svg",
+        "wide": "webflow-wide.svg",
+        "stacked": "webflow-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=webflow (cdn.simpleicons.org/webflow)",
+      "terms": "Simple Icons collection CC0-1.0; Webflow trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "webrtc",
+      "name": "WebRTC",
+      "short": "WebRTC",
+      "colour": "#333333",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "webrtc.svg",
+        "mono": "webrtc-mono.svg",
+        "light": "webrtc-light.svg",
+        "dark": "webrtc-dark.svg",
+        "wide": "webrtc-wide.svg",
+        "stacked": "webrtc-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=webrtc (cdn.simpleicons.org/webrtc)",
+      "terms": "Simple Icons collection CC0-1.0; WebRTC trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "x",
+      "name": "X (xAI / Grok)",
+      "short": "X",
+      "colour": "#000000",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "x.svg",
+        "mono": "x-mono.svg",
+        "light": "x-light.svg",
+        "dark": "x-dark.svg",
+        "wide": "x-wide.svg",
+        "stacked": "x-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=x (cdn.simpleicons.org/x)",
+      "terms": "Simple Icons collection CC0-1.0; X (xAI / Grok) trademark belongs to its owner",
+      "checked": "2026-09-29"
+    },
+    {
+      "slug": "zod",
+      "name": "Zod",
+      "short": "Zod",
+      "colour": "#408AFF",
+      "needs_dark_tile": false,
+      "files": {
+        "colour": "zod.svg",
+        "mono": "zod-mono.svg",
+        "light": "zod-light.svg",
+        "dark": "zod-dark.svg",
+        "wide": "zod-wide.svg",
+        "stacked": "zod-stacked.svg"
+      },
+      "lockups_are_ours": true,
+      "source": "https://simpleicons.org/?q=zod (cdn.simpleicons.org/zod)",
+      "terms": "Simple Icons collection CC0-1.0; Zod trademark belongs to its owner",
+      "checked": "2026-09-29"
+    }
+  ]
+}

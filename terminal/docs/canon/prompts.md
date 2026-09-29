@@ -514,6 +514,7 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 > PS: we're going to need the Logo system to do lightmode and dark mode and transparent and more as well as each of the configurations of that logo like wide, icon only, etc.   we might even consider using an inexpensive vectororizer tool as needed, and or 3D .... Of course each step is a cost question, but ultimately each layer of automated enhancements and info gathering and generating stuff will be an interesting part of the system working ahead, and optimizing things behind the scenes
 
 **What happened:** Ontology, connectors and migration answered as proposals ([reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), decisions C-061 to C-063. FreshStack nesting and logo variants went to another session.
+Justin's session, same message: FreshStack nesting (Jev under OpenRouter, Gemini Live and OpenAI Realtime under LiveKit, marks on cards) and the logo configuration set (C-067, C-068).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790649886.159139
 
 ## 60. Mon Sep 28, 9:45 PM CDT · 2026-09-29 02:45:16 UTC
@@ -536,3 +537,19 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 
 **What happened:** Built in pass 5: every Open terminal goes straight to a new box with that terminal's theme and skin. Decision C-060.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649998972349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790649998.972349
+
+## 63. Mon Sep 28, 9:54 PM CDT · 2026-09-29 02:54:29 UTC
+
+> command v is triggering the voice tool in terminal. the voice tool doesnt seem to work. I wrote the following thinking it would do something, but then nothing happened . Paste did not paste. There were issues moving the cursor around. Also i wanted to see my text spellcheck and format itself automatically, above where i'm writing. Like a type writer has the page growing taller. then i can edit text either in my rough writing pad, or the formated one above. and use the chips and stuff too.
+
+(With a screenshot of two long prompts in the live terminal that got no reply; the first asked for a tools icon in the top bar hiding everything but the money counter, noted that "make sure" was split into two chips and that "Money Counter" and "Top Bar" were tagged only in Title Case; the second asked for a timer and model line per reply in smaller letters.)
+
+**What happened:** Cmd+V and the cursor fixed (C-069); the formatted page above the pad and the tools tray queued in the same session; the two unanswered prompts are being looked at (the router was healthy at 02:57 UTC).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790650469.518959
+
+## 64. Mon Sep 28, 9:56 PM CDT · 2026-09-29 02:56:40 UTC
+
+> i cant seem to remove a box from the left side. menu should probably be in the top bar and even hidden as a tool we can add form to the top bar tray or leave hidden behind the tray menu config
+
+**What happened:** Box removal shipped (C-069). The top-bar tray with the menu and tools behind it is the next piece.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790650600.637069

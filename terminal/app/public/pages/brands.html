@@ -1,21 +1,91 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Brand marks</title>
 <style>
-:root{--bg:#0b0d10;--bg-2:#12151a;--fg:#e8eaed;--muted:#8d939c;--line:#242830;--accent:#8ee6a1;color-scheme:dark;font-size:18px}
-@media (prefers-color-scheme: light){:root{--bg:#f3f4f2;--bg-2:#fff;--fg:#15181d;--muted:#5b6169;--line:#d9dce0;--accent:#1f8a45;color-scheme:light}}
+:root{--bg:#0b0d10;--bg-2:#12151a;--fg:#e8eaed;--muted:#8d939c;--line:#242830;--line-2:#3a404a;--accent:#8ee6a1;color-scheme:dark;font-size:18px}
+:root[data-theme='light']{--bg:#f3f4f2;--bg-2:#fff;--fg:#15181d;--muted:#5b6169;--line:#d9dce0;--line-2:#b9bec6;--accent:#1f8a45;color-scheme:light}
+@media (prefers-color-scheme: light){:root:not([data-theme='dark']){--bg:#f3f4f2;--bg-2:#fff;--fg:#15181d;--muted:#5b6169;--line:#d9dce0;--line-2:#b9bec6;--accent:#1f8a45;color-scheme:light}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
 .wrap{max-width:1680px;margin:auto;padding:clamp(24px,4vw,64px) clamp(16px,3.5vw,56px);display:grid;gap:1.5rem}
 nav{font-size:.9rem;color:var(--muted)}nav a{color:var(--muted);text-decoration:none}h1{margin:0;font-size:clamp(1.9rem,1.3rem + 1.6vw,3.1rem);font-weight:600;letter-spacing:-.015em}
 p{margin:0;max-width:62ch;color:var(--muted)}a{color:var(--accent)}
-.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-figure{margin:0;display:grid;gap:.6rem;justify-items:center;padding:1.1rem .8rem;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;text-align:center}
-figure img{width:32px;height:32px;object-fit:contain}.tile{width:56px;height:56px;border-radius:12px;background:#fff;display:grid;place-items:center}.tile.dark{background:#0b0d10;border:1px solid var(--line)}figure.text .mark{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:var(--fg);color:var(--bg);font-weight:700;font-size:1.4rem}
-figcaption{font-size:.9rem;display:grid}figcaption small{color:var(--muted);font-size:.75rem}
 .row{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}.pill{font:600 .74rem ui-monospace,monospace;text-transform:uppercase;padding:.15rem .55rem;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:.25rem;padding:.25rem;border:1px solid var(--line);border-radius:999px}
+.seg button{min-height:44px;padding:0 .9rem;border:0;border-radius:999px;background:transparent;color:var(--muted);font:inherit;font-size:.9rem;cursor:pointer}
+.seg button[aria-pressed='true']{background:var(--fg);color:var(--bg)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+.grid[data-variant='wide']{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+figure{margin:0;display:grid;gap:.6rem;justify-items:center;align-content:start;padding:1.1rem .8rem;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;text-align:center}
+.tile{min-width:56px;height:56px;padding:0 .6rem;border-radius:12px;display:grid;place-items:center;color:var(--fg)}
+.tile[data-bg='white']{background:#fff;color:#15181d}.tile[data-bg='black']{background:#0b0d10;color:#e8eaed;border:1px solid var(--line)}
+.tile img{height:32px;width:auto;max-width:100%;object-fit:contain;display:block}
+.tile img.stacked{height:56px}
+.tile img.wide{height:24px}
+figure.text .mark{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:var(--fg);color:var(--bg);font-weight:700;font-size:1.4rem}
+figcaption{font-size:.9rem;display:grid}figcaption small{color:var(--muted);font-size:.75rem}
+.sizes{display:flex;gap:.5rem;align-items:center;color:var(--fg)}.sizes img{display:block}
+h2{margin:1rem 0 0;font-size:1.2rem;font-weight:600}
+.foot{font-size:.9rem}
 </style></head><body><div class="wrap">
 <nav><a href="../">Fresh Terminal</a> / <a href="library.html">Library</a> / Brand marks</nav>
 <h1>Brand marks</h1>
-<p>Every company, product and tool named so far, as a stored SVG. 43 gathered from Simple Icons (CC0 collection; each mark belongs to its owner), 12 waiting on their official brand pages and shown as text marks. Sizes and light/dark checks per the <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/skills/logos-and-icons/SKILL.md">logos-and-icons skill</a>; the <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/brand/registry.md">registry</a> has one line per file.</p>
-<div class="row"><span class="pill">43 svg</span><span class="pill">12 text marks</span><span class="pill">checked 2026-09-29</span></div>
-<div class="grid"><figure><span class="tile"><img src="../brand/cloudflare/cloudflare.svg" alt="Cloudflare logo" loading="lazy"></span><figcaption>Cloudflare</figcaption></figure><figure><span class="tile"><img src="../brand/github/github.svg" alt="GitHub logo" loading="lazy"></span><figcaption>GitHub</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">S</span><figcaption>SpacetimeDB<small>text mark</small></figcaption></figure><figure><span class="tile dark"><img src="../brand/livekit/livekit.svg" alt="LiveKit logo" loading="lazy"></span><figcaption>LiveKit</figcaption></figure><figure><span class="tile"><img src="../brand/openrouter/openrouter.svg" alt="OpenRouter logo" loading="lazy"></span><figcaption>OpenRouter</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">O</span><figcaption>OpenAI<small>text mark</small></figcaption></figure><figure><span class="tile"><img src="../brand/googlegemini/googlegemini.svg" alt="Google Gemini logo" loading="lazy"></span><figcaption>Google Gemini</figcaption></figure><figure><span class="tile"><img src="../brand/anthropic/anthropic.svg" alt="Anthropic logo" loading="lazy"></span><figcaption>Anthropic</figcaption></figure><figure><span class="tile"><img src="../brand/claude/claude.svg" alt="Claude logo" loading="lazy"></span><figcaption>Claude</figcaption></figure><figure><span class="tile"><img src="../brand/clerk/clerk.svg" alt="Clerk logo" loading="lazy"></span><figcaption>Clerk</figcaption></figure><figure><span class="tile"><img src="../brand/stripe/stripe.svg" alt="Stripe logo" loading="lazy"></span><figcaption>Stripe</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">H</span><figcaption>Hyperbeam<small>text mark</small></figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">B</span><figcaption>Browserbase<small>text mark</small></figcaption></figure><figure><span class="tile"><img src="../brand/flydotio/flydotio.svg" alt="Fly.io logo" loading="lazy"></span><figcaption>Fly.io</figcaption></figure><figure><span class="tile"><img src="../brand/vite/vite.svg" alt="Vite logo" loading="lazy"></span><figcaption>Vite</figcaption></figure><figure><span class="tile"><img src="../brand/react/react.svg" alt="React logo" loading="lazy"></span><figcaption>React</figcaption></figure><figure><span class="tile"><img src="../brand/typescript/typescript.svg" alt="TypeScript logo" loading="lazy"></span><figcaption>TypeScript</figcaption></figure><figure><span class="tile"><img src="../brand/hono/hono.svg" alt="Hono logo" loading="lazy"></span><figcaption>Hono</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">P</span><figcaption>Playwright<small>text mark</small></figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">S</span><figcaption>Slack<small>text mark</small></figcaption></figure><figure><span class="tile"><img src="../brand/cursor/cursor.svg" alt="Cursor logo" loading="lazy"></span><figcaption>Cursor</figcaption></figure><figure><span class="tile"><img src="../brand/x/x.svg" alt="X (xAI / Grok) logo" loading="lazy"></span><figcaption>X (xAI / Grok)</figcaption></figure><figure><span class="tile"><img src="../brand/meta/meta.svg" alt="Meta logo" loading="lazy"></span><figcaption>Meta</figcaption></figure><figure><span class="tile"><img src="../brand/excalidraw/excalidraw.svg" alt="Excalidraw logo" loading="lazy"></span><figcaption>Excalidraw</figcaption></figure><figure><span class="tile"><img src="../brand/mediapipe/mediapipe.svg" alt="MediaPipe logo" loading="lazy"></span><figcaption>MediaPipe</figcaption></figure><figure><span class="tile"><img src="../brand/rive/rive.svg" alt="Rive logo" loading="lazy"></span><figcaption>Rive</figcaption></figure><figure><span class="tile"><img src="../brand/lottiefiles/lottiefiles.svg" alt="LottieFiles logo" loading="lazy"></span><figcaption>LottieFiles</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">L</span><figcaption>Liveblocks<small>text mark</small></figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">C</span><figcaption>Colyseus<small>text mark</small></figcaption></figure><figure><span class="tile"><img src="../brand/supabase/supabase.svg" alt="Supabase logo" loading="lazy"></span><figcaption>Supabase</figcaption></figure><figure><span class="tile"><img src="../brand/nextdotjs/nextdotjs.svg" alt="Next.js logo" loading="lazy"></span><figcaption>Next.js</figcaption></figure><figure><span class="tile"><img src="../brand/tailwindcss/tailwindcss.svg" alt="Tailwind CSS logo" loading="lazy"></span><figcaption>Tailwind CSS</figcaption></figure><figure><span class="tile"><img src="../brand/shadcnui/shadcnui.svg" alt="shadcn/ui logo" loading="lazy"></span><figcaption>shadcn/ui</figcaption></figure><figure><span class="tile"><img src="../brand/radixui/radixui.svg" alt="Radix UI logo" loading="lazy"></span><figcaption>Radix UI</figcaption></figure><figure><span class="tile"><img src="../brand/zod/zod.svg" alt="Zod logo" loading="lazy"></span><figcaption>Zod</figcaption></figure><figure><span class="tile"><img src="../brand/vitest/vitest.svg" alt="Vitest logo" loading="lazy"></span><figcaption>Vitest</figcaption></figure><figure><span class="tile"><img src="../brand/nodedotjs/nodedotjs.svg" alt="Node.js logo" loading="lazy"></span><figcaption>Node.js</figcaption></figure><figure><span class="tile"><img src="../brand/pnpm/pnpm.svg" alt="pnpm logo" loading="lazy"></span><figcaption>pnpm</figcaption></figure><figure><span class="tile"><img src="../brand/postgresql/postgresql.svg" alt="PostgreSQL logo" loading="lazy"></span><figcaption>PostgreSQL</figcaption></figure><figure><span class="tile"><img src="../brand/drizzle/drizzle.svg" alt="Drizzle ORM logo" loading="lazy"></span><figcaption>Drizzle ORM</figcaption></figure><figure><span class="tile"><img src="../brand/fastify/fastify.svg" alt="Fastify logo" loading="lazy"></span><figcaption>Fastify</figcaption></figure><figure><span class="tile"><img src="../brand/convex/convex.svg" alt="Convex logo" loading="lazy"></span><figcaption>Convex</figcaption></figure><figure><span class="tile dark"><img src="../brand/betterauth/betterauth.svg" alt="Better Auth logo" loading="lazy"></span><figcaption>Better Auth</figcaption></figure><figure><span class="tile"><img src="../brand/webrtc/webrtc.svg" alt="WebRTC logo" loading="lazy"></span><figcaption>WebRTC</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">W</span><figcaption>W3C<small>text mark</small></figcaption></figure><figure><span class="tile"><img src="../brand/googlechrome/googlechrome.svg" alt="Google Chrome logo" loading="lazy"></span><figcaption>Google Chrome</figcaption></figure><figure><span class="tile"><img src="../brand/firefox/firefox.svg" alt="Firefox logo" loading="lazy"></span><figcaption>Firefox</figcaption></figure><figure><span class="tile"><img src="../brand/safari/safari.svg" alt="Safari logo" loading="lazy"></span><figcaption>Safari</figcaption></figure><figure><span class="tile"><img src="../brand/railway/railway.svg" alt="Railway logo" loading="lazy"></span><figcaption>Railway</figcaption></figure><figure><span class="tile"><img src="../brand/resend/resend.svg" alt="Resend logo" loading="lazy"></span><figcaption>Resend</figcaption></figure><figure><span class="tile"><img src="../brand/webflow/webflow.svg" alt="Webflow logo" loading="lazy"></span><figcaption>Webflow</figcaption></figure><figure><span class="tile"><img src="../brand/vercel/vercel.svg" alt="Vercel logo" loading="lazy"></span><figcaption>Vercel</figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">P</span><figcaption>Puck<small>text mark</small></figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">Y</span><figcaption>Yjs<small>text mark</small></figcaption></figure><figure class="text"><span class="mark" aria-hidden="true">E</span><figcaption>Electric SQL<small>text mark</small></figcaption></figure></div>
-</div></body></html>
+<p>Every company, product and tool named so far, as stored SVG. Each gathered mark ships in six configurations: official colour, mono (takes the text colour), fixed light, fixed dark, and two lockups of ours (wide and stacked) that put the name next to the icon in the house font. All files are transparent. Sources and terms per file are in the <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/brand/registry.md">registry</a>; rules in the <a href="https://github.com/imagine-os/fresh-terminal/blob/main/terminal/skills/logos-and-icons/SKILL.md">logos-and-icons skill</a>; the machine-readable list is <a href="../brand/index.json">brand/index.json</a>.</p>
+<div class="row">
+  <div class="seg" role="group" aria-label="Configuration">
+    <button type="button" data-variant="colour" aria-pressed="true">Colour</button>
+    <button type="button" data-variant="mono">Mono</button>
+    <button type="button" data-variant="light">Light</button>
+    <button type="button" data-variant="dark">Dark</button>
+    <button type="button" data-variant="wide">Wide</button>
+    <button type="button" data-variant="stacked">Stacked</button>
+  </div>
+  <div class="seg" role="group" aria-label="Page theme">
+    <button type="button" data-theme="dark">Dark page</button>
+    <button type="button" data-theme="light">Light page</button>
+  </div>
+  <span class="pill" id="count">loading</span><span class="pill">checked 2026-09-29</span>
+</div>
+<div class="grid" id="grid" data-variant="colour"></div>
+<h2>Not gathered yet (text marks)</h2>
+<p>Not in Simple Icons; the registry names the official source to try for each. Shown as a letter until then.</p>
+<div class="grid" id="text"></div>
+<h2>Sizes</h2>
+<p>Every mark is checked at 16, 24, 48 and 128 px on both page themes. This row shows the mono configuration of the first mark at each size.</p>
+<div class="sizes" id="sizes"></div>
+<p class="foot">Configurations are generated by <code>node scripts/brand-variants.mjs</code> from the colour file; edit the source and re-run rather than editing variants by hand. Raster PNG export, tracing raster-only logos to vectors, and 3D versions are later, costed layers (see the skill).</p>
+</div>
+<script>
+(function () {
+  var TEXT = [['SpacetimeDB','S'],['OpenAI','O'],['Hyperbeam','H'],['Browserbase','B'],['Playwright','P'],['Slack','S'],['Liveblocks','L'],['Colyseus','C'],['W3C','W'],['Puck','P'],['Yjs','Y'],['Electric SQL','E']];
+  var variant = 'colour';
+  var grid = document.getElementById('grid');
+  var marks = [];
+  function el(tag, attrs, children) { var n = document.createElement(tag); Object.keys(attrs || {}).forEach(function (k) { if (k === 'text') n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }); (children || []).forEach(function (c) { if (c) n.appendChild(c); }); return n; }
+  function bgFor(m) {
+    // Colour marks that are white need a dark tile; black marks need a white tile so they read on any page.
+    if (variant !== 'colour') return 'none';
+    if (m.needs_dark_tile) return 'black';
+    return 'white';
+  }
+  function render() {
+    grid.textContent = '';
+    grid.setAttribute('data-variant', variant);
+    marks.forEach(function (m) {
+      var img = el('img', { src: '../brand/' + m.slug + '/' + m.files[variant], alt: m.name + ' logo' + (variant === 'wide' || variant === 'stacked' ? ' (our lockup)' : ''), loading: 'lazy', 'class': variant });
+      grid.appendChild(el('figure', null, [ el('span', { 'class': 'tile', 'data-bg': bgFor(m) }, [img]), el('figcaption', null, [ document.createTextNode(m.name), el('small', { text: m.files[variant] }) ]) ]));
+    });
+    document.querySelectorAll('[data-variant]').forEach(function (b) { if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', String(b.getAttribute('data-variant') === variant)); });
+  }
+  document.querySelectorAll('.seg button[data-variant]').forEach(function (b) { b.addEventListener('click', function () { variant = b.getAttribute('data-variant'); render(); }); });
+  document.querySelectorAll('.seg button[data-theme]').forEach(function (b) { b.addEventListener('click', function () { document.documentElement.setAttribute('data-theme', b.getAttribute('data-theme')); document.querySelectorAll('.seg button[data-theme]').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); }); }); });
+  var text = document.getElementById('text');
+  TEXT.forEach(function (t) { text.appendChild(el('figure', { 'class': 'text' }, [ el('span', { 'class': 'mark', 'aria-hidden': 'true', text: t[1] }), el('figcaption', null, [ document.createTextNode(t[0]), el('small', { text: 'text mark' }) ]) ])); });
+  fetch('../brand/index.json').then(function (r) { return r.json(); }).then(function (data) {
+    marks = data.marks;
+    document.getElementById('count').textContent = marks.length + ' marks × 6 files · ' + TEXT.length + ' text marks';
+    render();
+    var sizes = document.getElementById('sizes');
+    [16, 24, 48, 128].forEach(function (s) { sizes.appendChild(el('img', { src: '../brand/' + marks[0].slug + '/' + marks[0].files.mono, width: String(s), height: String(s), alt: marks[0].name + ' at ' + s + ' px' })); });
+  }).catch(function () { document.getElementById('count').textContent = 'index.json not reachable'; });
+})();
+</script>
+</body></html>
