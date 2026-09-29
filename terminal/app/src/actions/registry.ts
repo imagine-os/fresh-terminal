@@ -91,9 +91,14 @@ export const CANVAS_ACTIONS: ActionDecl[] = [
   { id: 'canvas.pan', intent: 'pan the canvas', permission: 'anyone', shortcut: 'arrows' },
   { id: 'canvas.zoom', intent: 'zoom the canvas', permission: 'anyone', shortcut: '+ / -' },
   { id: 'canvas.fit', intent: 'fit all cards', permission: 'anyone', shortcut: '0' },
-  { id: 'canvas.card.move', intent: 'move the focused card', permission: 'anyone', shortcut: 'arrows' },
-  { id: 'canvas.card.open', intent: 'open the card', permission: 'anyone' },
+  { id: 'canvas.zoom.reset', intent: 'zoom the canvas to 100%', permission: 'anyone', shortcut: '1' },
+  { id: 'canvas.minimap', intent: 'show or hide the minimap', permission: 'anyone' },
+  { id: 'canvas.card.move', intent: 'move the focused card', permission: 'anyone', shortcut: 'alt+arrows' },
+  { id: 'canvas.card.select', intent: 'select a card and show its live preview', permission: 'anyone', shortcut: 'enter' },
+  { id: 'canvas.card.open', intent: 'open the card', permission: 'anyone', shortcut: 'enter twice' },
   { id: 'canvas.card.add', intent: 'add a card', permission: 'anyone' },
+  { id: 'canvas.tidy', intent: 'put moved cards back in their sections', permission: 'anyone' },
+  { id: 'canvas.v1', intent: 'open the archived first canvas', permission: 'anyone' },
 ];
 
 export const PAGE_ACTIONS: Record<string, ActionDecl[]> = {

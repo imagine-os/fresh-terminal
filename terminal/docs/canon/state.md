@@ -8,10 +8,11 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | --- | --- | --- |
 | Fresh Terminal site | https://imagine-os.github.io/fresh-terminal/ | 2026-09-29 00:07 UTC |
 | A box | `/box/<id>`; new box in a theme: `/box/new?theme=<id>` | 2026-09-28 |
-| Master canvas | https://imagine-os.github.io/fresh-terminal/canvas (press `C`) | 2026-09-28 |
+| Master canvas v2 (paper sheets, sections, minimap; C-081) | https://imagine-os.github.io/fresh-terminal/canvas (press `C`); archived v1 at `/canvas?v=1` | 2026-09-29 04:20 UTC |
 | Plan viewer (kanban, list, timeline) | https://imagine-os.github.io/fresh-terminal/plan (also dev mode, `D`) | 2026-09-28 |
 | Library of terminals | https://imagine-os.github.io/fresh-terminal/pages/library.html | 2026-09-29 00:07 UTC |
-| Koi pond v2 (pass 4 push) | https://imagine-os.github.io/fresh-terminal/pages/koi.html | 2026-09-29, pass 4 |
+| Koi pond v3 (opens top-down, tilts up; C-080) | https://imagine-os.github.io/fresh-terminal/pages/koi.html | 2026-09-29 04:20 UTC |
+| Koi pond v2 (archived) | https://imagine-os.github.io/fresh-terminal/pages/koi-v2.html (was `pages/koi.html` until v3) | 2026-09-29, pass 4 |
 | Koi pond v1 | https://imagine-os.github.io/fresh-terminal/pages/koi-v1.html (was `pages/koi.html` until pass 4) | 2026-09-29 00:07 UTC |
 | FreshStack (the default stack, three modes, exit per piece) | https://imagine-os.github.io/fresh-terminal/pages/freshstack.html | 2026-09-29 02:20 UTC, live on the next Pages deploy |
 | Replay of a box (playback scrubber, every step, interface as it was) | https://imagine-os.github.io/fresh-terminal/ then press `P`, or `/box/<id>/play` | 2026-09-29 02:45 UTC, live on the next Pages deploy |
@@ -80,7 +81,7 @@ As of 2026-09-29:
 - Voice controller over the actions list; TV remote and gamepad navigation.
 - Koi pond as an in-app theme (it's a separate page for now); `window.pond` is not wired to ops yet (pass 5).
 - ~~freshterminal.ai and api.freshterminal.ai (bought 2026-09-29, C-045; not pointed at anything yet).~~ Superseded 2026-09-29 (C-064): both are deployed as Worker custom domains.
-- Canvas grouping, long-paper scroll cards, image upload.
+- Long-paper scroll cards, image upload, live (not scripted) card screenshots. Canvas grouping shipped in v2 (2026-09-29).
 - Company OS connection. Import of old repos and data.
 - Replay: branching and merging from a step (`playback.branch`), audio and video steps (`playback.media`). The timeline shape (parent ids, branch id) is ready for both. 2026-09-29.
 

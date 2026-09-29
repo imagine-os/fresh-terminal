@@ -16,7 +16,7 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-078) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-081) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
 | [canon/prompts.md](canon/prompts.md) | All 73 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
@@ -52,6 +52,7 @@ Read this first.
 | [prompts/0015-wiki.md](prompts/0015-wiki.md) | Keep the documentation wiki current, as a rule | 2026-09-29 |
 | [prompts/0016-playback.md](prompts/0016-playback.md) | A playback scrubber for every step of a session; "evolve as we grow" | 2026-09-29 |
 | [prompts/0017-domain-clerk-d1.md](prompts/0017-domain-clerk-d1.md) | "i already did cloudflare clerk": freshterminal.ai, sign-in and D1 unblocked | 2026-09-29 |
+| [prompts/0018-koi-v3-canvas-v2.md](prompts/0018-koi-v3-canvas-v2.md) | "koi pond 2 came out terrible" and "The canvas you made is awful": koi v3 and canvas v2 | 2026-09-29 |
 
 ## 4. Decisions: one per file
 
@@ -78,6 +79,7 @@ Read this first.
 | [decisions/0019-playback.md](decisions/0019-playback.md) | Every step is a saved event with parents; replay first, branches and merges later | 2026-09-29 |
 | [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md) | freshterminal.ai on Workers, Clerk anonymous-first, accounts, boxes and ledger mirror in D1 | 2026-09-29 |
 | [decisions/0021-free-credits.md](decisions/0021-free-credits.md) | Free credits enforced by the router: grants, soft prompts, abuse limits, daily cap, cost estimates | 2026-09-29 |
+| [decisions/0022-koi-v3-and-canvas-v2.md](decisions/0022-koi-v3-and-canvas-v2.md) | Koi pond v3 (top-down, then tilt up; photographic) and canvas v2 (paper sheets, sections, minimap): what was wrong, what was chosen and why | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
 
@@ -93,6 +95,7 @@ Read this first.
 | [changelog/0008.md](changelog/0008.md) | Free credits enforced by the router, with the live check | 2026-09-29 |
 | [changelog/0009.md](changelog/0009.md) | Product Hunt strategy page (proposed launch plan, C-077) | 2026-09-29 |
 | [changelog/0010.md](changelog/0010.md) | Readable text over photo and material skins: sampled scrim, AA text, neutral small text | 2026-09-29 |
+| [changelog/0011.md](changelog/0011.md) | Koi pond v3 and canvas v2 redo, best-of-3 rounds, before/after screenshots, live check | 2026-09-29 |
 
 ## 6. Reference
 
@@ -101,7 +104,8 @@ Read this first.
 | [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API (incl. `/skin/*`, `/me`, `/sync/*`), ops as tools, `refine()`, `window.pond`, D1, SpacetimeDB, CLI, MCP, deploy workflows | 2026-09-29 |
 | [pages/landing.md](pages/landing.md) | Page spec: landing (`/`) | 2026-09-29 |
 | [pages/box.md](pages/box.md) | Page spec: a box (`/box/:id`), with pass 4's menu, edits and chips | 2026-09-29 |
-| [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas (`/canvas`) | 2026-09-28 |
+| [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas v2 (`/canvas`; v1 at `?v=1`) | 2026-09-29 |
+| [pages/koi.md](pages/koi.md) | Page spec: koi pond v3 (`/pages/koi.html`): views, controls, URL options, versions | 2026-09-29 |
 | [pages/producthunt.md](pages/producthunt.md) | Page doc: the Product Hunt strategy (`/pages/producthunt.html`): the call, pitch pick, readiness, costs; proposed | 2026-09-29 |
 | [brand/registry.md](brand/registry.md) | Every brand mark in the repo: file, source, licence, date checked; what is still missing | 2026-09-29 |
 | [qa/responsive-latest.md](qa/responsive-latest.md) | The latest responsive check: 28 pages and widths (landing, box, canvas, replay), 360 to 3840 | 2026-09-29 |
