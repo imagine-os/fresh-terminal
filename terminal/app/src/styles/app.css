@@ -3948,3 +3948,51 @@ textarea.field-input {
     transition: opacity 400ms ease;
   }
 }
+
+/* ---------- C-096: a tighter tools menu (Justin) ---------- */
+.tray {
+  width: min(14.5rem, calc(100vw - 2rem));
+  max-height: none;
+  overflow: visible;
+  padding: 0.25rem;
+  gap: 0;
+}
+.tray-list {
+  gap: 0;
+}
+.row-button {
+  min-height: 2.1rem;
+  gap: 0.45rem;
+  padding: 0 0.45rem 0 0.4rem;
+  font-size: var(--type-whisper);
+}
+.row-detail {
+  margin-top: -0.3rem;
+  padding-bottom: 0.2rem;
+  font-size: 0.7rem;
+}
+.tray-tool.row[data-pair='true'] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.15rem;
+}
+.tray-tool.row[data-pair='true'] .row-button {
+  grid-template-columns: 1.2rem minmax(0, 1fr);
+}
+.tray-tool.row[data-pair='true'] .tray-pin {
+  display: none;
+}
+.tray-section + .tray-section {
+  padding-top: 0.1rem;
+  margin-top: 0.1rem;
+}
+.tray-foot {
+  padding: 0.25rem 0.4rem 0.15rem;
+  font-size: 0.7rem;
+}
+@media (max-width: 40rem) {
+  .tray {
+    max-height: 80vh;
+    overflow: auto;
+  }
+}

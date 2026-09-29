@@ -54,18 +54,12 @@ jobs:
         env:
           SPACETIMEDB_TOKEN: ${{ secrets.SPACETIMEDB_TOKEN }}
         run: spacetime login --token "$SPACETIMEDB_TOKEN"
-      - name: Publish to Maincloud
+      - name: Publish to Maincloud (the CLI bundles src/index.ts itself; spacetime.json only names the database)
         working-directory: terminal/module
-        run: |
-          spacetime publish --server maincloud --yes "$DATABASE" --project-path . \
-            || spacetime publish --server maincloud --yes "$DATABASE" --module-path . \
-            || spacetime publish --server maincloud --yes "$DATABASE"
+        run: spacetime publish --server maincloud --yes "$DATABASE" --module-path .
       - name: Generate TypeScript bindings for the app
         working-directory: terminal/module
-        run: |
-          spacetime generate --lang typescript --out-dir ../app/src/module_bindings --project-path . \
-            || spacetime generate --lang typescript --out-dir ../app/src/module_bindings --module-path . \
-            || spacetime generate --lang typescript --out-dir ../app/src/module_bindings
+        run: spacetime generate --lang typescript --out-dir ../app/src/module_bindings --module-path . --yes
       - name: Describe the live database (names only)
         run: spacetime describe --server maincloud --json "$DATABASE" | head -c 4000 || true
       - name: Commit the bindings back to main
