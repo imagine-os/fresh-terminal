@@ -813,3 +813,12 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-096: the tighter menu shipped; parts of speech in colour is proposed with an estimate.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659643321609?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659643.321609
+
+## 93. Tue Sep 29, 12:29 AM CDT · 2026-09-29 05:29:25 UTC
+
+> problem
+
+(With a screenshot: the account window opened from the avatar, signed in, about 450 px wide on a 1908 px screen, its page clipped.)
+
+**What happened:** C-099: the sign-in width had leaked onto every Clerk window; the account window got its own size, from phone to 4K, with a check that renders it signed in. Changelog 0017.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659765100189?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659765.100189
