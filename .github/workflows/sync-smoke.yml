@@ -84,6 +84,10 @@ jobs:
           echo "POST /route (device): HTTP $code, events: $(grep -c '^event:' "$RUNNER_TEMP/route.txt"), done: $(grep -A1 '^event: done' "$RUNNER_TEMP/route.txt" | tail -1 | sed 's/^data: //' | jq -c '{ok, served_model, price: .entry.price_micro, cost: .entry.cost_micro}')"
           sleep 3
           echo "GET /credits after the call: $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{spent_micro, remaining_micro}')"
+          before=$(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -r '.spent_micro')
+          tag=$(curl -sS "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/tag" -d '{"boxId":"smoke","text":"call Sergio tomorrow at Hoy"}')
+          after=$(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -r '.spent_micro')
+          echo "POST /tag: entry $(echo "$tag" | jq -c '.entry | {what, price_micro, cost_micro}'); credits delta $((after - before)) (must equal the entry price)"
           echo "anonymous model choice: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[],"model":"anthropic/claude-sonnet-5.5"}')"
       - name: Clean up (D1 rows, Clerk user)
         if: always()

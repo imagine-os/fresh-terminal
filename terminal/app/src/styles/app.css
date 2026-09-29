@@ -3027,3 +3027,256 @@ textarea.field-input {
   color: var(--fg);
   text-decoration: underline;
 }
+
+/* ---------- C-079: tiles in the tray, stacked tags, inline lists, sidebar resize, stop line ---------- */
+
+.tray {
+  width: min(24rem, calc(100vw - 2rem));
+}
+.tray-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+.tray-tool.tile {
+  position: relative;
+  display: block;
+  grid-template-columns: none;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+}
+.tray-tool.tile:hover {
+  background: none;
+}
+.tile-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  min-height: 3.9rem;
+  padding: 0.45rem 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--type-whisper);
+  line-height: 1.1;
+  text-decoration: none;
+  cursor: pointer;
+}
+.tile-button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+.tile-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.tile-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tile-icon {
+  display: inline-flex;
+  font-size: 1.05rem;
+}
+.tile-icon svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+.tile-label {
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.tile-detail {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg-faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+.tile-key {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--fg-faint);
+  opacity: 0.8;
+}
+.tray-tool.tile .tray-pin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+}
+.tray-tool.tile:hover .tray-pin,
+.tray-tool.tile:focus-within .tray-pin,
+.tray-tool.tile[data-pinned='true'] .tray-pin {
+  opacity: 1;
+}
+.tray-version {
+  font-family: var(--font-mono);
+  color: var(--fg-faint);
+}
+@media (max-width: 30rem) {
+  .tray-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* stacked tags: one column for a list of the same kind */
+.chip-tray {
+  align-items: flex-start;
+}
+.chip-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+  padding: 0.25rem 0.35rem 0.3rem;
+  border: 1px dashed color-mix(in srgb, var(--chip) 55%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--chip) 6%, transparent);
+  vertical-align: top;
+}
+.chip-stack[data-kind='org'],
+.chip-stack[data-kind='person'],
+.chip-stack[data-kind='place'] {
+  --chip: var(--chip-entity);
+}
+.chip-stack[data-kind='list'] {
+  --chip: var(--chip-list);
+}
+.chip-stack-head {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-faint);
+  padding-inline: 0.15rem;
+}
+.chip-button[data-in-stack='true'] {
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 0.05rem 0.4rem;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--chip) 12%, transparent);
+  font-size: var(--type-whisper);
+}
+.chip-other {
+  margin-left: 0.25em;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* the draft page shows an inline enumeration as the list it is */
+.draft-listing {
+  display: grid;
+  gap: 0.35rem;
+}
+.draft-lead {
+  margin: 0;
+}
+/* a tall start (many tags) scrolls instead of clipping */
+.empty[data-centered='true'] {
+  justify-content: flex-start;
+}
+.empty[data-centered='true'] > :first-child {
+  margin-top: auto;
+}
+.empty[data-centered='true'] > :last-child {
+  margin-bottom: auto;
+}
+/* two lines: the promise, then the line we grow with */
+.headline em {
+  display: block;
+}
+.draft-list {
+  margin: 0;
+  padding-left: 1.4rem;
+  display: grid;
+  gap: 0.2rem;
+}
+.draft-list li::marker {
+  color: var(--fg-faint);
+  font-family: var(--font-mono);
+}
+
+/* drag the sidebar's edge (docked or floating) */
+.region-left[data-behaviour='floating'] {
+  width: var(--left-float-width, min(85cqi, 22rem));
+  max-width: 92cqi;
+}
+.shell[data-left='floating'] .left-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(min(var(--left-float-width, 22rem), 92cqi) - 3px);
+  margin: 0;
+  z-index: 31;
+}
+.left-resize {
+  grid-area: left;
+  justify-self: end;
+  align-self: stretch;
+  width: 6px;
+  margin-right: -3px;
+  z-index: 5;
+  cursor: col-resize;
+  touch-action: none;
+}
+.left-resize:hover,
+.left-resize:focus-visible {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+  outline: none;
+}
+.shell[data-left='full'] .left-resize {
+  display: block;
+}
+
+/* phone: the tray is a bottom sheet, the prompt starts at the bottom, the counter waits in the tray */
+@media (max-width: 40rem) {
+  .tray {
+    position: fixed;
+    top: auto;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    max-height: 75vh;
+  }
+  .topbar .balance,
+  .region-top .balance {
+    display: none;
+  }
+  .empty[data-centered='true'] {
+    justify-content: flex-end;
+    padding-bottom: 0.5rem;
+  }
+  .empty[data-centered='true'] > :first-child {
+    margin-top: 0;
+  }
+  .empty[data-centered='true'] > :last-child {
+    margin-bottom: 0;
+  }
+}

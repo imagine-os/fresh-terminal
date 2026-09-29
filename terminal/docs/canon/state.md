@@ -8,10 +8,10 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | --- | --- | --- |
 | Fresh Terminal site | https://imagine-os.github.io/fresh-terminal/ | 2026-09-29 00:07 UTC |
 | A box | `/box/<id>`; new box in a theme: `/box/new?theme=<id>` | 2026-09-28 |
-| Master canvas v2 (paper sheets, sections, minimap; C-081) | https://imagine-os.github.io/fresh-terminal/canvas (press `C`); archived v1 at `/canvas?v=1` | 2026-09-29 04:20 UTC |
+| Master canvas v2 (paper sheets, sections, minimap; C-083) | https://imagine-os.github.io/fresh-terminal/canvas (press `C`); archived v1 at `/canvas?v=1` | 2026-09-29 04:20 UTC |
 | Plan viewer (kanban, list, timeline) | https://imagine-os.github.io/fresh-terminal/plan (also dev mode, `D`) | 2026-09-28 |
 | Library of terminals | https://imagine-os.github.io/fresh-terminal/pages/library.html | 2026-09-29 00:07 UTC |
-| Koi pond v3 (opens top-down, tilts up; C-080) | https://imagine-os.github.io/fresh-terminal/pages/koi.html | 2026-09-29 04:20 UTC |
+| Koi pond v3 (opens top-down, tilts up; C-082) | https://imagine-os.github.io/fresh-terminal/pages/koi.html | 2026-09-29 04:20 UTC |
 | Koi pond v2 (archived) | https://imagine-os.github.io/fresh-terminal/pages/koi-v2.html (was `pages/koi.html` until v3) | 2026-09-29, pass 4 |
 | Koi pond v1 | https://imagine-os.github.io/fresh-terminal/pages/koi-v1.html (was `pages/koi.html` until pass 4) | 2026-09-29 00:07 UTC |
 | FreshStack (the default stack, three modes, exit per piece) | https://imagine-os.github.io/fresh-terminal/pages/freshstack.html | 2026-09-29 02:20 UTC, live on the next Pages deploy |
@@ -67,7 +67,7 @@ As of 2026-09-29:
 - SpacetimeDB live store. The module is written and type-checked, not published. The app uses browser storage instead, so boxes don't sync between devices or people. 2026-09-29: account data goes to Cloudflare D1 first (C-047).
 - ~~Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.~~ Superseded 2026-09-29 (C-065): sign-in is wired on the Clerk development instance. Still not wired: the Clerk production instance (steps in C-065), Clerk screens in Spanish, transcript lines in sync, realtime sync between devices.
 - Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.)
-- A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).
+- ~~A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).~~ Built 2026-09-29 (C-080): $1 per account, $10 across accounts per UTC day.
 - Turnstile before a new free-credit device: built, not switched on; the Cloudflare token needs Account → Turnstile → Edit (C-074).
 - Shared chain beyond the browser, and the server re-checking hashes.
 - Jev permission checks: they exist but aren't enforced (no signed-in owners on the server yet).
@@ -101,6 +101,7 @@ As of 2026-09-29:
 | **Logos and icons skill** | Added 2026-09-29 02:25 UTC at `terminal/skills/logos-and-icons/SKILL.md`: source order (official → official repo → Simple Icons → text mark), licence check, sizes, registry at `docs/brand/registry.md`, generate only for our own marks. First use: marks on the FreshStack cards and brand chips. Assets not gathered yet. |
 | **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 157 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
+| **No silent turns, smarter tagger, tiles, stage** (C-080) | Shipped 2026-09-29 04:20 UTC. Next: the review pass (C-081): no-op edit turns, raw ids, Undo bars, open created pages. |
 | **Tighter start** (C-078) | Shipped 2026-09-29 04:00 UTC: square corners, one bottom row, centered prompt on an empty box, tags. |
 | **Branded export, import, live credits** (C-076) | Shipped 2026-09-29 03:50 UTC. |
 | **Clean start** (C-075) | Shipped 2026-09-29 03:40 UTC: Alt+key shortcuts while typing, free usage label, sidebar hidden with top-left icon and settings, starters and hints behind switches, calmer tray. |

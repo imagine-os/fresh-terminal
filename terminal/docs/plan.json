@@ -1051,7 +1051,7 @@
     },
     {
       "id": "koi-v3",
-      "title": "Koi pond v3: opens top-down, tilts up to the bridge and garden; CC0 photo assets; best-of-3 (C-080)",
+      "title": "Koi pond v3: opens top-down, tilts up to the bridge and garden; CC0 photo assets; best-of-3 (C-082)",
       "status": "done",
       "depends_on": [],
       "model": "Opus 5.5",
@@ -1059,7 +1059,7 @@
     },
     {
       "id": "canvas-v2",
-      "title": "Canvas v2: paper sheets with screenshots, sections, minimap, pan/zoom on every input; best-of-3 (C-081)",
+      "title": "Canvas v2: paper sheets with screenshots, sections, minimap, pan/zoom on every input; best-of-3 (C-083)",
       "status": "done",
       "depends_on": [
         "master-canvas"

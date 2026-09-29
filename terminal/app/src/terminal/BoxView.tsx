@@ -17,6 +17,7 @@ import { store, useStoreSnapshot, type Box } from '../store';
 import type { GlossaryTerm } from '@shared/ui';
 import type { ChipDecision, ChipRecords } from './ChipPopover';
 import { Composer } from './Composer';
+import { matchLocalCommand } from './localCommands';
 import { looksLikeSkinRequest } from '@shared/skins';
 import { startSkinRun } from '../skins/runner';
 import { Doodles } from './Doodles';
@@ -116,6 +117,9 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
   const { t, lang } = useI18n();
   const snapshot = useStoreSnapshot();
   const [busy, setBusy] = useState(false);
+  // The running turn; Esc aborts it (C-079).
+  const turnAbort = useRef<AbortController | null>(null);
+  const lastNudge = useRef(0);
   const [fading, setFading] = useState(false);
   const sentOnce = useRef(false);
   const [voiceAppend, setVoiceAppend] = useState<string | null>(null);
@@ -221,7 +225,6 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       }
 
       const localStarted = performance.now();
-      const { matchLocalCommand } = await import('./localCommands');
       const local = matchLocalCommand(text, chips, {
         boxes: snapshot.boxes,
         lang,
@@ -303,6 +306,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
 
       setBusy(true);
       let replyLineId: string | null = null;
+      const abort = new AbortController();
+      turnAbort.current = abort;
       try {
         const started = performance.now();
         const startedAt = Date.now();
@@ -388,6 +393,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             } else if (failure.kind === 'credits') {
               reportCreditsError(failure.code, failure.message);
               message = t(`credits.${failure.code}` as 'credits.sign_in_required');
+            } else if (failure.kind === 'stopped') {
+              message = t(failure.reason === 'user' ? 'system.turnStopped' : 'system.turnIdle');
             } else {
               message = t('system.error', { message: failure.message });
             }
@@ -410,7 +417,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
             return;
           }
-          await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers);
+          await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot }, handlers, { signal: abort.signal });
         }
       } catch (error) {
         // Nothing may end in silence: a thrown turn leaves a visible line.
@@ -418,11 +425,32 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         const message = error instanceof Error ? error.message : String(error);
         store.appendLine(box.id, 'system', t('system.turnFailed', { message: message.slice(0, 200) }), [], { reveal: 'none' });
       } finally {
+        turnAbort.current = null;
         setBusy(false);
       }
     },
     [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands, pageId, onLeavePage],
   );
+
+  const cancelTurn = useCallback(() => {
+    turnAbort.current?.abort();
+  }, []);
+  const busyEnter = useCallback(() => {
+    const now = Date.now();
+    if (now - lastNudge.current < 4000) return;
+    lastNudge.current = now;
+    store.appendLine(box.id, 'system', t('system.stillWorking'), [], { reveal: 'none' });
+  }, [box.id, t]);
+
+  // Anything that escapes the code becomes a line here, never silence (C-079).
+  useEffect(() => {
+    const onFault = (event: Event) => {
+      const message = String((event as CustomEvent<{ message?: string }>).detail?.message ?? 'unknown error').slice(0, 200);
+      store.appendLine(box.id, 'system', t('system.fault', { message }), [], { reveal: 'none' });
+    };
+    window.addEventListener('ft:fault', onFault);
+    return () => window.removeEventListener('ft:fault', onFault);
+  }, [box.id, t]);
 
   return (
     <>
@@ -434,8 +462,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
           {landing ? (
             <>
               <h1 className="headline">
-                {t('landing.headline').split(' ').slice(0, -3).join(' ')}{' '}
-                <em>{t('landing.headline').split(' ').slice(-3).join(' ')}</em>
+                {t('landing.headline')} <em>{t('landing.subline')}</em>
               </h1>
               {commands.showHints ? (
               <ol className="how">
@@ -486,9 +513,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         voiceAppend={voiceAppend}
         onVoiceAppendConsumed={() => setVoiceAppend(null)}
         showStarters={commands.showStarters}
-        showHints={commands.showHints}
-        onToggleStarters={commands.toggleStarters}
-        onToggleHints={commands.toggleHints}
+        onCancel={cancelTurn}
+        onBusyEnter={busyEnter}
       />
     </>
   );
@@ -514,9 +540,8 @@ function ComposerSlot(props: {
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
   showStarters: boolean;
-  showHints: boolean;
-  onToggleStarters: () => void;
-  onToggleHints: () => void;
+  onCancel: () => void;
+  onBusyEnter: () => void;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -546,9 +571,8 @@ function ComposerSlot(props: {
       voiceAppend={props.voiceAppend}
       onVoiceAppendConsumed={props.onVoiceAppendConsumed}
       showStarters={props.showStarters}
-      showHints={props.showHints}
-      onToggleStarters={props.onToggleStarters}
-      onToggleHints={props.onToggleHints}
+      onCancel={props.onCancel}
+      onBusyEnter={props.onBusyEnter}
       hasBoxes={props.hasBoxes}
       hasLines={props.hasLines}
       busy={props.busy}

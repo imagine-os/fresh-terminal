@@ -50,6 +50,33 @@ export function paragraphs(text: string): Paragraph[] {
   return out;
 }
 
+export interface ListItem {
+  start: number;
+  end: number;
+  text: string;
+}
+
+/**
+ * A paragraph that enumerates inline ("1st is ..., second is ..., 3rd is ...")
+ * splits into items at each ordinal of one group, so the page can show it as
+ * the list it is. Offsets are relative to the paragraph. Null when there is no
+ * such list.
+ */
+export function inlineListItems(paragraph: string, chips: Array<{ start: number; end: number; kind: string; group?: string }>): ListItem[] | null {
+  const ordinals = chips.filter((chip) => chip.kind === 'list' && chip.group?.startsWith('ord-')).sort((a, b) => a.start - b.start);
+  if (ordinals.length < 2) return null;
+  const items: ListItem[] = [];
+  for (let index = 0; index < ordinals.length; index += 1) {
+    const start = ordinals[index]!.start;
+    const next = ordinals[index + 1];
+    let end = next ? next.start : paragraph.length;
+    // The separator before the next ordinal (", " or ";") belongs to no item.
+    while (end > start && /[\s,;]/.test(paragraph[end - 1] as string)) end -= 1;
+    items.push({ start, end, text: paragraph.slice(start, end) });
+  }
+  return items;
+}
+
 /** The draft page appears once there is enough text to be worth formatting. */
 export function wantsPage(text: string): boolean {
   return text.length >= 80 || text.includes('\n');

@@ -18,7 +18,7 @@ export interface CreditsStatus {
   sign_in_required: boolean;
   /** This device was issued past the per-IP / per-network limit and has no starter grant. */
   limited: boolean;
-  /** The global daily cap on anonymous spend is reached for today (UTC). */
+  /** Today's cap is reached (UTC): the global signed-out cap, or for accounts their own or the all-accounts cap. */
   daily_cap_reached: boolean;
   /** Bot check before the first paid call (on POST /credits/device). */
   turnstile: 'on' | 'not-wired';
@@ -32,6 +32,8 @@ export type CreditsErrorCode =
   | 'sign_in_required'
   | 'daily_cap'
   | 'account_credits_exhausted'
+  /** A signed-in account hit its daily free usage, or all accounts together hit theirs. */
+  | 'account_daily_cap'
   | 'rate_limited'
   | 'too_large'
   | 'model_needs_sign_in'

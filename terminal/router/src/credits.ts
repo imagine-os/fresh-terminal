@@ -35,6 +35,8 @@ export interface CreditsBindings extends AuthBindings {
   ANON_CHANCE_MICRO?: string;
   ANON_CHANCES?: string;
   ANON_DAILY_COST_CAP_MICRO?: string;
+  ACCOUNT_DAILY_MICRO?: string;
+  ACCOUNT_DAILY_TOTAL_COST_MICRO?: string;
   ACCOUNT_GRANT_MICRO?: string;
   MIN_BALANCE_MICRO?: string;
   DEVICES_PER_IP_DAY?: string;
@@ -61,6 +63,10 @@ export const CREDIT_DEFAULTS = {
   chances: 2,
   /** $2 of provider cost per UTC day across all anonymous devices. */
   anonDailyCostCapMicro: 2_000_000,
+  /** $1 of free usage (price) per signed-in account per UTC day. */
+  accountDailyMicro: 1_000_000,
+  /** $10 of provider cost per UTC day across all signed-in accounts on free usage. */
+  accountDailyTotalCostMicro: 10_000_000,
   /** $1 of price per signed-in account (Stripe is not wired yet). */
   accountGrantMicro: 1_000_000,
   /** A call needs at least 1¢ left to start. */
@@ -84,6 +90,8 @@ export function creditConfig(bindings: CreditsBindings): CreditConfig {
     chances: pick(bindings.ANON_CHANCES, CREDIT_DEFAULTS.chances),
     anonDailyCostCapMicro: pick(bindings.ANON_DAILY_COST_CAP_MICRO, CREDIT_DEFAULTS.anonDailyCostCapMicro),
     accountGrantMicro: pick(bindings.ACCOUNT_GRANT_MICRO, CREDIT_DEFAULTS.accountGrantMicro),
+    accountDailyMicro: pick(bindings.ACCOUNT_DAILY_MICRO, CREDIT_DEFAULTS.accountDailyMicro),
+    accountDailyTotalCostMicro: pick(bindings.ACCOUNT_DAILY_TOTAL_COST_MICRO, CREDIT_DEFAULTS.accountDailyTotalCostMicro),
     minBalanceMicro: pick(bindings.MIN_BALANCE_MICRO, CREDIT_DEFAULTS.minBalanceMicro),
     devicesPerIpDay: pick(bindings.DEVICES_PER_IP_DAY, CREDIT_DEFAULTS.devicesPerIpDay),
     devicesPerNetDay: pick(bindings.DEVICES_PER_NET_DAY, CREDIT_DEFAULTS.devicesPerNetDay),
@@ -186,6 +194,16 @@ async function dailyAnonCost(db: D1Database, now: number): Promise<number> {
   return Number(row?.cost_micro ?? 0);
 }
 
+/** Signed-in daily use: this account's price today, and all accounts' provider cost today. */
+async function accountDaily(db: D1Database, accountId: string, now: number): Promise<{ mine: number; allCost: number }> {
+  const day = utcDay(now);
+  const mine = await db.prepare('SELECT price_micro FROM spend_daily WHERE day = ?1 AND scope = ?2').bind(day, `acct:${accountId}`).first<{ price_micro: number }>();
+  const all = await db.prepare("SELECT cost_micro FROM spend_daily WHERE day = ?1 AND scope = 'account'").bind(day).first<{ cost_micro: number }>();
+  return { mine: Number(mine?.price_micro ?? 0), allCost: Number(all?.cost_micro ?? 0) };
+}
+
+export const DAILY_FREE_USAGE_REACHED = 'Daily free usage reached. It resets at 00:00 UTC, or use your key.';
+
 async function accountCredits(db: D1Database, clerkUserId: string, now: number, config: CreditConfig): Promise<AccountCreditRow> {
   await ensureAccount(db, clerkUserId, now);
   const id = accountIdFor(clerkUserId);
@@ -242,7 +260,7 @@ export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: b
   const base = { ...turnstile, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'free usage · signed in' : 'free usage' };
   if (payer.kind === 'account') {
     const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
-    return { ...base, daily_cap_reached: false, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false };
+    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false };
   }
   if (payer.kind === 'device') {
     const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
@@ -324,6 +342,17 @@ async function record(db: D1Database, payer: Payer, costs: { cost: number; price
          ON CONFLICT(day, scope) DO UPDATE SET cost_micro = cost_micro + excluded.cost_micro, price_micro = price_micro + excluded.price_micro, calls = calls + 1, updated_at = excluded.updated_at`,
       )
       .bind(utcDay(now), scope, costs.cost, costs.price, now),
+    // Per-account day row (signed-in only), for the per-account daily cap.
+    ...(payer.kind === 'account'
+      ? [
+          db
+            .prepare(
+              `INSERT INTO spend_daily (day, scope, cost_micro, price_micro, calls, updated_at) VALUES (?1, ?2, ?3, ?4, 1, ?5)
+               ON CONFLICT(day, scope) DO UPDATE SET cost_micro = cost_micro + excluded.cost_micro, price_micro = price_micro + excluded.price_micro, calls = calls + 1, updated_at = excluded.updated_at`,
+            )
+            .bind(utcDay(now), `acct:${payer.id}`, costs.cost, costs.price, now),
+        ]
+      : []),
   ]);
 }
 
@@ -363,6 +392,11 @@ export function meter(options: MeterOptions): MiddlewareHandler {
     if (payer.kind === 'account') {
       if (payer.row.grant_micro - payer.row.spent_micro < config.minBalanceMicro) {
         return deny(c, 402, 'account_credits_exhausted', 'Your free account credits are used up. Paying for more is not wired yet; your key (K, your own OpenRouter key) still works.', statusFor(payer, config, false, bindings));
+      }
+      // Daily caps for signed-in free usage (your key goes browser -> OpenRouter and is never capped).
+      const daily = await accountDaily(db, payer.id, now);
+      if (daily.mine >= config.accountDailyMicro || daily.allCost >= config.accountDailyTotalCostMicro) {
+        return deny(c, 402, 'account_daily_cap', DAILY_FREE_USAGE_REACHED, statusFor(payer, config, true, bindings));
       }
     } else {
       const length = Number(c.req.header('Content-Length') ?? '0');
@@ -426,7 +460,12 @@ export function mountCreditRoutes(app: { get: (path: string, handler: (c: Contex
     if (!db) return c.json({ error: 'Credits need the D1 binding; metering is off here', code: 'device_required' }, 503);
     const payer = await resolvePayer(c, options, db, config);
     if (payer.kind === 'invalid') return c.json({ error: payer.reason, code: 'sign_in_required' }, 401);
-    const cap = payer.kind === 'device' ? (await dailyAnonCost(db, options.now())) >= config.anonDailyCostCapMicro : false;
+    let cap = false;
+    if (payer.kind === 'device') cap = (await dailyAnonCost(db, options.now())) >= config.anonDailyCostCapMicro;
+    if (payer.kind === 'account') {
+      const daily = await accountDaily(db, payer.id, options.now());
+      cap = daily.mine >= config.accountDailyMicro || daily.allCost >= config.accountDailyTotalCostMicro;
+    }
     return c.json(statusFor(payer, config, cap, bindings));
   });
 

@@ -529,6 +529,7 @@ function Product() {
       styleOverrides={boxUi?.style}
       hideTopBar={prefs.topBarHidden}
       hideBottomBar={composerCentered}
+      leftResize={{ width: prefs.sidebarWidth, onChange: (px) => set('sidebarWidth', px), label: t('sidebar.resize') }}
       skins={boxUi?.skins}
       slots={{
         topBar: (
@@ -569,6 +570,10 @@ function Product() {
             onExport={exportSession}
             onImport={importSession}
             onHideTopBar={toggleBar}
+            startersOn={prefs.showStarters}
+            hintsOn={prefs.showHints}
+            onToggleStarters={() => set('showStarters', !prefs.showStarters)}
+            onToggleHints={() => set('showHints', !prefs.showHints)}
           />
         ),
         leftSidebar: (

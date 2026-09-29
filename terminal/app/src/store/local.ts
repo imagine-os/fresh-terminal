@@ -193,7 +193,7 @@ export class LocalStore implements Store {
     const box: Box = {
       id: newId('box'),
       owner_identity: this.identity,
-      name: `${(file.box?.name ?? 'Imported box').trim() || 'Imported box'} (imported)`,
+      name: `${(file.box?.name ?? 'Imported stage').trim() || 'Imported stage'} (imported)`,
       created_at: file.box?.created_at ?? now,
       updated_at: now,
     };

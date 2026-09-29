@@ -17,6 +17,8 @@ const DEVICE_KEY = 'fresh-terminal.device.v1';
 
 let sessionToken: (() => Promise<string | null>) | null = null;
 let deviceInflight: Promise<string | null> | null = null;
+/** In-memory copy, for browsers where localStorage is blocked (and tests). */
+let deviceInMemory: string | null = null;
 
 export function setSessionTokenProvider(provider: (() => Promise<string | null>) | null): void {
   sessionToken = provider;
@@ -28,10 +30,11 @@ export function routerUrl(pathOrUrl: string): string {
 }
 
 export function storedDevice(): string | null {
-  return readJson<string | null>(DEVICE_KEY, null);
+  return readJson<string | null>(DEVICE_KEY, null) ?? deviceInMemory;
 }
 
 export function forgetDevice(): void {
+  deviceInMemory = null;
   writeJson(DEVICE_KEY, null);
 }
 
@@ -56,7 +59,10 @@ export async function deviceToken(fetchImpl: typeof fetch = fetch): Promise<stri
       });
       if (!response.ok) return null;
       const body = (await response.json()) as { device?: string };
-      if (body.device) writeJson(DEVICE_KEY, body.device);
+      if (body.device) {
+        deviceInMemory = body.device;
+        writeJson(DEVICE_KEY, body.device);
+      }
       return body.device ?? null;
     } catch {
       return null;

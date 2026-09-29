@@ -33,6 +33,8 @@ interface ShellProps {
   hideTopBar?: boolean;
   /** The prompt is in the middle of an empty box; the bottom bar has nothing to show. */
   hideBottomBar?: boolean;
+  /** Drag the sidebar's edge to resize it (C-079). Width in px, clamped by the shell. */
+  leftResize?: { width: number; onChange: (px: number) => void; label: string };
   skins?: Partial<Record<SkinTarget, Skin>>;
 }
 
@@ -177,8 +179,43 @@ export function skinProps(
   };
 }
 
-export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false, hideBottomBar = false }: ShellProps) {
+export const SIDEBAR_MIN = 180;
+export const SIDEBAR_MAX = 520;
+
+export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false, hideBottomBar = false, leftResize }: ShellProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const startResize = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!leftResize) return;
+    event.preventDefault();
+    dragging.current = true;
+    const target = event.currentTarget;
+    target.setPointerCapture(event.pointerId);
+    const shellLeft = ref.current?.getBoundingClientRect().left ?? 0;
+    const move = (pointer: PointerEvent) => {
+      if (!dragging.current) return;
+      const px = Math.round(Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, pointer.clientX - shellLeft)));
+      leftResize.onChange(px);
+    };
+    const up = () => {
+      dragging.current = false;
+      target.releasePointerCapture(event.pointerId);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  };
+  const resizeKeys = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!leftResize) return;
+    const step = event.shiftKey ? 40 : 10;
+    if (event.key === 'ArrowLeft') leftResize.onChange(Math.max(SIDEBAR_MIN, leftResize.width - step));
+    else if (event.key === 'ArrowRight') leftResize.onChange(Math.min(SIDEBAR_MAX, leftResize.width + step));
+    else return;
+    event.preventDefault();
+  };
   const readout = useSizeClass(ref);
 
   useEffect(() => {
@@ -207,6 +244,11 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
   const shellSkin = skinProps(skins?.shell, skinUrls);
   const style: CSSProperties & Record<string, string> = { ...theme.tokens, ...(styleOverrides ?? {}), ...(shellSkin.style ?? {}) };
   style['--cursor-color'] = CURSOR_COLOR_VALUES[theme.cursor.color];
+  if (leftResize) {
+    const width = `${Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, leftResize.width))}px`;
+    style['--left-full-width'] = width;
+    style['--left-float-width'] = width;
+  }
 
   const onPointerMove =
     theme.respondsTo === 'pointer'
@@ -253,6 +295,22 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
       >
         {slots.leftSidebar}
       </aside>
+      {leftResize && (left === 'full' || (left === 'floating' && leftOpen)) ? (
+        <div
+          className="left-resize"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={leftResize.label}
+          aria-valuenow={leftResize.width}
+          aria-valuemin={SIDEBAR_MIN}
+          aria-valuemax={SIDEBAR_MAX}
+          tabIndex={0}
+          title={leftResize.label}
+          onPointerDown={startResize}
+          onKeyDown={resizeKeys}
+          data-testid="left-resize"
+        />
+      ) : null}
 
       <main className="region region-stage" data-behaviour={regions.stage} id="stage" {...regionSkin(skins?.stage ?? skins?.shell)}>
         {slots.stage}

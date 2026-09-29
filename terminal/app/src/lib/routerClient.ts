@@ -43,6 +43,8 @@ export type RouteFailure =
   | { kind: 'no-key'; hint?: string }
   | { kind: 'pending'; note: string }
   | { kind: 'error'; message: string }
+  /** The person pressed Esc, or nothing arrived for `idleMs` (C-079). */
+  | { kind: 'stopped'; reason: 'user' | 'idle' }
   /** Free credits: used up, daily cap, rate limit, too large, or a model choice that needs sign-in. */
   | { kind: 'credits'; code: CreditsErrorCode; message: string };
 
@@ -77,8 +79,41 @@ export interface RouteRequest {
 }
 
 /** Calls POST /route and reads the SSE stream. Never sees the API key. */
-export async function streamRoute(request: RouteRequest, handlers: RouteHandlers): Promise<void> {
+export interface StreamOptions {
+  /** Aborting it stops the turn; the box gets a "stopped" line, never silence. */
+  signal?: AbortSignal;
+  /** No bytes for this long ends the turn as stopped (idle). Default 60 s. */
+  idleMs?: number;
+}
+
+/** No turn may end in silence: a hung stream stops itself, and Esc stops it sooner. */
+export async function streamRoute(request: RouteRequest, handlers: RouteHandlers, options: StreamOptions = {}): Promise<void> {
+  const controller = new AbortController();
+  let stoppedBy: 'user' | 'idle' | null = null;
+  const stop = (reason: 'user' | 'idle') => {
+    if (stoppedBy === null) {
+      stoppedBy = reason;
+      controller.abort();
+    }
+  };
+  if (options.signal?.aborted) {
+    handlers.onFail({ kind: 'stopped', reason: 'user' });
+    return;
+  }
+  options.signal?.addEventListener('abort', () => stop('user'), { once: true });
+  const idleMs = options.idleMs ?? 60_000;
+  let idleTimer: ReturnType<typeof setTimeout> | null = null;
+  const armIdle = () => {
+    if (idleTimer !== null) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => stop('idle'), idleMs);
+  };
+  const disarm = () => {
+    if (idleTimer !== null) clearTimeout(idleTimer);
+    idleTimer = null;
+  };
+
   let response: Response;
+  armIdle();
   try {
     response = await routerFetch(
       '/route',
@@ -86,11 +121,13 @@ export async function streamRoute(request: RouteRequest, handlers: RouteHandlers
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
+        signal: controller.signal,
       },
       { paid: true },
     );
   } catch {
-    handlers.onFail({ kind: 'no-router' });
+    disarm();
+    handlers.onFail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'no-router' });
     return;
   }
 
@@ -147,10 +184,19 @@ export async function streamRoute(request: RouteRequest, handlers: RouteHandlers
   };
 
   while (true) {
-    const { value, done: finished } = await reader.read();
+    let chunk: ReadableStreamReadResult<Uint8Array>;
+    try {
+      chunk = await reader.read();
+    } catch {
+      disarm();
+      handlers.onFail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'error', message: 'stream broke' });
+      return;
+    }
+    const { value, done: finished } = chunk;
     if (finished) {
       break;
     }
+    armIdle();
     buffer += decoder.decode(value, { stream: true });
     let separator = buffer.indexOf('\n\n');
     while (separator !== -1) {
@@ -172,7 +218,8 @@ export async function streamRoute(request: RouteRequest, handlers: RouteHandlers
     }
   }
 
+  disarm();
   if (!done) {
-    handlers.onFail({ kind: 'error', message: 'stream ended without done' });
+    handlers.onFail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'error', message: 'stream ended without done' });
   }
 }

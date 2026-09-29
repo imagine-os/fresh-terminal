@@ -1,6 +1,6 @@
 # 0022 — koi pond v3 and canvas v2
 
-Date: 2026-09-29. Model: Opus 5.5 (all of it). Prompt 0018 (Canon prompts 60, 61). Canon: C-080 (koi), C-081 (canvas). Replaces the look, not the data, of decisions 0011 (canvas) and the koi v2 build in changelog 0004.
+Date: 2026-09-29. Model: Opus 5.5 (all of it). Prompt 0018 (Canon prompts 60, 61). Canon: C-082 (koi), C-083 (canvas). Replaces the look, not the data, of decisions 0011 (canvas) and the koi v2 build in changelog 0004.
 
 ## Koi pond v3
 
