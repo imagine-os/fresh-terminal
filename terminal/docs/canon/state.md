@@ -89,7 +89,7 @@ As of 2026-09-29:
 | **SpacetimeDB publish** | Proposed 2026-09-29 02:07 UTC (C-052). Waiting on Justin for the `SPACETIMEDB_TOKEN` secret. |
 | **Proposals waiting on Justin** | Media in R2 (C-053), streamed browsers (C-054), integration ladder (C-055), recipes (C-056). Not started. |
 | **Multiplayer rules** | Decided 2026-09-29 (C-049): no Liveblocks or Colyseus; our own house rules on SpacetimeDB. Not started. |
-| **Pass 5: skins and the refine loop** | Built 2026-09-29 (Opus 5.5): instant draft, Jev picks the path, best-of-3 rounds with stop rules, thumbnails and Stop. Details: changelog 0005, decision 0018. Live results in changelog 0005 once checked. |
+| **Pass 5: skins and the refine loop** | Built 2026-09-29 (Opus 5.5): instant draft, Jev picks the path, best-of-3 rounds with stop rules, thumbnails and Stop. Details: changelog 0005, decision 0018. Checked live on f116d86: library run 0.02¢, image search 0.10¢ over 5 rounds, CSS 0.44¢ for one round; image generation held back by the 3¢ cap (4.2¢ per image). Details: changelog 0005. |
 | **Fresh Terminal company in between-gigs** | Saved to GitHub (b191350). Waiting for a Sites sync to show on between-gigs.com. |
 | **This Canon** | Written 2026-09-29; in the repo with the pass 4 push, with a canvas card. Kept current every pass (plan task `canon-current`). |
 | **LiveKit** (C-051) | Decided 2026-09-29 02:20 UTC. Waiting on Justin: `lk cloud auth` once, then repo secrets `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`. Then: agent in `terminal/agent` deployed by `livekit/deploy-action`, Fresh Terminal tools attached over MCP, LiveKit docs MCP added for coding agents. Not started. |

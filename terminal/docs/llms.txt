@@ -54,3 +54,4 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [prompts/](prompts/README.md): build prompts 0001 to 0017, verbatim with reply summaries
 - [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0020, one per file
 - [qa/responsive-latest.md](qa/responsive-latest.md): latest responsive check
+- qa/skins/: pass 5 live skin run screenshots (before and after, refine block at 390 and 1280, library boxes)
