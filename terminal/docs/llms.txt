@@ -43,6 +43,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0010.md](changelog/0010.md): readable text over photo and material skins (sampled scrim, AA, neutral small text)
 - [changelog/0009.md](changelog/0009.md): Product Hunt strategy page
 - [changelog/0008.md](changelog/0008.md): free credits enforced by the router, live check
 - [changelog/0007.md](changelog/0007.md): freshterminal.ai, Clerk sign-in, D1 sync, live check

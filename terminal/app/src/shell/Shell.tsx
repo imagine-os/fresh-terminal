@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Skin, SkinTarget } from '@shared/skins';
 import { resolveImageRef } from '../lib/blobs';
+import { sampleImageTones } from '../skins/tones';
+import { UNKNOWN_TONES, blend, colorsInBackground, parseColor, readableOver, tonesFromColors, type ImageTones, type Readability } from '@shared/ui';
 import type { RegionBehaviour, ShellRegion, ShellSpec, SizeClass } from '@shared/dialect';
 import { CURSOR_COLOR_VALUES, type Theme } from '@shared/themes';
 import { useSizeClass, type SizeReadout } from './useSizeClass';
@@ -68,11 +70,11 @@ function effectiveBehaviour(behaviour: RegionBehaviour, open: boolean): RegionBe
   return behaviour;
 }
 
-/** Object URLs for skin images stored in IndexedDB; https refs pass through. */
+/** Object URLs for skin images (and their thumbnails) stored in IndexedDB; https refs pass through. */
 function useSkinImages(skins: Partial<Record<SkinTarget, Skin>> | undefined): Record<string, string> {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const refs = Object.values(skins ?? {})
-    .map((skin) => skin?.image?.ref)
+    .flatMap((skin) => [skin?.image?.ref, skin?.image?.thumb])
     .filter((ref): ref is string => Boolean(ref));
   const key = refs.join('|');
   useEffect(() => {
@@ -92,8 +94,63 @@ function useSkinImages(skins: Partial<Record<SkinTarget, Skin>> | undefined): Re
   return urls;
 }
 
-/** Style and attributes for a skinned region: tokens scoped to it, material layers, a veil. */
-export function skinProps(skin: Skin | undefined, urls: Record<string, string>): { style?: CSSProperties & Record<string, string>; 'data-skinned'?: string; 'data-skin-path'?: string } {
+/** Image skins keep the photo vivid; the scrim behind text does the reading work. */
+const IMAGE_VEIL = 25;
+
+export function skinVeil(skin: Skin): number {
+  return skin.image ? Math.min(skin.veil, IMAGE_VEIL) : skin.veil;
+}
+
+/** Sampled tones per image URL; null while loading or when the image cannot be read. */
+function useImageTones(skins: Partial<Record<SkinTarget, Skin>> | undefined, urls: Record<string, string>): Record<string, ImageTones | null> {
+  const [tones, setTones] = useState<Record<string, ImageTones | null>>({});
+  const wanted = Object.values(skins ?? {})
+    .map((skin) => (skin?.image ? urls[skin.image.thumb ?? ''] ?? urls[skin.image.ref] : undefined))
+    .filter((url): url is string => Boolean(url));
+  const key = wanted.join('|');
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all(wanted.map(async (url) => [url, await sampleImageTones(url)] as const)).then((pairs) => {
+      if (!cancelled) setTones(Object.fromEntries(pairs));
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return tones;
+}
+
+/**
+ * The readability layer for one skinned region, or null when the skin has no
+ * image or material behind its text. Tones are composited under the region's
+ * veil first, because that is what text actually sits on.
+ */
+export function skinReadability(
+  skin: Skin | undefined,
+  themeTokens: Record<string, string>,
+  sampled: ImageTones | null | undefined,
+): Readability | null {
+  if (!skin || (!skin.image && !skin.background)) return null;
+  const bg = skin.tokens['--bg'] ?? themeTokens['--bg'];
+  const accent = skin.tokens['--accent'] ?? themeTokens['--accent'];
+  const raw = skin.image ? (sampled ?? UNKNOWN_TONES) : (tonesFromColors(colorsInBackground(skin.background ?? '')) ?? UNKNOWN_TONES);
+  const base = (bg ? parseColor(bg) : null) ?? [11, 13, 16];
+  const veil = skinVeil(skin) / 100;
+  const tones: ImageTones = {
+    dark: blend(base, raw.dark, veil),
+    light: blend(base, raw.light, veil),
+    mean: raw.mean,
+  };
+  return readableOver(tones, { ...(bg ? { bg } : {}), ...(accent ? { accent } : {}) });
+}
+
+/** Style and attributes for a skinned region: tokens scoped to it, material layers, a veil, and the readability layer. */
+export function skinProps(
+  skin: Skin | undefined,
+  urls: Record<string, string>,
+  readable: Readability | null = null,
+): { style?: CSSProperties & Record<string, string>; 'data-skinned'?: string; 'data-skin-path'?: string; 'data-readable'?: string } {
   if (!skin) return {};
   const style: CSSProperties & Record<string, string> = { ...skin.tokens };
   if (skin.tokens['--bg'] && !skin.tokens['--bg-elevated']) style['--bg-elevated'] = skin.tokens['--bg'];
@@ -102,8 +159,22 @@ export function skinProps(skin: Skin | undefined, urls: Record<string, string>):
   if (url) layers.push(`url("${url.replace(/"/g, '%22')}")`);
   if (skin.background) layers.push(skin.background);
   style['--skin-layers'] = layers.length > 0 ? layers.join(', ') : 'none';
-  style['--skin-veil'] = `${skin.veil}%`;
-  return { style, 'data-skinned': skin.target, 'data-skin-path': skin.path };
+  style['--skin-layer-sizes'] = layers.length > 0 ? layers.map(() => 'cover').join(', ') : 'cover';
+  style['--skin-veil'] = `${skinVeil(skin)}%`;
+  if (!readable) return { style, 'data-skinned': skin.target, 'data-skin-path': skin.path };
+  style['--fg'] = readable.fg;
+  style['--fg-muted'] = readable.fgMuted;
+  style['--fg-faint'] = readable.fgFaint;
+  if (readable.accent) style['--accent'] = readable.accent;
+  style['--scrim'] = readable.scrim.join(' ');
+  style['--scrim-a'] = String(readable.alpha);
+  style['--scrim-blur'] = readable.alpha > 0 ? '8px' : '0px';
+  return {
+    style,
+    'data-skinned': skin.target,
+    'data-skin-path': skin.path,
+    'data-readable': skin.image ? 'image' : 'material',
+  };
 }
 
 export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating, devMode, onSize, styleOverrides, skins, hideTopBar = false, hideBottomBar = false }: ShellProps) {
@@ -128,6 +199,11 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
 
   // Theme tokens are custom properties on the shell root. Nothing else.
   const skinUrls = useSkinImages(skins);
+  const skinTones = useImageTones(skins, skinUrls);
+  const regionSkin = (skin: Skin | undefined) => {
+    const sampleUrl = skin?.image ? (skinUrls[skin.image.thumb ?? ''] ?? skinUrls[skin.image.ref]) : undefined;
+    return skinProps(skin, skinUrls, skinReadability(skin, { ...theme.tokens, ...(styleOverrides ?? {}) }, sampleUrl ? skinTones[sampleUrl] : null));
+  };
   const shellSkin = skinProps(skins?.shell, skinUrls);
   const style: CSSProperties & Record<string, string> = { ...theme.tokens, ...(styleOverrides ?? {}), ...(shellSkin.style ?? {}) };
   style['--cursor-color'] = CURSOR_COLOR_VALUES[theme.cursor.color];
@@ -164,7 +240,7 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
       style={style}
       onPointerMove={onPointerMove}
     >
-      <header className="region region-top" data-behaviour={regions.topBar} {...skinProps(skins?.topbar, skinUrls)}>
+      <header className="region region-top" data-behaviour={regions.topBar} {...regionSkin(skins?.topbar)}>
         {slots.topBar}
       </header>
 
@@ -173,12 +249,12 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
         data-behaviour={left}
         data-open={left === 'floating' ? String(leftOpen) : undefined}
         aria-label="boxes"
-        {...skinProps(skins?.sidebar, skinUrls)}
+        {...regionSkin(skins?.sidebar)}
       >
         {slots.leftSidebar}
       </aside>
 
-      <main className="region region-stage" data-behaviour={regions.stage} id="stage" {...skinProps(skins?.stage ?? skins?.shell, skinUrls)}>
+      <main className="region region-stage" data-behaviour={regions.stage} id="stage" {...regionSkin(skins?.stage ?? skins?.shell)}>
         {slots.stage}
       </main>
 
@@ -191,7 +267,7 @@ export function Shell({ spec, theme, slots, leftOpen, rightOpen, onCloseFloating
         {slots.rightSidebar}
       </aside>
 
-      <footer className="region region-bottom" data-behaviour={regions.bottomBar} {...skinProps(skins?.composer, skinUrls)}>
+      <footer className="region region-bottom" data-behaviour={regions.bottomBar} {...regionSkin(skins?.composer)}>
         {slots.bottomBar}
       </footer>
 
