@@ -1,0 +1,92 @@
+name: infra-verify
+
+# Read-only checks of the Cloudflare token and the Clerk keys. Prints names,
+# statuses and booleans only; never a secret value, account id or key.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/infra-verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLERK_PK: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+      CLERK_SK: ${{ secrets.CLERK_SECRET_KEY }}
+      ZONE_NAME: freshterminal.ai
+    steps:
+      - name: Which secrets are set (names only)
+        env:
+          S_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          S_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          S_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          S_CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          S_OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          S_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          S_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          for n in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY OPENROUTER_API_KEY OPENAI_API_KEY GOOGLE_API_KEY; do
+            v="S_$n"; if [ -n "${!v}" ]; then echo "secret $n: set"; else echo "secret $n: NOT SET"; fi
+          done
+
+      - name: Cloudflare token verify
+        run: |
+          auth=(-H "Authorization: Bearer $CF_TOKEN")
+          echo "user token verify:"
+          curl -sS "${auth[@]}" https://api.cloudflare.com/client/v4/user/tokens/verify | jq -c '{success, status: .result.status, errors: [.errors[]?.message]}'
+          echo "account token verify:"
+          curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/tokens/verify" | jq -c '{success, status: .result.status, errors: [.errors[]?.message]}'
+
+      - name: Zones (names only) and zone access
+        run: |
+          auth=(-H "Authorization: Bearer $CF_TOKEN")
+          echo "zones visible to the token:"
+          curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/zones?per_page=50" | jq -r '.result[]? | "  \(.name) status=\(.status) plan=\(.plan.name)"'
+          zone=$(curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/zones?name=$ZONE_NAME" | jq -r '.result[0].id // empty')
+          if [ -z "$zone" ]; then echo "ZONE $ZONE_NAME: NOT VISIBLE (Zone Read missing or zone not in account)"; exit 0; fi
+          echo "zone $ZONE_NAME: visible"
+          curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/zones/$zone" | jq -c '{status: .result.status, name_servers: .result.name_servers, original_ns: .result.original_name_servers, activated_on: .result.activated_on}'
+          echo "DNS records (Zone DNS read):"
+          curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?per_page=100" | jq -r 'if .success then (.result[] | "  \(.type) \(.name) proxied=\(.proxied)") else "  DNS read FAILED: \([.errors[]?.message] | join("; "))" end'
+          echo "Worker routes on zone (Zone Workers Routes):"
+          curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/zones/$zone/workers/routes" | jq -r 'if .success then "  ok, \(.result | length) routes" else "  routes read FAILED: \([.errors[]?.message] | join("; "))" end'
+
+      - name: Account-level access (Workers, custom domains, D1)
+        run: |
+          auth=(-H "Authorization: Bearer $CF_TOKEN")
+          base="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT"
+          echo "workers scripts:"
+          curl -sS "${auth[@]}" "$base/workers/scripts" | jq -r 'if .success then (.result[] | "  \(.id)") else "  FAILED: \([.errors[]?.message] | join("; "))" end'
+          echo "workers custom domains:"
+          curl -sS "${auth[@]}" "$base/workers/domains" | jq -r 'if .success then (if (.result|length)==0 then "  (none)" else (.result[] | "  \(.hostname) -> \(.service)") end) else "  FAILED: \([.errors[]?.message] | join("; "))" end'
+          echo "D1 databases (Account D1 read):"
+          curl -sS "${auth[@]}" "$base/d1/database" | jq -r 'if .success then (if (.result|length)==0 then "  (none)" else (.result[] | "  \(.name)") end) else "  FAILED: \([.errors[]?.message] | join("; "))" end'
+          echo "workers.dev subdomain:"
+          curl -sS "${auth[@]}" "$base/workers/subdomain" | jq -r 'if .success then "  \(.result.subdomain).workers.dev" else "  FAILED" end'
+
+      - name: Clerk keys (instance type and frontend host only)
+        run: |
+          case "$CLERK_PK" in pk_live_*) echo "publishable key: live (production instance)";; pk_test_*) echo "publishable key: test (development instance)";; "") echo "publishable key: NOT SET";; *) echo "publishable key: unexpected prefix";; esac
+          case "$CLERK_SK" in sk_live_*) echo "secret key: live";; sk_test_*) echo "secret key: test";; "") echo "secret key: NOT SET";; *) echo "secret key: unexpected prefix";; esac
+          # The publishable key is public (it ships in the bundle); it encodes the Frontend API host.
+          if [ -n "$CLERK_PK" ]; then
+            host=$(printf '%s' "${CLERK_PK#pk_*_}" | base64 -d 2>/dev/null | tr -d '$')
+            echo "frontend API host: $host"
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "https://$host/v1/environment")
+            echo "frontend API /v1/environment: HTTP $code"
+          fi
+          if [ -n "$CLERK_SK" ]; then
+            echo "backend API (secret key) check:"
+            curl -sS -H "Authorization: Bearer $CLERK_SK" "https://api.clerk.com/v1/domains" | jq -r 'if .data then (.data[] | "  domain \(.name) satellite=\(.is_satellite) frontend_api=\(.frontend_api_url)") else "  FAILED: \([.errors[]?.message] | join("; "))" end'
+            curl -sS -H "Authorization: Bearer $CLERK_SK" "https://api.clerk.com/v1/users/count" | jq -c '{users: .total_count}'
+            echo "JWKS reachable:"
+            curl -sS -H "Authorization: Bearer $CLERK_SK" "https://api.clerk.com/v1/jwks" | jq -r '"  keys: \(.keys | length)"'
+          fi
