@@ -1,0 +1,35 @@
+<!doctype html>
+<!--
+  Source of the share card app/public/brand/og-1200x630.png (2026-09-29).
+  Render with: node scripts/og-card.mjs   (Playwright, 1200x630, device scale 1)
+  Void theme: black, the green >_ mark, one line of headline, a hint of the prompt box.
+  Kept big so it reads when Slack or iMessage shows it at ~300 px wide.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Share card</title>
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; background: #000; overflow: hidden; }
+  body { font-family: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', monospace; color: #eaf5ec; }
+  .card { position: relative; box-sizing: border-box; width: 1200px; height: 630px; padding: 64px 80px; border: 2px solid #123a1c; display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 22px; font-size: 40px; font-weight: 700; }
+  .brand img { width: 64px; height: 64px; display: block; }
+  h1 { margin: auto 0 0; font-size: 84px; line-height: 1.05; font-weight: 700; letter-spacing: -1px; }
+  h1 span { color: #33ff66; }
+  .prompt { margin-top: 44px; height: 84px; border: 3px solid #33ff66; display: flex; align-items: center; padding: 0 28px; gap: 18px; font-size: 34px; color: #7d9684; }
+  .prompt .caret { width: 20px; height: 42px; background: #33ff66; }
+  .prompt .go { margin-left: auto; width: 56px; height: 56px; background: #33ff66; color: #000; display: grid; place-items: center; font-size: 34px; font-weight: 700; }
+  .domain { position: absolute; top: 76px; right: 80px; font-size: 28px; color: #a3b8a8; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><img src="../../app/public/brand/fresh-terminal/fresh-terminal-monogram-dark.svg" alt="">Fresh Terminal</div>
+    <div class="domain">freshterminal.ai</div>
+    <h1>A terminal that<br><span>adapts to you.</span></h1>
+    <div class="prompt"><span class="caret"></span>Type here.<span class="go">→</span></div>
+  </div>
+</body>
+</html>

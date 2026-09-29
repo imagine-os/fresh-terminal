@@ -27,6 +27,7 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | Free credits, enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day signed-out cap) | `GET https://api.freshterminal.ai/credits`; live check in changelog 0008 | 2026-09-29 (C-074) |
 | $5 starter kit per signed-in account (C-089), no per-account daily cap (C-094), which is also the pass-through threshold (past it `402 payment_required`), friend credits and invite codes; privacy by default (`share_data` off, access grants, admin sees totals only; C-094); storage measured per account (100 MB free, not billed; C-092) | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-086, C-087) |
 | The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-088) |
+| Sales site: about, pricing, FAQ (EN/ES, share cards) | https://freshterminal.ai/about, https://freshterminal.ai/pricing, https://freshterminal.ai/faq (also on Pages under /fresh-terminal/) | 2026-09-29 (C-097) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |
 
@@ -105,6 +106,7 @@ As of 2026-09-29:
 | **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
 | **Actions: ledger cost, filters, arrows; plan to docs/plan** (C-095) | 2026-09-29 (Opus 5.5): model and cost per row from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, a remembered and keyboard-resizable label column, typed undo; our build plan moved to `docs/plan/` (hub and wiki), `/plan` stays the dev viewer. Live check in changelog 0015. |
 | **Tighter tools menu** (C-096) | Shipped 2026-09-29 05:40 UTC. |
+| **Sales site and share cards** (C-097) | Shipped 2026-09-29 05:30 UTC (Opus 5.5). Not wired yet: "Buy credits" (pay as you go, model cost + 10%) and "Tell me when" (teams and self-host). Coming soon on the site: realtime multiplayer, live sync across devices, voice talk-back, connectors, migration, encryption with your own key, teams and self-host. |
 | **Rename in place, perspective grid, publish workflow** (C-094) | Shipped 2026-09-29 05:30 UTC. `fresh-terminal` published to SpacetimeDB Maincloud 05:39 UTC (run 4; 14 tables, 19 reducers), bindings committed. Live store (`createSpacetimeStore`) still pending. |
 | **Uniform bar, minimal tray, Actions, voice fails once** (C-090) | Shipped 2026-09-29 05:10 UTC. Terminal-talk is a switch + demo; the voice agent is next after SpacetimeDB. |
 | **One line in the top bar** (C-085) | Shipped 2026-09-29 04:40 UTC: banner gone, saved/sign-in line centered in the bar, voice key in the placeholder. |

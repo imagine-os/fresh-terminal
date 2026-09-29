@@ -820,5 +820,22 @@
       "terms": "Simple Icons collection CC0-1.0; Zod trademark belongs to its owner",
       "checked": "2026-09-29"
     }
-  ]
+  ],
+  "product": {
+    "slug": "fresh-terminal",
+    "name": "Fresh Terminal",
+    "colour": "#33ff66",
+    "note": "Our own mark (2026-09-29, sales site pass): the >_ monogram on a square, and the name in the house monospace. -dark is for dark backgrounds (green square, light name); -light is for light backgrounds. The name is SVG text in the system monospace, not outlined paths.",
+    "files": {
+      "horizontal-dark": "fresh-terminal/fresh-terminal-horizontal-dark.svg",
+      "horizontal-light": "fresh-terminal/fresh-terminal-horizontal-light.svg",
+      "stacked-dark": "fresh-terminal/fresh-terminal-stacked-dark.svg",
+      "stacked-light": "fresh-terminal/fresh-terminal-stacked-light.svg",
+      "monogram-dark": "fresh-terminal/fresh-terminal-monogram-dark.svg",
+      "monogram-light": "fresh-terminal/fresh-terminal-monogram-light.svg",
+      "og-card": "og-1200x630.png"
+    },
+    "source": "terminal/app/public/brand/fresh-terminal (ours); card source terminal/docs/brand/og-card.html, rendered by scripts/og-card.mjs",
+    "checked": "2026-09-29"
+  }
 }

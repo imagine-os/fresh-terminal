@@ -187,6 +187,7 @@ export function TopBar(props: Props) {
           links={[
             { label: t('footer.source'), href: REPO_URL },
             { label: t('footer.docs'), href: `${import.meta.env.BASE_URL}wiki/` },
+            { label: t('footer.about'), href: `${import.meta.env.BASE_URL}about` },
           ]}
           foot={`v${PRODUCT_VERSION} · ${t('landing.tagline')}`}
         />

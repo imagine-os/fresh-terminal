@@ -1,6 +1,6 @@
 # Fresh Terminal
 
-> A prompt-first terminal that routes what you type to the right model and can edit its own interface through undoable ops. This is the docs wiki: plain Markdown, dated facts, one start-here index. Updated every pass in the same commit as the work. Last updated 2026-09-29 (domain, sign-in and D1 pass).
+> A prompt-first terminal that routes what you type to the right model and can edit its own interface through undoable ops. This is the docs wiki: plain Markdown, dated facts, one start-here index. Updated every pass in the same commit as the work. Last updated 2026-09-29 (sales site pass).
 
 Base URLs: GitHub https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/ · raw https://raw.githubusercontent.com/imagine-os/fresh-terminal/main/terminal/docs/ · rendered https://imagine-os.github.io/fresh-terminal/wiki/ (each page also at /wiki/<path>.md as plain Markdown). Links below are relative to terminal/docs/.
 
@@ -11,7 +11,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-096 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-097 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
@@ -30,6 +30,8 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Reference
 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
+- [decisions/0025-sales-site.md](decisions/0025-sales-site.md): the sales site at freshterminal.ai/about, /pricing, /faq; pricing (free, $5 starter kit, pay as you go at model cost + 10%, buy credits not wired yet, your key $0 for models); share tags from shared/src/share.ts
+- [pages/sales.md](pages/sales.md): the sales pages doc (sections, actions, EN/ES, share tags)
 - [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md): Clerk Billing checked (subscriptions only, no usage billing), the $5 pass-through threshold (402 payment_required), Stripe Checkout top-ups proposed, friend credits and invite codes, the admin API, the hub at freshterminal.ai/hub, costs
 - [pages/actions.md](pages/actions.md): the Actions page doc (the person's activity; model and cost from the ledger; filters by status, stage, model, words; sort by cost; timeline arrows)
 - [pages/hub.md](pages/hub.md): the hub page doc (admins only, server-checked; work items, prompt/response library, Canon, wiki, plan, credits, secrets checklist)
@@ -50,6 +52,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0016.md](changelog/0016.md): the sales site, share cards, our brand mark, live check
 - [changelog/0014.md](changelog/0014.md): the $5 pass-through gate, friend credits, invite codes, the hub, live check
 - [changelog/0013.md](changelog/0013.md): the sign-in matches the theme (Clerk appearance)
 - [changelog/0012.md](changelog/0012.md): koi pond v3 and canvas v2 redo, before/after, live check

@@ -1,6 +1,6 @@
 # Responsive check (latest)
 
-Run: 2026-09-29T05:42:17.791Z. Widths: 360, 390, 768, 1280, 1920, 2560, 3840. Pages: /, /box/demo, /canvas, /box/demo/play, /actions.
+Run: 2026-09-29T05:46:43.528Z. Widths: 360, 390, 768, 1280, 1920, 2560, 3840. Pages: /, /box/demo, /canvas, /box/demo/play, /actions, /about, /pricing, /faq.
 Asserts: no horizontal overflow, composer visible, interactive targets >= 44px.
 
 | page | width | overflow | composer | small targets | screenshot |
@@ -40,5 +40,26 @@ Asserts: no horizontal overflow, composer visible, interactive targets >= 44px.
 | actions | 1920 | no | yes | 0 | actions-1920.png |
 | actions | 2560 | no | yes | 0 | actions-2560.png |
 | actions | 3840 | no | yes | 0 | actions-3840.png |
+| about | 360 | no | yes | 0 | about-360.png |
+| about | 390 | no | yes | 0 | about-390.png |
+| about | 768 | no | yes | 0 | about-768.png |
+| about | 1280 | no | yes | 0 | about-1280.png |
+| about | 1920 | no | yes | 0 | about-1920.png |
+| about | 2560 | no | yes | 0 | about-2560.png |
+| about | 3840 | no | yes | 0 | about-3840.png |
+| pricing | 360 | no | yes | 0 | pricing-360.png |
+| pricing | 390 | no | yes | 0 | pricing-390.png |
+| pricing | 768 | no | yes | 0 | pricing-768.png |
+| pricing | 1280 | no | yes | 0 | pricing-1280.png |
+| pricing | 1920 | no | yes | 0 | pricing-1920.png |
+| pricing | 2560 | no | yes | 0 | pricing-2560.png |
+| pricing | 3840 | no | yes | 0 | pricing-3840.png |
+| faq | 360 | no | yes | 0 | faq-360.png |
+| faq | 390 | no | yes | 0 | faq-390.png |
+| faq | 768 | no | yes | 0 | faq-768.png |
+| faq | 1280 | no | yes | 0 | faq-1280.png |
+| faq | 1920 | no | yes | 0 | faq-1920.png |
+| faq | 2560 | no | yes | 0 | faq-2560.png |
+| faq | 3840 | no | yes | 0 | faq-3840.png |
 
 Result: PASS

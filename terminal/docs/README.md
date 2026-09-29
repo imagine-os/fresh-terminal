@@ -1,6 +1,6 @@
 # Fresh Terminal wiki — start here
 
-Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (domain, sign-in and D1 pass, Opus 5.5).
+Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (sales site pass, Opus 5.5).
 
 - Read it rendered: https://imagine-os.github.io/fresh-terminal/wiki/
 - Read it on GitHub: https://github.com/imagine-os/fresh-terminal/tree/main/terminal/docs
@@ -16,7 +16,7 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-096) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-097) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
 | [canon/prompts.md](canon/prompts.md) | All 92 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
@@ -83,6 +83,7 @@ Read this first.
 | [decisions/0021-free-credits.md](decisions/0021-free-credits.md) | Free credits enforced by the router: grants, soft prompts, abuse limits, daily cap, cost estimates | 2026-09-29 |
 | [decisions/0022-koi-v3-and-canvas-v2.md](decisions/0022-koi-v3-and-canvas-v2.md) | Koi pond v3 (top-down, then tilt up; photographic) and canvas v2 (paper sheets, sections, minimap): what was wrong, what was chosen and why | 2026-09-29 |
 | [decisions/0023-signin-style.md](decisions/0023-signin-style.md) | Clerk sign-in themed from the active theme: square, our fonts, accent button, no shadow, 44px, focus; what stays (Clerk branding, dev notice) | 2026-09-29 |
+| [decisions/0025-sales-site.md](decisions/0025-sales-site.md) | The sales site (/about, /pricing, /faq): what Omarchy taught, best-of-3 picks, pricing as built, what is not wired, share cards, costs | 2026-09-29 |
 | [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md) | What Clerk Billing can and cannot do (sources), the $5 pass-through threshold, Stripe Checkout top-ups (proposed), friend credits and invite codes, the hub at /hub, costs | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
@@ -102,6 +103,7 @@ Read this first.
 | [changelog/0010.md](changelog/0010.md) | Readable text over photo and material skins: sampled scrim, AA text, neutral small text | 2026-09-29 |
 | [changelog/0012.md](changelog/0012.md) | Koi pond v3 and canvas v2 redo, best-of-3 rounds, before/after screenshots, live check | 2026-09-29 |
 | [changelog/0013.md](changelog/0013.md) | The sign-in matches the theme (Clerk appearance), before/after at 390, 1280, 3840 | 2026-09-29 |
+| [changelog/0016.md](changelog/0016.md) | The sales site at /about, /pricing and /faq, share cards on every public page, our own brand mark, with the live check | 2026-09-29 |
 | [changelog/0014.md](changelog/0014.md) | The $5 pass-through gate, friend credits and invite codes, the hub at freshterminal.ai/hub, with the live check | 2026-09-29 |
 | [changelog/0015.md](changelog/0015.md) | Actions: model and cost from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, typed undo; our plan moved to `docs/plan/` (C-095) | 2026-09-29 |
 
@@ -115,6 +117,7 @@ Read this first.
 | [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas v2 (`/canvas`; v1 at `?v=1`) | 2026-09-29 |
 | [pages/koi.md](pages/koi.md) | Page spec: koi pond v3 (`/pages/koi.html`): views, controls, URL options, versions | 2026-09-29 |
 | [pages/actions.md](pages/actions.md) | Page doc: Actions (`/actions`): rows, statuses, model and cost from the ledger, filters, sort, views, the resizable timeline column, typed undo | 2026-09-29 |
+| [pages/sales.md](pages/sales.md) | Page doc: the sales pages (/about, /pricing, /faq): sections, pricing, actions, languages, share tags, how to change them | 2026-09-29 |
 | [pages/hub.md](pages/hub.md) | Page doc: the hub (`/hub`): who can see it, how the server checks, sections, data, actions, local preview | 2026-09-29 |
 | [pages/producthunt.md](pages/producthunt.md) | Page doc: the Product Hunt strategy (`/pages/producthunt.html`): the call, pitch pick, readiness, costs; proposed | 2026-09-29 |
 | [brand/registry.md](brand/registry.md) | Every brand mark in the repo: file, source, licence, date checked; what is still missing | 2026-09-29 |
