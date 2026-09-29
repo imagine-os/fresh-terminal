@@ -23,7 +23,7 @@ export interface Prefs {
   firstRunSeen: boolean;
   /** Top bar hidden by the tray switch (H brings it back). */
   topBarHidden: boolean;
-  /** Starter prompts under the box and the hints on the start screen (off by default, C-074). */
+  /** Starter prompts under the box and the hints on the start screen (off by default, C-075). */
   showStarters: boolean;
   showHints: boolean;
   /** Sidebar settings: show the box menu there; keep it open when a box is picked. */

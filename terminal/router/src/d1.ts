@@ -7,6 +7,7 @@ import type { AccountInfo, PushBoxesResult, SyncBox, SyncEntry } from '../../sha
 export interface D1Result<T> {
   results: T[];
   success: boolean;
+  meta?: { changes?: number };
 }
 export interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;

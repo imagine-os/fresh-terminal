@@ -53,7 +53,7 @@ describe('parseDialect', () => {
   it('parses the default spec without issues', () => {
     const { spec, issues } = parseDialect(defaultSpecText);
     expect(issues).toEqual([]);
-    // Hidden everywhere since 2026-09-29 (C-074): the boxes list opens from the top-left icon.
+    // Hidden everywhere since 2026-09-29 (C-075): the boxes list opens from the top-left icon.
     expect(spec.regions.leftSidebar.behaviour).toEqual({
       phone: 'hidden',
       tablet: 'hidden',

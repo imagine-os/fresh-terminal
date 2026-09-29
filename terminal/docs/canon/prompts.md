@@ -576,7 +576,7 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 >
 > PS: we need to be smart about our own costs, because people might abuse the free start from multiple browser sessions or whatever other methods they might do.
 
-**What happened:** Split. Justin's session: the first-run line, the session export, the hide-the-top-bar switch in the tray (C-072). The other session: free credits enforced on the router, soft sign-in prompts, abuse limits, moving browser boxes to D1 on sign-in (proposed defaults 25¢ per device, $2/day cap). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651953157019?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+**What happened:** Split. Justin's session: the first-run line, the session export, the hide-the-top-bar switch in the tray (C-072). The other session: free credits enforced on the router, soft sign-in prompts, abuse limits, moving browser boxes to D1 on sign-in (proposed defaults 25¢ per device, $2/day cap). 2026-09-29 03:40 UTC (Opus 5.5): built as C-074 with 25¢ per device, 2 soft prompts, $1 per account, $2/day signed-out cap (decision 0021, changelog 0008). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651953157019?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651662236069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651662.236069
 
 ## 68. Mon Sep 28, 10:14 PM CDT · 2026-09-29 03:14:40 UTC
@@ -601,5 +601,5 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 >
 > Right now the goal is to get the starting point super super clean
 
-**What happened:** C-074: Alt/Option shortcuts while typing, "free usage", sidebar hidden with a top-left icon and its own settings, starters and hints behind switches in the prompt box, a calmer tray.
+**What happened:** C-075: Alt/Option shortcuts while typing, "free usage", sidebar hidden with a top-left icon and its own settings, starters and hints behind switches in the prompt box, a calmer tray.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652625.835259

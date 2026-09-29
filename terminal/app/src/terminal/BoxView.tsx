@@ -24,6 +24,7 @@ import { Transcript } from './Transcript';
 import { PageView } from '../pages/PageView';
 import { downloadSession } from '../lib/exportSession';
 import { FirstRun } from './FirstRun';
+import { creditsSnapshot, reportCreditsError } from '../credits';
 
 export interface AppCommands {
   setLang: (lang: 'en' | 'es') => void;
@@ -302,6 +303,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       let replyLineId: string | null = null;
       try {
         const started = performance.now();
+        const startedAt = Date.now();
         const reply = store.appendLine(box.id, 'assistant', '', []);
         replyLineId = reply.id;
         let assembled = '';
@@ -366,6 +368,11 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             store.updateLine(reply.id, text, false);
             const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
             store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
+            // Free credits ran out and the router let this one through: say so, softly (1 of 2, 2 of 2).
+            const soft = creditsSnapshot().lastSoftPrompt;
+            if (soft && soft.at >= startedAt) {
+              store.appendLine(box.id, 'system', t('credits.softPrompt', { n: String(soft.n), of: String(soft.of) }), []);
+            }
           },
           onFail: (failure) => {
             store.updateLine(reply.id, assembled, false);
@@ -376,6 +383,9 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               message = t('system.noKey');
             } else if (failure.kind === 'pending') {
               message = t('system.pending', { note: failure.note });
+            } else if (failure.kind === 'credits') {
+              reportCreditsError(failure.code, failure.message);
+              message = t(`credits.${failure.code}` as 'credits.sign_in_required');
             } else {
               message = t('system.error', { message: failure.message });
             }

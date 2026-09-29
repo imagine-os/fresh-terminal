@@ -2,6 +2,7 @@ import type { Chip } from '@shared/chips';
 import type { GlossaryTerm } from '@shared/ui';
 import { ROUTER_URL } from './routerClient';
 import { cachedRouterHealth } from './routerHealth';
+import { routerFetch } from './routerFetch';
 
 export interface RemoteTagResult {
   text: string;
@@ -38,7 +39,8 @@ export async function tagRemote(
     if (signal) {
       init.signal = signal;
     }
-    const response = await fetch(`${ROUTER_URL}/tag`, init);
+    // Metered like every paid call; out of credits it answers 402 and chips stay local (never blocks typing).
+    const response = await routerFetch(`${ROUTER_URL}/tag`, init, { paid: true });
     if (!response.ok) {
       return null;
     }
