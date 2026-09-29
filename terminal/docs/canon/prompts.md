@@ -441,3 +441,57 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 
 **What happened:** Made a rule: the Canon and the docs wiki are updated in the same commit as every pass. The wiki got one start-here index (`terminal/docs/README.md`), an `llms.txt` for AI readers, and a rendered copy on the site. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647944459239?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Decision C-057; repo prompt 0015.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647881.668439
+
+## 53. Mon Sep 28, 9:15 PM CDT · 2026-09-29 02:15:39 UTC
+
+> I'm building with LiveKit - can you read this docs page https://docs.livekit.io/agents/logic/tools/mcp.md ssetup the mcp or cli or whatever tools you want. tell me how to get it registered so you can use it without me.
+>
+> Make a little page or component that shows the items we're using in freshterminal by default. CloudFlare, Github, SpaceTimeDB, LiveKit, Open Router, etc This is our FreshStack.  the goal is that this becomes the most popular, best starter kit on the internet. until we get rid of the dependencies on those things too. And consider that users will either use our multitenant system, bring their own keys, or later we can figure out how to let them self hold everything in a way that is seperated from us.
+
+**What happened:** FreshStack page shipped (`pages/freshstack.html`, 13 pieces, three modes, an exit per piece, commit 765ea77) and LiveKit plan: Agents with MCP toolset on the router's `/mcp`, deploy-action, one `lk cloud auth` step from Justin. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648472558009?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Decisions C-050, C-051.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648139645019?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648139.645019
+
+## 54. Mon Sep 28, 9:21 PM CDT · 2026-09-29 02:21:25 UTC
+
+> _One honest limit_ [quoted from the recipes reply] … I dont understand this
+>
+> Also, side note, Voice and device type drivers are key. we can use a word different than drivers, but our ability to test and plan around many device types and inputs and outputs etc is going to be key.  controller mapping , etc.
+>
+> i like that you're adding Media Pipe.
+>
+> Setup a skill for gathering logos very very well please. Also icons. we need to ultimately feel like the snapiest best logo, icon, etc. library, and generate better ones when needed. Thumbnails and poster art too soon. But we can come to that later.
+>
+> PS: Give me live links to stuff for me to test .Also give me screenshots more often in our correspondance please
+
+**What happened:** Plain-words explanation of recipes; inputs and outputs plan (a table of input and output kinds, per-device mapping records, the responsive check grows to run actions per input kind); the logos-and-icons skill at `terminal/skills/logos-and-icons/SKILL.md` (commit f15a89e); live links and QA screenshots in every reply from then on. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648676443869?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648485155289?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648485.155289
+
+## 55. Mon Sep 28, 9:23 PM CDT · 2026-09-29 02:23:14 UTC
+
+> give me a prompt to give to ai in my browser to start doing the steps to get all these keys and stuff in place for all the things i havent done yet. i'm logged into to most of the services. so lets move forward.
+>
+> Every single word youi've said that is a company or brand or item with a logo should have the logo(s) saved, this will come in handy with our chips system and more for our own better version of intellitype.
+
+**What happened:** A browser-AI setup prompt (keys go only to GitHub Actions secrets, never into the chat; secret names read back) [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648733284199?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), a correction not to delete the rotated OpenRouter key [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648791886499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), and 43 SVG brand marks with mono variants, a registry and `pages/brands.html` (commits 8c5eae8, 4a26e22) [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649004590609?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648594106509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648594.106509
+
+## 56. Mon Sep 28, 9:28 PM CDT · 2026-09-29 02:28:23 UTC
+
+> i already did cloudflare clerk,  I dont need open ai. are we gonna use livekit or openrouter for voice? benchmarks should show who has best voice at the moment for model, livekit looks cool, eleven labs popular but expensive, google realtime and openairealtime just shipped recently. so look up very rcent best practices, but dont let that slow you down from updating the prompt for my browser ai
+
+**What happened:** Prompt reissued without Cloudflare, Clerk and OpenAI (LiveKit, SpacetimeDB, Google AI key for Gemini Live, optional Hyperbeam) [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648967608979?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Voice call: OpenRouter has no audio; LiveKit is the pipe and agent runtime; default Gemini Live over LiveKit, Cartesia or ElevenLabs as optional skins, browser speech stays the free fallback; OpenAI Realtime becomes optional [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648994220409?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Updates C-023 (voice seam) and C-051.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648903521149?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648903.521149
+
+## 57. Mon Sep 28, 9:29 PM CDT · 2026-09-29 02:29:41 UTC
+
+> i need a playback scrubber that then evolves to have branching and merging capability if needed to watch through every step of our interactions with a terminal session please. Everything saved beatuifully. in the future we can save video adn audio and whatever else also, for now get us started and we can evolve as we grow
+
+**What happened:** Replay shipped: `/box/<id>/play`, key `P`, every step derived from the store with parent ids, the interface rebuilt at any step, save as JSON, branching labelled not wired. Decision C-058; repo prompt 0016, decision 0019, changelog 0006.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648981706729?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648981.706729
+
+## 58. Mon Sep 28, 9:29 PM CDT · 2026-09-29 02:29:52 UTC
+
+> "evolve as we grow" is great tagline
+
+**What happened:** Made it the tagline: "Evolve as we grow." Decision C-059.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648992.904059

@@ -16,4 +16,6 @@ export const NOT_WIRED = [
   { id: 'voice.gemini.audio', label: 'Gemini Live audio capture and playback (token + transcript events exist)' },
   { id: 'voice.usage.pricing', label: 'Realtime voice priced from real usage (entries are estimates)' },
   { id: 'voice.control', label: 'Voice controller over the actions registry / TV remote input' },
+  { id: 'playback.branch', label: 'Branching and merging a session from a replay step (the timeline stores parent ids for it)' },
+  { id: 'playback.media', label: 'Audio and video in the replay (steps only today)' },
 ] as const;

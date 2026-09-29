@@ -917,6 +917,36 @@
       ],
       "model": "Opus 5.5",
       "pass": 4
+    },
+    {
+      "id": "playback",
+      "title": "Replay: every step of a session as a saved event with parent ids; scrubber at /box/:id/play (P); interface rebuilt at any step; timeline.v0 export",
+      "status": "done",
+      "depends_on": [
+        "op-language"
+      ],
+      "model": "Opus 5.5",
+      "pass": 5
+    },
+    {
+      "id": "playback-branching",
+      "title": "Branch and merge a session from a replay step (two live heads per box; needs the shared store)",
+      "status": "todo",
+      "depends_on": [
+        "playback"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "playback-media",
+      "title": "Audio, video and pointer steps in the replay, aligned on the same wall-clock lane (media rows in R2 + SpacetimeDB)",
+      "status": "todo",
+      "depends_on": [
+        "playback"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
     }
   ]
 }

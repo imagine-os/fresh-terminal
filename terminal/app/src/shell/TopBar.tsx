@@ -6,7 +6,7 @@ import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { NotWiredButton } from '../ui/NotWiredButton';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconSave, IconSidebar, IconTheme } from '../ui/icons';
+import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSave, IconSidebar, IconTheme } from '../ui/icons';
 
 interface Props {
   boxName: string;
@@ -25,6 +25,8 @@ interface Props {
   onSettings: () => void;
   payMode: 'ours' | 'own';
   libraryHref: string;
+  onReplay: () => void;
+  replayActive: boolean;
 }
 
 function key(id: string): string {
@@ -71,6 +73,11 @@ export function TopBar(props: Props) {
           <a className="btn" data-variant="ghost" data-icon="true" aria-label={t('topbar.library')} href={props.libraryHref} data-testid="library-link">
             <IconLibrary />
           </a>
+        </Tooltip>
+        <Tooltip label={t('topbar.replay')} shortcut={key('play.open')}>
+          <Button icon variant="ghost" aria-label={t('topbar.replay')} aria-pressed={props.replayActive} onClick={props.onReplay} data-testid="replay-link">
+            <IconReplay />
+          </Button>
         </Tooltip>
         <Tooltip label={t('topbar.toggleSidebar')} shortcut={key('sidebar.toggle')}>
           <Button icon variant="ghost" aria-label={t('topbar.toggleSidebar')} onClick={props.onToggleSidebar}>

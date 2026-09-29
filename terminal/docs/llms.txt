@@ -11,13 +11,13 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-057 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-059 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
 
 - [canon/vision.md](canon/vision.md): what we are building and why, in Justin's words
-- [canon/prompts.md](canon/prompts.md): all 52 of Justin's messages verbatim with outcomes
+- [canon/prompts.md](canon/prompts.md): all 58 of Justin's messages verbatim with outcomes
 - [canon/glossary.md](canon/glossary.md): house words (box, chip, dialect, Jev, recipe, wiki)
 - [canon/people-and-access.md](canon/people-and-access.md): people, repos, secret names
 
@@ -31,6 +31,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag), ops as tools, action runner, window.pond, SpacetimeDB, CLI, MCP
 - [decisions/0016-self-editing.md](decisions/0016-self-editing.md): how the interface edits itself (ops, undo, tool calling, escalation)
 - [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md): chip kinds, glossary, reply blocks
+- [decisions/0019-playback.md](decisions/0019-playback.md): replay, steps with parent ids, state rebuilt at any step, branches later
 - [pages/box.md](pages/box.md): the box page spec
 - [pages/landing.md](pages/landing.md): the landing page spec
 - [pages/canvas.md](pages/canvas.md): the master canvas spec
@@ -38,6 +39,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Changelog
 
 - [changelog/0004.md](changelog/0004.md): pass 4, the terminal edits itself, chips v2, replies, koi v2, Canon, wiki
+- [changelog/0006.md](changelog/0006.md): replay scrubber over every step of a session; tagline "Evolve as we grow."
 - [changelog/0003.md](changelog/0003.md): pass 3, voice, router health, router live
 - [changelog/0002.md](changelog/0002.md): pass 2, two ways to pay, Jev, tagger, library, koi v1
 - [changelog/0001.md](changelog/0001.md): pass 1, the first build

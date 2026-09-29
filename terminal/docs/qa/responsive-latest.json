@@ -1,5 +1,5 @@
 {
-  "stamp": "2026-09-29T02:22:15.873Z",
+  "stamp": "2026-09-29T02:43:45.174Z",
   "results": [
     {
       "page": "landing",
@@ -168,6 +168,62 @@
       "composerVisible": true,
       "smallTargets": [],
       "screenshot": "canvas-3840.png"
+    },
+    {
+      "page": "replay",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-360.png"
+    },
+    {
+      "page": "replay",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-390.png"
+    },
+    {
+      "page": "replay",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-768.png"
+    },
+    {
+      "page": "replay",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-1280.png"
+    },
+    {
+      "page": "replay",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-1920.png"
+    },
+    {
+      "page": "replay",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-2560.png"
+    },
+    {
+      "page": "replay",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "replay-3840.png"
     }
   ]
 }

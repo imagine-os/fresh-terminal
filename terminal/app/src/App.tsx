@@ -4,12 +4,17 @@ import type { Op } from '@shared/ops';
 import type { NavTarget } from '@shared/ui';
 import { usedMicro } from '@shared/ledger';
 import { THEME_SURFACE_PAGES, findTheme, nextThemeId, resolveThemeId } from '@shared/themes';
-import { installActionsRegistry } from './actions/registry';
+import { deriveTimeline, stateAt, type Step } from '@shared/timeline';
+import type { EngineContext } from '@shared/ops';
+import { installActionsRegistry, listActions } from './actions/registry';
 import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
 import { I18nProvider, useI18n } from './i18n';
+import { newId } from './lib/ids';
 import { hrefFor, routeForPath, useRoute } from './lib/router';
+import { PlaybackView } from './playback/PlaybackView';
+import { usePlayback } from './playback/usePlayback';
 import { probeRouter } from './lib/routerHealth';
 import { PrefsProvider, usePrefs } from './prefs';
 import { SettingsPanel } from './settings/SettingsPanel';
@@ -30,6 +35,8 @@ function isEditable(target: EventTarget | null): boolean {
   const tag = target.tagName;
   return tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || target.isContentEditable;
 }
+
+const NO_STEPS: Step[] = [];
 
 function Product() {
   const { prefs, set, update } = usePrefs();
@@ -91,17 +98,42 @@ function Product() {
     [snapshot.boxes],
   );
   const currentPage = route.name === 'page' ? snapshot.pages.find((page) => page.id === route.id) ?? null : null;
+  const replaying = route.name === 'play';
   const requested =
-    route.name === 'box'
+    route.name === 'box' || route.name === 'play'
       ? snapshot.boxes.find((box) => box.id === route.id) ?? null
       : currentPage
         ? snapshot.boxes.find((box) => box.id === currentPage.box_id) ?? null
         : null;
   const currentBox = requested ?? mostRecent;
-  const boxUi = useMemo(
+  const liveBoxUi = useMemo(
     () => (currentBox ? snapshot.boxUis.find((ui) => ui.box_id === currentBox.id) ?? null : null),
     [currentBox, snapshot.boxUis],
   );
+
+  // Replay: every step of this box, and the interface as it was at the chosen one.
+  const steps = useMemo(() => (replaying && currentBox ? deriveTimeline(snapshot, currentBox.id) : NO_STEPS), [replaying, currentBox, snapshot]);
+  const playback = usePlayback(steps, route.name === 'play' ? route.step : null);
+  const replayView = useMemo(() => {
+    if (!replaying || !currentBox) return null;
+    const ctx: EngineContext = {
+      boxId: currentBox.id,
+      now: Date.now(),
+      newId: (prefix) => newId(prefix),
+      themeIds: snapshot.themes.map((candidate) => candidate.id),
+      actionIds: listActions().map((action) => action.id),
+      boxes: snapshot.boxes.map((box) => ({ id: box.id, name: box.name })),
+    };
+    return stateAt(steps, playback.index, store.uiState(currentBox.id), snapshot.edits, ctx);
+  }, [replaying, currentBox, steps, playback.index, snapshot]);
+  const boxUi = replayView?.state.boxUi ?? liveBoxUi;
+
+  // Keep ?step= in the address so a replay position can be shared.
+  useEffect(() => {
+    if (route.name === 'play' && currentBox && steps.length > 0) {
+      window.history.replaceState(null, '', hrefFor({ name: 'play', id: currentBox.id, step: playback.index }));
+    }
+  }, [route.name, currentBox, steps.length, playback.index]);
   const effectiveThemeId = boxUi?.theme_id ?? prefs.themeId;
   const dialectText = boxUi?.dialect_text ?? defaultSpecText;
 
@@ -121,6 +153,9 @@ function Product() {
   useEffect(() => {
     if (route.name === 'box' && requested === null && mostRecent !== null) {
       window.history.replaceState(null, '', hrefFor({ name: 'box', id: mostRecent.id }));
+    }
+    if (route.name === 'play' && requested === null && mostRecent !== null) {
+      window.history.replaceState(null, '', hrefFor({ name: 'play', id: mostRecent.id, step: route.step }));
     }
   }, [route, requested, mostRecent]);
 
@@ -187,6 +222,12 @@ function Product() {
 
   const openPage = useCallback((pageId: string) => navigate({ name: 'page', id: pageId }), [navigate]);
 
+  /** P: replay the current box step by step; P again (or Esc) returns to live. */
+  const toggleReplay = useCallback(() => {
+    if (!currentBox) return;
+    navigate(replaying ? { name: 'box', id: currentBox.id } : { name: 'play', id: currentBox.id, step: null });
+  }, [currentBox, replaying, navigate]);
+
   /** Undo the newest applied batch in this box; redo the most recently undone one. */
   const undoLast = useCallback(() => {
     if (!currentBox) return;
@@ -245,6 +286,7 @@ function Product() {
       'sidebar.toggle': () => toggleSidebar(),
       'edit.undo': () => undoLast(),
       'edit.redo': () => redoLast(),
+      'play.open': () => toggleReplay(),
     };
     const onAction = (event: Event) => {
       const id = (event as CustomEvent<{ id?: string }>).detail?.id ?? '';
@@ -254,7 +296,7 @@ function Product() {
     };
     window.addEventListener('ft:action', onAction);
     return () => window.removeEventListener('ft:action', onAction);
-  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toast, t]);
+  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toggleReplay, toast, t]);
 
   // Shortcuts: single key outside the composer, Ctrl/Cmd+key inside it.
   useEffect(() => {
@@ -290,7 +332,12 @@ function Product() {
         event.preventDefault();
         action();
       };
-      if (key === 'n') run(newBox);
+      // While replaying, the scrubber owns space and the arrows; edits stay off.
+      if (replaying && !['p', '[', 'd', 'l', 'k', 'c', 'escape'].includes(key)) {
+        return;
+      }
+      if (key === 'p') run(toggleReplay);
+      else if (key === 'n') run(newBox);
       else if (key === '[') run(toggleSidebar);
       else if (key === 't') run(cycleTheme);
       else if (key === 'd') run(toggleDev);
@@ -306,7 +353,7 @@ function Product() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [newBox, toggleSidebar, cycleTheme, toggleDev, toggleLang, openCanvas, update, undoLast, redoLast]);
+  }, [newBox, toggleSidebar, cycleTheme, toggleDev, toggleLang, openCanvas, update, undoLast, redoLast, replaying, toggleReplay]);
 
   const closeFloating = useCallback(() => {
     update({ leftOpen: false });
@@ -326,6 +373,17 @@ function Product() {
     );
   } else if (route.name === 'page') {
     stage = <PageView pageId={route.id} />;
+  } else if (replaying && currentBox) {
+    stage = (
+      <PlaybackView
+        key={`play:${currentBox.id}`}
+        box={currentBox}
+        steps={steps}
+        playback={playback}
+        exact={replayView?.exact ?? true}
+        onExit={() => navigate({ name: 'box', id: currentBox.id })}
+      />
+    );
   } else if (currentBox) {
     stage = (
       <BoxView
@@ -364,7 +422,19 @@ function Product() {
       slots={{
         topBar: (
           <TopBar
-            boxName={route.name === 'canvas' ? t('canvas.title') : route.name === 'plan' ? t('dev.pm') : route.name === 'page' ? currentPage?.title ?? '' : landing ? '' : currentBox?.name ?? ''}
+            boxName={
+              route.name === 'canvas'
+                ? t('canvas.title')
+                : route.name === 'plan'
+                  ? t('dev.pm')
+                  : route.name === 'page'
+                    ? currentPage?.title ?? ''
+                    : replaying
+                      ? `${currentBox?.name ?? ''} · ${t('play.suffix')}`
+                      : landing
+                        ? ''
+                        : currentBox?.name ?? ''
+            }
             theme={theme}
             devMode={prefs.devMode}
             usedMicro={used}
@@ -380,9 +450,20 @@ function Product() {
             onSettings={() => setSettingsOpen((current) => !current)}
             payMode={prefs.payMode}
             libraryHref={`${import.meta.env.BASE_URL}pages/library.html`}
+            onReplay={toggleReplay}
+            replayActive={replaying}
           />
         ),
-        leftSidebar: <Sidebar boxes={snapshot.boxes} currentId={currentBox?.id ?? null} onOpen={openBox} onNew={newBox} onNavigate={navigateTo} />,
+        leftSidebar: (
+          <Sidebar
+            boxes={snapshot.boxes}
+            currentId={currentBox?.id ?? null}
+            onOpen={openBox}
+            onNew={newBox}
+            onNavigate={navigateTo}
+            navOverride={replayView?.state.nav ?? null}
+          />
+        ),
         rightSidebar: prefs.devMode ? (
           <DevPanel
             dialectText={dialectText}

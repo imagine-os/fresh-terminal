@@ -51,7 +51,7 @@ function LineBody({ line, fresh }: { line: Line; fresh: boolean }) {
   return <>{line.text}</>;
 }
 
-export function Transcript({ lines }: { lines: Line[] }) {
+export function Transcript({ lines, currentId = null }: { lines: Line[]; currentId?: string | null }) {
   const endRef = useRef<HTMLDivElement>(null);
   const mountedAt = useRef(Date.now());
   const lastLine = lines[lines.length - 1];
@@ -64,7 +64,7 @@ export function Transcript({ lines }: { lines: Line[] }) {
   return (
     <div className="transcript" role="log" aria-live="polite" aria-relevant="additions text" data-testid="transcript">
       {lines.map((line) => (
-        <div key={line.id} className="line" data-kind={line.kind} data-streaming={line.streaming ? 'true' : undefined}>
+        <div key={line.id} className="line" data-kind={line.kind} data-streaming={line.streaming ? 'true' : undefined} data-current={line.id === currentId ? 'true' : undefined}>
           <span className="line-glyph" aria-hidden="true">
             {GLYPH[line.kind]}
           </span>

@@ -25,6 +25,8 @@ export const SHELL_ACTIONS: ActionDecl[] = [
   { id: 'lang.toggle', intent: 'switch language', permission: 'anyone', shortcut: 'l' },
   { id: 'canvas.open', intent: 'open the master canvas', permission: 'anyone', shortcut: 'c' },
   { id: 'plan.open', intent: 'open the plan', permission: 'anyone' },
+  { id: 'play.open', intent: 'replay this session step by step', permission: 'anyone', shortcut: 'p' },
+  { id: 'play.branch', intent: 'branch the session from this step', permission: 'anyone', notWired: true },
   { id: 'edit.undo', intent: 'undo the last change', permission: 'anyone', shortcut: 'mod+z' },
   { id: 'edit.redo', intent: 'redo the change', permission: 'anyone', shortcut: 'mod+shift+z' },
   { id: 'nav.open', intent: 'open a sidebar menu item', permission: 'anyone' },

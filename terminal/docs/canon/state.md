@@ -14,6 +14,7 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | Koi pond v2 (pass 4 push) | https://imagine-os.github.io/fresh-terminal/pages/koi.html | 2026-09-29, pass 4 |
 | Koi pond v1 | https://imagine-os.github.io/fresh-terminal/pages/koi-v1.html (was `pages/koi.html` until pass 4) | 2026-09-29 00:07 UTC |
 | FreshStack (the default stack, three modes, exit per piece) | https://imagine-os.github.io/fresh-terminal/pages/freshstack.html | 2026-09-29 02:20 UTC, live on the next Pages deploy |
+| Replay of a box (playback scrubber, every step, interface as it was) | https://imagine-os.github.io/fresh-terminal/ then press `P`, or `/box/<id>/play` | 2026-09-29 02:45 UTC, live on the next Pages deploy |
 | The Canon | https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/README.md, and a card on the master canvas | 2026-09-29, pass 4 |
 | Audit and rebuild recommendation | https://imagine-os.github.io/fresh-terminal/pages/audit.html | 2026-09-28 |
 | Old themes page | `/pages/themes.html`, now redirects to the library | 2026-09-29 |
@@ -34,6 +35,7 @@ Superseded copies: the audit and themes were first published as Claude artifacts
 - CRT "Draw" reveal, with demo drawings made from our own parts.
 - Ledger with a verifiable hash chain and an opt-in shared chain, in the browser.
 - Voice with a live transcript through browser speech (press `V` or the mic).
+- Replay (2026-09-29): press `P` in any box to scrub through every step; the transcript, menu, layout and theme show as they were at that step; save the timeline as a file.
 - English and Spanish.
 - Checks: typecheck, 96 tests, build, and 21 responsive checks from 360 to 3840 wide. CI, Pages and router-deploy workflows green. Pass 4: 132 tests, 21/21 responsive.
 
@@ -73,6 +75,7 @@ As of 2026-09-29:
 - freshterminal.ai and api.freshterminal.ai (bought 2026-09-29, C-045; not pointed at anything yet).
 - Canvas grouping, long-paper scroll cards, image upload.
 - Company OS connection. Import of old repos and data.
+- Replay: branching and merging from a step (`playback.branch`), audio and video steps (`playback.media`). The timeline shape (parent ids, branch id) is ready for both. 2026-09-29.
 
 ## In progress
 
@@ -88,4 +91,6 @@ As of 2026-09-29:
 | **This Canon** | Written 2026-09-29; in the repo with the pass 4 push, with a canvas card. Kept current every pass (plan task `canon-current`). |
 | **LiveKit** (C-051) | Decided 2026-09-29 02:20 UTC. Waiting on Justin: `lk cloud auth` once, then repo secrets `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`. Then: agent in `terminal/agent` deployed by `livekit/deploy-action`, Fresh Terminal tools attached over MCP, LiveKit docs MCP added for coding agents. Not started. |
 | **Logos and icons skill** | Added 2026-09-29 02:25 UTC at `terminal/skills/logos-and-icons/SKILL.md`: source order (official → official repo → Simple Icons → text mark), licence check, sizes, registry at `docs/brand/registry.md`, generate only for our own marks. First use: marks on the FreshStack cards and brand chips. Assets not gathered yet. |
+| **Replay** (C-058) | Shipped 2026-09-29 02:45 UTC: `shared/src/timeline` (steps with parent ids, derived from the store; state rebuilt at any step; `timeline.v0` export), `app/src/playback` (scrubber, `/box/<id>/play?step=N`, key `P`). 137 tests, 28/28 responsive. Next: branches and merges once SpacetimeDB holds two heads (C-052); media steps after R2 (C-053). |
+| **Tagline** (C-059) | "Evolve as we grow." set 2026-09-29 02:45 UTC in `landing.tagline` (en and es). |
 | **Brand marks** | Gathered 2026-09-29 02:28 UTC: 43 SVG marks from Simple Icons for every brand and tool named in the thread, at `app/public/brand/<slug>/`, one registry line each in `docs/brand/registry.md`; 12 not in Simple Icons (SpacetimeDB, OpenAI, Hyperbeam, Browserbase, Playwright, Slack, Liveblocks, Colyseus, W3C, Puck, Yjs, Electric) shown as text marks with the official source to try next; our own marks (Fresh Terminal, Playset, Between Gigs, Hoy, Company OS) not started. Preview page `pages/brands.html`, canvas card `brand-marks`. Chips can now show a mark for any registered brand (wiring pending). |

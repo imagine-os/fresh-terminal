@@ -368,3 +368,16 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Owner's one-time step: install `lk`, run `lk cloud auth` (browser sign-in, picks the project, mints a key), then copy the three values into the repo secrets. After that no dashboard visits are needed.
 - Status: decided, not started. Depends on the router exposing `/mcp` (see the integrations plan in the thread, 02:07 UTC).
 
+
+## Replay and the tagline (2026-09-29)
+
+**C-058 · 2026-09-29 02:29 · Every step is a saved event; replay first, branches and merges later**
+- Justin: "i need a playback scrubber that then evolves to have branching and merging capability if needed to watch through every step of our interactions with a terminal session please. Everything saved beatuifully. in the future we can save video adn audio and whatever else also, for now get us started and we can evolve as we grow" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648981706729?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: a session is a list of steps, each with `parent_ids` (a list, so a branch or a merge fits without a new shape) and a `branch_id` (only `main` today). Steps are derived from what the store already records (sessions, lines, edit batches, undo/redo ledger entries), so every existing box already replays from its first line. The interface at any step is rebuilt by reversing later edits with their stored inverses, never stored twice. Replay is read-only. One JSON file (`timeline.v0`) saves branches, steps, lines and edits. Media (audio, video, pointer) will be steps of new kinds pointing at media rows (C-053), on the same wall-clock lane.
+- Surface: `/box/<id>/play?step=N`, key `P`, replay button in the top bar; scrubber with lane marks, range, transport, speed, save, "Branch from here" (not wired yet).
+- Status: current. Shipped 2026-09-29 (changelog 0006, decision 0019). Branching and media are listed as not wired (`playback.branch`, `playback.media`).
+
+**C-059 · 2026-09-29 02:29 · Tagline: "Evolve as we grow."**
+- Justin: ""evolve as we grow" is great tagline" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648992904059?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)), eleven seconds after the replay ask.
+- Decided: the product tagline (`landing.tagline`, the one place named by `PRODUCT_TAGLINE_KEY`) is "Evolve as we grow." Spanish: "Evolucionamos mientras crecemos." It shows in the top bar on the landing page. Superseded: "Type, and it routes." (2026-09-28).
+- Status: current.
