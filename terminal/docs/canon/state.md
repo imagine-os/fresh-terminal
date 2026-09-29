@@ -13,6 +13,7 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | Library of terminals | https://imagine-os.github.io/fresh-terminal/pages/library.html | 2026-09-29 00:07 UTC |
 | Koi pond v2 (pass 4 push) | https://imagine-os.github.io/fresh-terminal/pages/koi.html | 2026-09-29, pass 4 |
 | Koi pond v1 | https://imagine-os.github.io/fresh-terminal/pages/koi-v1.html (was `pages/koi.html` until pass 4) | 2026-09-29 00:07 UTC |
+| FreshStack (the default stack, three modes, exit per piece) | https://imagine-os.github.io/fresh-terminal/pages/freshstack.html | 2026-09-29 02:20 UTC, live on the next Pages deploy |
 | The Canon | https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/canon/README.md, and a card on the master canvas | 2026-09-29, pass 4 |
 | Audit and rebuild recommendation | https://imagine-os.github.io/fresh-terminal/pages/audit.html | 2026-09-28 |
 | Old themes page | `/pages/themes.html`, now redirects to the library | 2026-09-29 |
@@ -81,3 +82,4 @@ As of 2026-09-29:
 | **Pass 5: skins and the refine loop** | Next after pass 4. Instant draft, Jev picks the route, best-of-3 rounds with stop rules. |
 | **Fresh Terminal company in between-gigs** | Saved to GitHub (b191350). Waiting for a Sites sync to show on between-gigs.com. |
 | **This Canon** | Written 2026-09-29; in the repo with the pass 4 push, with a canvas card. Kept current every pass (plan task `canon-current`). |
+| **LiveKit** (C-051) | Decided 2026-09-29 02:20 UTC. Waiting on Justin: `lk cloud auth` once, then repo secrets `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`. Then: agent in `terminal/agent` deployed by `livekit/deploy-action`, Fresh Terminal tools attached over MCP, LiveKit docs MCP added for coding agents. Not started. |
