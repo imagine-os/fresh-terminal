@@ -8,6 +8,7 @@ import { deriveTimeline, stateAt, type Step } from '@shared/timeline';
 import type { EngineContext } from '@shared/ops';
 import { findLibraryTerminal, findMaterial, libraryToSkin } from '@shared/skins';
 import { installActionsRegistry, listActions } from './actions/registry';
+import { AccountProvider } from './auth/Account';
 import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
@@ -228,6 +229,22 @@ function Product() {
     navigate({ name: 'box', id: created.id });
   }, [snapshot.boxes.length, navigate, t]);
 
+  /** Remove a box and everything in it; land on the most recent remaining box (or a fresh one). */
+  const removeBox = useCallback(
+    (id: string) => {
+      const box = snapshot.boxes.find((candidate) => candidate.id === id);
+      if (!box) return;
+      const remaining = snapshot.boxes.filter((candidate) => candidate.id !== id).sort((a, b) => b.updated_at - a.updated_at);
+      store.removeBox(id);
+      toast(t('box.removed', { name: box.name }));
+      if (currentBox?.id === id) {
+        if (remaining[0]) navigate({ name: 'box', id: remaining[0].id });
+        else navigate({ name: 'landing' });
+      }
+    },
+    [snapshot.boxes, currentBox, navigate, toast, t],
+  );
+
   const openBox = useCallback(
     (id: string) => {
       navigate({ name: 'box', id });
@@ -351,7 +368,9 @@ function Product() {
         }
         return;
       }
-      if (!inEditor && modifier) {
+      // Inside a field, Ctrl/Cmd combos belong to the browser (paste, select all, copy).
+      // Outside one, modifier combos are not ours either.
+      if (modifier) {
         return;
       }
       const key = event.key.toLowerCase();
@@ -466,7 +485,6 @@ function Product() {
             theme={theme}
             devMode={prefs.devMode}
             usedMicro={used}
-            showSave={snapshot.lines.length >= 3}
             onNewBox={newBox}
             onToggleSidebar={toggleSidebar}
             onCycleTheme={cycleTheme}
@@ -489,6 +507,7 @@ function Product() {
             onOpen={openBox}
             onNew={newBox}
             onNavigate={navigateTo}
+            onRemove={removeBox}
             navOverride={replayView?.state.nav ?? null}
           />
         ),
@@ -541,7 +560,9 @@ function WithLang() {
 export default function App() {
   return (
     <PrefsProvider>
-      <WithLang />
+      <AccountProvider>
+        <WithLang />
+      </AccountProvider>
     </PrefsProvider>
   );
 }

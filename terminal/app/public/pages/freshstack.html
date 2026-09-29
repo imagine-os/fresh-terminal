@@ -88,7 +88,12 @@ h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1
 
 .grid { display: grid; gap: clamp(14px, 1.6vw, 24px); grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
 .card { display: grid; gap: .7rem; padding: 1.1rem 1.2rem 1.2rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); }
-.card header { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.card header { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.card header .mark { width: 22px; height: 22px; color: var(--fg); flex: none; }
+.nest { display: grid; gap: .6rem; padding-top: .4rem; border-top: 1px dashed var(--line); }
+.nest-label { font: 600 .74rem ui-monospace, monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.card[data-nested='true'] { padding: .8rem .9rem .9rem; background: transparent; border-style: dashed; }
+.card[data-nested='true'] h2 { font-size: 1rem; }
 .card h2 { margin: 0; font-size: 1.15rem; font-weight: 600; letter-spacing: -.01em; }
 .role { font-size: .85rem; color: var(--muted); }
 .pill { margin-left: auto; font: 600 .74rem var(--mono); letter-spacing: .02em; text-transform: uppercase; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
@@ -154,28 +159,30 @@ h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1
 </div>
 
 <script>
-/* The stack as data. One object per piece. `modes` says how the piece behaves in each of the three modes; `exit` says how we leave it. */
+/* The stack as data. One object per piece. `modes` says how the piece behaves in each of the three modes; `exit` says how we leave it.
+   `parent` nests a piece under the one it runs through (Jev is reached through OpenRouter; Gemini Live rides on LiveKit): a child is a
+   subset of its parent's account, key and exit. `mark` names a registered brand mark in ../brand/<mark>/ (docs/brand/registry.md). */
 var STACK = [
   {
-    name: 'GitHub', role: 'source, checks, static hosting', status: 'live',
+    name: 'GitHub', mark: 'github', role: 'source, checks, static hosting', status: 'live',
     does: 'Holds the one folder, runs typecheck/tests/build on every push, and serves the static app from GitHub Pages.',
     modes: { ours: 'Our repo and Pages site. Git is the nightly export, not the editing loop.', byo: 'Fork the repo; Pages deploys from your fork on the next push.', self: 'Any git host plus any static file server. The build is plain files.' },
     exit: 'Any static host: copy the build folder. Any git host: push the folder.', link: 'https://github.com/imagine-os/fresh-terminal'
   },
   {
-    name: 'Cloudflare', role: 'router worker, domain, media', status: 'live',
+    name: 'Cloudflare', mark: 'cloudflare', role: 'router worker, domain, media', status: 'live',
     does: 'Runs the router (holds the one key, routes prompts, writes ledger entries) as a Worker. Owns the freshterminal.ai domain. R2 is the planned home for uploaded media.',
     modes: { ours: 'Our Worker at fresh-terminal-router; our domain; our R2 bucket.', byo: 'Not needed: your key goes straight from the browser to OpenRouter.', self: 'Run the router as a Node process (same code) on any host; point DNS anywhere; use any S3-compatible bucket.' },
     exit: 'The router is one Hono app that runs on Node or a Worker. Media is S3-compatible.', link: 'https://developers.cloudflare.com/workers/'
   },
   {
-    name: 'OpenRouter', role: 'one key, many models', status: 'live',
+    name: 'OpenRouter', mark: 'openrouter', role: 'one key, many models', status: 'live',
     does: 'Every model call goes through one key: Jev for decisions, Gemini Flash-Lite for tagging, Claude for judgment and building. Reports usage and cost per call, which the ledger records.',
     modes: { ours: 'Our key on the router; you pay pass-through cost plus margin, shown live in the top bar.', byo: 'Press K and paste your own OpenRouter key. It never leaves your browser.', self: 'Point the router at any OpenAI-compatible endpoint, or at direct provider keys.' },
     exit: 'Direct provider keys behind the same router interface.', link: 'https://openrouter.ai/'
   },
   {
-    name: 'Jev', role: 'fast typed decisions', status: 'live',
+    name: 'Jev', parent: 'OpenRouter', role: 'fast typed decisions', status: 'live',
     does: 'Returns typed choices only: pick one of these, yes or no, a score. Routes intents, checks steps, disambiguates chips. Reached through OpenRouter as typesafe/jev-1.13.',
     modes: { ours: 'Included in pass-through.', byo: 'Included with your OpenRouter key.', self: 'Swap the decisions model in the routing table for any small classifier.' },
     exit: 'The decisions tier is one row in the routing table.', link: 'https://openrouter.ai/typesafe/jev-1.13'
@@ -187,25 +194,31 @@ var STACK = [
     exit: 'SpacetimeDB is open source and self-hostable; the store interface has a local fallback already.', link: 'https://spacetimedb.com/'
   },
   {
-    name: 'LiveKit', role: 'realtime voice, video, agents', status: 'planned',
+    name: 'LiveKit', mark: 'livekit', role: 'realtime voice, video, agents', status: 'planned',
     does: 'Rooms for voice and video, and the Agents framework for realtime AI participants that can call Fresh Terminal tools over MCP. Replaces the browser-only speech path once wired.',
     modes: { ours: 'Our LiveKit Cloud project; the agent deploys from GitHub Actions with the repo secrets.', byo: 'Your LiveKit Cloud project: set LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET.', self: 'LiveKit server is open source; run it anywhere and point the same env vars at it.' },
     exit: 'Open-source server; the agent code does not change.', link: 'https://docs.livekit.io/'
   },
   {
-    name: 'OpenAI Realtime', role: 'spoken conversation (optional)', status: 'written',
-    does: 'Live transcript and a spoken reply. The router mints short-lived client secrets; the browser never sees the key. Off until OPENAI_API_KEY is set.',
-    modes: { ours: 'Our key on the router once added.', byo: 'Your key on your router.', self: 'Any realtime speech endpoint behind the same voice interface (Gemini Live is stubbed).' },
-    exit: 'Browser speech recognition works with no key at all.', link: 'https://platform.openai.com/docs/guides/realtime'
+    name: 'Gemini Live', mark: 'googlegemini', parent: 'LiveKit', role: 'speech-to-speech voice (default)', status: 'written',
+    does: 'One model that hears and speaks, with a live transcript. Chosen 2026-09-29 over OpenAI Realtime; rides on LiveKit through its Gemini plugin. Token flow exists; audio capture and playback are not wired yet. Needs GOOGLE_API_KEY.',
+    modes: { ours: 'Our Google AI key on the router.', byo: 'Your Google AI key.', self: 'Any speech-to-speech endpoint behind the same voice seam.' },
+    exit: 'Browser speech recognition works with no key at all; Cartesia or ElevenLabs plug in as a text-to-speech mouth behind the same agent.', link: 'https://ai.google.dev/gemini-api/docs/live'
   },
   {
-    name: 'Clerk', role: 'sign-in and organizations', status: 'written',
+    name: 'OpenAI Realtime', parent: 'LiveKit', role: 'spoken conversation (optional)', status: 'written',
+    does: 'Code complete behind the same voice seam. Not in the default stack since 2026-09-29; turns on only if OPENAI_API_KEY is set.',
+    modes: { ours: 'Off by default.', byo: 'Your key on your router.', self: 'Same seam.' },
+    exit: 'Nothing depends on it.', link: 'https://platform.openai.com/docs/guides/realtime'
+  },
+  {
+    name: 'Clerk', mark: 'clerk', role: 'sign-in and organizations', status: 'written',
     does: 'Anonymous first, like Excalidraw: sign in only to save or share. Organizations map to tenants. The auth seam exists; anonymous identity is in use today.',
     modes: { ours: 'Our Clerk instance behind freshterminal.ai.', byo: 'Your Clerk keys in the router env.', self: 'Swap the provider behind the seam for Better Auth or any OpenID Connect issuer.' },
     exit: 'One provider class behind a seam; SpacetimeDB accepts standard OpenID Connect tokens.', link: 'https://clerk.com/'
   },
   {
-    name: 'Stripe', role: 'settlement', status: 'planned',
+    name: 'Stripe', mark: 'stripe', role: 'settlement', status: 'planned',
     does: 'Turns the ledger balance into a charge. The ledger itself (micro-dollars, hash-linked, verifiable) is ours and already live.',
     modes: { ours: 'We settle your balance monthly.', byo: 'No settlement needed: you pay your vendors directly.', self: 'Any processor, or none; the ledger stands alone.' },
     exit: 'The ledger is the product; the processor is a plug.', link: 'https://stripe.com/'
@@ -217,13 +230,13 @@ var STACK = [
     exit: 'Both vendors stream standard Chromium; the window type does not care which.', link: 'https://hyperbeam.com/'
   },
   {
-    name: 'Vite + React + TypeScript', role: 'the app', status: 'live',
+    name: 'Vite + React + TypeScript', mark: 'vite', role: 'the app', status: 'live',
     does: 'The static shell. React is the render engine under a small runtime that draws pages, menus and components from records; nobody writes React by hand to change the product.',
     modes: { ours: 'Built by GitHub Actions.', byo: 'Same build.', self: 'Same build; it is plain files.' },
     exit: 'The document model is renderer-independent; the engine can change under it.', link: 'https://vite.dev/'
   },
   {
-    name: 'Hono', role: 'the router', status: 'live',
+    name: 'Hono', mark: 'hono', role: 'the router', status: 'live',
     does: 'A tiny web framework that runs the same code as a Cloudflare Worker or a Node process. Holds keys, routes prompts, talks to models, writes the ledger.',
     modes: { ours: 'Worker.', byo: 'Not in the path.', self: 'Node.' },
     exit: 'Standard fetch handlers; portable by design.', link: 'https://hono.dev/'
@@ -252,11 +265,16 @@ var STACK = [
     return n;
   }
 
-  function render() {
-    grid.textContent = '';
-    STACK.forEach(function (p) {
-      var card = el('article', { 'class': 'card', 'data-status': p.status }, [
+  function markOf(p) {
+    if (!p.mark) return null;
+    return el('img', { 'class': 'mark', src: '../brand/' + p.mark + '/' + p.mark + '-mono.svg', alt: '', width: '22', height: '22', loading: 'lazy' });
+  }
+
+  function card(p, children) {
+    var kids = (children || []).map(function (c) { return card(c, []); });
+    var node = el('article', { 'class': 'card', 'data-status': p.status, 'data-nested': p.parent ? 'true' : 'false' }, [
         el('header', null, [
+          markOf(p),
           el('h2', { text: p.name }),
           el('span', { 'class': 'role', text: p.role }),
           el('span', { 'class': 'pill ' + p.status, text: STATUS_LABEL[p.status] })
@@ -267,9 +285,19 @@ var STACK = [
           el('span', { 'class': 'v', text: p.modes[mode] })
         ]),
         el('p', { 'class': 'exit' }, [ el('strong', { text: 'Exit: ' }), document.createTextNode(p.exit) ]),
-        el('footer', null, [ el('a', { href: p.link, rel: 'noopener', target: '_blank', text: 'Docs' }) ])
+        el('footer', null, [ el('a', { href: p.link, rel: 'noopener', target: '_blank', text: 'Docs' }) ]),
+        kids.length ? el('div', { 'class': 'nest' }, [ el('div', { 'class': 'nest-label', text: 'Through ' + p.name }) ].concat(kids)) : null
       ]);
-      grid.appendChild(card);
+    return node;
+  }
+
+  function render() {
+    grid.textContent = '';
+    var byParent = {};
+    STACK.forEach(function (p) { if (p.parent) { (byParent[p.parent] = byParent[p.parent] || []).push(p); } });
+    STACK.forEach(function (p) {
+      if (p.parent) return;
+      grid.appendChild(card(p, byParent[p.name]));
     });
     buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === mode)); });
   }

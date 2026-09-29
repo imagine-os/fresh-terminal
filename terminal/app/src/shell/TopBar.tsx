@@ -4,16 +4,15 @@ import type { Theme } from '@shared/themes';
 import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
-import { NotWiredButton } from '../ui/NotWiredButton';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSave, IconSidebar, IconTheme } from '../ui/icons';
+import { IconBox, IconDev, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme } from '../ui/icons';
+import { AccountButton } from './AccountButton';
 
 interface Props {
   boxName: string;
   theme: Theme;
   devMode: boolean;
   usedMicro: number;
-  showSave: boolean;
   onNewBox: () => void;
   onToggleSidebar: () => void;
   onCycleTheme: () => void;
@@ -54,6 +53,9 @@ export function TopBar(props: Props) {
         </a>
       </Tooltip>
       <span className="tagline">{props.boxName ? `/ ${props.boxName}` : t('landing.tagline')}</span>
+      <span className="topbar-account">
+        <AccountButton />
+      </span>
       <span className="topbar-spacer" />
       <span className="balance" data-live={props.usedMicro > 0} data-testid="balance" aria-label={`${formatMicro(props.usedMicro)} ${t('topbar.used')}`}>
         {formatMicro(props.usedMicro)} {t('topbar.used')} · {t(props.payMode === 'own' ? 'pay.mode.own' : 'pay.mode.ours')}
@@ -105,11 +107,6 @@ export function TopBar(props: Props) {
             <IconDev />
           </Button>
         </Tooltip>
-        {props.showSave || props.devMode ? (
-          <NotWiredButton what="Clerk sign-in" label={t('topbar.save')} icon align="end">
-            <IconSave />
-          </NotWiredButton>
-        ) : null}
       </span>
     </>
   );

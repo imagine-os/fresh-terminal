@@ -540,6 +540,58 @@
       "pass": 2
     },
     {
+      "id": "infra-verify",
+      "title": "Verify the Cloudflare token scopes and Clerk keys from Actions (names and booleans only)",
+      "status": "done",
+      "depends_on": [
+        "router-deploy"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "domain-workers",
+      "title": "freshterminal.ai on an app Worker (www to apex), router on api.freshterminal.ai, Pages kept as fallback",
+      "status": "done",
+      "depends_on": [
+        "infra-verify"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "clerk-dev",
+      "title": "Clerk sign-in, anonymous-first, development instance; router verifies session tokens",
+      "status": "done",
+      "depends_on": [
+        "auth-seam",
+        "infra-verify"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "d1-sync",
+      "title": "D1 accounts, boxes and ledger mirror; signed-in cloud sync (last writer wins)",
+      "status": "done",
+      "depends_on": [
+        "clerk-dev",
+        "domain-workers"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
+      "id": "clerk-production",
+      "title": "Clerk production instance on freshterminal.ai (Justin: steps in Canon C-065; DNS by site-deploy)",
+      "status": "todo",
+      "depends_on": [
+        "clerk-dev"
+      ],
+      "model": "Opus 5.5",
+      "pass": 6
+    },
+    {
       "id": "stripe-settlement",
       "title": "Stripe settlement for the ledger balance",
       "status": "todo",

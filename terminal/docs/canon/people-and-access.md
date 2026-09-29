@@ -26,10 +26,12 @@ In `imagine-os/fresh-terminal` → Settings → Secrets and variables → Action
 | Name | Used for |
 | --- | --- |
 | `OPENROUTER_API_KEY` | The router's key for AI models. Also copied to the Cloudflare Worker as a Worker secret by the deploy. |
-| `CLOUDFLARE_API_TOKEN` | Deploys the router Worker. Made from the "Edit Cloudflare Workers" template, so it can only deploy workers. |
+| `CLOUDFLARE_API_TOKEN` | Deploys the router Worker. Made from the "Edit Cloudflare Workers" template, so it can only deploy workers. 2026-09-29 ~02:28 UTC: Justin added Zone DNS Edit, Zone Read, Account D1 Edit, all zones. Verified 02:31 UTC: user token, active, sees the zone `freshterminal.ai`, reads DNS, Worker routes, Workers and D1. Now also deploys the app Worker and creates the D1 database. |
 | `CLOUDFLARE_ACCOUNT_ID` | Which Cloudflare account to deploy to. Not secret in itself, kept with the others. |
+| `CLERK_PUBLISHABLE_KEY` | Added by Justin 2026-09-29 ~02:28 UTC. Clerk **development** instance (`pk_test_`, Frontend API `relevant-flea-5813.clerk.accounts.dev`). Public by design; built into the app as `VITE_CLERK_PUBLISHABLE_KEY` by `site-deploy` and `pages`. |
+| `CLERK_SECRET_KEY` | Added by Justin 2026-09-29 ~02:28 UTC. Development instance (`sk_test_`). Pushed to the router Worker as a secret by `router-deploy`, which also derives `CLERK_JWT_KEY` (the public PEM) from Clerk's JWKS. |
 
-Not set, optional: `OPENAI_API_KEY` (spoken replies), `GOOGLE_API_KEY` (Gemini Live). The repository variable `ROUTER_URL` is no longer used (2026-09-29).
+Not set, optional: `OPENAI_API_KEY` (spoken replies; Justin 2026-09-29 02:28 UTC: "I dont need open ai"), `GOOGLE_API_KEY` (Gemini Live). Checked by name 2026-09-29 02:31 UTC with the `infra-verify` workflow. The repository variable `ROUTER_URL` is no longer used (2026-09-29).
 
 A user's own OpenRouter key (bring-your-own mode) is stored only in that user's browser and never reaches us.
 

@@ -24,6 +24,9 @@ import { tagWithModel } from './tagger';
 import { mountSkinRoutes } from './skins';
 import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
+import { authenticate, clerkConfigured, type TokenVerifier } from './auth';
+import { ensureAccount, listBoxes, listEntries, pushBoxes, pushEntries, type D1Database } from './d1';
+import { pushBoxesSchema, pushEntriesSchema, type AccountInfo } from '../../shared/src/sync/types';
 
 /**
  * The router. Same code runs on Node (node.ts) and as a Cloudflare Worker
@@ -47,10 +50,25 @@ export interface RouterBindings {
   OPENAI_TRANSCRIBE_MODEL?: string;
   GOOGLE_API_KEY?: string;
   GEMINI_LIVE_MODEL?: string;
+  /** Clerk: secret key (JWKS fetch fallback) and/or PEM public key (networkless). */
+  CLERK_SECRET_KEY?: string;
+  CLERK_JWT_KEY?: string;
+}
+
+/** Bindings that are objects, not strings (Workers only). */
+export interface RouterResources {
+  /** Cloudflare D1 database "fresh-terminal" (binding DB). Absent on Node. */
+  DB?: D1Database;
 }
 
 /** Origins allowed by default: the GitHub Pages site and local dev/preview. */
-export const DEFAULT_ALLOWED_ORIGINS = ['https://imagine-os.github.io', 'http://localhost:5173', 'http://localhost:4173'];
+export const DEFAULT_ALLOWED_ORIGINS = [
+  'https://freshterminal.ai',
+  'https://www.freshterminal.ai',
+  'https://imagine-os.github.io',
+  'http://localhost:5173',
+  'http://localhost:4173',
+];
 
 export function allowedOrigins(bindings: RouterBindings): string[] {
   const list = (bindings.ALLOWED_ORIGINS ?? bindings.ROUTER_ALLOWED_ORIGIN ?? '')
@@ -118,6 +136,10 @@ export interface CreateAppOptions {
   bindings: (requestEnv: unknown) => RouterBindings;
   fetchImpl?: typeof fetch;
   now?: () => number;
+  /** Resource bindings (D1). Workers read c.env; tests pass fakes. */
+  resources?: (requestEnv: unknown) => RouterResources;
+  /** Clerk token verifier; tests inject a fake. */
+  verifier?: TokenVerifier;
 }
 
 export function createApp(options: CreateAppOptions) {
@@ -127,8 +149,26 @@ export function createApp(options: CreateAppOptions) {
     const bindings = options.bindings(c.env);
     const origins = allowedOrigins(bindings);
     const origin = origins.includes('*') ? '*' : origins;
-    return cors({ origin, allowMethods: ['GET', 'POST', 'OPTIONS'] })(c, next);
+    return cors({ origin, allowMethods: ['GET', 'POST', 'PUT', 'OPTIONS'], allowHeaders: ['Content-Type', 'Authorization'], maxAge: 600 })(c, next);
   });
+
+  const resourcesFor = (env: unknown): RouterResources => options.resources?.(env) ?? ((env ?? {}) as RouterResources);
+  const now = () => (options.now ?? Date.now)();
+
+  /** Signed-in account for this request, or a JSON error response. */
+  async function requireAccount(c: { env: unknown; req: { header: (name: string) => string | undefined } }): Promise<
+    { ok: true; account: AccountInfo; db: D1Database } | { ok: false; status: 401 | 503; body: Record<string, unknown> }
+  > {
+    const bindings = options.bindings(c.env);
+    const parties = allowedOrigins(bindings).filter((origin) => origin !== '*');
+    const auth = await authenticate(c.req.header('Authorization'), bindings, parties, options.verifier);
+    if (auth.state === 'anonymous') return { ok: false, status: 401, body: { error: 'Sign in to sync. Signed-out boxes stay in this browser.' } };
+    if (auth.state === 'not-configured') return { ok: false, status: 503, body: { error: 'Clerk is not configured on this router (CLERK_SECRET_KEY / CLERK_JWT_KEY)' } };
+    if (auth.state === 'invalid') return { ok: false, status: 401, body: { error: 'Session token rejected', reason: auth.reason } };
+    const db = resourcesFor(c.env).DB;
+    if (!db) return { ok: false, status: 503, body: { error: 'No D1 database is bound to this router (binding DB)' } };
+    return { ok: true, account: await ensureAccount(db, auth.userId, now()), db };
+  }
 
   app.get('/health', (c) => {
     const bindings = options.bindings(c.env);
@@ -141,7 +181,52 @@ export function createApp(options: CreateAppOptions) {
         openai: Boolean(bindings.OPENAI_API_KEY),
         gemini: Boolean(bindings.GOOGLE_API_KEY),
       },
+      auth: { clerk: clerkConfigured(bindings), networkless: Boolean(bindings.CLERK_JWT_KEY) },
+      store: { d1: Boolean(resourcesFor(c.env).DB) },
     });
+  });
+
+  /** Who is calling: anonymous is fine; a signed-in caller gets (and creates) their account row. */
+  app.get('/me', async (c) => {
+    const bindings = options.bindings(c.env);
+    const parties = allowedOrigins(bindings).filter((origin) => origin !== '*');
+    const auth = await authenticate(c.req.header('Authorization'), bindings, parties, options.verifier);
+    if (auth.state === 'anonymous') return c.json({ signedIn: false });
+    if (auth.state !== 'signed-in') return c.json({ signedIn: false, error: auth.state === 'invalid' ? auth.reason : 'Clerk not configured' }, auth.state === 'invalid' ? 401 : 503);
+    const db = resourcesFor(c.env).DB;
+    const account = db ? await ensureAccount(db, auth.userId, now()) : null;
+    return c.json({ signedIn: true, userId: auth.userId, account, sync: Boolean(db) });
+  });
+
+  app.get('/sync/boxes', async (c) => {
+    const who = await requireAccount(c);
+    if (!who.ok) return c.json(who.body, who.status);
+    const since = Number(c.req.query('since') ?? '0') || 0;
+    return c.json({ boxes: await listBoxes(who.db, who.account.id, since), server_time: now() });
+  });
+
+  app.put('/sync/boxes', async (c) => {
+    const who = await requireAccount(c);
+    if (!who.ok) return c.json(who.body, who.status);
+    const parsed = pushBoxesSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Invalid body', issues: parsed.error.issues.slice(0, 5) }, 400);
+    return c.json(await pushBoxes(who.db, who.account.id, parsed.data.boxes, now()));
+  });
+
+  app.get('/sync/ledger', async (c) => {
+    const who = await requireAccount(c);
+    if (!who.ok) return c.json(who.body, who.status);
+    const since = Number(c.req.query('since') ?? '0') || 0;
+    return c.json({ entries: await listEntries(who.db, who.account.id, since), server_time: now() });
+  });
+
+  app.post('/sync/ledger', async (c) => {
+    const who = await requireAccount(c);
+    if (!who.ok) return c.json(who.body, who.status);
+    const parsed = pushEntriesSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Invalid body', issues: parsed.error.issues.slice(0, 5) }, 400);
+    const written = await pushEntries(who.db, who.account.id, parsed.data.entries, now());
+    return c.json({ received: parsed.data.entries.length, written, server_time: now() });
   });
 
   /** Which realtime voice providers this router can mint sessions for. */

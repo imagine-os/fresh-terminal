@@ -29,6 +29,7 @@ jobs:
         env:
           VITE_BASE: /fresh-terminal/
           VITE_ROUTER_URL: ${{ vars.ROUTER_URL }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: terminal/app/dist

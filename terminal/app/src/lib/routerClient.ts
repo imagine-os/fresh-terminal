@@ -6,7 +6,11 @@ import type { EntryDraft } from '@shared/ledger';
 import { resolveRouterUrl } from '../config/router';
 
 
-export const ROUTER_URL: string = resolveRouterUrl(import.meta.env.VITE_ROUTER_URL as string | undefined, import.meta.env.DEV);
+export const ROUTER_URL: string = resolveRouterUrl(
+  import.meta.env.VITE_ROUTER_URL as string | undefined,
+  import.meta.env.DEV,
+  typeof window === 'undefined' ? '' : window.location.hostname,
+);
 
 export interface RouteMeta {
   routing?: { intent: string; source: string; confidence: number | null; model: string | null; costMicro: number };

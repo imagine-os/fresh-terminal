@@ -249,11 +249,13 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Justin bought freshterminal.ai on Cloudflare Registrar for 2 years ("OK i paid $160 for 2 years freshterminal.ai on cloudflair").
 - Plan: freshterminal.ai serves the app from a Cloudflare Worker with static assets. api.freshterminal.ai serves the router. GitHub Pages stays as a mirror.
 - Status: current as the decision; **not live yet**. Supersedes C-033b; partly supersedes C-010.
+- 2026-09-29: **built** (C-064): app Worker `fresh-terminal-app` on freshterminal.ai (www redirects), router on api.freshterminal.ai, GitHub Pages kept as the fallback. Live status in [state.md](state.md).
 
 **C-046 · 2026-09-29 · Cloudflare automation runs from CI with an API token**
 - Decided: automation uses a Cloudflare API token held as a CI secret, not the laptop OAuth MCP setup, so Justin never has to open Cloudflare ("Make it so i dont need to go to cloudflare and you can do everything please").
 - Requested extra token scopes: Zone DNS Edit, Zone Read, Account D1 Edit, all zones.
 - Status: current. Whether the token has those scopes is not verified here.
+- 2026-09-29 02:31 UTC: **verified** by workflow `infra-verify` (run 36512972684): active user token, zone freshterminal.ai visible, DNS, Worker routes, Workers and D1 readable. Write access proven by the deploys (custom domains, D1 create).
 
 **C-047 · 2026-09-29 · Account data moves to Cloudflare D1 behind the router**
 - 2026-09-29 02:07: proposal C-052 would publish SpacetimeDB now instead, once Justin adds `SPACETIMEDB_TOKEN`. Until he decides, this entry stands.
@@ -261,12 +263,14 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 - Why: avoids another sign-up; the router already runs on Cloudflare.
 - SpacetimeDB stays the plan for live multiplayer and presence.
 - Status: current, and Justin can override it. Partly supersedes C-004c. Not built yet.
+- 2026-09-29: **built** (C-066): D1 database `fresh-terminal`, accounts, boxes and a ledger mirror, synced for signed-in people only.
 
 **C-048 · 2026-09-29 · Auth is Clerk, starting on development instance keys**
 - Decided: start with the Clerk development instance. Keys are held as the secrets `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` (names only; values never in the repo or Slack).
 - Moving to production later is one click in the Clerk dashboard, plus DNS records we add through the Cloudflare token (C-046).
 - Why: Justin wants to use his own Fresh Terminal account personally and start connecting it to things ("i'd like to start using my terminal account personally").
 - Status: current. Wiring not built yet. Builds on C-009.
+- 2026-09-29: **built** on the development instance (C-065). Verified 02:31 UTC: `pk_test_` / `sk_test_`, Frontend API relevant-flea-5813.clerk.accounts.dev, JWKS reachable, 0 users. "Moving to production is one click" was too short: it also needs Google and GitHub OAuth credentials of our own; steps in C-065.
 
 **C-049 · 2026-09-29 · No Liveblocks, no Colyseus: SpacetimeDB plus our own house rules**
 - Justin asked: "do we need liveblocks or colyseus for this? or does spacetimedb handle realtime, and the rest of the rules we can study other tools like liveblocks and make our own simpler cleaner rules?"
@@ -329,6 +333,33 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 - Justin: "are you keeping and updating your documentation wiki? please do as a rule. very human and ai readable" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647944459239?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
 - Decided: the Canon and the docs wiki (`terminal/docs`) are updated in the same commit as every pass. Plain dated lines, one fact per line. Superseded lines are kept and marked, never deleted. Each page links to the Slack message that caused it. One start-here index (`terminal/docs/README.md`) and an `llms.txt` for AI readers; the same pages serve people and agents.
 - Status: current (a rule from Justin). Written into the root README and [README.md](README.md). Repo prompt: 0015.
+
+## Domain, sign-in and accounts (2026-09-29, infra pass)
+
+**C-064 · 2026-09-29 02:50 · freshterminal.ai runs on a Worker; the router answers on api.freshterminal.ai**
+- Justin, 02:28 UTC: "i already did cloudflare clerk" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648903521149?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)).
+- Decided: the app is Worker `fresh-terminal-app` (`terminal/site`) with static assets and SPA fallback, on custom domains freshterminal.ai and www.freshterminal.ai; the Worker sends www to the apex with a 301. The router Worker adds custom domain api.freshterminal.ai. Custom domains make Cloudflare create the DNS records and certificates, so there is no DNS step. Both keep their workers.dev URLs; GitHub Pages keeps its own build as the fallback.
+- The app picks its router by where it is served from: api.freshterminal.ai on the domain, the workers.dev router everywhere else, so Pages is not moved until the domain is proven.
+- Deploys: `site-deploy.yml` (app) and `router-deploy.yml` (router) on push to main and on demand, from GitHub Actions with `CLOUDFLARE_API_TOKEN`.
+- Status: current. Repo: [0020-domain-clerk-d1.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0020-domain-clerk-d1.md). Builds C-045 and C-046.
+
+**C-065 · 2026-09-29 02:50 · Sign-in is Clerk, anonymous-first, on the development instance for now**
+- Decided: everyone starts signed out and everything works as before. A **Sign in** button in the header opens Clerk; signed in adds cloud sync. The app uses `@clerk/react` (Clerk's current React package). The router checks the Clerk session token itself, without a network call (the instance's public key is pushed as `CLERK_JWT_KEY` by the deploy; `CLERK_SECRET_KEY` is the fallback). Only `/me` and `/sync/*` need a session.
+- Limit (Clerk docs, read 2026-09-29): a development instance works from any domain, including freshterminal.ai, but shows a "Development mode" badge, holds at most 100 users, and should not carry real users. Its users cannot be moved to production.
+- Before inviting anyone, Justin does these steps once (about 15 minutes):
+  1. https://dashboard.clerk.com → open the Fresh Terminal app → click **Development** at the top → **Create production instance** → clone the development settings.
+  2. Domain: `freshterminal.ai`.
+  3. **SSO connections**: Google and GitHub need our own OAuth apps in production. Google: https://console.cloud.google.com/apis/credentials (OAuth client, web; redirect URI as shown by Clerk). GitHub: https://github.com/settings/developers → New OAuth App (callback URL as shown by Clerk). Paste each client id and secret into Clerk.
+  4. Production **API keys** page in Clerk → replace the GitHub secrets `CLERK_PUBLISHABLE_KEY` (`pk_live_…`) and `CLERK_SECRET_KEY` (`sk_live_…`) at https://github.com/imagine-os/fresh-terminal/settings/secrets/actions.
+  5. Run the `router-deploy` and `site-deploy` workflows (https://github.com/imagine-os/fresh-terminal/actions). `site-deploy` then reads the DNS records Clerk wants (clerk., accounts., clkmail., clk._domainkey., clk2._domainkey.) and creates them in Cloudflare, DNS only. Nothing to type into Cloudflare.
+  6. Back in the Clerk dashboard: wait for the **Domains** checks to pass, then press **Deploy certificates**.
+- Status: current. Development instance live; production not started (waiting on Justin). Builds C-048 and C-009.
+
+**C-066 · 2026-09-29 02:50 · Signed-in accounts, boxes and a ledger mirror live in D1; signed out stays in the browser**
+- Decided: D1 database `fresh-terminal`, created by the deploy if missing. Tables: `accounts` (clerk_user_id, plan, created_at, updated_at), `boxes` (id, account_id, name, state_json, created_at, updated_at, deleted_at), `ledger_entries` (the chained entry plus account_id and updated_at). Every row keeps a stable id and `updated_at` for later multiplayer.
+- Sync rule: last writer wins per box on `updated_at`; a box edited on this device since the last sync wins over an older server copy; an untouched box takes the newer server copy. Nobody can overwrite or read another account's box. The ledger mirror is append-only.
+- What syncs: each box's name, menu, pages, layout, theme, style, skins and glossary, and the ledger. Transcript lines stay in the browser for now (not wired yet). Sync runs on sign-in, after edits and when the window gets focus; it is not realtime.
+- Status: current. Builds C-047. SpacetimeDB or Durable Objects remain the plan for live multiplayer (C-049).
 
 ## Principles recorded as decisions
 
@@ -405,5 +436,25 @@ These are plans Claude answered with. Justin has not decided them, and none is b
 
 **C-063 · 2026-09-29 02:47 · Migration: originals kept, records mapped with source ids, duplicates flagged**
 - Asked: "migration is a huge ability we need to build out" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650063160389?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
-- Proposed: raw originals go to storage untouched. Records are mapped onto the ontology (C-061) with their source ids, so an import can be re-run. Possible duplicates are flagged for review, never merged silently. First formats: Google Takeout, Dropbox, mbox email and WhatsApp chat export. Between Gigs and Company OS are the first real imports.
+- Proposed: raw originals go to storage untouched. Records are mapped onto the ontology (C-065) with their source ids, so an import can be re-run. Possible duplicates are flagged for review, never merged silently. First formats: Google Takeout, Dropbox, mbox email and WhatsApp chat export. Between Gigs and Company OS are the first real imports.
 - Status: proposed.
+## Nesting and the logo set (2026-09-29)
+
+**C-067 · 2026-09-29 02:44 · FreshStack nests a piece under what it runs through**
+- Justin: "consider jev is a subset of open router if thats where its being used . think of organizing with nesting as appropraite." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: a stack piece may name a `parent`. A child is a subset of its parent's account, key and exit, and renders inside the parent's card under "Through <parent>". Today: Jev under OpenRouter; Gemini Live (the default voice, C-023 as updated 02:29) and OpenAI Realtime (optional) under LiveKit. Cards show the piece's registered mark.
+- Status: current (this commit). The ontology behind it (links with a name per direction) is the other session's proposal from the same message.
+
+**C-068 · 2026-09-29 02:44 · Every logo ships as a set of configurations; heavier layers are costed**
+- Justin: "we're going to need the Logo system to do lightmode and dark mode and transparent and more as well as each of the configurations of that logo like wide, icon only, etc. we might even consider using an inexpensive vectororizer tool as needed, and or 3D .... each step is a cost question" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649886159139?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Decided: one colour source per mark generates six transparent SVG files (colour, mono, light, dark, wide, stacked) with `scripts/brand-variants.mjs`; `app/public/brand/index.json` is the manifest chips and cards read. Wide and stacked are our own icon + name lockups, never presented as the vendor's wordmark. Later layers in cost order: raster export (free, Playwright), vectorizing raster-only logos (free potrace/vtracer first, paid Vectorizer.AI when quality matters, cost on the ledger), 3D and motion for our own marks only (best-of-3, C-031), official wordmarks and brand kits.
+- Status: current. 43 marks × 6 files generated 2026-09-29; the later layers are not automated yet (skill §4b).
+
+## Composer fixes (2026-09-29)
+
+**C-069 · 2026-09-29 02:54 · Modifier keys belong to the browser; the visible cursor follows the caret; a box can be removed**
+- Justin: "command v is triggering the voice tool in terminal. the voice tool doesnt seem to work. ... Paste did not paste. There were issues moving the cursor around." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650469518959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)) and "i cant seem to remove a box from the left side." ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5))
+- Found: the shortcut handler let Ctrl/Cmd+key inside the composer fall through to the single-key shortcuts, so Cmd+V toggled voice and swallowed the paste. The themed block cursor was always drawn at the end of the text while the browser's caret was hidden, so moving the caret backwards was invisible.
+- Decided: Ctrl/Cmd combinations are never shortcuts of ours (Ctrl/Cmd+Z on an empty composer stays the one exception). The themed cursor shows only while the caret is at the end; anywhere else the browser's caret shows. Spell-check is on in the writing pad. Each box row in the sidebar has a remove control (with a confirm); removing a box deletes its lines, sessions, menu, pages, edits and box UI, and keeps its ledger entries (the chain is append-only).
+- Queued from the same messages: a formatted page that grows above the writing pad as you type, editable from either side; a top-bar tools tray with the menu, tools and sign-in behind it, draggable back; multi-word phrase chips ("make sure"), tagging "learn" and "tagged"; a small timer and model line per reply (the structured header already shows model, seconds and cost for edit and schedule replies).
+- Status: fixes shipped 2026-09-29 (this commit). Queued items: in progress, Justin's session.
