@@ -6,7 +6,7 @@ import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconBox, IconDev, IconDownload, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme, IconTopBar } from '../ui/icons';
+import { IconBox, IconDev, IconDownload, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme, IconTopBar, IconUpload } from '../ui/icons';
 import { AccountButton } from './AccountButton';
 import { Tray, type Tool } from './Tray';
 
@@ -34,6 +34,7 @@ interface Props {
   nav: NavItem[];
   onNavigate: (target: NavTarget, item: NavItem) => void;
   onExport: () => void;
+  onImport: () => void;
   onHideTopBar: () => void;
 }
 
@@ -59,6 +60,7 @@ export function TopBar(props: Props) {
     { id: 'settings.open', label: t('topbar.settings'), icon: <IconKey />, onClick: props.onSettings, shortcut: key('settings.open'), testId: 'settings-link' },
     { id: 'dev.toggle', label: t('topbar.devMode'), icon: <IconDev />, onClick: props.onToggleDev, shortcut: key('dev.toggle'), pressed: props.devMode },
     { id: 'session.export', label: t('firstRun.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },
+    { id: 'session.import', label: t('import.label'), icon: <IconUpload />, onClick: props.onImport, testId: 'import-session' },
     { id: 'bar.toggle', label: t('topbar.hide'), icon: <IconTopBar />, onClick: props.onHideTopBar, shortcut: key('bar.toggle'), testId: 'hide-bar' },
   ];
   return (

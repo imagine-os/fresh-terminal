@@ -584,7 +584,7 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 > start thinking about the product hunt strategy. you can make a page for product hunt strategy
 
 **What happened:** Taken by the other session (a Product Hunt strategy page).
-Other session (Opus 5.5): researched Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then made the page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free credits, a launch-day spend limit, the first-run screen, a repo licence). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-076.
+Other session (Opus 5.5): researched Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then made the page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free usage, a launch-day spend limit, the minimal first screen, a repo licence; free usage and the first screen have shipped). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-077.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651680.495959
 
 ## 69. Mon Sep 28, 10:25 PM CDT · 2026-09-29 03:25:36 UTC
@@ -604,3 +604,19 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-075: Alt/Option shortcuts while typing, "free usage", sidebar hidden with a top-left icon and its own settings, starters and hints behind switches in the prompt box, a calmer tray.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652625.835259
+
+## 71. Mon Sep 28, 10:34 PM CDT · 2026-09-29 03:34:36 UTC
+
+> spacetimedb doesnt seem to have a token , maybe u need to cli into it or something? I think i got you everything else you asked for.
+>
+> PS: include emojis in all your responses to make it easier to read stuff
+
+**What happened:** The token comes from the CLI (`spacetime login`, then `spacetime login show --token`) into the `SPACETIMEDB_TOKEN` secret. Emojis in every reply from then on (adds to C-073). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652910618299?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652876963799?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652876.963799
+
+## 72. Mon Sep 28, 10:37 PM CDT · 2026-09-29 03:37:43 UTC
+
+> put some human text at the top of the export , including some askii art or something cool so its branded to us and tells them what they need to know to come back, and even import into the fresh terminal
+
+**What happened:** C-076: the export opens with a readme (ASCII mark, what it is, come back, how to import); import from the tray or by dropping the file; live credits in the first-run line.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790653063786309?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790653063.786309

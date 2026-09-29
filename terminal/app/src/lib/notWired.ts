@@ -10,7 +10,6 @@ export const NOT_WIRED = [
   { id: 'auth.clerk.production', label: 'Clerk production instance on freshterminal.ai (a development instance is in use: dev badge, 100-user cap)' },
   { id: 'auth.clerk.es', label: 'Clerk sign-in screens in Spanish (Clerk UI is English only for now)' },
   { id: 'sync.lines', label: 'Transcript lines in cloud sync (boxes, menus, pages, looks and the ledger mirror sync; lines stay in this browser)' },
-  { id: 'credits.turnstile', label: 'Cloudflare Turnstile bot check before the first free call (the API token has no Turnstile permission; free credits rely on signed device ids, IP and network limits and a daily cap)' },
   { id: 'credits.buy', label: 'Buying more credits (Stripe); signed-in accounts get $1 free, then your own key' },
   { id: 'sync.realtime', label: 'Realtime sync between devices (sync runs on sign-in, after edits and on focus; last writer wins)' },
   { id: 'store.spacetimedb', label: 'SpacetimeDB live store (module written, not published)' },

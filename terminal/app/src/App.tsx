@@ -15,6 +15,7 @@ import { PlanViewer } from './dev/PlanViewer';
 import { I18nProvider, useI18n } from './i18n';
 import { newId } from './lib/ids';
 import { downloadSession } from './lib/exportSession';
+import { importSessionFile, pickAndImport, type ImportResult } from './lib/importSession';
 import { hrefFor, routeForPath, useRoute } from './lib/router';
 import { PlaybackView } from './playback/PlaybackView';
 import { usePlayback } from './playback/usePlayback';
@@ -273,6 +274,31 @@ function Product() {
   );
   const toggleDev = useCallback(() => update({ devMode: !prefs.devMode }), [prefs.devMode, update]);
   const toggleBar = useCallback(() => set('topBarHidden', !prefs.topBarHidden), [prefs.topBarHidden, set]);
+  const afterImport = useCallback(
+    (result: ImportResult | null) => {
+      if (!result) return;
+      if (!result.ok) {
+        toast(result.reason);
+        return;
+      }
+      store.appendLine(result.box.id, 'system', t('import.done', { lines: String(result.lines), pages: String(result.pages) }), [], { reveal: 'none' });
+      toast(t('import.toast', { name: result.box.name }));
+      navigate({ name: 'box', id: result.box.id });
+    },
+    [toast, t, navigate],
+  );
+  const importSession = useCallback(() => {
+    void pickAndImport().then(afterImport);
+  }, [afterImport]);
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      const file = Array.from(event.dataTransfer.files).find((candidate) => candidate.name.endsWith('.json') || candidate.type === 'application/json');
+      if (!file) return;
+      event.preventDefault();
+      void importSessionFile(file).then(afterImport);
+    },
+    [afterImport],
+  );
   const exportSession = useCallback(() => {
     if (!currentBox) return;
     const name = downloadSession(currentBox.id);
@@ -352,6 +378,7 @@ function Product() {
       'play.open': () => toggleReplay(),
       'bar.toggle': () => toggleBar(),
       'session.export': () => exportSession(),
+      'session.import': () => importSession(),
     };
     const onAction = (event: Event) => {
       const id = (event as CustomEvent<{ id?: string }>).detail?.id ?? '';
@@ -361,7 +388,7 @@ function Product() {
     };
     window.addEventListener('ft:action', onAction);
     return () => window.removeEventListener('ft:action', onAction);
-  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toggleReplay, toggleBar, exportSession, toast, t]);
+  }, [navigate, newBox, cycleTheme, toggleDev, toggleLang, toggleSidebar, undoLast, redoLast, toggleReplay, toggleBar, exportSession, importSession, toast, t]);
 
   // Shortcuts: single key outside the composer, Ctrl/Cmd+key inside it.
   useEffect(() => {
@@ -536,6 +563,7 @@ function Product() {
             nav={replayView?.state.nav ?? (currentBox ? snapshot.navItems.filter((item) => item.box_id === currentBox.id) : [])}
             onNavigate={navigateTo}
             onExport={exportSession}
+            onImport={importSession}
             onHideTopBar={toggleBar}
           />
         ),
@@ -570,7 +598,13 @@ function Product() {
           />
         ) : null,
         stage: (
-          <>
+          <div
+            className="stage-drop"
+            onDragOver={(event) => {
+              if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault();
+            }}
+            onDrop={onDrop}
+          >
             {prefs.topBarHidden ? (
               <button type="button" className="btn show-bar" data-variant="ghost" onClick={toggleBar} aria-label={t('topbar.show')} data-testid="show-bar">
                 {t('topbar.show')} <kbd className="kbd">H</kbd>
@@ -589,7 +623,7 @@ function Product() {
               realtimeProviders={realtimeProviders}
               routerOk={routerOk}
             />
-          </>
+          </div>
         ),
         bottomBar: <div id="composer-slot" />,
       }}

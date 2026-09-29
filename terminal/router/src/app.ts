@@ -169,6 +169,7 @@ export function createApp(options: CreateAppOptions) {
     resources: (env: unknown) => options.resources?.(env) ?? ((env ?? {}) as RouterResources),
     authorizedParties: (env: unknown) => allowedOrigins(options.bindings(env)).filter((origin) => origin !== '*'),
     ...(options.verifier ? { verifier: options.verifier } : {}),
+    ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
     now: () => (options.now ?? Date.now)(),
   };
   const metered = meter(meterOptions);
@@ -212,7 +213,7 @@ export function createApp(options: CreateAppOptions) {
         metered: Boolean(resourcesFor(c.env).DB),
         signed_devices: Boolean(bindings.DEVICE_SIGNING_KEY),
         rate_limits: Boolean(resourcesFor(c.env).RL_IP && resourcesFor(c.env).RL_NET),
-        turnstile: 'not-wired',
+        turnstile: bindings.TURNSTILE_SECRET && bindings.TURNSTILE_SITEKEY ? 'on' : 'not-wired',
         ...creditConfig(bindings),
       },
     });
