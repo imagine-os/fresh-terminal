@@ -1,6 +1,6 @@
 # Fresh Terminal
 
-> A prompt-first terminal that routes what you type to the right model and can edit its own interface through undoable ops. This is the docs wiki: plain Markdown, dated facts, one start-here index. Updated every pass in the same commit as the work. Last updated 2026-09-29 (pass 5).
+> A prompt-first terminal that routes what you type to the right model and can edit its own interface through undoable ops. This is the docs wiki: plain Markdown, dated facts, one start-here index. Updated every pass in the same commit as the work. Last updated 2026-09-29 (domain, sign-in and D1 pass).
 
 Base URLs: GitHub https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/ · raw https://raw.githubusercontent.com/imagine-os/fresh-terminal/main/terminal/docs/ · rendered https://imagine-os.github.io/fresh-terminal/wiki/ (each page also at /wiki/<path>.md as plain Markdown). Links below are relative to terminal/docs/.
 
@@ -11,7 +11,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-066 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-069 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
@@ -28,7 +28,8 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Reference
 
-- [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag), ops as tools, action runner, window.pond, SpacetimeDB, CLI, MCP
+- [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
+- [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md): freshterminal.ai on a Worker, api.freshterminal.ai, Clerk anonymous-first, D1 schema and sync rules, limits
 - [decisions/0016-self-editing.md](decisions/0016-self-editing.md): how the interface edits itself (ops, undo, tool calling, escalation)
 - [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md): chip kinds, glossary, reply blocks
 - [decisions/0018-skins-and-refine.md](decisions/0018-skins-and-refine.md): skins as records, the refine() best-of-3 loop, stop rules, /skin endpoints
@@ -40,15 +41,16 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
+- [changelog/0007.md](changelog/0007.md): freshterminal.ai, Clerk sign-in, D1 sync, live check
+- [changelog/0006.md](changelog/0006.md): replay scrubber over every step of a session; tagline "Evolve as we grow."
 - [changelog/0005.md](changelog/0005.md): pass 5, skins, material library, refine loop, live results
 - [changelog/0004.md](changelog/0004.md): pass 4, the terminal edits itself, chips v2, replies, koi v2, Canon, wiki
-- [changelog/0006.md](changelog/0006.md): replay scrubber over every step of a session; tagline "Evolve as we grow."
 - [changelog/0003.md](changelog/0003.md): pass 3, voice, router health, router live
 - [changelog/0002.md](changelog/0002.md): pass 2, two ways to pay, Jev, tagger, library, koi v1
 - [changelog/0001.md](changelog/0001.md): pass 1, the first build
 
 ## Optional
 
-- [prompts/](prompts/README.md): build prompts 0001 to 0015, verbatim with reply summaries
-- [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0018, one per file
+- [prompts/](prompts/README.md): build prompts 0001 to 0017, verbatim with reply summaries
+- [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0020, one per file
 - [qa/responsive-latest.md](qa/responsive-latest.md): latest responsive check

@@ -51,3 +51,7 @@ Model note, 2026-09-29: pass 4 onward runs on **Opus 5.5** at Justin's request (
 ## Pass 5 — skins, materials and the refine loop (shipped 2026-09-29, Opus 5.5)
 
 Done: `skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui` (decision 0018, changelog 0005). Still to do: `pond-ops` (wire `window.pond` to ops); `koi-realism`. See prompt 0013.
+
+## Infra — freshterminal.ai, sign-in, D1 (shipped 2026-09-29, Opus 5.5; tasks tagged pass 6 in plan.json)
+
+Done: `infra-verify` → `domain-workers` → `clerk-dev` → `d1-sync` (decision 0020, changelog 0007, Canon C-064 to C-066). Still to do: `clerk-production` (Justin creates the production instance and OAuth apps; the deploy adds the DNS records), transcript lines in sync, realtime sync (SpacetimeDB or Durable Objects, C-049). See prompt 0017.

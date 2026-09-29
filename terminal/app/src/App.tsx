@@ -8,6 +8,7 @@ import { deriveTimeline, stateAt, type Step } from '@shared/timeline';
 import type { EngineContext } from '@shared/ops';
 import { findLibraryTerminal, findMaterial, libraryToSkin } from '@shared/skins';
 import { installActionsRegistry, listActions } from './actions/registry';
+import { AccountProvider } from './auth/Account';
 import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
@@ -484,7 +485,6 @@ function Product() {
             theme={theme}
             devMode={prefs.devMode}
             usedMicro={used}
-            showSave={snapshot.lines.length >= 3}
             onNewBox={newBox}
             onToggleSidebar={toggleSidebar}
             onCycleTheme={cycleTheme}
@@ -560,7 +560,9 @@ function WithLang() {
 export default function App() {
   return (
     <PrefsProvider>
-      <WithLang />
+      <AccountProvider>
+        <WithLang />
+      </AccountProvider>
     </PrefsProvider>
   );
 }

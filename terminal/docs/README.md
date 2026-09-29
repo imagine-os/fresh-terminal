@@ -1,6 +1,6 @@
 # Fresh Terminal wiki — start here
 
-Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (pass 5, Opus 5.5).
+Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (domain, sign-in and D1 pass, Opus 5.5).
 
 - Read it rendered: https://imagine-os.github.io/fresh-terminal/wiki/
 - Read it on GitHub: https://github.com/imagine-os/fresh-terminal/tree/main/terminal/docs
@@ -16,7 +16,7 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-066) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-069) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
 | [canon/prompts.md](canon/prompts.md) | All 64 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
@@ -51,6 +51,7 @@ Read this first.
 | [prompts/0014-koi-v2.md](prompts/0014-koi-v2.md) | Koi pond v2: any-shape lily pads, stone paths, tilt, bridge and sky | 2026-09-29 |
 | [prompts/0015-wiki.md](prompts/0015-wiki.md) | Keep the documentation wiki current, as a rule | 2026-09-29 |
 | [prompts/0016-playback.md](prompts/0016-playback.md) | A playback scrubber for every step of a session; "evolve as we grow" | 2026-09-29 |
+| [prompts/0017-domain-clerk-d1.md](prompts/0017-domain-clerk-d1.md) | "i already did cloudflare clerk": freshterminal.ai, sign-in and D1 unblocked | 2026-09-29 |
 
 ## 4. Decisions: one per file
 
@@ -75,6 +76,7 @@ Read this first.
 | [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md) | Chip types you can set, a glossary per box, structured replies | 2026-09-29 |
 | [decisions/0018-skins-and-refine.md](decisions/0018-skins-and-refine.md) | Skins as records and the best-of-3 refine loop with its stop rules | 2026-09-29 |
 | [decisions/0019-playback.md](decisions/0019-playback.md) | Every step is a saved event with parents; replay first, branches and merges later | 2026-09-29 |
+| [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md) | freshterminal.ai on Workers, Clerk anonymous-first, accounts, boxes and ledger mirror in D1 | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
 
@@ -86,12 +88,13 @@ Read this first.
 | [changelog/0004.md](changelog/0004.md) | Pass 4: the terminal edits itself, chips v2, structured replies, koi pond v2, the Canon, this wiki | 2026-09-29 |
 | [changelog/0005.md](changelog/0005.md) | Pass 5: skins, the material library and the refine loop, with live results | 2026-09-29 |
 | [changelog/0006.md](changelog/0006.md) | Replay: a playback scrubber over every step of a session; the tagline | 2026-09-29 |
+| [changelog/0007.md](changelog/0007.md) | freshterminal.ai, api.freshterminal.ai, Clerk sign-in and D1 sync, with the live check | 2026-09-29 |
 
 ## 6. Reference
 
 | Page | What it says | Updated |
 | --- | --- | --- |
-| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API (incl. `/skin/*`), ops as tools, `refine()`, `window.pond`, SpacetimeDB, CLI, MCP | 2026-09-29 |
+| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API (incl. `/skin/*`, `/me`, `/sync/*`), ops as tools, `refine()`, `window.pond`, D1, SpacetimeDB, CLI, MCP, deploy workflows | 2026-09-29 |
 | [pages/landing.md](pages/landing.md) | Page spec: landing (`/`) | 2026-09-29 |
 | [pages/box.md](pages/box.md) | Page spec: a box (`/box/:id`), with pass 4's menu, edits and chips | 2026-09-29 |
 | [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas (`/canvas`) | 2026-09-28 |
@@ -102,9 +105,10 @@ Data files: [canvas/cards.json](canvas/cards.json) (master canvas seed; add with
 
 ## Code map (all under `terminal/`)
 
-- `app/` Vite + React 19 + TypeScript + Tailwind 4. `src/shell` (five regions, menu tree), `src/terminal` (composer, chips, chip popover, transcript, structured replies), `src/pages` (pages from blocks), `src/dev` (dev panel, PM viewer), `src/playback` (replay scrubber), `src/store` (local store + SpacetimeDB seam), `src/auth` (anonymous now, Clerk stub), `src/actions/registry.ts`, `src/i18n`.
+- `app/` Vite + React 19 + TypeScript + Tailwind 4. `src/shell` (five regions, menu tree), `src/terminal` (composer, chips, chip popover, transcript, structured replies), `src/pages` (pages from blocks), `src/dev` (dev panel, PM viewer), `src/playback` (replay scrubber), `src/store` (local store + SpacetimeDB seam), `src/auth` (anonymous identity; Clerk `AccountProvider` when a key is built in), `src/sync` (cloud sync to D1 for signed-in people), `src/actions/registry.ts`, `src/i18n`.
 - `shared/` the dialects and core types: layout dialect v0 (with `mergeDialect`), billing dialect, theme records, chip tagger and merge, ledger (integer micro-dollars, hash chain, sha256), product name constant. Pass 4: `ui/` (menu, pages, box UI, glossary), `ops/` (op schemas, engine, tool definitions), `timeline/` (steps with parent ids, state at any step, export), `reply/` (structured reply blocks), `agent/` (OpenRouter streaming, snapshot, prompt, `runTurn`).
-- `router/` Hono router: route table, Jev routing, tool calling, one charge entry per turn. Node and Cloudflare Worker entries.
+- `router/` Hono router: route table, Jev routing, tool calling, one charge entry per turn. Node and Cloudflare Worker entries. Clerk session checks (`src/auth.ts`), D1 access (`src/d1.ts`), migrations in `router/migrations/`.
+- `site/` the Worker that serves the built app on freshterminal.ai (www → apex, SPA fallback, cache headers).
 - `module/` SpacetimeDB TypeScript module: tables and reducers. Type-checked, not yet published.
 - `scripts/` responsive check, SPA fallback, wiki build, chain verifier, ledger sample, canvas card adder.
 

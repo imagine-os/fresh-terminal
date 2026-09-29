@@ -1,0 +1,21 @@
+# The app on its own domain: https://freshterminal.ai (www redirects to the apex).
+# A Worker with static assets serves terminal/app/dist, built with VITE_BASE=/.
+# Deployed by .github/workflows/site-deploy.yml. GitHub Pages (built with
+# VITE_BASE=/fresh-terminal/) keeps running as a fallback from the same source.
+name = "fresh-terminal-app"
+main = "src/worker.ts"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+routes = [
+  { pattern = "freshterminal.ai", custom_domain = true },
+  { pattern = "www.freshterminal.ai", custom_domain = true },
+]
+
+[assets]
+directory = "../app/dist"
+binding = "ASSETS"
+# Unknown paths (/box/:id, /canvas ...) get index.html; the app's router takes over.
+not_found_handling = "single-page-application"
+# The Worker runs first so it can redirect www and set headers; it then asks ASSETS.
+run_worker_first = true

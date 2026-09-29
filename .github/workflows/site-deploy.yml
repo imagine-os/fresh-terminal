@@ -1,0 +1,100 @@
+name: site-deploy
+
+# Builds the app with VITE_BASE=/ and deploys it to the Cloudflare Worker
+# "fresh-terminal-app", which serves https://freshterminal.ai (www redirects to
+# the apex) from static assets. GitHub Pages keeps its own build as a fallback.
+# The Clerk publishable key is public by design and is injected at build time.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'terminal/app/**'
+      - 'terminal/shared/**'
+      - 'terminal/docs/**'
+      - 'terminal/scripts/**'
+      - 'terminal/site/**'
+      - 'terminal/router/rules.json'
+      - 'terminal/package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/site-deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: site-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - id: gate
+        name: Check for a Cloudflare token
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "CLOUDFLARE_API_TOKEN is not set; skipping."; fi
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/checkout@v4
+      - if: steps.gate.outputs.ok == 'true'
+        uses: pnpm/action-setup@v4
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - if: steps.gate.outputs.ok == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.gate.outputs.ok == 'true'
+        name: Test the site worker
+        run: pnpm -C terminal exec tsc -p site/tsconfig.json --noEmit && pnpm -C terminal exec vitest run site
+      - if: steps.gate.outputs.ok == 'true'
+        name: Build the app for the domain (base /)
+        run: pnpm -C terminal build:app
+        env:
+          VITE_BASE: /
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+      - if: steps.gate.outputs.ok == 'true'
+        name: Deploy (workers.dev + freshterminal.ai + www)
+        working-directory: terminal/site
+        run: pnpm dlx wrangler@4 deploy
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Clerk production DNS (only with a live instance)
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+        run: |
+          # A Clerk production instance on freshterminal.ai needs CNAMEs (clerk., accounts., clkmail., clk._domainkey., clk2._domainkey.).
+          # When the live secret key is in place this step reads the targets from Clerk and creates any missing record, DNS only.
+          case "$CLERK_SECRET_KEY" in
+            sk_live_*) ;;
+            *) echo "Clerk key is a development key (or unset): no DNS records needed."; exit 0;;
+          esac
+          zone=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/zones?name=freshterminal.ai" | jq -r '.result[0].id // empty')
+          [ -n "$zone" ] || { echo "zone freshterminal.ai not visible to the token"; exit 1; }
+          curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" https://api.clerk.com/v1/domains \
+            | jq -r '.data[]? | select(.name == "freshterminal.ai") | .cname_targets[]? | "\(.host) \(.value)"' \
+            | while read -r host value; do
+                [ -n "$host" ] || continue
+                existing=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?type=CNAME&name=$host" | jq -r '.result | length')
+                if [ "$existing" != "0" ]; then echo "CNAME $host: exists"; continue; fi
+                result=$(curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json' \
+                  "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" \
+                  -d "{\"type\":\"CNAME\",\"name\":\"$host\",\"content\":\"$value\",\"proxied\":false,\"ttl\":1,\"comment\":\"Clerk (site-deploy)\"}" | jq -r '.success')
+                echo "CNAME $host -> $value: created=$result"
+              done
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Smoke check
+        run: |
+          for url in https://fresh-terminal-app.jmassion.workers.dev/ https://freshterminal.ai/ https://freshterminal.ai/box/smoke; do
+            code=""
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || true)
+              [ "$code" = "200" ] && break
+              sleep $((i * 6))
+            done
+            echo "$url: HTTP $code"
+          done
+          echo "www: $(curl -sS -o /dev/null -w '%{http_code} -> %{redirect_url}' --max-time 10 https://www.freshterminal.ai/canvas 2>/dev/null || echo 'not answering yet')"

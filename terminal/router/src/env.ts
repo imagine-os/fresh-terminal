@@ -46,6 +46,8 @@ export function bindingsFromProcessEnv(): RouterBindings {
     'OPENAI_TRANSCRIBE_MODEL',
     'GOOGLE_API_KEY',
     'GEMINI_LIVE_MODEL',
+    'CLERK_SECRET_KEY',
+    'CLERK_JWT_KEY',
   ];
   for (const key of keys) {
     const value = process.env[key];
