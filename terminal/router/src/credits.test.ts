@@ -148,6 +148,41 @@ describe('signed-in credits', () => {
   });
 });
 
+describe('signed-in daily caps', () => {
+  it('stops one account at its daily free usage and says when it resets', async () => {
+    const h = harness({ ACCOUNT_DAILY_MICRO: '300000' });
+    await h.call('/credits', { method: 'GET', token: 'good-user_1' }); // creates the account
+    await h.db.prepare('UPDATE accounts SET grant_micro = 5000000').run(); // a big grant, so only the daily cap can stop it
+    expect((await h.call('/paid/json?cost=300000', { token: 'good-user_1' })).status).toBe(200);
+    const capped = await h.call('/paid/json?cost=1', { token: 'good-user_1' });
+    expect(capped.status).toBe(402);
+    expect(capped.body.code).toBe('account_daily_cap');
+    expect(capped.body.error).toBe('Daily free usage reached. It resets at 00:00 UTC, or use your key.');
+    expect(((await h.call('/credits', { method: 'GET', token: 'good-user_1' })).body as unknown as CreditsStatus).daily_cap_reached).toBe(true);
+    // Another account is not affected by user_1's cap.
+    expect((await h.call('/paid/json?cost=1', { token: 'good-user_2' })).status).toBe(200);
+  });
+
+  it('stops all accounts at the all-accounts daily cost cap, and signed-out devices are separate', async () => {
+    const h = harness({ ACCOUNT_DAILY_TOTAL_COST_MICRO: '150000' });
+    await h.call('/paid/json?cost=100000', { token: 'good-user_a' });
+    await h.call('/paid/json?cost=60000', { token: 'good-user_b' });
+    const capped = await h.call('/paid/json?cost=1', { token: 'good-user_c' });
+    expect(capped.status).toBe(402);
+    expect(capped.body.code).toBe('account_daily_cap');
+    const { token } = await h.newDevice();
+    expect((await h.call('/paid/json?cost=1', { device: token })).status).toBe(200);
+  });
+
+  it('defaults to $1 per account and $10 across accounts per day', async () => {
+    const db = fakeD1();
+    const app = createApp({ bindings: () => ({ DEVICE_SIGNING_KEY: KEY }), resources: () => ({ DB: db }) });
+    const health = (await (await app.request('/health')).json()) as { credits: { accountDailyMicro: number; accountDailyTotalCostMicro: number } };
+    expect(health.credits.accountDailyMicro).toBe(1_000_000);
+    expect(health.credits.accountDailyTotalCostMicro).toBe(10_000_000);
+  });
+});
+
 describe('cost extraction', () => {
   it('reads entries, a single entry, or cost_micro', () => {
     expect(costsFromJson({ entries: [{ cost_micro: 10, price_micro: 12 }, { cost_micro: 5, price_micro: 6 }] })).toEqual({ cost: 15, price: 18 });

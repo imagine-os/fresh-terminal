@@ -16,7 +16,7 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-078) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-080) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
 | [canon/prompts.md](canon/prompts.md) | All 73 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
@@ -91,6 +91,7 @@ Read this first.
 | [changelog/0006.md](changelog/0006.md) | Replay: a playback scrubber over every step of a session; the tagline | 2026-09-29 |
 | [changelog/0007.md](changelog/0007.md) | freshterminal.ai, api.freshterminal.ai, Clerk sign-in and D1 sync, with the live check | 2026-09-29 |
 | [changelog/0008.md](changelog/0008.md) | Free credits enforced by the router, with the live check | 2026-09-29 |
+| [changelog/0011.md](changelog/0011.md) | Daily caps for signed-in free usage ($1 per account, $10 across accounts) | 2026-09-29 |
 | [changelog/0009.md](changelog/0009.md) | Product Hunt strategy page (proposed launch plan, C-077) | 2026-09-29 |
 | [changelog/0010.md](changelog/0010.md) | Readable text over photo and material skins: sampled scrim, AA text, neutral small text | 2026-09-29 |
 

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { createApp } from '@router/src/app';
 import { fakeD1 } from '@router/src/testing/fakeD1';
-import { parseSoftPrompt, routerFetch, routerUrl } from './routerFetch';
+import { forgetDevice, parseSoftPrompt, routerFetch, routerUrl } from './routerFetch';
 
 describe('routerFetch', () => {
   it('gets a signed device id, sends it, and the router meters by it', async () => {
+    forgetDevice();
     const db = fakeD1();
     const router = createApp({ bindings: () => ({ DEVICE_SIGNING_KEY: 'k', OPENROUTER_API_KEY: '' }), resources: () => ({ DB: db }) });
     const seen: string[] = [];

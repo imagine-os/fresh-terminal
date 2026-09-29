@@ -31,3 +31,10 @@ Date: 2026-09-29. Model: Opus 5.5. Prompt: Canon prompt 67 (Justin, 03:14:22 UTC
 - Most one IP can cost per day: 3 devices × 37¢ ≈ $1.11; one network ≈ $3.70. Both are also inside the global cap. **Sure** for the rule; the IP count is only as good as the IP (VPNs and mobile carriers share and rotate them).
 - Most all anonymous use can cost per day: $2 plus the calls already running when the cap is reached (each ≤ 4¢). About $60 a month at the very most. **Sure** for the cap; **rough guess** for how quickly real traffic reaches it.
 - Signed-in: $1 per account; on the Clerk development instance at most 100 accounts, so at most $100 in total. **Sure.** A production instance needs its own daily cap for accounts (not built).
+
+## Addendum 2026-09-29 04:15 UTC: daily caps for signed-in accounts
+
+- Signed-in free usage stops for the UTC day at $1 per account (price, `ACCOUNT_DAILY_MICRO`) or $10 across all accounts (provider cost, `ACCOUNT_DAILY_TOTAL_COST_MICRO`). Answer: `402 account_daily_cap`, "Daily free usage reached. It resets at 00:00 UTC, or use your key." Your key is never capped. Changelog 0011, Canon C-080.
+- With today's $1 lifetime grant per account, the per-account daily cap only matters once the grant is raised or Stripe lands; the all-accounts cap is what bounds a sign-up flood on a production Clerk instance.
+- Cost bound: signed-in free usage costs at most $10 a day (about $300 a month) plus calls already running when the cap is hit (each ≤ about 4¢). **Sure** for the cap; **rough guess** for how fast real use reaches it.
+- Same day: every metered call is ledgered. `/tag` now returns its charge entry like `/route` and `/skin/*`, so the top-bar counter equals `GET /credits` spend (the counter showed $0.0000 while tagging had used 2¢). Exception: voice session estimates.
