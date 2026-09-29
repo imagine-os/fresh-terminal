@@ -92,7 +92,7 @@ describe('ops engine', () => {
     expect(result.state.boxUi.theme_id).toBe('glass-window');
     expect(result.state.boxUi.style['--accent']).toBe('#ff7a00');
     const spec = parseDialect(result.state.boxUi.dialect_text ?? defaultSpecText).spec;
-    expect(spec.regions.leftSidebar.behaviour).toEqual({ phone: 'hidden', tablet: 'hidden', laptop: 'rail', desk: 'full', wall: 'full' });
+    expect(spec.regions.leftSidebar.behaviour).toEqual({ phone: 'hidden', tablet: 'hidden', laptop: 'rail', desk: 'hidden', wall: 'hidden' });
   });
 
   it('round-trips page, card, starter and glossary ops', () => {

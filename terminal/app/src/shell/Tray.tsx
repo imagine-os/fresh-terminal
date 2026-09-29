@@ -186,6 +186,9 @@ export function Tray({ tools, pinned, onPinned, nav, onNavigate }: Props) {
                 })}
               </ul>
             </section>
+            <div className="tray-foot">
+              {t('tray.hint')} · {t('shortcut.alt')}
+            </div>
           </div>
         ) : null}
       </span>

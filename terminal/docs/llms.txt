@@ -11,13 +11,13 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-074 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-076 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
 
 - [canon/vision.md](canon/vision.md): what we are building and why, in Justin's words
-- [canon/prompts.md](canon/prompts.md): all 69 of Justin's messages verbatim with outcomes
+- [canon/prompts.md](canon/prompts.md): all 70 of Justin's messages verbatim with outcomes
 - [canon/glossary.md](canon/glossary.md): house words (box, chip, dialect, Jev, recipe, wiki)
 - [canon/people-and-access.md](canon/people-and-access.md): people, repos, secret names
 
@@ -29,6 +29,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Reference
 
 - [reference/surfaces.md](reference/surfaces.md): router API (/route SSE, /tag, /me, /sync/boxes, /sync/ledger), ops as tools, action runner, window.pond, D1, SpacetimeDB, CLI, MCP, deploy workflows
+- [decisions/0021-free-credits.md](decisions/0021-free-credits.md): free credits enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day cap), abuse limits, GET /credits, cost estimates
 - [decisions/0020-domain-clerk-d1.md](decisions/0020-domain-clerk-d1.md): freshterminal.ai on a Worker, api.freshterminal.ai, Clerk anonymous-first, D1 schema and sync rules, limits
 - [decisions/0016-self-editing.md](decisions/0016-self-editing.md): how the interface edits itself (ops, undo, tool calling, escalation)
 - [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md): chip kinds, glossary, reply blocks
@@ -42,7 +43,8 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 
 ## Changelog
 
-- [changelog/0008.md](changelog/0008.md): Product Hunt strategy page
+- [changelog/0009.md](changelog/0009.md): Product Hunt strategy page
+- [changelog/0008.md](changelog/0008.md): free credits enforced by the router, live check
 - [changelog/0007.md](changelog/0007.md): freshterminal.ai, Clerk sign-in, D1 sync, live check
 - [changelog/0006.md](changelog/0006.md): replay scrubber over every step of a session; tagline "Evolve as we grow."
 - [changelog/0005.md](changelog/0005.md): pass 5, skins, material library, refine loop, live results
@@ -54,6 +56,6 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 ## Optional
 
 - [prompts/](prompts/README.md): build prompts 0001 to 0017, verbatim with reply summaries
-- [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0020, one per file
+- [decisions/](README.md#4-decisions-one-per-file): decisions 0001 to 0021, one per file
 - [qa/responsive-latest.md](qa/responsive-latest.md): latest responsive check
 - qa/skins/: pass 5 live skin run screenshots (before and after, refine block at 390 and 1280, library boxes)

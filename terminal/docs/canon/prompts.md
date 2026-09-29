@@ -576,7 +576,7 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 >
 > PS: we need to be smart about our own costs, because people might abuse the free start from multiple browser sessions or whatever other methods they might do.
 
-**What happened:** Split. Justin's session: the first-run line, the session export, the hide-the-top-bar switch in the tray (C-072). The other session: free credits enforced on the router, soft sign-in prompts, abuse limits, moving browser boxes to D1 on sign-in (proposed defaults 25¢ per device, $2/day cap). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651953157019?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
+**What happened:** Split. Justin's session: the first-run line, the session export, the hide-the-top-bar switch in the tray (C-072). The other session: free credits enforced on the router, soft sign-in prompts, abuse limits, moving browser boxes to D1 on sign-in (proposed defaults 25¢ per device, $2/day cap). 2026-09-29 03:40 UTC (Opus 5.5): built as C-074 with 25¢ per device, 2 soft prompts, $1 per account, $2/day signed-out cap (decision 0021, changelog 0008). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651953157019?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651662236069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651662.236069
 
 ## 68. Mon Sep 28, 10:14 PM CDT · 2026-09-29 03:14:40 UTC
@@ -584,7 +584,7 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 > start thinking about the product hunt strategy. you can make a page for product hunt strategy
 
 **What happened:** Taken by the other session (a Product Hunt strategy page).
-Other session (Opus 5.5): researched Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then made the page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free credits, a launch-day spend limit, the first-run screen, a repo licence). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-074.
+Other session (Opus 5.5): researched Product Hunt's current rules (help center, launch guide) and 2025–2026 launches, then made the page https://imagine-os.github.io/fresh-terminal/pages/producthunt.html. The call: launch Fresh Terminal first, not FreshStack (starter kits aren't featured; one launch per root domain every six months), after five blockers (Clerk production, free credits, a launch-day spend limit, the first-run screen, a repo licence). Tagline pick: "The terminal that rebuilds itself when you ask". Decision C-076.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651680495959?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651680.495959
 
 ## 69. Mon Sep 28, 10:25 PM CDT · 2026-09-29 03:25:36 UTC
@@ -593,3 +593,14 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** Rule C-073: Done / Try it / Next, images posted in the thread. Applied from the reply onward.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652336159989?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652336.159989
+
+## 70. Mon Sep 28, 10:30 PM CDT · 2026-09-29 03:30:25 UTC
+
+> the shortcuts may not work right because we're typing in the prompt box, and essentially liv there. We call it free useage. instead of our key. the drop down is ugly.  the left sidebar can be hidden by defalt, maybe just a little icon top left for it to open. and then it has its own settings dropdown.
+>
+> Make the starter screen even cleaner. I'm not even sure the starter prompts are needed right now. but we should have a nice way to turn them on, maybe just a setting in the prompt box.
+>
+> Right now the goal is to get the starting point super super clean
+
+**What happened:** C-075: Alt/Option shortcuts while typing, "free usage", sidebar hidden with a top-left icon and its own settings, starters and hints behind switches in the prompt box, a calmer tray.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652625.835259

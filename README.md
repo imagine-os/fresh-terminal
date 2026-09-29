@@ -33,13 +33,14 @@ Router (`terminal/router/.env`, copy from `.env.example`; never reaches the brow
 | `ALLOWED_ORIGINS` | comma-separated browser origins for CORS and Clerk authorized parties (default: freshterminal.ai, www, the Pages origin, localhost 5173/4173) |
 | `OPENAI_API_KEY` | realtime voice (OpenAI). The router mints ephemeral client secrets; the browser never sees this key. |
 | `GOOGLE_API_KEY` | realtime voice (Gemini Live token minting; audio not wired yet) |
+| `DEVICE_SIGNING_KEY` | signs anonymous device ids for free credits (created once by `router-deploy`). Credit numbers are vars: `ANON_GRANT_MICRO`, `ANON_CHANCES`, `ANON_DAILY_COST_CAP_MICRO` and more (decision 0021). Without D1 (local Node) metering is off. |
 | `CLERK_SECRET_KEY` / `CLERK_JWT_KEY` | Clerk session checks for `/me` and `/sync/*` (the PEM public key makes it networkless). Without them signed-in calls get 503; signed-out use is unchanged. |
 
 App (build-time, optional): `VITE_CLERK_PUBLISHABLE_KEY` (Clerk sign-in; without it the Sign in button says not wired yet), `VITE_ROUTER_URL` (default: `/api` in dev, `https://api.freshterminal.ai` when served from freshterminal.ai, the workers.dev router elsewhere), `VITE_BASE` (`/fresh-terminal/` on GitHub Pages), `VITE_SPACETIMEDB_URI` / `VITE_SPACETIMEDB_NAME` (recognised, not used until the module is published).
 
 ## Two ways to pay
 
-Press `K` (key icon). Default: use Fresh Terminal's key through the router, pass-through cost plus margin. Or bring your own OpenRouter key: stored only in your browser, never sent to our router; calls go straight to OpenRouter and the ledger records price = cost. "Delete my key" removes it.
+Press `K` (key icon). Default: **free usage** through the router (free credits: 25¢ per browser, $1 once signed in; pass-through cost plus margin). Or bring your own OpenRouter key: stored only in your browser, never sent to our router; calls go straight to OpenRouter and the ledger records price = cost. "Delete my key" removes it.
 
 ## Pages and the canvas
 

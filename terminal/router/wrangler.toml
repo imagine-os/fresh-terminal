@@ -4,7 +4,8 @@
 #   2. applies migrations/ to it (remote),
 #   3. runs `wrangler deploy`, which also attaches the custom domain api.freshterminal.ai
 #      (Cloudflare creates the DNS record and certificate),
-#   4. pushes Worker secrets (OPENROUTER_API_KEY, CLERK_SECRET_KEY, CLERK_JWT_KEY, ...) over stdin.
+#   4. pushes Worker secrets (OPENROUTER_API_KEY, CLERK_SECRET_KEY, CLERK_JWT_KEY, ...) over stdin, and
+#      creates DEVICE_SIGNING_KEY once (random, never printed, kept across deploys).
 # The workers.dev URL stays on as a fallback.
 name = "fresh-terminal-router"
 main = "src/worker.ts"
@@ -25,3 +26,21 @@ database_name = "fresh-terminal"
 # Replaced at deploy time by router-deploy.yml (the id is not a secret; it is looked up, not stored).
 database_id = "D1_DATABASE_ID"
 migrations_dir = "migrations"
+
+# Free-credit abuse limits (router/src/credits.ts): paid calls per minute per IP and per network.
+# Workers Rate Limiting: per Cloudflare location, eventually consistent; a brake, not accounting.
+[[ratelimits]]
+name = "RL_IP"
+namespace_id = "7101"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60
+
+[[ratelimits]]
+name = "RL_NET"
+namespace_id = "7102"
+
+  [ratelimits.simple]
+  limit = 120
+  period = 60

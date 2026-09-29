@@ -25,6 +25,8 @@ import { mountSkinRoutes } from './skins';
 import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
 import { authenticate, clerkConfigured, type TokenVerifier } from './auth';
+import { creditConfig, meter, mountCreditRoutes, payerFor, type CreditsBindings, type RateLimiter } from './credits';
+import { DEVICE_HEADER, SOFT_PROMPT_HEADER } from '../../shared/src/credits/types';
 import { ensureAccount, listBoxes, listEntries, pushBoxes, pushEntries, type D1Database } from './d1';
 import { pushBoxesSchema, pushEntriesSchema, type AccountInfo } from '../../shared/src/sync/types';
 
@@ -32,7 +34,7 @@ import { pushBoxesSchema, pushEntriesSchema, type AccountInfo } from '../../shar
  * The router. Same code runs on Node (node.ts) and as a Cloudflare Worker
  * (worker.ts). It holds the OpenRouter key; the browser never sees it.
  */
-export interface RouterBindings {
+export interface RouterBindings extends CreditsBindings {
   OPENROUTER_API_KEY?: string;
   OPENROUTER_DEFAULT_MODEL?: string;
   OPENROUTER_JEV_MODEL?: string;
@@ -59,6 +61,9 @@ export interface RouterBindings {
 export interface RouterResources {
   /** Cloudflare D1 database "fresh-terminal" (binding DB). Absent on Node. */
   DB?: D1Database;
+  /** Workers Rate Limiting bindings: per IP and per /24 (or /48) network. */
+  RL_IP?: RateLimiter;
+  RL_NET?: RateLimiter;
 }
 
 /** Origins allowed by default: the GitHub Pages site and local dev/preview. */
@@ -149,8 +154,28 @@ export function createApp(options: CreateAppOptions) {
     const bindings = options.bindings(c.env);
     const origins = allowedOrigins(bindings);
     const origin = origins.includes('*') ? '*' : origins;
-    return cors({ origin, allowMethods: ['GET', 'POST', 'PUT', 'OPTIONS'], allowHeaders: ['Content-Type', 'Authorization'], maxAge: 600 })(c, next);
+    return cors({
+      origin,
+      allowMethods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+      allowHeaders: ['Content-Type', 'Authorization', DEVICE_HEADER],
+      exposeHeaders: [SOFT_PROMPT_HEADER],
+      maxAge: 600,
+    })(c, next);
   });
+
+  // Free credits: paid endpoints are metered per signed-in account or signed anonymous device (router/src/credits.ts).
+  const meterOptions = {
+    bindings: (env: unknown) => options.bindings(env),
+    resources: (env: unknown) => options.resources?.(env) ?? ((env ?? {}) as RouterResources),
+    authorizedParties: (env: unknown) => allowedOrigins(options.bindings(env)).filter((origin) => origin !== '*'),
+    ...(options.verifier ? { verifier: options.verifier } : {}),
+    now: () => (options.now ?? Date.now)(),
+  };
+  const metered = meter(meterOptions);
+  for (const path of ['/route', '/tag', '/skin/*', '/realtime/session']) {
+    app.use(path, metered);
+  }
+  mountCreditRoutes(app as never, meterOptions);
 
   const resourcesFor = (env: unknown): RouterResources => options.resources?.(env) ?? ((env ?? {}) as RouterResources);
   const now = () => (options.now ?? Date.now)();
@@ -183,6 +208,13 @@ export function createApp(options: CreateAppOptions) {
       },
       auth: { clerk: clerkConfigured(bindings), networkless: Boolean(bindings.CLERK_JWT_KEY) },
       store: { d1: Boolean(resourcesFor(c.env).DB) },
+      credits: {
+        metered: Boolean(resourcesFor(c.env).DB),
+        signed_devices: Boolean(bindings.DEVICE_SIGNING_KEY),
+        rate_limits: Boolean(resourcesFor(c.env).RL_IP && resourcesFor(c.env).RL_NET),
+        turnstile: 'not-wired',
+        ...creditConfig(bindings),
+      },
     });
   });
 
@@ -310,6 +342,11 @@ export function createApp(options: CreateAppOptions) {
       ...(bindings.OPENROUTER_JEV_MODEL ? { jevModel: bindings.OPENROUTER_JEV_MODEL } : {}),
       ...(bindings.OPENROUTER_DEFAULT_MODEL ? { defaultModel: bindings.OPENROUTER_DEFAULT_MODEL } : {}),
     };
+    // Signed-out calls run on the default tiers only: no model choice, no escalation (bounds one call's cost).
+    const anonymous = payerFor(c.req.raw)?.kind === 'device';
+    if (anonymous && body.model !== undefined) {
+      return c.json({ error: 'Sign in to choose a model', code: 'model_needs_sign_in' }, 403);
+    }
     if (body.model !== undefined && !isAllowedModel(body.model, table, overrides)) {
       return c.json({ error: `Model "${body.model}" is not allowed`, allowed: allowedModels(table) }, 400);
     }
@@ -353,6 +390,7 @@ export function createApp(options: CreateAppOptions) {
     const snapshot = body.snapshot ?? emptySnapshot(body.boxId);
     const escalation = table.escalation ?? { min_confidence: 0.6, max_nav_items: 40, max_pages: 10 };
     const startEscalated =
+      !anonymous &&
       routing.intent === 'edit_ui' &&
       ((routing.source === 'jev' && (routing.confidence ?? 1) < escalation.min_confidence) ||
         snapshot.nav.length > escalation.max_nav_items ||
@@ -409,7 +447,7 @@ export function createApp(options: CreateAppOptions) {
           void stream.writeSSE({ event: 'delta', data: JSON.stringify({ text }) });
         },
       };
-      if (route.escalateModel) turnOptions.escalateModel = route.escalateModel;
+      if (route.escalateModel && !anonymous) turnOptions.escalateModel = route.escalateModel;
       if (options.fetchImpl) turnOptions.fetchImpl = options.fetchImpl;
       if (options.now) turnOptions.now = options.now;
       if (bindings.ROUTER_REFERER) turnOptions.referer = bindings.ROUTER_REFERER;

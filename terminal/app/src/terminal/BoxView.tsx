@@ -24,6 +24,7 @@ import { Transcript } from './Transcript';
 import { PageView } from '../pages/PageView';
 import { downloadSession } from '../lib/exportSession';
 import { FirstRun } from './FirstRun';
+import { creditsSnapshot, reportCreditsError } from '../credits';
 
 export interface AppCommands {
   setLang: (lang: 'en' | 'es') => void;
@@ -36,6 +37,10 @@ export interface AppCommands {
   modelTagger: boolean;
   voiceProvider: 'webspeech' | 'openai' | 'gemini';
   voiceMode: 'toggle' | 'hold';
+  showStarters: boolean;
+  showHints: boolean;
+  toggleStarters: () => void;
+  toggleHints: () => void;
   openSettings: () => void;
   realtimePrice: (provider: 'openai' | 'gemini') => { audio_in_micro_per_minute: number; audio_out_micro_per_minute: number } | null;
 }
@@ -298,6 +303,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       let replyLineId: string | null = null;
       try {
         const started = performance.now();
+        const startedAt = Date.now();
         const reply = store.appendLine(box.id, 'assistant', '', []);
         replyLineId = reply.id;
         let assembled = '';
@@ -362,6 +368,11 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             store.updateLine(reply.id, text, false);
             const blocks = modelBlocks.length > 0 ? modelBlocks : assembled ? [{ kind: 'summary', text: assembled.slice(0, 300) } as ReplyBlock] : [];
             store.setLineReply(reply.id, assemble(meta, blocks, batch, extra));
+            // Free credits ran out and the router let this one through: say so, softly (1 of 2, 2 of 2).
+            const soft = creditsSnapshot().lastSoftPrompt;
+            if (soft && soft.at >= startedAt) {
+              store.appendLine(box.id, 'system', t('credits.softPrompt', { n: String(soft.n), of: String(soft.of) }), []);
+            }
           },
           onFail: (failure) => {
             store.updateLine(reply.id, assembled, false);
@@ -372,6 +383,9 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
               message = t('system.noKey');
             } else if (failure.kind === 'pending') {
               message = t('system.pending', { note: failure.note });
+            } else if (failure.kind === 'credits') {
+              reportCreditsError(failure.code, failure.message);
+              message = t(`credits.${failure.code}` as 'credits.sign_in_required');
             } else {
               message = t('system.error', { message: failure.message });
             }
@@ -421,6 +435,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
                 {t('landing.headline').split(' ').slice(0, -3).join(' ')}{' '}
                 <em>{t('landing.headline').split(' ').slice(-3).join(' ')}</em>
               </h1>
+              {commands.showHints ? (
               <ol className="how">
                 <li>
                   <b>{t('landing.how.1.title')}</b>
@@ -435,9 +450,10 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
                   {t('landing.how.3.body')}
                 </li>
               </ol>
+              ) : null}
             </>
           ) : null}
-          <Doodles fading={fading} showNewBox={showNewBoxDoodle} />
+          {commands.showHints ? <Doodles fading={fading} showNewBox={showNewBoxDoodle} /> : null}
         </section>
       ) : (
         <Transcript lines={lines} />
@@ -480,6 +496,10 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         voiceAvailable={voiceAvailable}
         voiceAppend={voiceAppend}
         onVoiceAppendConsumed={() => setVoiceAppend(null)}
+        showStarters={commands.showStarters}
+        showHints={commands.showHints}
+        onToggleStarters={commands.toggleStarters}
+        onToggleHints={commands.toggleHints}
       />
     </>
   );
@@ -504,6 +524,10 @@ function ComposerSlot(props: {
   voiceAvailable: boolean;
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
+  showStarters: boolean;
+  showHints: boolean;
+  onToggleStarters: () => void;
+  onToggleHints: () => void;
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
@@ -530,6 +554,10 @@ function ComposerSlot(props: {
       voiceAvailable={props.voiceAvailable}
       voiceAppend={props.voiceAppend}
       onVoiceAppendConsumed={props.onVoiceAppendConsumed}
+      showStarters={props.showStarters}
+      showHints={props.showHints}
+      onToggleStarters={props.onToggleStarters}
+      onToggleHints={props.onToggleHints}
       hasBoxes={props.hasBoxes}
       hasLines={props.hasLines}
       busy={props.busy}

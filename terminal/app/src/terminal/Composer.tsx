@@ -37,6 +37,10 @@ interface Props {
   /** Text arriving from a final voice transcript to append to the draft. */
   voiceAppend: string | null;
   onVoiceAppendConsumed: () => void;
+  showStarters?: boolean;
+  showHints?: boolean;
+  onToggleStarters?: () => void;
+  onToggleHints?: () => void;
 }
 
 export interface ComposerHandle {
@@ -67,6 +71,10 @@ export function Composer({
   voiceAvailable,
   voiceAppend,
   onVoiceAppendConsumed,
+  showStarters = false,
+  showHints = false,
+  onToggleStarters,
+  onToggleHints,
 }: Props) {
   const { t } = useI18n();
   const [text, setText] = useState('');
@@ -183,7 +191,7 @@ export function Composer({
     }
   };
 
-  const showSuggestions = focused && text.trim().length === 0;
+  const showSuggestions = showStarters && focused && text.trim().length === 0;
 
   return (
     <div className="composer" data-testid="composer">
@@ -330,8 +338,20 @@ export function Composer({
       <audio ref={voice.audioRef} autoPlay data-testid="assistant-audio" />
       <div className="composer-hint">
         <span>{voice.active ? t(voice.state === 'connecting' ? 'voice.connecting' : voice.state === 'speaking' ? 'voice.speaking' : 'voice.listening') : t('composer.hint')}</span>
-        <span>
-          {chips.length} {t('composer.chips')}
+        <span className="composer-switches">
+          {onToggleStarters ? (
+            <button type="button" className="switch" aria-pressed={showStarters} title={t('composer.startersTip')} onClick={onToggleStarters} data-testid="switch-starters">
+              {t('composer.starters')}
+            </button>
+          ) : null}
+          {onToggleHints ? (
+            <button type="button" className="switch" aria-pressed={showHints} title={t('composer.hintsTip')} onClick={onToggleHints} data-testid="switch-hints">
+              {t('composer.hints')}
+            </button>
+          ) : null}
+          <span>
+            {chips.length} {t('composer.chips')}
+          </span>
         </span>
       </div>
     </div>

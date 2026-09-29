@@ -108,6 +108,13 @@ jobs:
               echo "skip $name (repository secret not set)"
             fi
           done
+          # Anonymous device ids are signed with DEVICE_SIGNING_KEY. Created once; rotating it would hand every browser a new grant.
+          if pnpm dlx wrangler@4 secret list --format json 2>/dev/null | jq -e '.[] | select(.name == "DEVICE_SIGNING_KEY")' > /dev/null; then
+            echo "keep DEVICE_SIGNING_KEY (already set)"
+          else
+            openssl rand -base64 48 | tr -d '\n' | pnpm dlx wrangler@4 secret put DEVICE_SIGNING_KEY > /dev/null
+            echo "set DEVICE_SIGNING_KEY (new, random)"
+          fi
           # Networkless session checks: the instance's public signing key as PEM, from the Clerk JWKS.
           if [ -n "$CLERK_SECRET_KEY" ]; then
             curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" https://api.clerk.com/v1/jwks > "$RUNNER_TEMP/jwks.json"
@@ -130,5 +137,5 @@ jobs:
               if echo "$body" | jq -e '.ok == true' > /dev/null 2>&1; then ok=1; break; fi
               sleep $((i * 6))
             done
-            if [ -n "$ok" ]; then echo "$url: $(echo "$body" | jq -c '{ok, keyConfigured, auth, store}')"; else echo "$url: not answering yet (a new custom domain can take a few minutes)"; fi
+            if [ -n "$ok" ]; then echo "$url: $(echo "$body" | jq -c '{ok, keyConfigured, auth, store, credits: (.credits | {metered, signed_devices, rate_limits, turnstile})}')"; else echo "$url: not answering yet (a new custom domain can take a few minutes)"; fi
           done
