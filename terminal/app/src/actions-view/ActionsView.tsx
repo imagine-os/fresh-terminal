@@ -15,7 +15,7 @@ export type { ActionKind, ActionRow, ActionStatus } from './rows';
  * Four views over the same rows: list, table, board (by status) and a
  * timeline in the order things happened, with the follows relation drawn as
  * arrows (an edit follows the line that asked for it). One row of controls:
- * search, status, stage, model and sort (C-094). Model and cost come from the
+ * search, status, stage, model and sort (C-095). Model and cost come from the
  * ledger. Very simple on purpose; it gets smarter as we go.
  */
 type View = 'list' | 'table' | 'board' | 'timeline';
@@ -149,7 +149,7 @@ export function ActionsView({ boxId }: { boxId: string | null }) {
             </Button>
           ))}
         </div>
-        {/* One row of controls: on a phone it scrolls sideways instead of stacking (C-094). */}
+        {/* One row of controls: on a phone it scrolls sideways instead of stacking (C-095). */}
         <div className="actions-controls">
         <input className="actions-filter" type="search" placeholder={t('actions.filter')} aria-label={t('actions.filter')} value={filter} onChange={(event) => setFilter(event.target.value)} data-testid="actions-filter" />
         <select className={selectClass} aria-label={t('actions.col.status')} value={status} onChange={(event) => setStatus(event.target.value as ActionStatus | 'all')} data-testid="actions-status">

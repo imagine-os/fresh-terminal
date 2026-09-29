@@ -1,5 +1,5 @@
-// Actions check (C-094). Local: pnpm build:app, then node scripts/qa-c094.mjs (from terminal/).
-// Live: node scripts/qa-c094.mjs --base https://imagine-os.github.io/fresh-terminal --out <dir>
+// Actions check (C-095). Local: pnpm build:app, then node scripts/qa-c095.mjs (from terminal/).
+// Live: node scripts/qa-c095.mjs --base https://imagine-os.github.io/fresh-terminal --out <dir>
 // A fresh browser types three real prompts (make a page, switch the theme, undo), opens /actions
 // and screenshots every view at 390, 1280 and 3840. Prints rows, statuses, costs, arrows and the ledger.
 import { spawn } from 'node:child_process';
@@ -17,7 +17,7 @@ const PORT = Number(process.env.QA_PORT ?? 43000 + Math.floor(Math.random() * 10
 const live = arg('--base', null);
 const BASE = (live ?? `http://localhost:${PORT}`).replace(/\/$/, '');
 const OUT = resolve(arg('--out', 'docs/qa'));
-const PREFIX = arg('--prefix', 'c094');
+const PREFIX = arg('--prefix', 'c095');
 mkdirSync(OUT, { recursive: true });
 
 const preview = live ? null : spawn('pnpm', ['exec', 'vite', 'preview', '--config', 'app/vite.config.ts', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });

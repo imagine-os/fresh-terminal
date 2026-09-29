@@ -249,6 +249,10 @@ function Product() {
   }, [snapshot.boxes.length, navigate, t]);
 
   /** Remove a box and everything in it; land on the most recent remaining box (or a fresh one). */
+  const renameBox = useCallback((id: string, name: string) => {
+    store.renameBox(id, name);
+  }, []);
+
   const removeBox = useCallback(
     (id: string) => {
       const box = snapshot.boxes.find((candidate) => candidate.id === id);
@@ -589,6 +593,7 @@ function Product() {
             }}
             onActions={() => navigate({ name: 'actions' })}
             onPlan={() => navigate({ name: 'plan' })}
+            onRenameBox={currentBox && (route.name === 'box' || route.name === 'landing') && !replaying ? (name) => renameBox(currentBox.id, name) : undefined}
           />
         ),
         leftSidebar: (
@@ -599,6 +604,7 @@ function Product() {
             onNew={newBox}
             onNavigate={navigateTo}
             onRemove={removeBox}
+            onRename={renameBox}
             navOverride={replayView?.state.nav ?? null}
             showMenu={prefs.sidebarMenu}
             settings={{

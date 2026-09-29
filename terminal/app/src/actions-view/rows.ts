@@ -3,7 +3,7 @@ import type { Line } from '../store/types';
 /**
  * The rows behind Actions (C-090), as plain functions so they can be tested
  * without the store. Every line sent, every reply, every note and every edit
- * is one row. Model and cost come from the ledger (C-094): the entries a reply
+ * is one row. Model and cost come from the ledger (C-095): the entries a reply
  * names in its header, or failing that the charges written during its turn.
  */
 export type ActionKind = 'line' | 'reply' | 'edit' | 'system';

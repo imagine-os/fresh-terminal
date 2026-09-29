@@ -104,7 +104,7 @@ export const CANVAS_ACTIONS: ActionDecl[] = [
   { id: 'canvas.v1', intent: 'open the archived first canvas', permission: 'anyone' },
 ];
 
-/** The Actions page (/actions, C-090, C-094). */
+/** The Actions page (/actions, C-090, C-095). */
 export const ACTIONS_PAGE_ACTIONS: ActionDecl[] = [
   ...SHELL_ACTIONS,
   { id: 'actions.open', intent: 'open my actions', permission: 'anyone' },

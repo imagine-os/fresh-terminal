@@ -16,8 +16,8 @@ Read this first.
 | --- | --- | --- |
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
-| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-093) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
-| [canon/prompts.md](canon/prompts.md) | All 85 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-095) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 91 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
 | [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, replay, step, wiki and more | 2026-09-29 |
@@ -27,7 +27,7 @@ Read this first.
 
 | Page | What it says | Updated |
 | --- | --- | --- |
-| [plan/README.md](plan/README.md) | Our build plan by pass, order of operations, model per task (moved from `plan.md` to `docs/plan/`, C-094; not in the product UI) | 2026-09-29 |
+| [plan/README.md](plan/README.md) | Our build plan by pass, order of operations, model per task (moved from `plan.md` to `docs/plan/`, C-095; not in the product UI) | 2026-09-29 |
 | [plan/plan.json](plan/plan.json) | The same plan as data (id, title, status, depends_on, model, pass); the hub's Plan section and the dev viewer at `/plan` read it (people's own activity is at `/actions`) | 2026-09-29 |
 | [voice-experience.md](voice-experience.md) | Terminal-talk: the voice experience we are building toward, as a 60-second demo script, the rules, and how it is built | 2026-09-29 |
 
@@ -103,6 +103,7 @@ Read this first.
 | [changelog/0012.md](changelog/0012.md) | Koi pond v3 and canvas v2 redo, best-of-3 rounds, before/after screenshots, live check | 2026-09-29 |
 | [changelog/0013.md](changelog/0013.md) | The sign-in matches the theme (Clerk appearance), before/after at 390, 1280, 3840 | 2026-09-29 |
 | [changelog/0014.md](changelog/0014.md) | The $5 pass-through gate, friend credits and invite codes, the hub at freshterminal.ai/hub, with the live check | 2026-09-29 |
+| [changelog/0015.md](changelog/0015.md) | Actions: model and cost from the ledger, filters by status, stage, model and words, cost sort, timeline arrows, typed undo; our plan moved to `docs/plan/` (C-095) | 2026-09-29 |
 
 ## 6. Reference
 

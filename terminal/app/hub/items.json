@@ -152,7 +152,7 @@
       "name": "Plan and kanban",
       "status": "live",
       "href": "#plan",
-      "about": "Our build plan as data, by status and dependency. Lives in docs/plan (moved out of the product, C-094); the dev viewer at /plan reads it.",
+      "about": "Our build plan as data, by status and dependency. Lives in docs/plan (moved out of the product, C-095); the dev viewer at /plan reads it.",
       "links": [
         {
           "label": "docs/plan",
@@ -178,7 +178,7 @@
       ],
       "canon": [
         "C-090",
-        "C-094"
+        "C-095"
       ]
     },
     {

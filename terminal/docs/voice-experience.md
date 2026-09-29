@@ -14,6 +14,10 @@ Voice never fights the keyboard. You can talk, type, or do both in the same sent
 4. You interrupt: *"no, tomorrow"*. The moment you speak, its voice stops. Your words are a new line; "no" plus a complaint about the last edit means reverse it, so the date flips and it says *"Tomorrow, then."*
 5. You type **Alt+V** again or say *"stop listening"*. The wave folds away. The transcript shows every spoken line with a small mic glyph, so you can tell later what you said and what you typed.
 
+## Drafting together (Justin, 2026-09-29 05:19 UTC)
+
+The spoken draft is a shared object, not a hidden buffer. You watch it form in the prompt as you talk; you can stop, type into it, fix a word, drag a tag; someone else on the same stage can too. Only when it reads right does it go to the terminal. The reply is reviewed the same way: it lands on the stage, and you talk about it or edit it before it becomes the next edit. Two people and the terminal, one draft.
+
 ## What makes it feel right
 
 - **Tags while you talk.** The same tagger runs on the live transcript. Names, dates and lists light up mid-sentence, so you see the terminal understood before it acts.

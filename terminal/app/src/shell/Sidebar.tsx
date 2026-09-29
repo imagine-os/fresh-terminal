@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Reveal } from '../ui/Reveal';
 import { IconClose, IconMore, IconPlus } from '../ui/icons';
 import { Tooltip } from '../ui/Tooltip';
+import { InlineName } from '../ui/InlineName';
 import { NavTree } from './NavTree';
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
   onNew: () => void;
   onNavigate: (target: NavTarget, item: NavItem) => void;
   onRemove?: (id: string) => void;
+  /** Double-click a stage name to rename it (C-094). */
+  onRename?: (id: string, name: string) => void;
   /** The menu moved to the top-bar tray (C-071); the sidebar shows it only when asked. */
   showMenu?: boolean;
   settings?: { menu: boolean; stay: boolean; onMenu: (value: boolean) => void; onStay: (value: boolean) => void };
@@ -22,7 +25,7 @@ interface Props {
   navOverride?: NavItem[] | null;
 }
 
-export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove, navOverride = null, showMenu = false, settings }: Props) {
+export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove, onRename, navOverride = null, showMenu = false, settings }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -91,7 +94,13 @@ export function Sidebar({ boxes, currentId, onOpen, onNew, onNavigate, onRemove,
             <span className="box-glyph" aria-hidden="true">
               {index + 1}
             </span>
-            <span className="box-name">{box.name}</span>
+            <span className="box-name">
+              {onRename ? (
+                <InlineName value={box.name} onCommit={(name) => onRename(box.id, name)} label={t('box.rename')} activateOn="dblclick" testId={`stage-name-${index + 1}`} />
+              ) : (
+                box.name
+              )}
+            </span>
           </button>
           {onRemove ? (
             <Tooltip label={t('box.remove', { name: box.name })} align="end">

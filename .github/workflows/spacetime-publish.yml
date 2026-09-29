@@ -1,0 +1,79 @@
+name: spacetime-publish
+
+# Publishes the Fresh Terminal module to SpacetimeDB Maincloud and regenerates
+# the TypeScript client bindings. Needs the SPACETIMEDB_TOKEN repository secret
+# (minted with `spacetime login show --token` on a signed-in machine). The
+# token is never printed. C-094.
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: Database name on Maincloud
+        default: fresh-terminal
+        required: true
+  push:
+    branches: [main]
+    paths:
+      - terminal/module/**
+      - .github/workflows/spacetime-publish.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: spacetime-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE: ${{ github.event.inputs.database || 'fresh-terminal' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install (one lockfile at the repo root; the module compiles against the spacetimedb package)
+        run: pnpm install --frozen-lockfile
+      - name: Token present? (name only, never the value)
+        env:
+          S: ${{ secrets.SPACETIMEDB_TOKEN }}
+        run: |
+          if [ -z "$S" ]; then echo "::error::SPACETIMEDB_TOKEN is not set in Actions secrets"; exit 1; fi
+          echo "SPACETIMEDB_TOKEN: set (${#S} chars)"
+      - name: Install the SpacetimeDB CLI
+        run: |
+          curl -sSf https://install.spacetimedb.com | sh -s -- --yes
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/spacetime" --version
+      - name: Sign in with the token
+        env:
+          SPACETIMEDB_TOKEN: ${{ secrets.SPACETIMEDB_TOKEN }}
+        run: spacetime login --token "$SPACETIMEDB_TOKEN"
+      - name: Publish to Maincloud
+        working-directory: terminal/module
+        run: |
+          spacetime publish --server maincloud --yes "$DATABASE" --project-path . \
+            || spacetime publish --server maincloud --yes "$DATABASE" --module-path . \
+            || spacetime publish --server maincloud --yes "$DATABASE"
+      - name: Generate TypeScript bindings for the app
+        working-directory: terminal/module
+        run: |
+          spacetime generate --lang typescript --out-dir ../app/src/module_bindings --project-path . \
+            || spacetime generate --lang typescript --out-dir ../app/src/module_bindings --module-path . \
+            || spacetime generate --lang typescript --out-dir ../app/src/module_bindings
+      - name: Describe the live database (names only)
+        run: spacetime describe --server maincloud --json "$DATABASE" | head -c 4000 || true
+      - name: Commit the bindings back to main
+        run: |
+          git config user.name "fresh-terminal-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A terminal/app/src/module_bindings
+          if git diff --cached --quiet; then echo "bindings unchanged"; exit 0; fi
+          git commit -m "SpacetimeDB bindings from publish of $DATABASE (${GITHUB_SHA::7})"
+          git pull --rebase origin main
+          git push origin HEAD:main
