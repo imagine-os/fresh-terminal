@@ -46,7 +46,7 @@ const records = [
     .map((name) => parseRecord('changelog', `changelog/${name}`, read(`changelog/${name}`))),
 ];
 const items = JSON.parse(readFileSync(resolve(here, '../app/hub/items.json'), 'utf8')) as { items: HubItem[] };
-const plan = JSON.parse(read('plan.json')) as { tasks: unknown[] };
+const plan = JSON.parse(read('plan/plan.json')) as { tasks: unknown[] };
 
 let found: Record<string, boolean> | null = null;
 try {

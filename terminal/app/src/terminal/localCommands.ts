@@ -13,7 +13,8 @@ export type LocalCommand =
   | { kind: 'draw'; component: 'dashboard' | 'login' | 'plan-kanban'; reveal: RevealPattern; wired: boolean }
   | { kind: 'ops'; ops: Op[]; openPage?: string }
   | { kind: 'lang'; lang: 'en' | 'es' }
-  | { kind: 'verify-chain' };
+  | { kind: 'verify-chain' }
+  | { kind: 'flip'; direction: 'undo' | 'redo' };
 
 export interface LocalContext {
   boxes: Box[];
@@ -112,6 +113,14 @@ export function matchLocalCommand(text: string, chips: Chip[], context: LocalCon
       text: `Would write: "Model calls: free" for ${count} calls as a credit rule on your owner record, then return to pass-through. Not wired yet: billing rules per owner arrive with the SpacetimeDB store.`,
       reveal,
     };
+  }
+
+  // Typing "undo" does what Ctrl+Z does (and shows up in Actions linked to what it undid).
+  if (/^(?:undo|undo that|undo (?:the )?last(?: change| edit)?|deshacer|deshaz(?: eso)?)$/.test(lower)) {
+    return { kind: 'flip', direction: 'undo' };
+  }
+  if (/^(?:redo|redo that|rehacer|rehaz(?: eso)?)$/.test(lower)) {
+    return { kind: 'flip', direction: 'redo' };
   }
 
   if (/^verify (?:the )?chain$/.test(lower)) {

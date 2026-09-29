@@ -77,6 +77,7 @@ export const STARTER_ACTIONS: ActionDecl[] = [
   { id: 'chain.verify', intent: 'verify the chain', permission: 'anyone' },
   { id: 'speak', intent: 'speak: <text>', permission: 'anyone' },
   { id: 'lang.translate', intent: 'translate this box to Spanish', permission: 'anyone' },
+  { id: 'edit.undo.typed', intent: 'undo or redo (type it)', permission: 'anyone' },
 ];
 
 export const DEV_ACTIONS: ActionDecl[] = [
@@ -103,10 +104,24 @@ export const CANVAS_ACTIONS: ActionDecl[] = [
   { id: 'canvas.v1', intent: 'open the archived first canvas', permission: 'anyone' },
 ];
 
+/** The Actions page (/actions, C-090, C-094). */
+export const ACTIONS_PAGE_ACTIONS: ActionDecl[] = [
+  ...SHELL_ACTIONS,
+  { id: 'actions.open', intent: 'open my actions', permission: 'anyone' },
+  { id: 'actions.view', intent: 'show my actions as a list, table, board or timeline', permission: 'anyone' },
+  { id: 'actions.filter.text', intent: 'filter my actions by words', permission: 'anyone' },
+  { id: 'actions.filter.status', intent: 'show only actions with a status', permission: 'anyone' },
+  { id: 'actions.filter.stage', intent: 'show the actions of one stage or all stages', permission: 'anyone' },
+  { id: 'actions.filter.model', intent: 'show the actions a model answered', permission: 'anyone' },
+  { id: 'actions.sort', intent: 'sort my actions newest, oldest, by status or by cost', permission: 'anyone' },
+  { id: 'actions.resize', intent: 'drag or arrow-key the timeline label column wider or narrower', permission: 'anyone', shortcut: 'arrows' },
+];
+
 export const PAGE_ACTIONS: Record<string, ActionDecl[]> = {
   landing: [...LANDING_ACTIONS, ...STARTER_ACTIONS],
   box: [...BOX_ACTIONS, ...STARTER_ACTIONS],
   canvas: CANVAS_ACTIONS,
+  actions: ACTIONS_PAGE_ACTIONS,
   dev: DEV_ACTIONS,
 };
 

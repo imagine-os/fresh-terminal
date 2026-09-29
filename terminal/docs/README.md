@@ -27,8 +27,8 @@ Read this first.
 
 | Page | What it says | Updated |
 | --- | --- | --- |
-| [plan.md](plan.md) | The development plan by pass, order of operations, model per task | 2026-09-29 |
-| [plan.json](plan.json) | The same plan as data (id, title, status, depends_on, model, pass); the dev viewer at `/plan` reads it (people's own activity is at `/actions`) | 2026-09-29 |
+| [plan/README.md](plan/README.md) | Our build plan by pass, order of operations, model per task (moved from `plan.md` to `docs/plan/`, C-094; not in the product UI) | 2026-09-29 |
+| [plan/plan.json](plan/plan.json) | The same plan as data (id, title, status, depends_on, model, pass); the hub's Plan section and the dev viewer at `/plan` read it (people's own activity is at `/actions`) | 2026-09-29 |
 | [voice-experience.md](voice-experience.md) | Terminal-talk: the voice experience we are building toward, as a 60-second demo script, the rules, and how it is built | 2026-09-29 |
 
 ## 3. Prompts: Justin's build prompts, verbatim
@@ -113,6 +113,7 @@ Read this first.
 | [pages/box.md](pages/box.md) | Page spec: a box (`/box/:id`), with pass 4's menu, edits and chips | 2026-09-29 |
 | [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas v2 (`/canvas`; v1 at `?v=1`) | 2026-09-29 |
 | [pages/koi.md](pages/koi.md) | Page spec: koi pond v3 (`/pages/koi.html`): views, controls, URL options, versions | 2026-09-29 |
+| [pages/actions.md](pages/actions.md) | Page doc: Actions (`/actions`): rows, statuses, model and cost from the ledger, filters, sort, views, the resizable timeline column, typed undo | 2026-09-29 |
 | [pages/hub.md](pages/hub.md) | Page doc: the hub (`/hub`): who can see it, how the server checks, sections, data, actions, local preview | 2026-09-29 |
 | [pages/producthunt.md](pages/producthunt.md) | Page doc: the Product Hunt strategy (`/pages/producthunt.html`): the call, pitch pick, readiness, costs; proposed | 2026-09-29 |
 | [brand/registry.md](brand/registry.md) | Every brand mark in the repo: file, source, licence, date checked; what is still missing | 2026-09-29 |

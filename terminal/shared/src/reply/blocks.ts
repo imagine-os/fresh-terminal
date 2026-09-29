@@ -38,6 +38,8 @@ export interface ReplyMeta {
   ms: number;
   cost_micro: number;
   source?: 'jev' | 'rules' | 'local';
+  /** Ledger entries this turn wrote, so Actions can take model and cost from the ledger exactly. */
+  ledger_ids?: string[];
 }
 
 export interface Reply {

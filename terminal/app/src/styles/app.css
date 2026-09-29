@@ -3666,7 +3666,8 @@ textarea.field-input {
 }
 .act-tl-row {
   display: grid;
-  grid-template-columns: var(--label-w) minmax(0, 1fr);
+  /* The saved width, but never more than 60% of a narrow screen (C-094). */
+  grid-template-columns: min(var(--label-w), 60%) minmax(0, 1fr);
   gap: 0.6rem;
   align-items: center;
   min-height: 1.9rem;
@@ -3718,17 +3719,82 @@ textarea.field-input {
 .act-tl-row[data-status='undone'] .act-tl-bar {
   opacity: 0.4;
 }
+/* A 44px grab area centred on the column edge; the visible line is 2px (C-094). */
 .act-tl-resize {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: calc(var(--label-w) + 0.3rem);
-  width: 6px;
+  left: calc(min(var(--label-w), 60%) + 0.3rem - (var(--target) / 2));
+  width: var(--target);
+  min-height: var(--target);
   cursor: col-resize;
   touch-action: none;
+  z-index: 1;
 }
-.act-tl-resize:hover {
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
+.act-tl-resize::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  background: var(--border);
+}
+.act-tl-resize:hover::after,
+.act-tl-resize:focus-visible::after {
+  background: var(--accent);
+}
+/* The follows relation as arrows over the tracks: from the earlier bar's end to the later bar. */
+.act-tl-arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--fg-faint);
+}
+.actions-controls {
+  display: flex;
+  flex: 1 1 32rem;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.actions-controls > * {
+  flex: 0 0 auto;
+}
+.actions-controls .actions-filter {
+  flex: 1 1 10rem;
+  margin-left: 0;
+}
+@media (max-width: 40rem) {
+  .actions-controls {
+    justify-content: flex-start;
+  }
+  /* The stage has no side padding on phones; keep a 16px gutter here. */
+  .actions {
+    padding-inline: 1rem;
+  }
+}
+/* 4K: use the width, and keep the controls on one row for 10-foot reading. */
+@container shell (min-width: 140rem) {
+  .actions {
+    width: min(100%, 140rem);
+  }
+}
+.act-meta,
+.act-cost {
+  font-family: var(--font-mono);
+  font-size: var(--type-whisper);
+  color: var(--fg-muted);
+}
+.act-cost {
+  white-space: nowrap;
 }
 
 @media (max-width: 40rem) {
