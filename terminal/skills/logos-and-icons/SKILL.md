@@ -72,6 +72,10 @@ Later layers, each a cost question and none automated yet (2026-09-29):
 3. **3D and motion** versions (extruded mark, turntable, a Rive-style state machine) for the koi pond, launchers and poster art. Generated per the best-of-3 loop (C-031) from our own marks only; third-party marks stay flat.
 4. **Wordmarks and full brand kits** gathered from official brand pages, the same source order as §2.
 
+## 4c. Say what it costs and how sure you are
+
+Rule C-071 (Justin, 2026-09-29 03:10): any proposal to gather, generate or upgrade marks states the money (model calls and vendor fees separately), the time, and how sure we are in plain words with a rough percentage. Put it where the decision is made: on the page (see the estimate block on `pages/brands.html`) or in the reply. When the work runs, its real cost goes on the ledger and the estimate is checked against it.
+
 ## 5. Generate only when nothing good exists
 
 Applies to our own product icons, thumbnails, poster art, and doodle hints. Not to third-party logos.

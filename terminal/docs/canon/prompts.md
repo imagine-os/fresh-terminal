@@ -553,3 +553,17 @@ Justin's session, same message: FreshStack nesting (Jev under OpenRouter, Gemini
 
 **What happened:** Box removal shipped (C-069). The top-bar tray with the menu and tools behind it is the next piece.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790650600637069?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790650600.637069
+
+## 65. Mon Sep 28, 10:09 PM CDT · 2026-09-29 03:09:20 UTC
+
+> writing make a page called notes removed ny prompt box from the bottom of the terminal. but it was fast.
+
+**What happened:** The page opened in the stage and unmounted the box view, taking the composer with it. Fixed: pages open inside the box view so the pad stays; sending from a page returns to the transcript (C-070).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651360900509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651360.900509
+
+## 66. Mon Sep 28, 10:10 PM CDT · 2026-09-29 03:10:42 UTC
+
+> include cost estimates and level of sureity for stuff. for instacne how much will it cost to finish the ungathered text marks, and a button to start the process would be nice in the page with logos and icons
+
+**What happened:** Rule C-071: estimates carry money, time and certainty. The brands page got the estimate block for the 12 text marks and a "Start in the terminal" button.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790651442483669?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790651442.483669
