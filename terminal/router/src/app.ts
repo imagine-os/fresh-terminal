@@ -22,6 +22,7 @@ import {
 import type { ChatMessage } from './openrouter';
 import { tagWithModel } from './tagger';
 import { mountSkinRoutes } from './skins';
+import { mountAdminRoutes, type AdminBindings } from './admin';
 import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
 import { authenticate, clerkConfigured, type TokenVerifier } from './auth';
@@ -34,7 +35,7 @@ import { pushBoxesSchema, pushEntriesSchema, type AccountInfo } from '../../shar
  * The router. Same code runs on Node (node.ts) and as a Cloudflare Worker
  * (worker.ts). It holds the OpenRouter key; the browser never sees it.
  */
-export interface RouterBindings extends CreditsBindings {
+export interface RouterBindings extends CreditsBindings, AdminBindings {
   OPENROUTER_API_KEY?: string;
   OPENROUTER_DEFAULT_MODEL?: string;
   OPENROUTER_JEV_MODEL?: string;
@@ -187,6 +188,8 @@ export function createApp(options: CreateAppOptions) {
     app.use(path, metered);
   }
   mountCreditRoutes(app as never, meterOptions);
+  // Friend credits (admin grants, invite codes), the admin API for the hub, and the payment hook (router/src/admin.ts).
+  mountAdminRoutes(app, meterOptions);
 
   const resourcesFor = (env: unknown): RouterResources => options.resources?.(env) ?? ((env ?? {}) as RouterResources);
   const now = () => (options.now ?? Date.now)();

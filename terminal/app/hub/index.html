@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="dark" />
+    <title>Fresh Terminal hub</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M8 10l7 6-7 6' stroke='%2333ff66' stroke-width='3' fill='none'/%3E%3Cpath d='M17 22h8' stroke='%2333ff66' stroke-width='3'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <!-- The hub is a shell: nothing private is in this page or its script. Content loads from /hub/data/* after the site Worker checks an admin session. -->
+    <div id="hub"></div>
+    <script type="application/json" id="page-actions">
+      {"page": "hub", "permission": "admin", "actions": [
+        {"id": "hub.search", "intent": "search the prompt and response library", "permission": "admin"},
+        {"id": "hub.filter", "intent": "show only prompts, Canon, decisions or changelogs", "permission": "admin"},
+        {"id": "hub.grant", "intent": "give a friend credit by email or user id", "permission": "admin"},
+        {"id": "hub.invite.create", "intent": "make an invite code worth an amount for a number of uses", "permission": "admin"},
+        {"id": "hub.invite.disable", "intent": "switch off an invite code", "permission": "admin"},
+        {"id": "hub.threshold", "intent": "set an account's billing threshold", "permission": "admin"},
+        {"id": "hub.signIn", "intent": "sign in to the hub", "permission": "anyone"},
+        {"id": "hub.signOut", "intent": "sign out of the hub", "permission": "admin"}
+      ]}
+    </script>
+    <script type="module" src="/src/hub/main.tsx"></script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import worker, { redirectFor } from './worker';
+import worker, { hubRoute, redirectFor } from './worker';
 
 describe('site worker', () => {
   it('redirects www to the apex and keeps path and query', () => {
@@ -18,5 +18,66 @@ describe('site worker', () => {
     const www = await worker.fetch(new Request('https://www.freshterminal.ai/canvas'), env);
     expect(www.status).toBe(301);
     expect(www.headers.get('Location')).toBe('https://freshterminal.ai/canvas');
+  });
+});
+
+describe('hub gate', () => {
+  const assets = {
+    fetch: async (request: Request) => {
+      const path = new URL(request.url).pathname;
+      if (path === '/hub/') return new Response('<!doctype html><div id="hub"></div>', { headers: { 'Content-Type': 'text/html' } });
+      if (path === '/hub/data/library.json') return new Response('{"prompts":[]}', { headers: { 'Content-Type': 'application/json' } });
+      return new Response('not found', { status: 404, headers: { 'Content-Type': 'text/html' } });
+    },
+  };
+  const router = {
+    fetch: async (request: Request) => {
+      const auth = request.headers.get('Authorization');
+      if (new URL(request.url).pathname !== '/admin/whoami') return new Response('{}', { status: 404 });
+      if (auth === 'Bearer admin') return Response.json({ admin: true, userId: 'user_admin', via: 'id' });
+      if (auth === 'Bearer friend') return Response.json({ error: 'This account is not an admin.', code: 'not_admin' }, { status: 403 });
+      return Response.json({ error: 'Session token rejected', code: 'sign_in_required' }, { status: 401 });
+    },
+  };
+  const env = { ASSETS: assets, ROUTER: router };
+  const get = (path: string, token?: string) => worker.fetch(new Request(`https://freshterminal.ai${path}`, token ? { headers: { Authorization: `Bearer ${token}` } } : {}), env);
+
+  it('routes hub paths', () => {
+    expect(hubRoute('/hub')).toBe('shell');
+    expect(hubRoute('/hub/credits')).toBe('shell');
+    expect(hubRoute('/hub/data/library.json')).toBe('data');
+    expect(hubRoute('/hub/api/session')).toBe('api');
+    expect(hubRoute('/hubs')).toBe('none');
+    expect(hubRoute('/')).toBe('none');
+  });
+
+  it('serves the shell to anyone, marked noindex and not cached', async () => {
+    for (const path of ['/hub', '/hub/', '/hub/credits']) {
+      const shell = await get(path);
+      expect(shell.status).toBe(200);
+      expect(await shell.text()).toContain('id="hub"');
+      expect(shell.headers.get('X-Robots-Tag')).toContain('noindex');
+      expect(shell.headers.get('Cache-Control')).toContain('no-store');
+    }
+  });
+
+  it('answers 401 without a session, 403 for a non-admin, and the data for an admin', async () => {
+    expect((await get('/hub/data/library.json')).status).toBe(401);
+    expect((await get('/hub/api/session')).status).toBe(401);
+    expect((await get('/hub/data/library.json', 'expired')).status).toBe(401);
+    expect((await get('/hub/data/library.json', 'friend')).status).toBe(403);
+    const data = await get('/hub/data/library.json', 'admin');
+    expect(data.status).toBe(200);
+    expect(await data.text()).toBe('{"prompts":[]}');
+    expect(data.headers.get('Cache-Control')).toContain('no-store');
+    expect(await (await get('/hub/api/session', 'admin')).json()).toMatchObject({ admin: true });
+    expect((await get('/hub/data/missing.json', 'admin')).status).toBe(404);
+    // Dot segments are normalised by the URL parser: this is the public shell, not a data file.
+    expect(await (await get('/hub/data/../index.html')).text()).toContain('id="hub"');
+  });
+
+  it('never serves hub data through the plain asset path', async () => {
+    const response = await worker.fetch(new Request('https://freshterminal.ai/hub/data/library.json', { method: 'POST' }), env);
+    expect(response.status).toBe(405);
   });
 });

@@ -25,6 +25,8 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | api.freshterminal.ai (same router, custom domain) | https://api.freshterminal.ai/health | 2026-09-29, infra pass (C-064) |
 | Sign in (Clerk development instance) and cloud sync (D1) | Header **Sign in** button on freshterminal.ai and on Pages | 2026-09-29, infra pass (C-065, C-066) |
 | Free credits, enforced by the router (25¢ per browser, 2 soft prompts, $1 per account, $2/day signed-out cap) | `GET https://api.freshterminal.ai/credits`; live check in changelog 0008 | 2026-09-29 (C-074) |
+| Billing threshold per account ($5 default; past the credit limit `402 payment_required`), friend credits and invite codes | `GET /credits` → `billing`; admin API `/admin/*`; tray → Invite code | 2026-09-29 (C-084, C-085) |
+| The hub (admins only, checked by the server) | https://freshterminal.ai/hub | 2026-09-29 (C-086) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |
 
@@ -66,7 +68,7 @@ As of 2026-09-29:
 
 - SpacetimeDB live store. The module is written and type-checked, not published. The app uses browser storage instead, so boxes don't sync between devices or people. 2026-09-29: account data goes to Cloudflare D1 first (C-047).
 - ~~Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.~~ Superseded 2026-09-29 (C-065): sign-in is wired on the Clerk development instance. Still not wired: the Clerk production instance (steps in C-065), Clerk screens in Spanish, transcript lines in sync, realtime sync between devices.
-- Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.)
+- Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.) 2026-09-29 (C-084): the $5 threshold is enforced and the Stripe Checkout top-up code is in; it switches on when `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are repository secrets and the router redeploys. Charging a saved card for usage (auto top-up) is not built.
 - ~~A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).~~ Built 2026-09-29 (C-080): $1 per account, $10 across accounts per UTC day.
 - Turnstile before a new free-credit device: built, not switched on; the Cloudflare token needs Account → Turnstile → Edit (C-074).
 - Shared chain beyond the browser, and the server re-checking hashes.

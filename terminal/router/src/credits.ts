@@ -1,5 +1,5 @@
 import type { Context, MiddlewareHandler } from 'hono';
-import { DEVICE_HEADER, SOFT_PROMPT_HEADER, type CreditsError, type CreditsErrorCode, type CreditsStatus } from '../../shared/src/credits/types';
+import { DEVICE_HEADER, SOFT_PROMPT_HEADER, type AccountBilling, type BillingState, type CreditsError, type CreditsErrorCode, type CreditsStatus } from '../../shared/src/credits/types';
 import { authenticate, type AuthBindings, type TokenVerifier } from './auth';
 import { accountIdFor, ensureAccount, type D1Database } from './d1';
 
@@ -42,6 +42,9 @@ export interface CreditsBindings extends AuthBindings {
   DEVICES_PER_IP_DAY?: string;
   DEVICES_PER_NET_DAY?: string;
   ANON_MAX_BODY_BYTES?: string;
+  /** Stripe Checkout top-ups (C-081). Both set = the "Top up / add payment" button is wired. */
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
 }
 
 export interface RateLimiter {
@@ -174,7 +177,25 @@ interface AccountCreditRow {
   id: string;
   grant_micro: number;
   spent_micro: number;
+  /** Lifetime free usage before a payment method is needed (C-081, default $5). */
+  billing_threshold_micro: number;
+  billing_state: BillingState;
+  paid_micro: number;
 }
+
+/** min(grant, threshold): what the account can spend before it must pay (C-081). */
+export function creditLimitMicro(row: Pick<AccountCreditRow, 'grant_micro' | 'billing_threshold_micro'>): number {
+  return Math.max(0, Math.min(row.grant_micro, row.billing_threshold_micro));
+}
+
+export function billingProvider(bindings: CreditsBindings): AccountBilling['provider'] {
+  return bindings.STRIPE_SECRET_KEY && bindings.STRIPE_WEBHOOK_SECRET ? 'stripe' : 'not-wired';
+}
+
+export const PAYMENT_REQUIRED_MESSAGE =
+  'You have used your free usage. Add a payment method to keep going: you pay for what you use, at cost plus a small fee. Your key still works.';
+export const PAYMENT_NOT_WIRED_MESSAGE =
+  'You have used your free usage. Adding a payment method is not wired yet; your key still works.';
 
 export type Payer =
   | { kind: 'account'; id: string; row: AccountCreditRow }
@@ -208,8 +229,19 @@ async function accountCredits(db: D1Database, clerkUserId: string, now: number, 
   await ensureAccount(db, clerkUserId, now);
   const id = accountIdFor(clerkUserId);
   // Accounts created before this migration carry the column default; apply the configured grant once.
-  const row = await db.prepare('SELECT id, grant_micro, spent_micro FROM accounts WHERE id = ?1').bind(id).first<AccountCreditRow>();
-  return { id, grant_micro: Number(row?.grant_micro ?? config.accountGrantMicro), spent_micro: Number(row?.spent_micro ?? 0) };
+  const row = await db
+    .prepare('SELECT id, grant_micro, spent_micro, billing_threshold_micro, billing_state, paid_micro FROM accounts WHERE id = ?1')
+    .bind(id)
+    .first<AccountCreditRow>();
+  const state = row?.billing_state;
+  return {
+    id,
+    grant_micro: Number(row?.grant_micro ?? config.accountGrantMicro),
+    spent_micro: Number(row?.spent_micro ?? 0),
+    billing_threshold_micro: Number(row?.billing_threshold_micro ?? 5_000_000),
+    billing_state: state === 'needs_payment' || state === 'active' ? state : 'free',
+    paid_micro: Number(row?.paid_micro ?? 0),
+  };
 }
 
 export interface MeterOptions {
@@ -259,8 +291,16 @@ export function statusFor(payer: Payer, config: CreditConfig, dailyCapReached: b
   const turnstile = bindings.TURNSTILE_SECRET && bindings.TURNSTILE_SITEKEY ? { turnstile: 'on' as const, turnstile_sitekey: bindings.TURNSTILE_SITEKEY } : { turnstile: 'not-wired' as const };
   const base = { ...turnstile, daily_cap_reached: dailyCapReached, label: payer.kind === 'account' ? 'free usage · signed in' : 'free usage' };
   if (payer.kind === 'account') {
-    const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
-    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false };
+    const limit = creditLimitMicro(payer.row);
+    const remaining = Math.max(0, limit - payer.row.spent_micro);
+    const billing: AccountBilling = {
+      state: payer.row.billing_state,
+      threshold_micro: payer.row.billing_threshold_micro,
+      credit_limit_micro: limit,
+      paid_micro: payer.row.paid_micro,
+      provider: billingProvider(bindings),
+    };
+    return { ...base, signed_in: true, mode: 'account', granted_micro: payer.row.grant_micro, spent_micro: payer.row.spent_micro, remaining_micro: remaining, soft_prompts_left: 0, sign_in_required: false, limited: false, billing };
   }
   if (payer.kind === 'device') {
     const remaining = Math.max(0, payer.row.grant_micro - payer.row.spent_micro);
@@ -390,13 +430,27 @@ export function meter(options: MeterOptions): MiddlewareHandler {
     if (payer.kind === 'none') return deny(c, 401, 'device_required', 'This browser has no device id yet. The app gets one from POST /credits/device.');
 
     if (payer.kind === 'account') {
-      if (payer.row.grant_micro - payer.row.spent_micro < config.minBalanceMicro) {
-        return deny(c, 402, 'account_credits_exhausted', 'Your free account credits are used up. Paying for more is not wired yet; your key (K, your own OpenRouter key) still works.', statusFor(payer, config, false, bindings));
+      // Pass-through gate (C-081): free usage runs to min(grant, threshold); past it the account must pay.
+      // "Your key" calls go browser -> OpenRouter and never reach this meter, so they are never blocked.
+      if (creditLimitMicro(payer.row) - payer.row.spent_micro < config.minBalanceMicro) {
+        if (payer.row.billing_state === 'free') {
+          await db.prepare("UPDATE accounts SET billing_state = 'needs_payment', updated_at = ?1 WHERE id = ?2 AND billing_state = 'free'").bind(now, payer.id).run();
+          payer.row.billing_state = 'needs_payment';
+        }
+        const status = statusFor(payer, config, false, bindings);
+        const wired = billingProvider(bindings) === 'stripe';
+        if (payer.row.billing_threshold_micro <= payer.row.grant_micro) {
+          return deny(c, 402, 'payment_required', wired ? PAYMENT_REQUIRED_MESSAGE : PAYMENT_NOT_WIRED_MESSAGE, status);
+        }
+        return deny(c, 402, 'account_credits_exhausted', wired ? PAYMENT_REQUIRED_MESSAGE : 'Your free account credits are used up. Adding a payment method is not wired yet; your key (K, your own OpenRouter key) still works.', status);
       }
       // Daily caps for signed-in free usage (your key goes browser -> OpenRouter and is never capped).
-      const daily = await accountDaily(db, payer.id, now);
-      if (daily.mine >= config.accountDailyMicro || daily.allCost >= config.accountDailyTotalCostMicro) {
-        return deny(c, 402, 'account_daily_cap', DAILY_FREE_USAGE_REACHED, statusFor(payer, config, true, bindings));
+      // An account that has paid (billing_state active) spends its own money and is not capped.
+      if (payer.row.billing_state !== 'active') {
+        const daily = await accountDaily(db, payer.id, now);
+        if (daily.mine >= config.accountDailyMicro || daily.allCost >= config.accountDailyTotalCostMicro) {
+          return deny(c, 402, 'account_daily_cap', DAILY_FREE_USAGE_REACHED, statusFor(payer, config, true, bindings));
+        }
       }
     } else {
       const length = Number(c.req.header('Content-Length') ?? '0');

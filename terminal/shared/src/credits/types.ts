@@ -24,6 +24,28 @@ export interface CreditsStatus {
   turnstile: 'on' | 'not-wired';
   /** Public Turnstile site key when the check is on. */
   turnstile_sitekey?: string;
+  /** Signed-in accounts only: the pass-through billing gate (C-081). */
+  billing?: AccountBilling;
+}
+
+/**
+ * Pass-through billing for a signed-in account (2026-09-29, C-081). Free usage
+ * runs up to the credit limit, min(granted, threshold); past it the account
+ * needs a payment method and pays for usage at cost plus our fee. Grants,
+ * invite codes and paid top-ups raise both numbers by the same amount.
+ */
+export type BillingState = 'free' | 'needs_payment' | 'active';
+
+export interface AccountBilling {
+  state: BillingState;
+  /** Lifetime free usage before a payment method is needed ($5 by default). */
+  threshold_micro: number;
+  /** min(granted_micro, threshold_micro): what this account can spend before paying. */
+  credit_limit_micro: number;
+  /** What a payment provider has charged this account in total. */
+  paid_micro: number;
+  /** "not-wired" until a payment provider (Stripe Checkout) is connected on the router. */
+  provider: 'stripe' | 'not-wired';
 }
 
 /** Error codes a paid endpoint answers with (HTTP 401/402/403/413/429). */
@@ -34,6 +56,8 @@ export type CreditsErrorCode =
   | 'account_credits_exhausted'
   /** A signed-in account hit its daily free usage, or all accounts together hit theirs. */
   | 'account_daily_cap'
+  /** Lifetime free usage reached the account's billing threshold: add a payment method (or use your key). */
+  | 'payment_required'
   | 'rate_limited'
   | 'too_large'
   | 'model_needs_sign_in'

@@ -1,0 +1,137 @@
+name: hub-smoke
+
+# End-to-end check of the hub, friend credits and the $5 billing gate on the
+# live site and router (C-084..C-086). Run on demand and after router deploys.
+# Uses two throwaway users in the Clerk DEVELOPMENT instance: "admin" is made a
+# hub admin for the length of the run through the Worker secret
+# ADMIN_USER_IDS_SMOKE (removed at the end), "friend" gets the credit. No model
+# is called (the 402 check stops before the model). Prints statuses, counts and
+# user ids only; session tokens are masked. Cleans up D1 rows and both users.
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [router-deploy]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hub-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      API: https://api.freshterminal.ai
+      SITE: https://freshterminal.ai
+    steps:
+      - name: Refuse to run against a production Clerk instance
+        run: |
+          case "$CLERK_SECRET_KEY" in sk_test_*) echo "development instance: ok";; *) echo "not a development key; stopping"; exit 1;; esac
+
+      - name: Who could be Justin (Clerk user ids only, no emails)
+        run: |
+          curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" "https://api.clerk.com/v1/users?limit=100&order_by=created_at" \
+            | jq -r '.[] | select((.username // "") | startswith("ftsmoke") | not) | select((.username // "") | startswith("fthub") | not)
+                     | "user \(.id) · created \((.created_at / 1000) | todate) · verified email at between-gigs.com: \([.email_addresses[]? | select(.verification.status == "verified") | .email_address | endswith("@between-gigs.com")] | any)"'
+          echo "users in the instance: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" 'https://api.clerk.com/v1/users/count' | jq -r '.total_count')"
+
+      - name: Signed out (the hub shell is public and empty; everything else answers 401)
+        run: |
+          shell=$(curl -sS -w '\n%{http_code}' "$SITE/hub")
+          echo "GET /hub: HTTP $(echo "$shell" | tail -1), shell only: $(echo "$shell" | grep -c 'id="hub"'), noindex: $(curl -sSI "$SITE/hub" | grep -ci 'x-robots-tag: noindex')"
+          for path in /hub/data/library.json /hub/data/secrets.json /hub/api/session; do
+            echo "GET $path: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "$SITE$path") (want 401)"
+          done
+          for path in /admin/whoami /admin/grants /admin/overview; do
+            echo "GET api $path: HTTP $(curl -sS -o /dev/null -w '%{http_code}' -H 'Origin: https://freshterminal.ai' "$API$path") (want 401)"
+          done
+          echo "POST api /admin/grant: HTTP $(curl -sS -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -X POST "$API/admin/grant" -d '{"user_id":"user_x","amount_usd":5,"note":"x"}') (want 401)"
+          echo "POST api /credits/redeem: HTTP $(curl -sS -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -X POST "$API/credits/redeem" -d '{"code":"FT-AAAA-AAAA"}') (want 401)"
+
+      - name: Admin grant, invite code, $5 gate (throwaway users)
+        id: users
+        run: |
+          clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
+          make_user() {
+            local tag=$1 n=$2
+            curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/users \
+              -d "{\"email_address\":[\"ft-hub-${tag}-${GITHUB_RUN_ID}@freshterminal.ai\"],\"username\":\"fthub${tag}${GITHUB_RUN_ID}\",\"phone_number\":[\"+1201555$(printf '%04d' $(( 100 + (GITHUB_RUN_ID + n) % 100 )))\"],\"skip_password_requirement\":true,\"skip_password_checks\":true}" | jq -r '.id // empty'
+          }
+          admin=$(make_user admin 37); friend=$(make_user friend 71)
+          [ -n "$admin" ] && [ -n "$friend" ] || { echo "user create failed"; exit 1; }
+          echo "admin=$admin" >> "$GITHUB_OUTPUT"; echo "friend=$friend" >> "$GITHUB_OUTPUT"
+          echo "throwaway admin: $admin, friend: $friend"
+          session() { curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/sessions -d "{\"user_id\":\"$1\"}" | jq -r '.id // empty'; }
+          sa=$(session "$admin"); sf=$(session "$friend")
+          # Session tokens live 60 s, so each call mints a fresh one.
+          tok() { local t; t=$(curl -sS "${clerk[@]}" -X POST "https://api.clerk.com/v1/sessions/$1/tokens" -d '{}' | jq -r '.jwt // empty'); echo "::add-mask::$t"; echo "$t"; }
+          call() { local sid=$1 method=$2 url=$3 body=${4:-}; local t; t=$(tok "$sid");
+            if [ -n "$body" ]; then curl -sS -w '\n%{http_code}' -H "Authorization: Bearer $t" -H 'Origin: https://freshterminal.ai' -H 'Content-Type: application/json' -X "$method" "$url" -d "$body";
+            else curl -sS -w '\n%{http_code}' -H "Authorization: Bearer $t" -H 'Origin: https://freshterminal.ai' -X "$method" "$url"; fi; }
+          status() { echo "$1" | tail -1; }
+          body() { echo "$1" | sed '$d'; }
+
+          r=$(call "$sf" GET "$API/admin/whoami"); echo "friend /admin/whoami: HTTP $(status "$r") (want 403)"
+          r=$(call "$sf" GET "$SITE/hub/data/library.json"); echo "friend /hub/data/library.json: HTTP $(status "$r") (want 403)"
+          r=$(call "$sa" GET "$API/admin/whoami"); echo "admin before the smoke id is set: HTTP $(status "$r") (want 403)"
+
+          printf '%s' "$admin" | npx --yes wrangler@4 secret put ADMIN_USER_IDS_SMOKE --name fresh-terminal-router > /dev/null
+          echo "smoke admin id set on the router"
+          for i in $(seq 1 20); do r=$(call "$sa" GET "$API/admin/whoami"); [ "$(status "$r")" = "200" ] && break; sleep 3; done
+          echo "admin /admin/whoami: HTTP $(status "$r") $(body "$r" | jq -c '{admin, via}')"
+          r=$(call "$sa" GET "$SITE/hub/api/session"); echo "admin /hub/api/session: HTTP $(status "$r")"
+          r=$(call "$sa" GET "$SITE/hub/data/library.json"); echo "admin /hub/data/library.json: HTTP $(status "$r") $(body "$r" | jq -c '{prompts: (.prompts|length), canon: (.canon|length), records: (.records|length)}')"
+          r=$(call "$sa" GET "$SITE/hub/data/secrets.json"); echo "admin /hub/data/secrets.json: HTTP $(status "$r") $(body "$r" | jq -c '[.secrets[] | "\(.name)=\(.state)"]')"
+
+          before=$(body "$(call "$sf" GET "$API/credits")" | jq -r '.granted_micro')
+          r=$(call "$sa" POST "$API/admin/grant" "{\"user_id\":\"$friend\",\"amount_usd\":2,\"note\":\"hub-smoke $GITHUB_RUN_ID\"}")
+          echo "POST /admin/grant \$2: HTTP $(status "$r") $(body "$r" | jq -c '{source: .grant.source, amount: .grant.amount_micro, granted_by_admin: (.grant.granted_by == "'"$admin"'"), note: .grant.note}')"
+          after=$(body "$(call "$sf" GET "$API/credits")" | jq -r '.granted_micro')
+          echo "friend granted_micro: $before -> $after (want +2000000)"
+
+          r=$(call "$sa" POST "$API/admin/invites" '{"amount_usd":0.5,"uses":1,"note":"hub-smoke invite"}')
+          code=$(body "$r" | jq -r '.invite.code'); echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "POST /admin/invites: HTTP $(status "$r"), code $code"
+          r=$(call "$sf" POST "$API/credits/redeem" "{\"code\":\"$code\"}"); echo "friend redeem: HTTP $(status "$r") $(body "$r" | jq -c '{amount_micro}')"
+          r=$(call "$sf" POST "$API/credits/redeem" "{\"code\":\"$code\"}"); echo "friend redeem again: HTTP $(status "$r") $(body "$r" | jq -r '.code') (want 409)"
+          r=$(call "$sa" POST "$API/credits/redeem" "{\"code\":\"$code\"}"); echo "admin redeem (1 use): HTTP $(status "$r") $(body "$r" | jq -r '.code') (want 410)"
+
+          r=$(call "$sa" GET "$API/admin/grants?limit=5"); echo "GET /admin/grants: $(body "$r" | jq -c --arg f "$friend" '[.grants[] | select(.clerk_user_id == $f) | {source, amount_micro, note}]')"
+          r=$(call "$sa" GET "$API/admin/ledger?limit=10"); echo "GET /admin/ledger: $(body "$r" | jq -c --arg a "acct_$friend" '[.entries[] | select(.account_id == $a) | {kind, what, price_micro}]')"
+
+          # The billing gate: threshold $0 for the friend, then one paid call. It stops at the meter (402), before any model runs.
+          r=$(call "$sa" POST "$API/admin/account" "{\"user_id\":\"$friend\",\"billing_threshold_usd\":0}"); echo "set friend threshold \$0: HTTP $(status "$r")"
+          r=$(call "$sf" POST "$API/route" '{"boxId":"hub-smoke","text":"hi","chips":[]}')
+          echo "friend POST /route past the threshold: HTTP $(status "$r") $(body "$r" | jq -c '{code, error, state: .credits.billing.state}')"
+          r=$(call "$sf" POST "$API/billing/checkout" '{"amount_usd":10}'); echo "friend POST /billing/checkout: HTTP $(status "$r") $(body "$r" | jq -r '.code') (want 501 not_wired until Stripe keys exist)"
+
+      - name: Clean up (smoke admin id, D1 rows, Clerk users)
+        if: always()
+        env:
+          ADMIN_ID: ${{ steps.users.outputs.admin }}
+          FRIEND_ID: ${{ steps.users.outputs.friend }}
+          CODE: ${{ steps.users.outputs.code }}
+        run: |
+          echo y | npx --yes wrangler@4 secret delete ADMIN_USER_IDS_SMOKE --name fresh-terminal-router > /dev/null 2>&1 && echo "smoke admin id removed" || echo "smoke admin id: nothing to remove"
+          cf=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          db=$(curl -sS "${cf[@]}" "$base?name=fresh-terminal" | jq -r '[.result[]? | select(.name=="fresh-terminal")][0].uuid // empty')
+          q() { curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "$(jq -nc --arg sql "$1" --arg p "$2" '{sql: $sql, params: [$p]}')" | jq -r '.success'; }
+          for uid in "$ADMIN_ID" "$FRIEND_ID"; do
+            [ -n "$uid" ] || continue
+            acct="acct_$uid"
+            echo "$uid: redemptions $(q 'DELETE FROM invite_redemptions WHERE account_id = ?' "$acct"), grants $(q 'DELETE FROM credit_grants WHERE account_id = ?' "$acct"), ledger $(q 'DELETE FROM ledger_entries WHERE account_id = ?' "$acct"), boxes $(q 'DELETE FROM boxes WHERE account_id = ?' "$acct"), spend $(q "DELETE FROM spend_daily WHERE scope = 'acct:' || ?" "$acct"), account $(q 'DELETE FROM accounts WHERE id = ?' "$acct")"
+          done
+          [ -n "$ADMIN_ID" ] && echo "invite codes by the smoke admin: $(q 'DELETE FROM invite_codes WHERE created_by = ?' "$ADMIN_ID")" || true
+          for uid in "$ADMIN_ID" "$FRIEND_ID"; do
+            [ -n "$uid" ] && echo "delete Clerk user $uid: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$uid" | jq -r '.deleted')" || true
+          done
