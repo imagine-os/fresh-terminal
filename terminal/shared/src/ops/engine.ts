@@ -3,6 +3,7 @@ import { mergeDialect } from '../dialect/parse';
 import { defaultSpecText } from '../dialect/types';
 import type { Starter } from '../starters/types';
 import { pathLabel, subtree } from '../ui/nav';
+import { SKIN_PATH_LABELS, SKIN_TARGET_LABELS, skinSchema, type Skin } from '../ui/skin';
 import type { BoxUi, GlossaryTerm, NavItem, NavTarget, Page } from '../ui/types';
 import type { Op } from './schema';
 
@@ -28,7 +29,7 @@ export interface EngineContext {
   boxes: Array<{ id: string; name: string }>;
 }
 
-export type ChangeRegion = 'nav' | 'shell' | 'theme' | 'style' | 'page' | 'canvas' | 'starters' | 'glossary';
+export type ChangeRegion = 'skin' | 'nav' | 'shell' | 'theme' | 'style' | 'page' | 'canvas' | 'starters' | 'glossary';
 
 /** A human-readable record of what changed, with before/after for diffs. */
 export interface Change {
@@ -228,6 +229,40 @@ function applyOne(state: UiState, op: Op, ctx: EngineContext): { state: UiState;
         inverse: [{ op: 'theme.set', theme_id: state.boxUi.theme_id }],
         applied: op,
         change: { region: 'theme', text: `switched the theme to ${op.theme_id ?? 'the default'}`, before: state.boxUi.theme_id, after: op.theme_id },
+      };
+    }
+    case 'skin.apply': {
+      const skins = { ...(state.boxUi.skins ?? {}) };
+      const target = op.skin.target;
+      const before = skins[target] ?? null;
+      // Ops can arrive from anywhere (tools, the refine loop, undo): re-check the CSS every time.
+      const checked = skinSchema.safeParse({ ...op.skin, id: op.skin.id ?? ctx.newId('skin'), created_at: op.skin.created_at || now });
+      if (!checked.success) {
+        throw new OpError(`Skin: ${checked.error.issues[0]?.path.join('.') ?? ''} ${checked.error.issues[0]?.message ?? 'invalid'}`.trim());
+      }
+      const skin: Skin = checked.data;
+      skins[target] = skin;
+      return {
+        state: { ...state, boxUi: { ...state.boxUi, skins, updated_at: now } },
+        inverse: before ? [{ op: 'skin.apply', skin: before }] : [{ op: 'skin.clear', target }],
+        applied: { op: 'skin.apply', skin },
+        change: {
+          region: 'skin',
+          text: `skinned the ${SKIN_TARGET_LABELS[target]} as '${skin.name}' (${SKIN_PATH_LABELS[skin.path]})`,
+          before: before ? before.name : null,
+          after: skin.name,
+        },
+      };
+    }
+    case 'skin.clear': {
+      const skins = { ...(state.boxUi.skins ?? {}) };
+      const before = skins[op.target] ?? null;
+      delete skins[op.target];
+      return {
+        state: { ...state, boxUi: { ...state.boxUi, skins, updated_at: now } },
+        inverse: before ? [{ op: 'skin.apply', skin: before }] : [],
+        applied: op,
+        change: { region: 'skin', text: `removed the skin from the ${SKIN_TARGET_LABELS[op.target]}`, before: before ? before.name : null, after: null },
       };
     }
     case 'style.set': {

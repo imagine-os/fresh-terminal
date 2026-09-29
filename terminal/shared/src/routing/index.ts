@@ -4,7 +4,7 @@ import { ACTION_VERBS } from '../chips/tagger';
  * Route resolution shared by the router (server) and the browser-direct
  * path (bring-your-own-key). The table itself lives in router/rules.json.
  */
-export type TierKind = 'chat' | 'decisions' | 'tagger';
+export type TierKind = 'chat' | 'decisions' | 'tagger' | 'image' | 'vision';
 
 export interface Tier {
   model: string;
@@ -30,9 +30,20 @@ export interface EscalationRule {
   max_pages: number;
 }
 
+/** refine() loop parameters for skins (pass 5). Estimates are per variant, micro-dollars. */
+export interface RefineRule {
+  variants: number;
+  target_score: number;
+  patience: number;
+  max_rounds: number;
+  cap_micro: number;
+  estimate_micro: Record<string, number>;
+}
+
 export interface RouteTable {
   default: string;
   escalation?: EscalationRule;
+  refine?: RefineRule;
   /** Extra model ids a request may pick explicitly. Tier models are always allowed. */
   allowed_models?: string[];
   tiers: Record<string, Tier>;

@@ -153,11 +153,13 @@ Repo decisions base URL: https://github.com/imagine-os/fresh-terminal/blob/main/
 **C-030 · 2026-09-29 01:28 · Skins and materials: instant draft, then Jev picks the route**
 - Decided: asking to skin something gives a quick draft in the same reply, from colors and styles. Jev then picks the best real route: custom code, a generated image, an image search or a free library. Rounds run in the background and only replace what's on screen if Jev scores them better. Each round has a small cost cap and can be undone.
 - Status: proposed (pass 5). The "up to three rounds" in this reply is superseded by C-031's stop rules.
+- 2026-09-29: **built in pass 5.** Draft from the material library or a colour tint, then Jev picks one of five paths: library, procedural CSS, colour tokens, image search (Openverse, licence recorded) or image generation (`openai/gpt-5-image-mini`). Repo: [0018-skins-and-refine.md](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/decisions/0018-skins-and-refine.md).
 
 **C-031 · 2026-09-29 01:28 · Refine loop (best-of-3) is the core loop for anything that can get better**
 - Justin: "make 3 versions, choose best, make 3 upgrades, choose best … Of course set an end to the loop when appropraite."
 - Decided: each round makes three variants from the current best. Jev scores them; the winner becomes the new base. Stops at a target score, after two rounds with no gain, after five rounds, or at a small cost cap. You see three thumbnails with scores per round and can overrule the pick. Applies to skins, Draw layouts, pages and copy.
 - Status: proposed (ships with pass 5).
+- 2026-09-29: **built in pass 5** as `refine()` in `shared/src/refine/loop.ts`, used by skins. Scores come from a vision description plus a Jev score on five rungs. Stop rules as decided, with the 3¢ cap checked before each round from per-variant estimates in `router/rules.json`. Layouts, pages and copy do not use it yet.
 
 ## Money
 

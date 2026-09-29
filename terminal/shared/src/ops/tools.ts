@@ -2,6 +2,7 @@ import { CARD_KINDS } from '../canvas/types';
 import { CHIP_KINDS } from '../chips/types';
 import { MODEL_BLOCK_KINDS, STEP_STATUSES, parseBlocks, type ReplyBlock } from '../reply/blocks';
 import { REVEAL_PATTERNS, STARTER_EXPECTS } from '../starters/types';
+import { SKIN_TARGETS } from '../ui/skin';
 import { BLOCK_KINDS, NAV_TARGET_KINDS } from '../ui/types';
 import { INTERNAL_OPS, opSchema, type Op, type OpName } from './schema';
 
@@ -86,6 +87,29 @@ const OP_TOOLS: Array<{ op: OpName; description: string; parameters: Record<stri
     parameters: obj({ dialect_text: str('One or more dialect statements.') }, ['dialect_text']),
   },
   { op: 'theme.set', description: 'Switch this box to a theme by id (see state.themes), or null for the default.', parameters: obj({ theme_id: { type: ['string', 'null'] } }, ['theme_id']) },
+  {
+    op: 'skin.apply',
+    description:
+      'Give one part of the interface a material made of CSS only (for images, textures from the web or several versions to choose from, answer with a reply suggesting "skin the <part> <material>", which runs the refine loop). target: shell|stage|sidebar|topbar|composer. tokens: --bg, --surface, --fg, --accent, --border as #hex. background: CSS gradients and colours only, no url(). veil: 0-90, how much plain background covers the material so text stays readable.',
+    parameters: obj(
+      {
+        skin: obj(
+          {
+            target: { type: 'string', enum: [...SKIN_TARGETS] },
+            name: str('Short name, e.g. "Brushed brass".'),
+            path: { type: 'string', enum: ['procedural_code', 'css_tokens'] },
+            tokens: { type: 'object', additionalProperties: { type: 'string' } },
+            background: { type: ['string', 'null'] },
+            veil: { type: 'number', minimum: 0, maximum: 90 },
+            description: str('One sentence on the look.'),
+          },
+          ['target', 'name', 'path', 'tokens', 'background', 'veil', 'description'],
+        ),
+      },
+      ['skin'],
+    ),
+  },
+  { op: 'skin.clear', description: 'Remove the skin from one part (target: shell|stage|sidebar|topbar|composer).', parameters: obj({ target: { type: 'string', enum: [...SKIN_TARGETS] } }, ['target']) },
   {
     op: 'style.set',
     description: 'Override one CSS design token for this box, e.g. --accent: #ff7a00. value null restores the theme value. Tokens: --bg, --bg-elevated, --surface, --border, --fg, --fg-muted, --accent, --accent-fg, --radius.',

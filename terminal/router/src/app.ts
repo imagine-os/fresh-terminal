@@ -21,6 +21,7 @@ import {
 } from './realtime';
 import type { ChatMessage } from './openrouter';
 import { tagWithModel } from './tagger';
+import { mountSkinRoutes } from './skins';
 import { costMicroFor, priceMicroFor, realtimePrice, type Usage } from './pricing';
 import { allowedModels, detectIntent, isAllowedModel, loadRules, resolveRoute } from './rules';
 
@@ -280,6 +281,34 @@ export function createApp(options: CreateAppOptions) {
       { role: 'user', content: userMessage(body.text, chips) },
     ];
 
+    if (routing.intent === 'skin') {
+      // Skins run the refine loop from the app (/skin/*); this turn only routes.
+      return streamSSE(c, async (stream) => {
+        await stream.writeSSE({ event: 'meta', data: JSON.stringify({ route, routing, escalated: false }) });
+        await stream.writeSSE({ event: 'skin', data: JSON.stringify({ text: body.text }) });
+        const entry: EntryDraft | null =
+          routing.costMicro > 0
+            ? entryDraftSchema.parse({
+                box_id: body.boxId,
+                owner_identity: '',
+                kind: 'charge',
+                what: 'skin.route',
+                model: routing.model ?? 'typesafe/jev-1.13',
+                units: 1,
+                unit_kind: 'call',
+                cost_micro: routing.costMicro,
+                price_micro: priceMicroFor(routing.costMicro, route.marginBasisPoints),
+                ref: routing.generationId ?? '',
+                created_at: (options.now ?? Date.now)(),
+              })
+            : null;
+        await stream.writeSSE({
+          event: 'done',
+          data: JSON.stringify({ ok: true, usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }, served_model: routing.model ?? '', routing, rounds: [], costSource: 'openrouter', entry, ms: 0 }),
+        });
+      });
+    }
+
     return streamSSE(c, async (stream) => {
       const started = (options.now ?? Date.now)();
       await stream.writeSSE({ event: 'meta', data: JSON.stringify({ route, routing, escalated: startEscalated }) });
@@ -443,6 +472,8 @@ export function createApp(options: CreateAppOptions) {
       jev: { used: jevUsed, cost_micro: jevCost },
     });
   });
+
+  mountSkinRoutes(app, options);
 
   return app;
 }

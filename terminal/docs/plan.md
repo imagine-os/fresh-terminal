@@ -48,6 +48,6 @@ Model note, 2026-09-29: pass 4 onward runs on **Opus 5.5** at Justin's request (
 5. Koi pond v2, the Canon, the wiki (`koi-v2`, `canon`, `wiki`).
 6. Standing: keep the Canon and the wiki current every pass (`canon-current`).
 
-## Pass 5 — skins, materials and the refine loop (queued; starts after pass 4 is live)
+## Pass 5 — skins, materials and the refine loop (shipped 2026-09-29, Opus 5.5)
 
-`skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui`; `pond-ops` (wire `window.pond` to ops); `koi-realism`. See prompt 0013.
+Done: `skin-apply-op` → `draft-material` → `refine-loop` → `refine-ui` (decision 0018, changelog 0005). Still to do: `pond-ops` (wire `window.pond` to ops); `koi-realism`. See prompt 0013.

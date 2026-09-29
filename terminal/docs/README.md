@@ -1,6 +1,6 @@
 # Fresh Terminal wiki — start here
 
-Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (pass 4, Opus 5.5).
+Everything about Fresh Terminal is written down in this folder, for people and for agents alike. Plain sentences, one fact per line, every fact dated. Last updated 2026-09-29 (pass 5, Opus 5.5).
 
 - Read it rendered: https://imagine-os.github.io/fresh-terminal/wiki/
 - Read it on GitHub: https://github.com/imagine-os/fresh-terminal/tree/main/terminal/docs
@@ -17,7 +17,7 @@ Read this first.
 | [canon/README.md](canon/README.md) | The Canon's own index, the vision in one paragraph, and the rules for keeping it true | 2026-09-29 |
 | [canon/vision.md](canon/vision.md) | What we're building and why, in Justin's words | 2026-09-29 |
 | [canon/decisions.md](canon/decisions.md) | Every decision (C-001 to C-057) with date, reason and status, reversals marked, proposals labelled | 2026-09-29 |
-| [canon/prompts.md](canon/prompts.md) | All 52 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
+| [canon/prompts.md](canon/prompts.md) | All 55 of Justin's messages, word for word, with what happened after each | 2026-09-29 |
 | [canon/state.md](canon/state.md) | What is live, what is not wired yet, what is in progress | 2026-09-29 |
 | [canon/open-questions.md](canon/open-questions.md) | What is still undecided or waiting on Justin | 2026-09-29 |
 | [canon/glossary.md](canon/glossary.md) | The house words: box, canvas, chip, dialect, Jev, recipe, wiki and more | 2026-09-29 |
@@ -72,6 +72,7 @@ Read this first.
 | [decisions/0015-router-deploy.md](decisions/0015-router-deploy.md) | Router deploy and the "no router" state | 2026-09-29 |
 | [decisions/0016-self-editing.md](decisions/0016-self-editing.md) | The interface is data, changed only by undoable ops | 2026-09-29 |
 | [decisions/0017-chips-and-structured-replies.md](decisions/0017-chips-and-structured-replies.md) | Chip types you can set, a glossary per box, structured replies | 2026-09-29 |
+| [decisions/0018-skins-and-refine.md](decisions/0018-skins-and-refine.md) | Skins as records and the best-of-3 refine loop with its stop rules | 2026-09-29 |
 
 ## 5. Changelog: what shipped per pass
 
@@ -81,15 +82,17 @@ Read this first.
 | [changelog/0002.md](changelog/0002.md) | Pass 2: two ways to pay, Jev routing, tagger tier, library, koi pond v1 | 2026-09-29 |
 | [changelog/0003.md](changelog/0003.md) | Pass 3: voice with live transcript, router health, router live on Cloudflare | 2026-09-29 |
 | [changelog/0004.md](changelog/0004.md) | Pass 4: the terminal edits itself, chips v2, structured replies, koi pond v2, the Canon, this wiki | 2026-09-29 |
+| [changelog/0005.md](changelog/0005.md) | Pass 5: skins, the material library and the refine loop, with live results | 2026-09-29 |
 
 ## 6. Reference
 
 | Page | What it says | Updated |
 | --- | --- | --- |
-| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API, ops as tools, `window.pond`, SpacetimeDB, CLI, MCP | 2026-09-29 |
+| [reference/surfaces.md](reference/surfaces.md) | Every surface an agent can use: WebMCP, router API (incl. `/skin/*`), ops as tools, `refine()`, `window.pond`, SpacetimeDB, CLI, MCP | 2026-09-29 |
 | [pages/landing.md](pages/landing.md) | Page spec: landing (`/`) | 2026-09-29 |
 | [pages/box.md](pages/box.md) | Page spec: a box (`/box/:id`), with pass 4's menu, edits and chips | 2026-09-29 |
 | [pages/canvas.md](pages/canvas.md) | Page spec: the master canvas (`/canvas`) | 2026-09-28 |
+| [brand/registry.md](brand/registry.md) | Brand marks: one line per logo file with source, terms and date (see `skills/logos-and-icons`) | 2026-09-29 |
 | [qa/responsive-latest.md](qa/responsive-latest.md) | The latest responsive check: 21 pages and widths, 360 to 3840 | 2026-09-29 |
 
 Data files: [canvas/cards.json](canvas/cards.json) (master canvas seed; add with `pnpm -C terminal canvas:add`), [prompts/starters.json](prompts/starters.json) (starter prompts), `qa/*.png` (screenshots), [qa/ledger-sample.json](qa/ledger-sample.json).

@@ -99,7 +99,7 @@ export interface RoutingDecision {
 const INTENT_DESCRIPTIONS: Record<string, string> = {
   chat: 'General conversation, a question, or anything that is not one of the other verbs.',
   edit_ui:
-    "Change this app's own interface: add, nest, rename, move or remove sidebar menu items; change the layout, theme, colours or style; create or edit pages; add starters, canvas cards or glossary terms.",
+    "Change this app's own interface: add, nest, rename, move or remove sidebar menu items; change the layout, theme, colours or style tokens; create or edit pages; add starters, canvas cards or glossary terms. Not materials, textures or skins.",
   make: 'Create or make something new: a page, a box, a document, a plan.',
   build: 'Build or assemble something with several parts, code, or a system.',
   show: 'Display or reveal information that already exists.',
@@ -111,6 +111,7 @@ const INTENT_DESCRIPTIONS: Record<string, string> = {
   schedule: 'Schedule, plan a time, set a reminder or a date.',
   find: 'Search for or locate something.',
   tag: 'Tag, label, or classify the text itself.',
+  skin: 'Restyle a part of the interface with a skin, material, texture or image look: "make the sidebar brass", "use a marble material", "skin the stage like the ocean". Not plain colour or layout changes.',
 };
 
 /** Builds the Choice question over the route table's intents. */

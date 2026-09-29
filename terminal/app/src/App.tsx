@@ -361,6 +361,7 @@ function Product() {
       onCloseFloating={closeFloating}
       onSize={setSize}
       styleOverrides={boxUi?.style}
+      skins={boxUi?.skins}
       slots={{
         topBar: (
           <TopBar

@@ -81,7 +81,8 @@ export class LocalStore implements Store {
       cards: mergeCards(saved.cards),
       navItems: saved.navItems ?? [],
       pages: saved.pages ?? [],
-      boxUis: saved.boxUis ?? [],
+      // Records from before pass 5 have no skins.
+      boxUis: (saved.boxUis ?? []).map((ui) => ({ ...ui, skins: ui.skins ?? {} })),
       glossary: saved.glossary ?? [],
       starters: saved.starters ?? [],
       edits: saved.edits ?? [],
