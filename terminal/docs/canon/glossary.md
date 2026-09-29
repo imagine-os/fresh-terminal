@@ -42,7 +42,7 @@ The house words and what they mean. Written 2026-09-29. When a meaning changed, 
 | **Company OS** | The multi-tenant backend Anu built (`Playset-LLC/company-os`). | 2026-09-28 |
 | **Playset OS** | Justin's name for the whole multi-tenant platform being rebuilt. | 2026-09-28 |
 | **Canon** | This record: what is true now, and how it got there. Justin's "creator memory". | 2026-09-29 |
-| **Integration ladder** | The order Fresh Terminal tries to reach another service: API, then CLI, then MCP, then WebMCP, then a browser. Jev picks the rung. | 2026-09-29 (proposed, C-053) |
-| **Recipe** | Saved know-how for a task: a first run's trace turned into steps that replay, checked by Jev, until it runs as plain code with no model calls. | 2026-09-29 (proposed, C-054) |
-| **Shape / binding** | The two halves of a recipe. The shape (steps and calls, no values) can be shared; the binding (tenant, keys, ids, personal data) stays private. | 2026-09-29 (proposed, C-054) |
-| **Wiki** | The docs folder `terminal/docs`, read by people and agents: one start-here index, `llms.txt`, and a rendered copy at `/wiki/` on the site. Updated every pass. | 2026-09-29 (C-055) |
+| **Integration ladder** | The order Fresh Terminal tries to reach another service: API, then CLI, then MCP, then WebMCP, then a browser. Jev picks the rung. | 2026-09-29 (proposed, C-055) |
+| **Recipe** | Saved know-how for a task: a first run's trace turned into steps that replay, checked by Jev, until it runs as plain code with no model calls. | 2026-09-29 (proposed, C-056) |
+| **Shape / binding** | The two halves of a recipe. The shape (steps and calls, no values) can be shared; the binding (tenant, keys, ids, personal data) stays private. | 2026-09-29 (proposed, C-056) |
+| **Wiki** | The docs folder `terminal/docs`, read by people and agents: one start-here index, `llms.txt`, and a rendered copy at `/wiki/` on the site. Updated every pass. | 2026-09-29 (C-057) |

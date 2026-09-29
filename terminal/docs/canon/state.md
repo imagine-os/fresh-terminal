@@ -80,8 +80,8 @@ As of 2026-09-29:
 | --- | --- |
 | **Pass 4: self-editing, chips v2, structured replies, koi pond v2, this Canon** | Pushed to `main` 2026-09-29 about 02:10 UTC by Opus 5.5 in one commit. Details: changelog [0004](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/changelog/0004.md), decisions 0016 and 0017. Live check on the site follows the push. |
 | **freshterminal.ai, Cloudflare and Clerk** | Decided 2026-09-29 (C-045 to C-048). Waiting on Justin: add token scopes (Zone DNS Edit, Zone Read, Account D1 Edit, all zones) and create the Clerk app with its two key secrets. Then: app on a Worker at freshterminal.ai, router at api.freshterminal.ai, sign-in, account data in D1, a Connections page. |
-| **SpacetimeDB publish** | Proposed 2026-09-29 02:07 UTC (C-050). Waiting on Justin for the `SPACETIMEDB_TOKEN` secret. |
-| **Proposals waiting on Justin** | Media in R2 (C-051), streamed browsers (C-052), integration ladder (C-053), recipes (C-054). Not started. |
+| **SpacetimeDB publish** | Proposed 2026-09-29 02:07 UTC (C-052). Waiting on Justin for the `SPACETIMEDB_TOKEN` secret. |
+| **Proposals waiting on Justin** | Media in R2 (C-053), streamed browsers (C-054), integration ladder (C-055), recipes (C-056). Not started. |
 | **Multiplayer rules** | Decided 2026-09-29 (C-049): no Liveblocks or Colyseus; our own house rules on SpacetimeDB. Not started. |
 | **Pass 5: skins and the refine loop** | Next after pass 4. Instant draft, Jev picks the route, best-of-3 rounds with stop rules. |
 | **Fresh Terminal company in between-gigs** | Saved to GitHub (b191350). Waiting for a Sites sync to show on between-gigs.com. |

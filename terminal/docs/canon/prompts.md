@@ -402,21 +402,21 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 >
 > What about things like mouse movement on screen? Keep in mind we will soon want webcam feeds to follow the mouse pointer.  same with ai characters with realtime movement, which i think meta muse figured out how to do the efficeint way. we can do even better
 
-**What happened:** Answered together with 48 and 49 in one reply: SpacetimeDB skills pack and a one-token hand-off, integrations over MCP and a webhook, which subscription plans can be used, live pointer, webcam and characters. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposals C-050, C-053.
+**What happened:** Answered together with 48 and 49 in one reply: SpacetimeDB skills pack and a one-token hand-off, integrations over MCP and a webhook, which subscription plans can be used, live pointer, webcam and characters. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposals C-052, C-055.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647341270939?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647341.270939
 
 ## 48. Mon Sep 28, 9:03 PM CDT · 2026-09-29 02:03:16 UTC
 
 > where is all my media being stored? and does that stay realtime as well?
 
-**What happened:** Nothing is stored server-side today. Proposal: bytes in Cloudflare R2 under freshterminal.ai, one row per file in SpacetimeDB so the list stays live. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-051.
+**What happened:** Nothing is stored server-side today. Proposal: bytes in Cloudflare R2 under freshterminal.ai, one row per file in SpacetimeDB so the list stays live. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-053.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647396138619?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647396.138619
 
 ## 49. Mon Sep 28, 9:05 PM CDT · 2026-09-29 02:05:06 UTC
 
 > also, im sick and tired of my browser issue. I want logged in browsers built into my window management system. I dont know if we need a cloud computer like fly.io or linux deskotp running chrome with ability to stream chrome browsers, or browser base or what. the one thing i would like to avoid though is lag. But i'm ok if it means i can finally have browsers in our system, withou companies like google not letting us see the page, for instance how too many things block iframes grrr
 
-**What happened:** Proposal: streamed browsers instead of iframes; Hyperbeam for windows people use, Browserbase or our own Fly.io machine for agents. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-052.
+**What happened:** Proposal: streamed browsers instead of iframes; Hyperbeam for windows people use, Browserbase or our own Fly.io machine for agents. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647671074559?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-054.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647506492349?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647506.492349
 
 ## 50. Mon Sep 28, 9:08 PM CDT · 2026-09-29 02:08:30 UTC
@@ -425,19 +425,19 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 >
 > PS: consider how WebMCP or any other api, cli, mcp, skills, plugins, or whatever protocal is necessary for the best integration abilities and ai agent abilities for our freshterminals
 
-**What happened:** Correction: Jev chooses, a runtime clicks. Keys move by API, never by screen. The integration ladder API → CLI → MCP → WebMCP → browser, and what Fresh Terminal exposes. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647779666479?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-053.
+**What happened:** Correction: Jev chooses, a runtime clicks. Keys move by API, never by screen. The integration ladder API → CLI → MCP → WebMCP → browser, and what Fresh Terminal exposes. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647779666479?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-055.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647710134419?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647710.134419
 
 ## 51. Mon Sep 28, 9:09 PM CDT · 2026-09-29 02:09:38 UTC
 
 > Our ability to train fresh terminal on shareable vs non shareable abilities and featuers is key. Because in theory, every time it figures out how to do things it will then figure out how to do those thigns faster and faster until it reaches the most efficient path. Which means every time something runs agian, in theory it gets cheaper better faster, etc.
 
-**What happened:** Recipes: a trace becomes a recipe, then a Jev-checked replay, then plain code; shareable shape and private binding. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647843929359?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-054.
+**What happened:** Recipes: a trace becomes a recipe, then a Jev-checked replay, then plain code; shareable shape and private binding. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647843929359?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Proposal C-056.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647778785799?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647778.785799
 
 ## 52. Mon Sep 28, 9:11 PM CDT · 2026-09-29 02:11:21 UTC
 
 > are you keeping and updating your documentation wiki? please do as a rule. very human and ai readable
 
-**What happened:** Made a rule: the Canon and the docs wiki are updated in the same commit as every pass. The wiki got one start-here index (`terminal/docs/README.md`), an `llms.txt` for AI readers, and a rendered copy on the site. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647944459239?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Decision C-055; repo prompt 0015.
+**What happened:** Made a rule: the Canon and the docs wiki are updated in the same commit as every pass. The wiki got one start-here index (`terminal/docs/README.md`), an `llms.txt` for AI readers, and a rendered copy on the site. [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647944459239?thread_ts=1790634517.611669&cid=C0C2YAS5TL5). Decision C-057; repo prompt 0015.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790647881.668439

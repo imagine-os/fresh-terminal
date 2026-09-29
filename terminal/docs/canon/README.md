@@ -22,7 +22,7 @@ Justin wants a plain screen with a blinking cursor that anyone can walk up to an
 
 ## Rules for keeping it true
 
-Justin, 2026-09-29 02:11 UTC: "are you keeping and updating your documentation wiki? please do as a rule. very human and ai readable" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). Decision C-055.
+Justin, 2026-09-29 02:11 UTC: "are you keeping and updating your documentation wiki? please do as a rule. very human and ai readable" ([message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). Decision C-057.
 
 - The Canon and the docs wiki are updated in the same commit as every pass, by whoever ships that pass (plan task `canon-current`).
 - Plain dated lines, one fact per line, readable by people and agents alike. No separate AI copy; `terminal/docs/llms.txt` is only an index.
