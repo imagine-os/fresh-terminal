@@ -53,12 +53,13 @@ describe('parseDialect', () => {
   it('parses the default spec without issues', () => {
     const { spec, issues } = parseDialect(defaultSpecText);
     expect(issues).toEqual([]);
+    // Hidden everywhere since 2026-09-29 (C-074): the boxes list opens from the top-left icon.
     expect(spec.regions.leftSidebar.behaviour).toEqual({
       phone: 'hidden',
       tablet: 'hidden',
-      laptop: 'full',
-      desk: 'full',
-      wall: 'full',
+      laptop: 'hidden',
+      desk: 'hidden',
+      wall: 'hidden',
     });
     expect(spec.regions.topBar.fit).toBe('pinsTop');
     expect(spec.regions.bottomBar.fit).toBe('pinsBottom');
@@ -83,7 +84,7 @@ describe('mergeDialect', () => {
   it('changes only the mentioned size: "rail on laptop" leaves desk and phone alone', () => {
     const { spec, issues } = mergeDialect(defaultSpecText, 'Left sidebar: rail on laptop.');
     expect(issues).toEqual([]);
-    expect(spec.regions.leftSidebar.behaviour).toEqual({ phone: 'hidden', tablet: 'hidden', laptop: 'rail', desk: 'full', wall: 'full' });
+    expect(spec.regions.leftSidebar.behaviour).toEqual({ phone: 'hidden', tablet: 'hidden', laptop: 'rail', desk: 'hidden', wall: 'hidden' });
     expect(spec.regions.topBar).toEqual(parseDialect(defaultSpecText).spec.regions.topBar);
   });
 

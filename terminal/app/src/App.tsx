@@ -261,9 +261,9 @@ function Product() {
   const openBox = useCallback(
     (id: string) => {
       navigate({ name: 'box', id });
-      set('leftOpen', false);
+      if (!prefs.sidebarStay) set('leftOpen', false);
     },
-    [navigate, set],
+    [navigate, set, prefs.sidebarStay],
   );
 
   const toggleSidebar = useCallback(() => set('leftOpen', !prefs.leftOpen), [prefs.leftOpen, set]);
@@ -366,11 +366,14 @@ function Product() {
   // Shortcuts: single key outside the composer, Ctrl/Cmd+key inside it.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.altKey) {
-        return;
-      }
       const inEditor = isEditable(event.target);
       const modifier = event.ctrlKey || event.metaKey;
+      // Alt/Option + key is the same shortcut anywhere, including inside the prompt box,
+      // where a bare letter must type. Alt alone with no letter is left alone.
+      const viaAlt = event.altKey && !modifier && /^[a-z[\]]$/i.test(event.key);
+      if (event.altKey && !viaAlt) {
+        return;
+      }
       // Ctrl/Cmd+Z undoes the last interface edit (outside fields, or in an empty composer).
       if (modifier && event.key.toLowerCase() === 'z') {
         const target = event.target;
@@ -382,10 +385,11 @@ function Product() {
         }
         return;
       }
-      if (inEditor && !modifier) {
+      if (inEditor && !modifier && !viaAlt) {
         if (event.key === 'Escape') {
           update({ leftOpen: false });
           setRightOpen(false);
+          (event.target as HTMLElement).blur();
         }
         return;
       }
@@ -472,6 +476,10 @@ function Product() {
           modelTagger: prefs.modelTagger,
           voiceProvider: prefs.voiceProvider,
           voiceMode: prefs.voiceMode,
+          showStarters: prefs.showStarters,
+          showHints: prefs.showHints,
+          toggleStarters: () => set('showStarters', !prefs.showStarters),
+          toggleHints: () => set('showHints', !prefs.showHints),
           openSettings: () => setSettingsOpen(true),
           realtimePrice: (provider) => realtimeProviders?.find((info) => info.id === provider)?.price ?? null,
         }}
@@ -540,6 +548,13 @@ function Product() {
             onNavigate={navigateTo}
             onRemove={removeBox}
             navOverride={replayView?.state.nav ?? null}
+            showMenu={prefs.sidebarMenu}
+            settings={{
+              menu: prefs.sidebarMenu,
+              stay: prefs.sidebarStay,
+              onMenu: (value) => set('sidebarMenu', value),
+              onStay: (value) => set('sidebarStay', value),
+            }}
           />
         ),
         rightSidebar: prefs.devMode ? (

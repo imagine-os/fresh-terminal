@@ -592,3 +592,14 @@ Justin's session: Rule C-070: estimates carry money, time and certainty. The bra
 
 **What happened:** Rule C-073: Done / Try it / Next, images posted in the thread. Applied from the reply onward.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652336159989?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652336.159989
+
+## 70. Mon Sep 28, 10:30 PM CDT · 2026-09-29 03:30:25 UTC
+
+> the shortcuts may not work right because we're typing in the prompt box, and essentially liv there. We call it free useage. instead of our key. the drop down is ugly.  the left sidebar can be hidden by defalt, maybe just a little icon top left for it to open. and then it has its own settings dropdown.
+>
+> Make the starter screen even cleaner. I'm not even sure the starter prompts are needed right now. but we should have a nice way to turn them on, maybe just a setting in the prompt box.
+>
+> Right now the goal is to get the starting point super super clean
+
+**What happened:** C-074: Alt/Option shortcuts while typing, "free usage", sidebar hidden with a top-left icon and its own settings, starters and hints behind switches in the prompt box, a calmer tray.
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790652625835259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790652625.835259

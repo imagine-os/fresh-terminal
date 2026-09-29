@@ -23,6 +23,12 @@ export interface Prefs {
   firstRunSeen: boolean;
   /** Top bar hidden by the tray switch (H brings it back). */
   topBarHidden: boolean;
+  /** Starter prompts under the box and the hints on the start screen (off by default, C-074). */
+  showStarters: boolean;
+  showHints: boolean;
+  /** Sidebar settings: show the box menu there; keep it open when a box is picked. */
+  sidebarMenu: boolean;
+  sidebarStay: boolean;
   /** cached for the pre-paint script in index.html */
   bg?: string;
   fg?: string;
@@ -40,6 +46,10 @@ const defaults: Prefs = {
   pinnedTools: [],
   firstRunSeen: false,
   topBarHidden: false,
+  showStarters: false,
+  showHints: false,
+  sidebarMenu: false,
+  sidebarStay: false,
 };
 
 interface PrefsValue {

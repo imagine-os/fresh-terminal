@@ -4,6 +4,7 @@ import type { Theme } from '@shared/themes';
 import type { NavItem, NavTarget } from '@shared/ui';
 import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
+import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
 import { IconBox, IconDev, IconDownload, IconKey, IconLang, IconLibrary, IconPlus, IconReplay, IconSidebar, IconTheme, IconTopBar } from '../ui/icons';
 import { AccountButton } from './AccountButton';
@@ -62,6 +63,11 @@ export function TopBar(props: Props) {
   ];
   return (
     <>
+      <Tooltip label={t('topbar.boxes')} shortcut={key('sidebar.toggle')} align="start">
+        <Button icon variant="ghost" className="boxes-toggle" aria-label={t('topbar.boxes')} onClick={props.onToggleSidebar} data-testid="boxes-toggle">
+          <IconSidebar />
+        </Button>
+      </Tooltip>
       <Tooltip label={PRODUCT_NAME} align="start">
         <a
           className="brand"
