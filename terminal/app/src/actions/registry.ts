@@ -39,7 +39,9 @@ export const SHELL_ACTIONS: ActionDecl[] = [
   { id: 'voice.mute', intent: 'mute or unmute the assistant voice', permission: 'anyone' },
   { id: 'pay.mode', intent: 'use our key or bring your own key', permission: 'anyone' },
   { id: 'pay.key.delete', intent: 'delete my key from this browser', permission: 'anyone' },
-  { id: 'auth.save', intent: 'save or sign in', permission: 'anyone', notWired: true },
+  { id: 'auth.signIn', intent: 'sign in to keep my boxes on every device', permission: 'anyone' },
+  { id: 'auth.signOut', intent: 'sign out', permission: 'anyone' },
+  { id: 'sync.now', intent: 'sync my boxes now', permission: 'anyone' },
 ];
 
 export const LANDING_ACTIONS: ActionDecl[] = [

@@ -6,6 +6,7 @@ import { applyOps as applyOpsPure, summarize, type EngineContext, type UiState }
 import type { Op } from '@shared/ops';
 import type { Reply } from '@shared/reply';
 import type { Starter } from '@shared/starters';
+import type { SyncBox } from '@shared/sync';
 import { SEED_THEMES } from '@shared/themes';
 import { SEED_NAV, defaultBoxUi, type BoxUi, type GlossaryTerm, type NavItem, type Page } from '@shared/ui';
 import { listActions } from '../actions/registry';
@@ -384,5 +385,55 @@ export class LocalStore implements Store {
       glossary: state.glossary.slice(0, 300),
       effectiveThemeId,
     };
+  }
+
+  syncBoxes(): SyncBox[] {
+    return this.snapshot.boxes.map((box) => {
+      const state = this.uiState(box.id);
+      return {
+        id: box.id,
+        name: box.name,
+        state_json: JSON.stringify({ nav: state.nav, pages: state.pages, boxUi: state.boxUi, glossary: state.glossary }),
+        created_at: box.created_at,
+        updated_at: box.updated_at,
+        deleted_at: null,
+      };
+    });
+  }
+
+  importSyncBoxes(rows: SyncBox[]): number {
+    let applied = 0;
+    let next = this.snapshot;
+    for (const row of rows) {
+      if (row.deleted_at !== null) {
+        continue;
+      }
+      let state: { nav?: unknown; pages?: unknown; boxUi?: unknown; glossary?: unknown };
+      try {
+        state = JSON.parse(row.state_json) as typeof state;
+      } catch {
+        continue;
+      }
+      const nav = Array.isArray(state.nav) ? (state.nav as NavItem[]).map((item) => ({ ...item, box_id: row.id })) : [];
+      const pages = Array.isArray(state.pages) ? (state.pages as Page[]).map((page) => ({ ...page, box_id: row.id })) : [];
+      const glossary = Array.isArray(state.glossary) ? (state.glossary as GlossaryTerm[]).map((term) => ({ ...term, box_id: row.id })) : [];
+      const boxUi: BoxUi =
+        state.boxUi && typeof state.boxUi === 'object' ? { ...(state.boxUi as BoxUi), box_id: row.id, seeded: true } : { ...defaultBoxUi(row.id, row.updated_at), seeded: true };
+      const box: Box = { id: row.id, owner_identity: this.identity, name: row.name, created_at: row.created_at, updated_at: row.updated_at };
+      const exists = next.boxes.some((candidate) => candidate.id === row.id);
+      next = {
+        ...next,
+        boxes: exists ? next.boxes.map((candidate) => (candidate.id === row.id ? box : candidate)) : [...next.boxes, box],
+        navItems: [...next.navItems.filter((item) => item.box_id !== row.id), ...nav],
+        pages: [...next.pages.filter((page) => page.box_id !== row.id), ...pages],
+        glossary: [...next.glossary.filter((term) => term.box_id !== row.id), ...glossary],
+        boxUis: [...next.boxUis.filter((ui) => ui.box_id !== row.id), boxUi],
+      };
+      applied += 1;
+    }
+    if (applied > 0) {
+      this.commit({ boxes: next.boxes, navItems: next.navItems, pages: next.pages, glossary: next.glossary, boxUis: next.boxUis });
+    }
+    return applied;
   }
 }

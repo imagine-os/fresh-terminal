@@ -1,6 +1,6 @@
 # State
 
-What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-29 at about 01:40 UTC (2026-09-28 8:40 PM CDT), updated about 02:10 UTC with the pass 4 push. Update this page when a pass ships; older snapshots are replaced here and kept in the repo changelog.
+What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-29 at about 01:40 UTC (2026-09-28 8:40 PM CDT), updated about 02:10 UTC with the pass 4 push and about 02:55 UTC with the domain, sign-in and D1 pass. Update this page when a pass ships; older snapshots are replaced here and kept in the repo changelog.
 
 ## Live now
 
@@ -18,6 +18,9 @@ What is live, what isn't wired, and what's in progress. Snapshot taken 2026-09-2
 | Audit and rebuild recommendation | https://imagine-os.github.io/fresh-terminal/pages/audit.html | 2026-09-28 |
 | Old themes page | `/pages/themes.html`, now redirects to the library | 2026-09-29 |
 | Router | https://fresh-terminal-router.jmassion.workers.dev (Cloudflare Worker) | 2026-09-29 01:13 UTC |
+| freshterminal.ai (app Worker, www → apex) | https://freshterminal.ai — see "freshterminal.ai, Cloudflare and Clerk" below for the live check | 2026-09-29, infra pass (C-058) |
+| api.freshterminal.ai (same router, custom domain) | https://api.freshterminal.ai/health | 2026-09-29, infra pass (C-058) |
+| Sign in (Clerk development instance) and cloud sync (D1) | Header **Sign in** button on freshterminal.ai and on Pages | 2026-09-29, infra pass (C-059, C-060) |
 | Repo | https://github.com/imagine-os/fresh-terminal, `main` (pass 4 on 2026-09-29; earlier head 1d77c83) | 2026-09-29 |
 | Docs wiki | https://imagine-os.github.io/fresh-terminal/wiki/ (source: `terminal/docs/README.md`; AI index: `llms.txt`) | 2026-09-29, pass 4 |
 
@@ -57,7 +60,7 @@ Superseded copies: the audit and themes were first published as Claude artifacts
 As of 2026-09-29:
 
 - SpacetimeDB live store. The module is written and type-checked, not published. The app uses browser storage instead, so boxes don't sync between devices or people. 2026-09-29: account data goes to Cloudflare D1 first (C-047).
-- Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.
+- ~~Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.~~ Superseded 2026-09-29 (C-059): sign-in is wired on the Clerk development instance. Still not wired: the Clerk production instance (steps in C-059), Clerk screens in Spanish, transcript lines in sync, realtime sync between devices.
 - Stripe: taking payment for the balance.
 - Shared chain beyond the browser, and the server re-checking hashes.
 - Jev permission checks: they exist but aren't enforced (no signed-in owners on the server yet).
@@ -70,7 +73,7 @@ As of 2026-09-29:
 - Realtime voice pricing from real usage (estimates for now).
 - Voice controller over the actions list; TV remote and gamepad navigation.
 - Koi pond as an in-app theme (it's a separate page for now); `window.pond` is not wired to ops yet (pass 5).
-- freshterminal.ai and api.freshterminal.ai (bought 2026-09-29, C-045; not pointed at anything yet).
+- ~~freshterminal.ai and api.freshterminal.ai (bought 2026-09-29, C-045; not pointed at anything yet).~~ Superseded 2026-09-29 (C-058): both are deployed as Worker custom domains.
 - Canvas grouping, long-paper scroll cards, image upload.
 - Company OS connection. Import of old repos and data.
 
@@ -79,7 +82,7 @@ As of 2026-09-29:
 | Work | Status (2026-09-29 01:40 UTC) |
 | --- | --- |
 | **Pass 4: self-editing, chips v2, structured replies, koi pond v2, this Canon** | Pushed to `main` 2026-09-29 about 02:10 UTC by Opus 5.5 in one commit. Details: changelog [0004](https://github.com/imagine-os/fresh-terminal/blob/main/terminal/docs/changelog/0004.md), decisions 0016 and 0017. Live check on the site follows the push. |
-| **freshterminal.ai, Cloudflare and Clerk** | Decided 2026-09-29 (C-045 to C-048). Waiting on Justin: add token scopes (Zone DNS Edit, Zone Read, Account D1 Edit, all zones) and create the Clerk app with its two key secrets. Then: app on a Worker at freshterminal.ai, router at api.freshterminal.ai, sign-in, account data in D1, a Connections page. |
+| **freshterminal.ai, Cloudflare and Clerk** | Decided 2026-09-29 (C-045 to C-048). ~~Waiting on Justin: add token scopes and create the Clerk app.~~ Done by Justin about 02:28 UTC; verified 02:31 UTC (workflow run 36512972684). Built 2026-09-29 by Opus 5.5 (C-058 to C-060, decision 0019, changelog 0006): app Worker on freshterminal.ai (www → apex), router on api.freshterminal.ai, Clerk sign-in (development instance), accounts, boxes and ledger mirror in D1. Live check results: changelog 0006. Still open: Clerk production instance (Justin, steps in C-059); a Connections page. |
 | **SpacetimeDB publish** | Proposed 2026-09-29 02:07 UTC (C-052). Waiting on Justin for the `SPACETIMEDB_TOKEN` secret. |
 | **Proposals waiting on Justin** | Media in R2 (C-053), streamed browsers (C-054), integration ladder (C-055), recipes (C-056). Not started. |
 | **Multiplayer rules** | Decided 2026-09-29 (C-049): no Liveblocks or Colyseus; our own house rules on SpacetimeDB. Not started. |

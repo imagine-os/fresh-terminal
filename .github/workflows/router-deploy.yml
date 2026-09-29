@@ -1,9 +1,13 @@
 name: router-deploy
 
-# Deploys terminal/router to a Cloudflare Worker on every push to main, but only
-# when the repository secret CLOUDFLARE_API_TOKEN exists. Secrets never touch the
-# repo: they are read from GitHub Actions secrets and pushed to the Worker with
-# `wrangler secret put` over stdin.
+# Deploys terminal/router to the Cloudflare Worker "fresh-terminal-router" on
+# every push to main that touches it, and on demand. Only runs when the
+# repository secret CLOUDFLARE_API_TOKEN exists. Secrets never touch the repo:
+# they are read from GitHub Actions secrets and pushed to the Worker with
+# `wrangler secret put` over stdin. Logs show names and booleans only.
+#
+# Order: D1 database (create if missing) -> migrations -> deploy (custom domain
+# api.freshterminal.ai + workers.dev) -> Worker secrets -> smoke check.
 
 on:
   push:
@@ -11,8 +15,14 @@ on:
     paths:
       - 'terminal/router/**'
       - 'terminal/shared/**'
+      - 'terminal/package.json'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/router-deploy.yml'
   workflow_dispatch:
+
+concurrency:
+  group: router-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -20,6 +30,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      D1_NAME: fresh-terminal
     steps:
       - id: gate
         name: Check for a Cloudflare token
@@ -44,10 +55,41 @@ jobs:
       - if: steps.gate.outputs.ok == 'true'
         name: Typecheck and test the router
         run: pnpm -C terminal exec tsc -p router/tsconfig.json --noEmit && pnpm -C terminal exec vitest run router
+
       - if: steps.gate.outputs.ok == 'true'
-        name: Deploy the Worker
+        name: Make sure the D1 database exists (idempotent)
+        id: d1
+        run: |
+          base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+          id=$(curl -sS "${auth[@]}" "$base?name=$D1_NAME" | jq -r --arg n "$D1_NAME" '[.result[]? | select(.name == $n)][0].uuid // empty')
+          if [ -z "$id" ]; then
+            echo "D1 $D1_NAME: not found, creating"
+            created=$(curl -sS "${auth[@]}" -H 'Content-Type: application/json' -X POST "$base" -d "{\"name\":\"$D1_NAME\"}")
+            if [ "$(echo "$created" | jq -r '.success')" != "true" ]; then
+              echo "D1 create FAILED: $(echo "$created" | jq -c '[.errors[]?.message]')"
+              echo "The token needs Account > D1 > Edit."
+              exit 1
+            fi
+            id=$(echo "$created" | jq -r '.result.uuid')
+            echo "D1 $D1_NAME: created"
+          else
+            echo "D1 $D1_NAME: exists"
+          fi
+          echo "D1 id: $id"
+          sed -i "s/D1_DATABASE_ID/$id/" terminal/router/wrangler.toml
+          grep -q "$id" terminal/router/wrangler.toml
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Apply D1 migrations (remote)
+        working-directory: terminal/router
+        run: pnpm dlx wrangler@4 d1 migrations apply "$D1_NAME" --remote
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Deploy the Worker (workers.dev + api.freshterminal.ai)
         working-directory: terminal/router
         run: pnpm dlx wrangler@4 deploy
+
       - if: steps.gate.outputs.ok == 'true'
         name: Push Worker secrets from repository secrets
         working-directory: terminal/router
@@ -55,13 +97,38 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: |
-          for name in OPENROUTER_API_KEY OPENAI_API_KEY GOOGLE_API_KEY; do
+          for name in OPENROUTER_API_KEY OPENAI_API_KEY GOOGLE_API_KEY CLERK_SECRET_KEY; do
             value="${!name}"
             if [ -n "$value" ]; then
-              printf '%s' "$value" | pnpm dlx wrangler@4 secret put "$name"
+              printf '%s' "$value" | pnpm dlx wrangler@4 secret put "$name" > /dev/null
               echo "set $name"
             else
               echo "skip $name (repository secret not set)"
             fi
+          done
+          # Networkless session checks: the instance's public signing key as PEM, from the Clerk JWKS.
+          if [ -n "$CLERK_SECRET_KEY" ]; then
+            curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" https://api.clerk.com/v1/jwks > "$RUNNER_TEMP/jwks.json"
+            if node -e "const {createPublicKey}=require('node:crypto');const j=require(process.argv[1]);if(!j.keys||!j.keys[0])process.exit(2);process.stdout.write(createPublicKey({key:j.keys[0],format:'jwk'}).export({type:'spki',format:'pem'}))" "$RUNNER_TEMP/jwks.json" > "$RUNNER_TEMP/clerk.pem"; then
+              pnpm dlx wrangler@4 secret put CLERK_JWT_KEY < "$RUNNER_TEMP/clerk.pem" > /dev/null
+              echo "set CLERK_JWT_KEY (PEM from Clerk JWKS)"
+            else
+              echo "skip CLERK_JWT_KEY (could not read the Clerk JWKS; the router falls back to CLERK_SECRET_KEY)"
+            fi
+            rm -f "$RUNNER_TEMP/jwks.json" "$RUNNER_TEMP/clerk.pem"
+          fi
+
+      - if: steps.gate.outputs.ok == 'true'
+        name: Smoke check (/health on both hosts)
+        run: |
+          for url in https://fresh-terminal-router.jmassion.workers.dev/health https://api.freshterminal.ai/health; do
+            ok=""
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              body=$(curl -sS --max-time 10 "$url" 2>/dev/null || true)
+              if echo "$body" | jq -e '.ok == true' > /dev/null 2>&1; then ok=1; break; fi
+              sleep $((i * 6))
+            done
+            if [ -n "$ok" ]; then echo "$url: $(echo "$body" | jq -c '{ok, keyConfigured, auth, store}')"; else echo "$url: not answering yet (a new custom domain can take a few minutes)"; fi
           done

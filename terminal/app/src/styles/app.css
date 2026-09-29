@@ -267,6 +267,58 @@ textarea {
   border-style: dashed;
 }
 
+/* ---------- account (Clerk sign-in, sync dot) ---------- */
+
+/* Far right on wide screens; on phones and tablets it sits on the brand row. */
+.topbar-account {
+  display: inline-flex;
+  align-items: center;
+  order: 10;
+}
+@media (max-width: 48em) {
+  .topbar-account {
+    order: 0;
+    margin-left: auto;
+  }
+}
+
+.btn.account-signin {
+  border-color: var(--border);
+}
+.account-signed-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: var(--target);
+}
+.account-signed-in .cl-userButtonTrigger,
+.account-signed-in .cl-userButtonBox {
+  min-width: var(--target);
+  min-height: var(--target);
+  justify-content: center;
+}
+.sync-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--fg-muted);
+}
+.sync-dot-button[data-sync='ok'] .sync-dot {
+  background: var(--accent);
+}
+.sync-dot-button[data-sync='error'] .sync-dot {
+  background: var(--danger);
+}
+.sync-dot-button[data-sync='syncing'] .sync-dot {
+  background: var(--accent);
+  opacity: 0.5;
+}
+@media (max-width: 30em) {
+  .account-label {
+    font-size: 0.9em;
+  }
+}
+
 .kbd {
   font-family: var(--font-mono);
   font-size: 0.8em;

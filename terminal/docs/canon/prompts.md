@@ -3,7 +3,7 @@
 Every message Justin Massion sent in this conversation, in order, word for word. Written 2026-09-29.
 
 - Source: the Slack thread in #developer that starts at ts 1790634517.611669, plus two of Justin's top-level channel posts from the same half hour (marked "channel post").
-- Count: 55 messages (53 in the thread, 2 in the channel); 45 to 52 were added 2026-09-29 when the Canon went into the repo, 53 to 55 with pass 5. The thread held 98 messages in total when read on 2026-09-29, not 150+.
+- Count: 56 messages (54 in the thread, 2 in the channel); 45 to 52 were added 2026-09-29 when the Canon went into the repo, 53 to 55 with pass 5, 56 with the domain, sign-in and D1 pass. The thread held 98 messages in total when read on 2026-09-29, not 150+.
 - Times: UTC, and Justin's local time as CDT (UTC−5). CDT is an assumption taken from the repo's prompt log ("18:00 CDT") and the -0500 offset on his between-gigs commits.
 - Text is verbatim, typos kept. Only two things changed: Slack link markup is shown as the visible text, and the pasted API key is removed.
 - Screenshots are shown as [screenshot: …]. The images were not opened; each description comes from Claude's reply to it.
@@ -479,3 +479,10 @@ Every message Justin Massion sent in this conversation, in order, word for word.
 
 **What happened:** A setup prompt for Justin's browser AI (later reissued without Cloudflare, Clerk and OpenAI), and 43 brand marks with a registry (8c5eae8, 4a26e22). [Reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648733284199?thread_ts=1790634517.611669&cid=C0C2YAS5TL5), [marks](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790649004590609?thread_ts=1790634517.611669&cid=C0C2YAS5TL5).
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648594106509?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648594.106509
+
+## 56. Mon Sep 28, 9:28 PM CDT · 2026-09-29 02:28:23 UTC
+
+> i already did cloudflare clerk,  I dont need open ai. are we gonna use livekit or openrouter for voice? benchmarks should show who has best voice at the moment for model, livekit looks cool, eleven labs popular but expensive, google realtime and openairealtime just shipped recently. so look up very rcent best practices, but dont let that slow you down from updating the prompt for my browser ai
+
+**What happened:** The browser-AI prompt was reissued without Cloudflare, Clerk and OpenAI ([reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648967608979?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). Voice answered with September 2026 benchmarks: LiveKit is the pipe, OpenRouter is text only, Gemini Live over LiveKit as the default proposal ([reply](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648994220409?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)). The Cloudflare token and Clerk keys were verified and wired: freshterminal.ai, api.freshterminal.ai, sign-in, D1 (C-058 to C-060; repo prompt 0016, decision 0019, changelog 0006).
+[Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790648903521149?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790648903.521149
