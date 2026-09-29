@@ -87,9 +87,12 @@ h1 { margin: 0; font-size: clamp(1.9rem, 1.3rem + 1.6vw, 3.1rem); line-height: 1
 .dot.live { background: var(--live); } .dot.written { background: var(--written); } .dot.planned { background: var(--planned); }
 
 .grid { display: grid; gap: clamp(14px, 1.6vw, 24px); grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
-.card { display: grid; gap: .7rem; padding: 1.1rem 1.2rem 1.2rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); }
-.card header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: .6rem; row-gap: .2rem; }
-.card header .role { grid-column: 1 / -1; }
+.card { display: grid; align-content: start; gap: .7rem; padding: 1.1rem 1.2rem 1.2rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); }
+.card header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; align-content: start; column-gap: .6rem; row-gap: .15rem; }
+.card header .mark { grid-row: 1; grid-column: 1; }
+.card header h2 { grid-row: 1; grid-column: 2; }
+.card header .pill { grid-row: 1; grid-column: 3; }
+.card header .role { grid-row: 2; grid-column: 1 / -1; }
 .card header .mark { width: 22px; height: 22px; color: var(--fg); flex: none; }
 .nest { display: grid; gap: .6rem; padding-top: .4rem; border-top: 1px dashed var(--line); }
 .nest-label { font: 600 .74rem ui-monospace, monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }

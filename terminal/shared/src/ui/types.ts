@@ -102,6 +102,7 @@ export const SITE_PAGES = [
 /** One item to start: the person's own actions (C-090). Library and Canvas live in the tray and the library page. */
 export const SEED_NAV: Array<{ label: string; icon: string; target: NavTarget }> = [
   { label: 'Actions', icon: '≡', target: { kind: 'action', ref: 'actions.open' } },
+  { label: 'Tags', icon: '#', target: { kind: 'action', ref: 'tags.open' } },
 ];
 
 export function defaultBoxUi(boxId: string, now: number): BoxUi {

@@ -117,11 +117,25 @@ export const ACTIONS_PAGE_ACTIONS: ActionDecl[] = [
   { id: 'actions.resize', intent: 'drag or arrow-key the timeline label column wider or narrower', permission: 'anyone', shortcut: 'arrows' },
 ];
 
+/** The Tags page (/tags, C-099). */
+export const TAGS_PAGE_ACTIONS: ActionDecl[] = [
+  ...SHELL_ACTIONS,
+  { id: 'tags.open', intent: 'open my tags', permission: 'anyone' },
+  { id: 'tags.view', intent: 'show my tags as a graph, table, list, board or timeline', permission: 'anyone' },
+  { id: 'tags.filter.text', intent: 'filter my tags by words', permission: 'anyone' },
+  { id: 'tags.filter.kind', intent: 'show only tags of one kind', permission: 'anyone' },
+  { id: 'tags.filter.stage', intent: 'show the tags of one stage or all stages', permission: 'anyone' },
+  { id: 'tags.sort', intent: 'sort my tags by how often, newest, oldest, name or kind', permission: 'anyone' },
+  { id: 'tags.graph.options', intent: 'change how the tag graph lays out, sizes nodes, hides light links and shows labels', permission: 'anyone' },
+  { id: 'tags.pick', intent: 'click a tag to narrow every view to it', permission: 'anyone' },
+];
+
 export const PAGE_ACTIONS: Record<string, ActionDecl[]> = {
   landing: [...LANDING_ACTIONS, ...STARTER_ACTIONS],
   box: [...BOX_ACTIONS, ...STARTER_ACTIONS],
   canvas: CANVAS_ACTIONS,
   actions: ACTIONS_PAGE_ACTIONS,
+  tags: TAGS_PAGE_ACTIONS,
   dev: DEV_ACTIONS,
 };
 

@@ -11,7 +11,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [README.md](README.md): the wiki index, every page with a summary and a date
 - [canon/README.md](canon/README.md): the Canon, what is true now and how it got there
 - [canon/state.md](canon/state.md): what is live, not wired, in progress
-- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-098 with status
+- [canon/decisions.md](canon/decisions.md): every decision C-001 to C-100 with status
 - [canon/open-questions.md](canon/open-questions.md): what is undecided or waiting on Justin
 
 ## Canon
@@ -34,6 +34,7 @@ Rules for readers: the Canon is the current truth; when two lines disagree, the 
 - [pages/sales.md](pages/sales.md): the sales pages doc (sections, actions, EN/ES, share tags)
 - [decisions/0024-billing-friend-credits-hub.md](decisions/0024-billing-friend-credits-hub.md): Clerk Billing checked (subscriptions only, no usage billing), the $5 pass-through threshold (402 payment_required), Stripe Checkout top-ups proposed, friend credits and invite codes, the admin API, the hub at freshterminal.ai/hub, costs
 - [pages/actions.md](pages/actions.md): the Actions page doc (the person's activity; model and cost from the ledger; filters by status, stage, model, words; sort by cost; timeline arrows)
+- [pages/tags.md](pages/tags.md): the Tags page doc (every tag the person typed; graph by default with layout, size, link and label options; table, list, board, timeline)
 - [pages/hub.md](pages/hub.md): the hub page doc (admins only, server-checked; work items, prompt/response library, Canon, wiki, plan, credits, secrets checklist)
 - [decisions/0023-signin-style.md](decisions/0023-signin-style.md): Clerk sign-in themed from the active theme (square, our fonts, accent button, no shadow, 44px targets, visible focus); Clerk branding and the dev notice stay
 - [decisions/0022-koi-v3-and-canvas-v2.md](decisions/0022-koi-v3-and-canvas-v2.md): koi pond v3 (opens top-down, tilts up; CC0 photo assets) and canvas v2 (paper sheets with screenshots, hand-drawn sections, minimap), chosen by best-of-3

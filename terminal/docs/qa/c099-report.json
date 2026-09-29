@@ -1,0 +1,50 @@
+{
+  "base": "http://localhost:4179",
+  "prompts": [
+    "I'm Justin, call me tomorrow at 3pm about the Cloudflare invoice for $120",
+    "shopping list: apples, pears and oat milk",
+    "remind Justin on Friday at 9am to review the Cloudflare plan and the Stripe plan",
+    "I am happy with the Cloudflare setup, see https://freshterminal.ai",
+    "make a page called Notes with 3 sections",
+    "add apples and pears to Notes tomorrow"
+  ],
+  "errors": [],
+  "overflow": {
+    "graph-390": false,
+    "table-390": false,
+    "list-390": false,
+    "board-390": false,
+    "timeline-390": false,
+    "graph-1280": false,
+    "table-1280": false,
+    "list-1280": false,
+    "board-1280": false,
+    "timeline-1280": false
+  },
+  "smallTargets": {
+    "graph-390": [],
+    "table-390": [],
+    "list-390": [],
+    "board-390": [],
+    "timeline-390": [],
+    "graph-1280": [],
+    "table-1280": [],
+    "list-1280": [],
+    "board-1280": [],
+    "timeline-1280": []
+  },
+  "graph": {
+    "390": {
+      "nodes": 9,
+      "links": 6
+    },
+    "1280": {
+      "nodes": 9,
+      "links": 6
+    }
+  },
+  "dimmedOnHover": 5,
+  "filterAfterClick": "tomorrow",
+  "nodesAfterClick": 1,
+  "tagCount": 9
+}

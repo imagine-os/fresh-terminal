@@ -8,7 +8,7 @@ import { shortcutFor } from '../actions/registry';
 import { useI18n } from '../i18n';
 import { Button } from '../ui/Button';
 import { Tooltip } from '../ui/Tooltip';
-import { IconCoin, IconDev, IconDownload, IconKey, IconLang, IconList, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
+import { IconCoin, IconDev, IconDownload, IconKey, IconLang, IconList, IconTag, IconMic, IconPlus, IconReplay, IconSidebar, IconSpark, IconUpload } from '../ui/icons';
 import { redeemInviteCode, startTopUp } from '../credits/billing';
 import { useToast } from '../ui/Toast';
 import { AccountButton } from './AccountButton';
@@ -54,6 +54,7 @@ interface Props {
   talkOn: boolean;
   onToggleTalk: () => void;
   onActions: () => void;
+  onTags: () => void;
   onPlan: () => void;
   /** When set, the stage name in the bar is click-to-edit (C-094). */
   onRenameBox?: (name: string) => void;
@@ -104,6 +105,7 @@ export function TopBar(props: Props) {
   const tools: Tool[] = [
     { id: 'box.new', group: 'go', label: t('topbar.newBox'), short: t('tool.newBox'), icon: <IconPlus />, onClick: props.onNewBox, shortcut: key('box.new'), testId: 'new-box' },
     { id: 'actions.open', group: 'go', label: t('topbar.actions'), short: t('tool.actions'), icon: <IconList />, onClick: props.onActions, testId: 'actions-link' },
+    { id: 'tags.open', group: 'go', label: t('topbar.tags'), short: t('tool.tags'), icon: <IconTag />, onClick: props.onTags, testId: 'tags-link' },
     { id: 'play.open', group: 'go', label: t('topbar.replay'), short: t('tool.replay'), detail: t('tray.experimental'), icon: <IconReplay />, onClick: props.onReplay, shortcut: key('play.open'), pressed: props.replayActive, testId: 'replay-link' },
     { id: 'lang.toggle', group: 'session', label: `${t('topbar.language')} (${lang})`, short: t('tool.language'), detail: lang.toUpperCase(), icon: <IconLang />, onClick: props.onToggleLang, shortcut: key('lang.toggle') },
     { id: 'session.export', group: 'session', pair: 'files', label: t('firstRun.export'), short: t('tool.export'), icon: <IconDownload />, onClick: props.onExport, testId: 'export-session' },

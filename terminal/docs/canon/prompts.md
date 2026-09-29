@@ -813,3 +813,9 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 
 **What happened:** C-096: the tighter menu shipped; parts of speech in colour is proposed with an estimate.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790659643321609?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790659643.321609
+
+## 94. Tue Sep 29, 1:04 AM CDT · 2026-09-29 06:04:29 UTC
+
+> in addition to the actions views, we should have a nother page they can go to, to see their tags as table list board, timeline, and probably graph by default. with some good view options in the graph.
+
+**What happened:** C-100: the Tags page shipped at `/tags` with the graph as the default view and four more views over the same rows.

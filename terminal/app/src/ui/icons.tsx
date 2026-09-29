@@ -260,6 +260,15 @@ export function IconHint(props: IconProps) {
   );
 }
 
+export function IconTag(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M3 12V4h8l9 9-8 8-9-9z" />
+      <path d="M7.5 7.5h.01" strokeWidth={2.4} />
+    </svg>
+  );
+}
+
 export function IconList(props: IconProps) {
   return (
     <svg {...base(props)}>

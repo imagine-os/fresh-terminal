@@ -8,6 +8,7 @@ export type Route =
   | { name: 'canvas' }
   | { name: 'plan' }
   | { name: 'actions' }
+  | { name: 'tags' }
   | { name: 'page'; id: string }
   | { name: 'play'; id: string; step: number | null };
 
@@ -23,6 +24,9 @@ function parse(pathname: string, search: string): Route {
   }
   if (/^\/actions\/?$/.test(path)) {
     return { name: 'actions' };
+  }
+  if (/^\/tags\/?$/.test(path)) {
+    return { name: 'tags' };
   }
   const page = /^\/page\/([^/]+)\/?$/.exec(path);
   if (page !== null && page[1]) {
@@ -57,6 +61,8 @@ export function hrefFor(route: Route): string {
       return `${base}/plan`;
     case 'actions':
       return `${base}/actions`;
+    case 'tags':
+      return `${base}/tags`;
     case 'page':
       return `${base}/page/${encodeURIComponent(route.id)}`;
     case 'play':

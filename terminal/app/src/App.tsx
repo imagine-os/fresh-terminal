@@ -13,6 +13,7 @@ import { Canvas } from './canvas/Canvas';
 import { DevPanel } from './dev/DevPanel';
 import { PlanViewer } from './dev/PlanViewer';
 import { ActionsView } from './actions-view/ActionsView';
+import { TagsView } from './tags-view/TagsView';
 import { nextCurrency } from './lib/currency';
 import { I18nProvider, useI18n } from './i18n';
 import { newId } from './lib/ids';
@@ -376,6 +377,7 @@ function Product() {
       'canvas.open': () => navigate({ name: 'canvas' }),
       'plan.open': () => navigate({ name: 'plan' }),
       'actions.open': () => navigate({ name: 'actions' }),
+      'tags.open': () => navigate({ name: 'tags' }),
       'library.open': () => window.location.assign(`${import.meta.env.BASE_URL}pages/library.html`),
       'settings.open': () => setSettingsOpen(true),
       'box.new': () => newBox(),
@@ -483,6 +485,8 @@ function Product() {
     );
   } else if (route.name === 'actions') {
     stage = <ActionsView boxId={currentBox?.id ?? null} />;
+  } else if (route.name === 'tags') {
+    stage = <TagsView boxId={currentBox?.id ?? null} />;
   } else if (route.name === 'page' && !currentBox) {
     stage = <PageView pageId={route.id} />;
   } else if (replaying && currentBox) {
@@ -592,6 +596,7 @@ function Product() {
               toast(prefs.terminalTalk ? t('talk.off') : t('talk.on'));
             }}
             onActions={() => navigate({ name: 'actions' })}
+            onTags={() => navigate({ name: 'tags' })}
             onPlan={() => navigate({ name: 'plan' })}
             onRenameBox={currentBox && (route.name === 'box' || route.name === 'landing') && !replaying ? (name) => renameBox(currentBox.id, name) : undefined}
           />
