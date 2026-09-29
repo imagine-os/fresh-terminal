@@ -1,6 +1,7 @@
 import { DEVICE_HEADER, SOFT_PROMPT_HEADER } from '@shared/credits';
 import { readJson, writeJson } from './storage';
 import { ROUTER_URL } from './routerClient';
+import { turnstileToken } from './turnstile';
 
 /**
  * Every call to our router goes through here (2026-09-29). It adds:
@@ -41,7 +42,18 @@ export async function deviceToken(fetchImpl: typeof fetch = fetch): Promise<stri
   if (deviceInflight) return deviceInflight;
   deviceInflight = (async () => {
     try {
-      const response = await fetchImpl(routerUrl('/credits/device'), { method: 'POST' });
+      // If the router runs Turnstile, get an invisible token first.
+      let turnstile = '';
+      const info = await fetchImpl(routerUrl('/credits'), { method: 'GET' }).catch(() => null);
+      if (info?.ok) {
+        const status = (await info.json().catch(() => ({}))) as { turnstile?: string; turnstile_sitekey?: string };
+        if (status.turnstile === 'on' && status.turnstile_sitekey) turnstile = await turnstileToken(status.turnstile_sitekey);
+      }
+      const response = await fetchImpl(routerUrl('/credits/device'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(turnstile ? { turnstile } : {}),
+      });
       if (!response.ok) return null;
       const body = (await response.json()) as { device?: string };
       if (body.device) writeJson(DEVICE_KEY, body.device);

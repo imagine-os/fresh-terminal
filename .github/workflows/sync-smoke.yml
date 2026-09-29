@@ -35,7 +35,7 @@ jobs:
         run: |
           clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
           user=$(curl -sS "${clerk[@]}" -X POST https://api.clerk.com/v1/users \
-            -d "{\"email_address\":[\"ft-smoke-${GITHUB_RUN_ID}@freshterminal.ai\"],\"skip_password_requirement\":true,\"skip_password_checks\":true}")
+            -d "{\"email_address\":[\"ft-smoke-${GITHUB_RUN_ID}@freshterminal.ai\"],\"username\":\"ftsmoke${GITHUB_RUN_ID}\",\"phone_number\":[\"+1201555$(printf '%04d' $((100 + GITHUB_RUN_ID % 100)))\"],\"skip_password_requirement\":true,\"skip_password_checks\":true}")
           uid=$(echo "$user" | jq -r '.id // empty')
           [ -n "$uid" ] || { echo "user create failed: $(echo "$user" | jq -c '[.errors[]?.long_message // .errors[]?.message]')"; exit 1; }
           echo "uid=$uid" >> "$GITHUB_OUTPUT"
@@ -66,11 +66,20 @@ jobs:
           echo "GET /credits (signed in): $(curl -sS "${auth[@]}" "$API/credits" | jq -c '{signed_in, mode, granted_micro, remaining_micro}')"
       - name: Anonymous credits on the live router (one real call, about half a cent)
         id: anon
+        if: always()
         run: |
           origin=(-H 'Origin: https://freshterminal.ai' -H 'Content-Type: application/json')
           echo "paid call without a device: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[]}')"
-          device=$(curl -sS "${origin[@]}" -X POST "$API/credits/device" | jq -r '.device // empty')
-          [ -n "$device" ] || { echo "device issue failed"; exit 1; }
+          turnstile=$(curl -sS "${origin[@]}" "$API/credits" | jq -r '.turnstile')
+          issued=$(curl -sS "${origin[@]}" -X POST "$API/credits/device" -d '{}')
+          device=$(echo "$issued" | jq -r '.device // empty')
+          if [ -z "$device" ]; then
+            if [ "$turnstile" = "on" ] && [ "$(echo "$issued" | jq -r '.code')" = "turnstile_failed" ]; then
+              echo "Turnstile is on: a device without a browser token is refused (expected). Paid-call check skipped."
+              exit 0
+            fi
+            echo "device issue failed: $(echo "$issued" | jq -c '{code, error}')"; exit 1
+          fi
           echo "device_id=${device%%.*}" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$device"
           echo "GET /credits (device): $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{mode, granted_micro, remaining_micro, soft_prompts_left, limited}')"
@@ -80,7 +89,7 @@ jobs:
           echo "GET /credits after the call: $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{spent_micro, remaining_micro}')"
           echo "anonymous model choice: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[],"model":"anthropic/claude-sonnet-5.5"}')"
       - name: Clean up (D1 rows, Clerk user)
-        if: always() && steps.user.outputs.uid != ''
+        if: always()
         env:
           UID_: ${{ steps.user.outputs.uid }}
           DEVICE_ID: ${{ steps.anon.outputs.device_id }}
@@ -89,7 +98,7 @@ jobs:
           base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
           db=$(curl -sS "${cf[@]}" "$base?name=fresh-terminal" | jq -r '[.result[]? | select(.name=="fresh-terminal")][0].uuid // empty')
           acct="acct_$UID_"
-          for table in ledger_entries boxes accounts; do
+          [ -n "$UID_" ] && for table in ledger_entries boxes accounts; do
             col=$([ "$table" = accounts ] && echo id || echo account_id)
             ok=$(curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "{\"sql\":\"DELETE FROM $table WHERE $col = ?\",\"params\":[\"$acct\"]}" | jq -r '.success')
             echo "delete $table rows: $ok"
@@ -97,4 +106,4 @@ jobs:
           if [ -n "$DEVICE_ID" ]; then
             echo "delete smoke device: $(curl -sS "${cf[@]}" -X POST "$base/$db/query" -d "{\"sql\":\"DELETE FROM anon_devices WHERE id = ?\",\"params\":[\"$DEVICE_ID\"]}" | jq -r '.success')"
           fi
-          echo "delete Clerk user: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$UID_" | jq -r '.deleted')"
+          [ -n "$UID_" ] && echo "delete Clerk user: $(curl -sS -H "Authorization: Bearer $CLERK_SECRET_KEY" -X DELETE "https://api.clerk.com/v1/users/$UID_" | jq -r '.deleted')" || true

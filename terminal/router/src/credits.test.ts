@@ -178,3 +178,26 @@ describe('router with credits', () => {
     expect(preflight.headers.get('Access-Control-Allow-Headers')?.toLowerCase()).toContain('x-ft-device');
   });
 });
+
+describe('turnstile', () => {
+  it('asks for a passing invisible Turnstile token before a new device', async () => {
+    const db = fakeD1();
+    const verified: string[] = [];
+    const app = createApp({
+      bindings: () => ({ DEVICE_SIGNING_KEY: KEY, TURNSTILE_SECRET: 'ts-secret', TURNSTILE_SITEKEY: '0x4AAAA-site' }),
+      resources: () => ({ DB: db }),
+      fetchImpl: async (url, init) => {
+        const form = init?.body as FormData;
+        verified.push(String(url));
+        return new Response(JSON.stringify({ success: form.get('response') === 'good-token' }));
+      },
+    });
+    const status = (await (await app.request('/credits')).json()) as CreditsStatus;
+    expect(status).toMatchObject({ mode: 'none', turnstile: 'on', turnstile_sitekey: '0x4AAAA-site' });
+    const bad = await app.request('/credits/device', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ turnstile: 'bad' }) });
+    expect(bad.status).toBe(403);
+    const good = await app.request('/credits/device', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ turnstile: 'good-token' }) });
+    expect(good.status).toBe(200);
+    expect(verified[0]).toContain('challenges.cloudflare.com/turnstile/v0/siteverify');
+  });
+});
