@@ -26,8 +26,13 @@ export const clerkVerifier: TokenVerifier = async (token, options) => {
   const payload = await verifyToken(token, {
     ...(options.jwtKey ? { jwtKey: options.jwtKey } : {}),
     ...(options.secretKey ? { secretKey: options.secretKey } : {}),
-    authorizedParties: options.authorizedParties,
   });
+  // Browser session tokens carry azp (the page's origin): it must be one of ours.
+  // Tokens minted with our own secret key through Clerk's Backend API (the CI smoke test) have no azp.
+  const azp = typeof payload.azp === 'string' ? payload.azp : undefined;
+  if (azp !== undefined && !options.authorizedParties.includes(azp)) {
+    throw new Error(`Authorized party ${azp} is not allowed`);
+  }
   return { sub: String(payload.sub), ...(typeof payload.sid === 'string' ? { sid: payload.sid } : {}) };
 };
 

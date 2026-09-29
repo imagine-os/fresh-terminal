@@ -66,7 +66,8 @@ As of 2026-09-29:
 - SpacetimeDB live store. The module is written and type-checked, not published. The app uses browser storage instead, so boxes don't sync between devices or people. 2026-09-29: account data goes to Cloudflare D1 first (C-047).
 - ~~Clerk sign-in. Everyone is anonymous; "save / sign in" is a placeholder.~~ Superseded 2026-09-29 (C-065): sign-in is wired on the Clerk development instance. Still not wired: the Clerk production instance (steps in C-065), Clerk screens in Spanish, transcript lines in sync, realtime sync between devices.
 - Stripe: taking payment for the balance. (2026-09-29: free credits are enforced, C-074; buying more is what is missing.)
-- A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).
+- ~~A daily cap for signed-in accounts (needed before a Clerk production instance; C-074).~~ Built 2026-09-29 (C-080): $1 per account, $10 across accounts per UTC day.
+- Turnstile before a new free-credit device: built, not switched on; the Cloudflare token needs Account → Turnstile → Edit (C-074).
 - Shared chain beyond the browser, and the server re-checking hashes.
 - Jev permission checks: they exist but aren't enforced (no signed-in owners on the server yet).
 - Model-generated "Draw" layouts (demos only).
@@ -104,6 +105,7 @@ As of 2026-09-29:
 | **Branded export, import, live credits** (C-076) | Shipped 2026-09-29 03:50 UTC. |
 | **Clean start** (C-075) | Shipped 2026-09-29 03:40 UTC: Alt+key shortcuts while typing, free usage label, sidebar hidden with top-left icon and settings, starters and hints behind switches, calmer tray. |
 | **First-run line, session export, hide the bar** (C-072) | Shipped 2026-09-29 03:30 UTC. Credits counter in the line is a placeholder until the router's `/credits` exists (other session). |
+| **Readable skins** (C-079) | Shipped 2026-09-29 (Opus 5.5): text over photo and material skins at AA with the weakest scrim that passes; neutral small text; the image stays visible at the edges. Changelog 0010. |
 | **Tools tray, draft page, pages keep the pad, estimates** (C-071, C-070) | Shipped 2026-09-29 03:20 UTC. Queued: editing on the draft page itself; running the mark-gathering from the page; a timer line on plain-text local replies (structured replies already show model, time and cost). |
 | **Composer fixes and box removal** (C-069) | Shipped 2026-09-29 03:00 UTC: Cmd+V pastes (no longer toggles voice), the visible cursor follows the caret, spell-check on, boxes removable from the sidebar. Queued: formatted page above the pad, top-bar tools tray, phrase chips, per-reply timer line. |
 | **Logo configuration set** (C-068) | Generated 2026-09-29 02:55 UTC: 43 marks × 6 files (`colour`, `-mono`, `-light`, `-dark`, `-wide`, `-stacked`) by `scripts/brand-variants.mjs`; manifest `app/public/brand/index.json`; `pages/brands.html` has a configuration switcher and a light/dark page toggle. Later layers (raster export, vectorizer, 3D, official wordmarks) are written down with costs, not automated. |

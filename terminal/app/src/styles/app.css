@@ -1958,6 +1958,32 @@ textarea.field-input {
   }
 }
 
+/*
+ * The readability layer (image and material skins). Text sits on a scrim in
+ * the theme background colour, as strong as the sampled image needs for WCAG
+ * AA and no stronger; the Shell computes --scrim-a and neutral --fg tokens.
+ * Bars keep a 4px frame of the image; the stage keeps its padding. The start
+ * screen, first-run line and footer are left to the start-screen rework.
+ */
+.region[data-readable]:not(.region-stage) {
+  background-image:
+    linear-gradient(rgb(var(--scrim) / var(--scrim-a)), rgb(var(--scrim) / var(--scrim-a))),
+    linear-gradient(color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent), color-mix(in srgb, var(--bg) var(--skin-veil, 40%), transparent)),
+    var(--skin-layers, none);
+  background-size: calc(100% - 8px) calc(100% - 8px), cover, var(--skin-layer-sizes, cover);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.region-stage[data-readable] > .transcript {
+  background: rgb(var(--scrim) / var(--scrim-a));
+  -webkit-backdrop-filter: blur(var(--scrim-blur, 0px));
+  backdrop-filter: blur(var(--scrim-blur, 0px));
+  border-radius: var(--radius);
+}
+.region-stage[data-readable] > .transcript {
+  padding: var(--space-cozy) clamp(0.75rem, 2cqi, 1.5rem) var(--space-roomy);
+}
+
 .rf {
   display: grid;
   gap: 0.5rem;

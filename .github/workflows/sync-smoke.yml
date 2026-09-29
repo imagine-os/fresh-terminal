@@ -30,7 +30,7 @@ jobs:
       - name: Refuse to run against a production Clerk instance
         run: |
           case "$CLERK_SECRET_KEY" in sk_test_*) echo "development instance: ok";; *) echo "not a development key; stopping"; exit 1;; esac
-      - name: Throwaway user and session token
+      - name: Signed in (throwaway user, session token, /me, /sync, /credits)
         id: user
         run: |
           clerk=(-H "Authorization: Bearer $CLERK_SECRET_KEY" -H 'Content-Type: application/json')
@@ -46,15 +46,12 @@ jobs:
           jwt=$(curl -sS "${clerk[@]}" -X POST "https://api.clerk.com/v1/sessions/$sid/tokens" -d '{}' | jq -r '.jwt // empty')
           [ -n "$jwt" ] || { echo "token mint failed"; exit 1; }
           echo "::add-mask::$jwt"
-          echo "jwt=$jwt" >> "$GITHUB_OUTPUT"
           echo "session token: minted"
-      - name: /me and /sync on the live router
-        env:
-          JWT: ${{ steps.user.outputs.jwt }}
-        run: |
+          # Same step on purpose: GitHub drops step outputs that hold masked values.
+          JWT="$jwt"
           auth=(-H "Authorization: Bearer $JWT" -H 'Content-Type: application/json' -H 'Origin: https://freshterminal.ai')
           now=$(date +%s%3N)
-          echo "GET /me: $(curl -sS "${auth[@]}" "$API/me" | jq -c '{signedIn, plan: .account.plan, sync}')"
+          echo "GET /me: $(curl -sS "${auth[@]}" "$API/me" | jq -c '{signedIn, error, plan: .account.plan, sync}')"
           box="{\"id\":\"box-smoke-$GITHUB_RUN_ID\",\"name\":\"Smoke\",\"state_json\":\"{\\\"nav\\\":[]}\",\"created_at\":$now,\"updated_at\":$now,\"deleted_at\":null}"
           echo "PUT /sync/boxes: $(curl -sS "${auth[@]}" -X PUT "$API/sync/boxes" -d "{\"boxes\":[$box]}" | jq -c '{accepted: (.accepted|length), conflicts: (.conflicts|length), rejected: (.rejected|length)}')"
           echo "PUT older copy: $(curl -sS "${auth[@]}" -X PUT "$API/sync/boxes" -d "{\"boxes\":[$(echo "$box" | jq -c ".updated_at = $((now-1000)) | .name = \"stale\"")]}" | jq -c '{accepted: (.accepted|length), conflicts: [.conflicts[].name]}')"
@@ -87,6 +84,10 @@ jobs:
           echo "POST /route (device): HTTP $code, events: $(grep -c '^event:' "$RUNNER_TEMP/route.txt"), done: $(grep -A1 '^event: done' "$RUNNER_TEMP/route.txt" | tail -1 | sed 's/^data: //' | jq -c '{ok, served_model, price: .entry.price_micro, cost: .entry.cost_micro}')"
           sleep 3
           echo "GET /credits after the call: $(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -c '{spent_micro, remaining_micro}')"
+          before=$(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -r '.spent_micro')
+          tag=$(curl -sS "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/tag" -d '{"boxId":"smoke","text":"call Sergio tomorrow at Hoy"}')
+          after=$(curl -sS "${origin[@]}" -H "X-FT-Device: $device" "$API/credits" | jq -r '.spent_micro')
+          echo "POST /tag: entry $(echo "$tag" | jq -c '.entry | {what, price_micro, cost_micro}'); credits delta $((after - before)) (must equal the entry price)"
           echo "anonymous model choice: HTTP $(curl -sS -o /dev/null -w '%{http_code}' "${origin[@]}" -H "X-FT-Device: $device" -X POST "$API/route" -d '{"boxId":"smoke","text":"hi","chips":[],"model":"anthropic/claude-sonnet-5.5"}')"
       - name: Clean up (D1 rows, Clerk user)
         if: always()

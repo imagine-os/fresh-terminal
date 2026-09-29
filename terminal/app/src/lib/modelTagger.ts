@@ -3,6 +3,8 @@ import type { GlossaryTerm } from '@shared/ui';
 import { ROUTER_URL } from './routerClient';
 import { cachedRouterHealth } from './routerHealth';
 import { routerFetch } from './routerFetch';
+import type { EntryDraft } from '@shared/ledger';
+import { store } from '../store';
 
 export interface RemoteTagResult {
   text: string;
@@ -22,6 +24,7 @@ export async function tagRemote(
   local: Chip[],
   glossary: GlossaryTerm[],
   signal?: AbortSignal,
+  boxId = '',
 ): Promise<RemoteTagResult | null> {
   if (cachedRouterHealth().state !== 'ok') {
     return null;
@@ -31,6 +34,7 @@ export async function tagRemote(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        ...(boxId ? { boxId } : {}),
         text,
         local,
         glossary: glossary.map((term) => ({ text: term.text, type: term.type, note: term.note, case_sensitive: term.case_sensitive })),
@@ -44,7 +48,12 @@ export async function tagRemote(
     if (!response.ok) {
       return null;
     }
-    const body = (await response.json()) as { chips?: Chip[]; cost_micro?: number; jev?: { used: boolean } };
+    const body = (await response.json()) as { chips?: Chip[]; cost_micro?: number; jev?: { used: boolean }; entry?: EntryDraft | null };
+    // Every metered call lands in the ledger, so the top-bar counter matches GET /credits.
+    if (body.entry) {
+      const { owner_identity: _owner, ...draft } = body.entry;
+      store.appendEntry(draft);
+    }
     return {
       text,
       chips: Array.isArray(body.chips) ? body.chips : [],

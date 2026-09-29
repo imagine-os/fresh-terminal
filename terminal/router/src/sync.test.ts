@@ -132,6 +132,11 @@ describe('Clerk networkless verification', () => {
     expect((await authenticate(`Bearer ${sign(claims)}`, { CLERK_JWT_KEY: other }, ['https://freshterminal.ai'])).state).toBe('invalid');
   });
 
+  it('accepts a backend-minted token without azp (our own secret key minted it)', async () => {
+    const { azp: _azp, ...noAzp } = claims;
+    expect((await authenticate(`Bearer ${sign(noAzp)}`, { CLERK_JWT_KEY: pem }, ['https://freshterminal.ai'])).state).toBe('signed-in');
+  });
+
   it('treats no header as anonymous', async () => {
     expect(await authenticate(undefined, { CLERK_JWT_KEY: pem }, [])).toEqual({ state: 'anonymous' });
   });

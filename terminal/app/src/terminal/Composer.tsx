@@ -119,7 +119,7 @@ export function Composer({
     }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void tagRemote(text, localChips, glossary, controller.signal).then((found) => {
+      void tagRemote(text, localChips, glossary, controller.signal, boxId).then((found) => {
         if (!controller.signal.aborted && found) {
           setRemote(found);
         }
@@ -129,7 +129,7 @@ export function Composer({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [text, modelTagger, localChips, glossary]);
+  }, [text, modelTagger, localChips, glossary, boxId]);
 
   // "next" chips in replies insert a command into the draft.
   useEffect(() => {

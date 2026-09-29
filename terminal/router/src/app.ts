@@ -111,6 +111,8 @@ const glossaryHintSchema = z.object({
 });
 
 const tagBodySchema = z.object({
+  /** The stage (box id internally) the text is typed in, for its ledger entry. */
+  boxId: z.string().max(200).optional(),
   text: z.string().min(1).max(4000),
   glossary: z.array(glossaryHintSchema).max(300).default([]),
   local: z.array(z.unknown()).max(60).default([]),
@@ -188,7 +190,7 @@ export function createApp(options: CreateAppOptions) {
     const bindings = options.bindings(c.env);
     const parties = allowedOrigins(bindings).filter((origin) => origin !== '*');
     const auth = await authenticate(c.req.header('Authorization'), bindings, parties, options.verifier);
-    if (auth.state === 'anonymous') return { ok: false, status: 401, body: { error: 'Sign in to sync. Signed-out boxes stay in this browser.' } };
+    if (auth.state === 'anonymous') return { ok: false, status: 401, body: { error: 'Sign in to sync. Signed-out stages stay in this browser.' } };
     if (auth.state === 'not-configured') return { ok: false, status: 503, body: { error: 'Clerk is not configured on this router (CLERK_SECRET_KEY / CLERK_JWT_KEY)' } };
     if (auth.state === 'invalid') return { ok: false, status: 401, body: { error: 'Session token rejected', reason: auth.reason } };
     const db = resourcesFor(c.env).DB;
@@ -588,13 +590,32 @@ export function createApp(options: CreateAppOptions) {
       }
     }
 
+    // One charge entry per tag call, so the ledger (and the top-bar counter) match what the meter charges.
+    const tagCost = (result?.costMicro ?? 0) + jevCost;
+    const tagEntry: EntryDraft | null =
+      tagCost > 0
+        ? entryDraftSchema.parse({
+            box_id: parsed.data.boxId ?? '',
+            owner_identity: '',
+            kind: 'charge',
+            what: 'chips.tag',
+            model: result?.servedModel ?? model,
+            units: 1,
+            unit_kind: 'call',
+            cost_micro: tagCost,
+            price_micro: tagCost, // the tagger tier is pass-through (no margin)
+            ref: result?.generationId ?? '',
+            created_at: (options.now ?? Date.now)(),
+          })
+        : null;
     return c.json({
       chips,
       model: result?.servedModel ?? model,
       ok: result !== null,
-      cost_micro: (result?.costMicro ?? 0) + jevCost,
+      cost_micro: tagCost,
       ref: result?.generationId ?? '',
       jev: { used: jevUsed, cost_micro: jevCost },
+      entry: tagEntry,
     });
   });
 
