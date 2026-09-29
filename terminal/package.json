@@ -21,7 +21,9 @@
     "ledger:sample": "tsx scripts/make-ledger-sample.ts",
     "start:router": "node router/dist/node.mjs",
     "canvas:add": "tsx scripts/canvas-add.ts",
-    "canvas:thumbs": "tsx scripts/canvas-thumbs.ts"
+    "canvas:thumbs": "tsx scripts/canvas-thumbs.ts",
+    "share:sync": "tsx scripts/share-sync.ts",
+    "og:card": "node scripts/og-card.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.20.1",

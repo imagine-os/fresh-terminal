@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- share:start (generated from shared/src/share.ts by pnpm share:sync; do not edit by hand) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Fresh Terminal" />
+<meta property="og:title" content="Fresh Terminal — the terminal for everyone" />
+<meta property="og:description" content="If computers had started smart, the terminal would look like this. Type, and it builds itself around you." />
+<meta property="og:url" content="https://freshterminal.ai/pricing" />
+<meta property="og:image" content="https://freshterminal.ai/brand/og-1200x630.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Fresh Terminal: A terminal that adapts to you." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Fresh Terminal — the terminal for everyone" />
+<meta name="twitter:description" content="If computers had started smart, the terminal would look like this. Type, and it builds itself around you." />
+<meta name="twitter:image" content="https://freshterminal.ai/brand/og-1200x630.png" />
+<meta name="twitter:image:alt" content="Fresh Terminal: A terminal that adapts to you." />
+<meta name="theme-color" content="#000000" />
+<!-- share:end -->
+<title data-i18n-title="pricing.title">Pricing · Fresh Terminal</title>
+<meta name="description" content="Free to try with no sign-up. Sign in for $5 of usage on us. Then pay what the models cost plus a small fee, or bring your own key and pay us nothing.">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://freshterminal.ai/pricing">
+<link rel="alternate" hreflang="en" href="https://freshterminal.ai/pricing">
+<link rel="alternate" hreflang="es" href="https://freshterminal.ai/pricing?lang=es">
+<link rel="icon" href="brand/fresh-terminal/fresh-terminal-monogram-dark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="sales/sales.css">
+<script type="application/json" id="page-actions">
+{
+  "$comment": "Actions this page offers (WebMCP / voice vocabulary). Update with every UI change. Registry: docs/reference/surfaces.md (sales pages).",
+  "page": "pricing",
+  "version": "1.0.0",
+  "actions": [
+    { "id": "sales.start", "intent": "start free, no sign-up", "permission": "anyone", "target": "a[data-action='sales.start']" },
+    { "id": "sales.signin", "intent": "sign in for the $5 starter kit", "permission": "anyone", "target": "a[data-action='sales.signin']" },
+    { "id": "sales.key.use", "intent": "use my own OpenRouter key", "permission": "anyone", "target": "a[data-action='sales.key.use']" },
+    { "id": "sales.payment.add", "intent": "add a payment method for pay as you go", "permission": "signed-in", "notWired": true, "target": "button[data-action='sales.payment.add']" },
+    { "id": "sales.teams.notify", "intent": "tell me when teams and self-host are ready", "permission": "anyone", "notWired": true, "target": "button[data-action='sales.teams.notify']" },
+    { "id": "sales.nav", "intent": "go to about, pricing or the FAQ", "permission": "anyone", "target": ".nav a" },
+    { "id": "sales.lang.toggle", "intent": "switch between English and Spanish", "permission": "anyone", "target": ".lang button" },
+    { "id": "sales.skip", "intent": "skip to the main content", "permission": "anyone", "target": ".skip" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="about" aria-label="Fresh Terminal, about"><span class="brand-mark" aria-hidden="true">&gt;_</span>Fresh Terminal</a>
+    <nav class="nav" aria-label="Site" data-i18n-attr="aria-label:nav.label">
+      <a href="about" data-i18n="nav.about">About</a>
+      <a href="pricing" aria-current="page" data-i18n="nav.pricing">Pricing</a>
+      <a href="faq" data-i18n="nav.faq">FAQ</a>
+      <span class="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label">
+        <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false" lang="es">ES</button>
+      </span>
+      <a class="btn primary nav-cta" href="./" data-action="sales.start" data-i18n="cta.start.short">Start typing</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section aria-labelledby="pricing-title">
+    <div class="wrap">
+      <p class="kicker" data-i18n="nav.pricing">Pricing</p>
+      <h1 id="pricing-title" class="page-title" data-i18n="price.title">Pay what the models cost. See every cent.</h1>
+      <p class="lede" data-i18n="price.lede">Start free with no sign-up. Sign in for $5 of usage on us. Or bring your own key and pay us nothing.</p>
+
+      <div class="plans">
+        <div class="plan">
+          <h3 data-i18n="plan.free">Free</h3>
+          <div class="price">$0</div>
+          <p class="for" data-i18n="plan.free.for">No sign-up. Try it now.</p>
+          <ul data-i18n="plan.free.ul"><li>Free usage to try, about 40 prompts</li><li>Saved in this browser</li><li>Every cost shown</li></ul>
+          <div class="ctas"><a class="btn" href="./" data-action="sales.start"><span data-i18n="cta.start">Start typing</span> <span class="arrow" aria-hidden="true">→</span></a></div>
+        </div>
+        <div class="plan" data-highlight>
+          <h3 data-i18n="plan.starter">Starter kit</h3>
+          <div class="price">$5<small data-i18n="plan.onus">on us</small></div>
+          <p class="for" data-i18n="plan.starter.for">Sign in with GitHub, Google or email.</p>
+          <ul data-i18n="plan.starter.ul"><li>$5 of usage on us</li><li>Cloud save for your stages</li><li>The same models and tools</li></ul>
+          <div class="ctas"><a class="btn primary" href="./?signin=1" data-action="sales.signin" data-i18n="cta.signin">Sign in for $5 free</a></div>
+        </div>
+        <div class="plan">
+          <h3><span data-i18n="plan.payg">Pay as you go</span> <span class="tag" data-status="not-wired" data-i18n="tag.notWired">Not wired yet</span></h3>
+          <div class="price"><span data-i18n="plan.cost">Cost</span> + <span data-fee>5%</span></div>
+          <p class="for" data-i18n="plan.payg.for">After the starter kit.</p>
+          <ul>
+            <li data-i18n="plan.payg.1">What the models cost, plus a small fee</li>
+            <li><span data-i18n="plan.payg.2">The fee is</span> <span data-fee>5%</span> <span class="tag" data-status="not-final" data-i18n="tag.notFinal">Not final</span></li>
+            <li data-i18n="plan.payg.3">Every cost shown: model, time, cents</li>
+          </ul>
+          <div class="ctas"><button type="button" class="btn" data-action="sales.payment.add" data-not-wired
+            data-tip="Not wired yet: we are choosing the payment provider. Until then, the starter kit and your key both work."
+            data-toast="Add payment is not wired yet. We are choosing the payment provider; until then use the $5 starter kit or your own key."
+            data-i18n-attr="data-tip:payg.tip;data-toast:payg.toast;aria-label:payg.aria" aria-label="Add payment (not wired yet)" data-i18n="plan.payg.cta">Add payment</button></div>
+        </div>
+        <div class="plan">
+          <h3 data-i18n="plan.key">Your key</h3>
+          <div class="price">$0<small data-i18n="plan.formodels">for models</small></div>
+          <p class="for" data-i18n="plan.key.for">Bring your own OpenRouter key.</p>
+          <ul>
+            <li data-i18n="plan.key.1">Pay the provider directly</li>
+            <li data-i18n="plan.key.2">Never blocked</li>
+            <li data-i18n="plan.key.3">Your key stays in your browser</li>
+            <li><span data-i18n="plan.key.4a">Storage:</span> <span data-storage-free>100 MB</span> <span data-i18n="plan.key.4b">free, then about</span> <span data-storage-price>$0.05</span><span data-i18n="plan.key.4c"> per GB-month</span> <span class="tag" data-status="not-final" data-i18n="tag.notFinal">Not final</span></li>
+          </ul>
+          <div class="ctas"><a class="btn" href="./?open=key" data-action="sales.key.use" data-i18n="plan.key.cta">Use your key</a></div>
+        </div>
+      </div>
+
+      <div class="extra">
+        <div>
+          <h3><span data-i18n="teams.t">Teams and self-host</span> <span class="tag" data-status="soon" data-i18n="tag.soon">Coming soon</span></h3>
+          <p data-i18n="teams.p">Shared stages and one bill for a team, or the whole stack on your own servers.</p>
+        </div>
+        <button type="button" class="btn" data-action="sales.teams.notify" data-not-wired
+          data-tip="Not wired yet: there is no sign-up list. Watch the GitHub repository for now."
+          data-toast="“Tell me when” is not wired yet. Watch github.com/imagine-os/fresh-terminal for releases for now."
+          data-i18n-attr="data-tip:teams.tip;data-toast:teams.toast;aria-label:teams.aria" aria-label="Tell me when (not wired yet)" data-i18n="teams.cta">Tell me when</button>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="how-pay-title">
+    <div class="wrap">
+      <p class="kicker" data-i18n="howpay.kicker">How paying works</p>
+      <h2 id="how-pay-title" data-i18n="howpay.title">No plans to pick. One path.</h2>
+      <ol class="steps">
+        <li><span class="n">01</span><h3 data-i18n="hp.1.t">Try it</h3><p data-i18n="hp.1.p">Open the terminal and type. Free usage covers about 40 prompts, depending on the model.</p></li>
+        <li><span class="n">02</span><h3 data-i18n="hp.2.t">Sign in</h3><p data-i18n="hp.2.p">Get the $5 starter kit and cloud save. GitHub, Google or email; no card.</p></li>
+        <li><span class="n">03</span><h3 data-i18n="hp.3.t">Keep going</h3><p data-i18n="hp.3.p">Pay what the models cost plus a small fee, or switch to your own key any time. Your key is never blocked.</p></li>
+      </ol>
+      <p class="fine" style="margin-top:1.4rem" data-i18n="howpay.fine">Numbers marked “not final” can change before billing opens. Pay as you go is not wired yet: until it is, free usage ends when the starter kit is spent, and your key keeps working.</p>
+      <div class="ctas" style="margin-top:1.6rem"><a class="btn" href="faq" data-i18n="howpay.cta">Questions? Read the FAQ</a></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="tagline"><span class="brand-mark" aria-hidden="true" style="display:inline-grid;vertical-align:-0.3em;margin-right:0.6rem">&gt;_</span><span data-i18n="tagline">Evolve as we grow.</span></p>
+    <nav aria-label="Footer" data-i18n-attr="aria-label:foot.label">
+      <a href="./" data-i18n="foot.app">Open the terminal</a>
+      <a href="about" data-i18n="nav.about">About</a>
+      <a href="pricing" data-i18n="nav.pricing">Pricing</a>
+      <a href="faq" data-i18n="nav.faq">FAQ</a>
+      <a href="pages/freshstack.html">FreshStack</a>
+      <a href="wiki/" data-i18n="foot.docs">Docs</a>
+      <a href="https://github.com/imagine-os/fresh-terminal" rel="noopener" data-i18n="foot.source">Source on GitHub</a>
+    </nav>
+    <p class="fine" data-i18n="foot.fine">No trackers, no cookies on these pages. Screenshots are from real sessions. Items marked “coming soon” are not live yet.</p>
+  </div>
+</footer>
+<script src="sales/i18n-es.js" defer></script>
+<script src="sales/sales.js" defer></script>
+</body>
+</html>

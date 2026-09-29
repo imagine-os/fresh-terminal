@@ -11,6 +11,7 @@ Honest status: most of this is planned. What exists is listed as such.
 - **Exists (canvas v2, 2026-09-29):** new canvas actions `canvas.zoom.reset`, `canvas.minimap`, `canvas.card.select`, `canvas.tidy`, `canvas.v1`; `canvas.card.move` is now Alt+arrows. `shared/src/canvas` exports `layoutCanvas`, `bestLayout`, `fitView`, `sectionOf`. CLI: `pnpm -C terminal canvas:thumbs` screenshots every card.
 - **Exists (2026-09-29):** actions `auth.signIn` (opens Clerk), `auth.signOut`, `sync.now`.
 - **Exists (pass 5):** ops `skin.apply {skin}` and `skin.clear {target}` (tools `skin_apply`, `skin_clear`); `shared/src/refine` exports `refine()` for any agent that wants the best-of-3 loop with its own generate and score functions. Actions `skin.run`, `skin.stop`, `skin.pick`.
+- **Exists (sales pages, 2026-09-29, C-091):** `/about`, `/pricing`, `/faq` declare their actions in `#page-actions` and expose `window.__actions = { page, version, list(), run(id) }`; `ft:action` runs `sales.lang.toggle`, `sales.lang.en`, `sales.lang.es`. Ids: `sales.start`, `sales.signin`, `sales.key.use`, `sales.payment.add` (not wired), `sales.teams.notify` (not wired), `sales.nav`, `sales.lang.toggle`, `sales.freshstack.open`, `sales.faq.open`, `sales.skip`. The app reads `?signin=1` (opens sign-in) and `?open=key` (opens Settings). Share tags: `shared/src/share.ts`, `pnpm -C terminal share:sync`; card `pnpm -C terminal og:card`.
 - **Planned:** `window.__actions.run(id, args)` over the same runner; a WebMCP manifest generated from the registry and the op tools.
 
 ## API (router)

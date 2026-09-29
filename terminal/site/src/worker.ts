@@ -33,6 +33,19 @@ export function redirectFor(url: URL): string | null {
   return null;
 }
 
+/**
+ * The sales pages (2026-09-29): /about, /pricing and /faq are static files
+ * (app/public/about.html ...) served by the asset store at their clean paths.
+ * /about/ and /about.html redirect to /about so each page has one address
+ * (its canonical and og:url). Public and indexable; no trackers.
+ */
+export const SALES_PAGES = ['/about', '/pricing', '/faq'] as const;
+
+export function salesRedirect(url: URL): string | null {
+  const match = /^\/(about|pricing|faq)(\/|\.html)$/.exec(url.pathname);
+  return match ? `${url.origin}/${match[1]}${url.search}` : null;
+}
+
 export type HubRoute = 'none' | 'shell' | 'data' | 'api';
 
 export function hubRoute(pathname: string): HubRoute {
@@ -104,6 +117,10 @@ export default {
     const target = redirectFor(url);
     if (target) {
       return Response.redirect(target, 301);
+    }
+    const sales = salesRedirect(url);
+    if (sales) {
+      return Response.redirect(sales, 301);
     }
     const route = hubRoute(url.pathname);
     if (route !== 'none') return serveHub(request, env, route, url);

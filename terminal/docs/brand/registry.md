@@ -48,6 +48,12 @@ One line per asset, per `terminal/skills/logos-and-icons/SKILL.md`. Source order
 | Webflow | `app/public/brand/webflow/webflow.svg` | https://simpleicons.org/?q=webflow (cdn.simpleicons.org/webflow) | Simple Icons collection CC0-1.0; Webflow trademark belongs to its owner | 2026-09-29 | colour source; generated set `-mono` `-light` `-dark` `-wide` `-stacked` (see Configurations) |
 | Vercel | `app/public/brand/vercel/vercel.svg` | https://simpleicons.org/?q=vercel (cdn.simpleicons.org/vercel) | Simple Icons collection CC0-1.0; Vercel trademark belongs to its owner | 2026-09-29 | colour source; generated set `-mono` `-light` `-dark` `-wide` `-stacked` (see Configurations) |
 
+## Our own mark (2026-09-29, C-091)
+
+| Mark | Files | Source | Terms | Checked | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Fresh Terminal | `app/public/brand/fresh-terminal/fresh-terminal-{horizontal,stacked,monogram}-{dark,light}.svg`; card `app/public/brand/og-1200x630.png` | ours: the `>_` monogram from the app's top bar; card source `docs/brand/og-card.html` rendered by `scripts/og-card.mjs` | ours | 2026-09-29 | `-dark` for dark backgrounds (green square, light name), `-light` for light backgrounds. The name is SVG text in the system monospace, not outlined. Listed in `brand/index.json` → `product` (kept by `brand-variants.mjs`). |
+
 ## Configurations (2026-09-29)
 
 Every gathered mark has six files, written by `node scripts/brand-variants.mjs` from the colour source and listed in `app/public/brand/index.json`: `<slug>.svg` (official colour, icon only), `-mono.svg` (`currentColor`), `-light.svg` (fixed `#15181d`), `-dark.svg` (fixed `#e8eaed`), `-wide.svg` and `-stacked.svg` (our icon + name lockups in the house font; not the vendor's wordmark). All transparent. Preview with the configuration switcher at `pages/brands.html`. Raster export, vectorizing raster-only logos and 3D versions are later costed layers (skill §4b).

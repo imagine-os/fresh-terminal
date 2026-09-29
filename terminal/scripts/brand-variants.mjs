@@ -97,5 +97,7 @@ for (const slug of readdirSync(root).sort()) {
     checked: meta.checked,
   });
 }
-writeFileSync(join(root, 'index.json'), JSON.stringify({ version: 'brand.v1', generated: new Date().toISOString().slice(0, 10), note: 'Icon-only marks are the vendors\' (see terms). -wide and -stacked are our own icon+name lockups in the house font, not official wordmarks. -light/-dark are fixed-colour copies for places without currentColor. All files are transparent SVG.', marks: manifest }, null, 2) + '\n');
+// Our own mark (the `product` entry, sales site pass 2026-09-29) is hand-made; keep it across regenerations.
+const previous = existsSync(join(root, 'index.json')) ? JSON.parse(readFileSync(join(root, 'index.json'), 'utf8')) : {};
+writeFileSync(join(root, 'index.json'), JSON.stringify({ version: 'brand.v1', generated: new Date().toISOString().slice(0, 10), note: 'Icon-only marks are the vendors\' (see terms). -wide and -stacked are our own icon+name lockups in the house font, not official wordmarks. -light/-dark are fixed-colour copies for places without currentColor. All files are transparent SVG.', marks: manifest, ...(previous.product ? { product: previous.product } : {}) }, null, 2) + '\n');
 console.log(`brand-variants: ${manifest.length} marks, ${written} variant files, index.json written`);

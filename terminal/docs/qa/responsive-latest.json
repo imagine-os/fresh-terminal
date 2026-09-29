@@ -1,5 +1,5 @@
 {
-  "stamp": "2026-09-29T05:11:26.492Z",
+  "stamp": "2026-09-29T05:24:48.137Z",
   "results": [
     {
       "page": "landing",
@@ -224,6 +224,174 @@
       "composerVisible": true,
       "smallTargets": [],
       "screenshot": "replay-3840.png"
+    },
+    {
+      "page": "about",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-360.png"
+    },
+    {
+      "page": "about",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-390.png"
+    },
+    {
+      "page": "about",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-768.png"
+    },
+    {
+      "page": "about",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-1280.png"
+    },
+    {
+      "page": "about",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-1920.png"
+    },
+    {
+      "page": "about",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-2560.png"
+    },
+    {
+      "page": "about",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "about-3840.png"
+    },
+    {
+      "page": "pricing",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-360.png"
+    },
+    {
+      "page": "pricing",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-390.png"
+    },
+    {
+      "page": "pricing",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-768.png"
+    },
+    {
+      "page": "pricing",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-1280.png"
+    },
+    {
+      "page": "pricing",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-1920.png"
+    },
+    {
+      "page": "pricing",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-2560.png"
+    },
+    {
+      "page": "pricing",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "pricing-3840.png"
+    },
+    {
+      "page": "faq",
+      "width": 360,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-360.png"
+    },
+    {
+      "page": "faq",
+      "width": 390,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-390.png"
+    },
+    {
+      "page": "faq",
+      "width": 768,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-768.png"
+    },
+    {
+      "page": "faq",
+      "width": 1280,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-1280.png"
+    },
+    {
+      "page": "faq",
+      "width": 1920,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-1920.png"
+    },
+    {
+      "page": "faq",
+      "width": 2560,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-2560.png"
+    },
+    {
+      "page": "faq",
+      "width": 3840,
+      "overflow": false,
+      "composerVisible": true,
+      "smallTargets": [],
+      "screenshot": "faq-3840.png"
     }
   ]
 }

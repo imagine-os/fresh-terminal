@@ -1,7 +1,7 @@
 /**
  * pnpm check:responsive
  * Builds nothing itself: expects app/dist (run `pnpm build:app` first) and
- * serves it with `vite preview`. Renders /, /box/demo and /canvas at seven widths and
+ * serves it with `vite preview`. Renders /, /box/demo, /canvas, replay and the sales pages at seven widths and
  * asserts: no horizontal overflow, composer visible, every visible interactive
  * element is at least 44x44 CSS px. Screenshots land in docs/qa/.
  * Uses the preinstalled Chromium at PLAYWRIGHT_BROWSERS_PATH (default /opt/pw-browsers).
@@ -16,6 +16,10 @@ const PAGES = [
   { name: 'box', path: '/box/demo', composer: true, ready: '[data-testid="composer"]' },
   { name: 'canvas', path: '/canvas', composer: false, ready: '[data-testid="canvas-surface"]' },
   { name: 'replay', path: '/box/demo/play', composer: false, ready: '[data-testid="scrubber"]' },
+  // The sales pages (2026-09-29): static HTML at /about, /pricing, /faq.
+  { name: 'about', path: '/about', composer: false, ready: '#main .hero' },
+  { name: 'pricing', path: '/pricing', composer: false, ready: '#main .plans' },
+  { name: 'faq', path: '/faq', composer: false, ready: '#main .faq' },
 ];
 // RESPONSIVE_PORT lets two checkouts run the check at the same time.
 const PORT = Number(process.env.RESPONSIVE_PORT ?? 4173);

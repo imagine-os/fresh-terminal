@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import worker, { hubRoute, redirectFor } from './worker';
+import worker, { SALES_PAGES, hubRoute, redirectFor, salesRedirect } from './worker';
 
 describe('site worker', () => {
   it('redirects www to the apex and keeps path and query', () => {
@@ -18,6 +18,40 @@ describe('site worker', () => {
     const www = await worker.fetch(new Request('https://www.freshterminal.ai/canvas'), env);
     expect(www.status).toBe(301);
     expect(www.headers.get('Location')).toBe('https://freshterminal.ai/canvas');
+  });
+});
+
+describe('sales pages', () => {
+  const env = {
+    ASSETS: {
+      fetch: async (request: Request) => {
+        const path = new URL(request.url).pathname;
+        const page = SALES_PAGES.find((name) => name === path);
+        return page
+          ? new Response(`<!doctype html><title>${page}</title>`, { headers: { 'Content-Type': 'text/html' } })
+          : new Response('<div id="root"></div>', { headers: { 'Content-Type': 'text/html' } });
+      },
+    },
+  };
+
+  it('serves /about, /pricing and /faq from the asset store, indexable, revalidated', async () => {
+    for (const page of SALES_PAGES) {
+      const response = await worker.fetch(new Request(`https://freshterminal.ai${page}`), env);
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain(`<title>${page}</title>`);
+      expect(response.headers.get('X-Robots-Tag')).toBeNull();
+      expect(response.headers.get('Cache-Control')).toContain('must-revalidate');
+    }
+  });
+
+  it('gives each page one address: a trailing slash or .html redirects, keeping the query', async () => {
+    expect(salesRedirect(new URL('https://freshterminal.ai/about/'))).toBe('https://freshterminal.ai/about');
+    expect(salesRedirect(new URL('https://freshterminal.ai/pricing.html?lang=es'))).toBe('https://freshterminal.ai/pricing?lang=es');
+    expect(salesRedirect(new URL('https://freshterminal.ai/faq'))).toBeNull();
+    expect(salesRedirect(new URL('https://freshterminal.ai/aboutx/'))).toBeNull();
+    const moved = await worker.fetch(new Request('https://freshterminal.ai/faq/'), env);
+    expect(moved.status).toBe(301);
+    expect(moved.headers.get('Location')).toBe('https://freshterminal.ai/faq');
   });
 });
 

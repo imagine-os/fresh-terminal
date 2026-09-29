@@ -727,6 +727,8 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** Taken by the other session (billing and the freshterminal.ai site are its build); this session asked it to keep the headline pair, the tagline and the brand set.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790657743245569?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790657743.245569
 
+**Follow-up to 82 (2026-09-29 05:30 UTC):** built as C-091 (Opus 5.5): the sales site at https://freshterminal.ai/about, /pricing and /faq (also on Pages), best-of-3 on the hero and the pricing layout, pricing Free / $5 starter kit / pay as you go at cost + 5% (not final, not wired yet) / your key $0 for models, Teams and self-host coming soon. Decision 0025, changelog 0015, page doc `pages/sales.md`.
+
 ## 83. Tue Sep 29, 12:01 AM CDT · 2026-09-29 05:01:34 UTC
 
 > no daily cap . just $5 on us.
@@ -740,9 +742,13 @@ Other session (Opus 5.5): researched Product Hunt's current rules (help center, 
 **What happened:** The offline prompt queue landed in C-090 (a line typed offline is held, marked, and sent, edited or discarded when the connection is back; stale after 10 min). The cap, storage costs, the privacy checkbox and SpacetimeDB live sync went to the other session.
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658094470499?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658094.470499
 
+**Follow-up to 83 (2026-09-29 05:30 UTC):** on the sales site (C-091): the starter kit reads "$5 of usage on us" with no daily cap mentioned; your key says storage past 100 MB free costs about $0.05 per GB-month (not final, not billed yet); privacy is a headline section ("Private from us by default") with the share-my-data checkbox, access only when granted and encryption with your own key marked coming soon; live sync across devices is coming soon; the offline queue (C-090) is shown as live. The router still caps free usage at $1 a day per account (C-089): open question 20.
+
 ## 84. Tue Sep 29, 12:03 AM CDT · 2026-09-29 05:03:40 UTC
 
 > when i share the website link freshterminal.ai it should have an image thumbnail and the tagline for sharing. the tagline should be something different than the tagline in the thumbnail. it should be something like the terminal for everyone, or something better . terminal that just works.  i dunn. if computers started smart, the terminal would be like this.... I dunno.
 
 **What happened:** Taken by the other session with its sales-site build (card, og tags on the app and the site). This session suggested the copy: card "A terminal that adapts to you."; share title "Fresh Terminal — the terminal for everyone"; description "If computers had started smart, the terminal would look like this. Type or talk; it builds itself around you."
 [Message link](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790658220851259?thread_ts=1790634517.611669&cid=C0C2YAS5TL5) · ts 1790658220.851259
+
+**Follow-up to 84 (2026-09-29 05:30 UTC):** built in C-091: the card `app/public/brand/og-1200x630.png` (mark + "A terminal that adapts to you." + a hint of the prompt box; source `docs/brand/og-card.html`), share title "Fresh Terminal — the terminal for everyone" and description "If computers had started smart, the terminal would look like this. Type, and it builds itself around you." ("talk" left out: voice is not ready), both in `shared/src/share.ts`, written into the raw HTML of /, /about, /pricing and /faq by `pnpm share:sync`.
