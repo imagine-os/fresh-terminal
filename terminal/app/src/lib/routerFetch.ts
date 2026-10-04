@@ -38,27 +38,57 @@ export function forgetDevice(): void {
   writeJson(DEVICE_KEY, null);
 }
 
+/** Cancel a caller's wait without cancelling a shared device-registration request. */
+function waitFor<T>(work: Promise<T>, signal?: AbortSignal | null): Promise<T> {
+  if (!signal) return work;
+  return new Promise((resolve, reject) => {
+    const aborted = () => {
+      signal.removeEventListener('abort', aborted);
+      reject(new DOMException('The request was stopped', 'AbortError'));
+    };
+    if (signal.aborted) {
+      aborted();
+      void work.catch(() => undefined);
+      return;
+    }
+    signal.addEventListener('abort', aborted, { once: true });
+    work.then(
+      (value) => { signal.removeEventListener('abort', aborted); resolve(value); },
+      (error: unknown) => { signal.removeEventListener('abort', aborted); reject(error); },
+    );
+  });
+}
+
 /** The signed device id for this browser, fetching one the first time. Null when the router has no credits (local dev). */
-export async function deviceToken(fetchImpl: typeof fetch = fetch): Promise<string | null> {
+export async function deviceToken(fetchImpl: typeof fetch = fetch, timeoutMs = 30_000): Promise<string | null> {
   const saved = storedDevice();
   if (saved) return saved;
   if (deviceInflight) return deviceInflight;
   deviceInflight = (async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       // If the router runs Turnstile, get an invisible token first.
       let turnstile = '';
-      const info = await fetchImpl(routerUrl('/credits'), { method: 'GET' }).catch(() => null);
+      const info = await waitFor(fetchImpl(routerUrl('/credits'), { method: 'GET', signal: controller.signal }), controller.signal).catch((error: unknown) => {
+        if (controller.signal.aborted) throw error;
+        return null;
+      });
       if (info?.ok) {
-        const status = (await info.json().catch(() => ({}))) as { turnstile?: string; turnstile_sitekey?: string };
-        if (status.turnstile === 'on' && status.turnstile_sitekey) turnstile = await turnstileToken(status.turnstile_sitekey);
+        const status = (await waitFor(info.json(), controller.signal).catch((error: unknown) => {
+          if (controller.signal.aborted) throw error;
+          return {};
+        })) as { turnstile?: string; turnstile_sitekey?: string };
+        if (status.turnstile === 'on' && status.turnstile_sitekey) turnstile = await waitFor(turnstileToken(status.turnstile_sitekey), controller.signal);
       }
-      const response = await fetchImpl(routerUrl('/credits/device'), {
+      const response = await waitFor(fetchImpl(routerUrl('/credits/device'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(turnstile ? { turnstile } : {}),
-      });
+        signal: controller.signal,
+      }), controller.signal);
       if (!response.ok) return null;
-      const body = (await response.json()) as { device?: string };
+      const body = (await waitFor(response.json(), controller.signal)) as { device?: string };
       if (body.device) {
         deviceInMemory = body.device;
         writeJson(DEVICE_KEY, body.device);
@@ -67,6 +97,7 @@ export async function deviceToken(fetchImpl: typeof fetch = fetch): Promise<stri
     } catch {
       return null;
     } finally {
+      clearTimeout(timer);
       deviceInflight = null;
     }
   })();
@@ -88,13 +119,16 @@ export function parseSoftPrompt(value: string | null): SoftPromptEvent | null {
 }
 
 async function withHeaders(init: RequestInit, fetchImpl: typeof fetch): Promise<Headers> {
+  if (init.signal?.aborted) throw new DOMException('The request was stopped', 'AbortError');
   const headers = new Headers(init.headers);
-  const device = await deviceToken(fetchImpl);
-  if (device && !headers.has(DEVICE_HEADER)) headers.set(DEVICE_HEADER, device);
   if (sessionToken && !headers.has('Authorization')) {
-    const token = await sessionToken().catch(() => null);
+    const token = await waitFor(sessionToken().catch(() => null), init.signal);
     if (token) headers.set('Authorization', `Bearer ${token}`);
   }
+  // The device also participates in signed-in welcome-credit checks. Keep
+  // that header while making its shared setup bounded and caller-cancellable.
+  const device = await waitFor(deviceToken(fetchImpl), init.signal);
+  if (device && !headers.has(DEVICE_HEADER)) headers.set(DEVICE_HEADER, device);
   return headers;
 }
 
@@ -102,12 +136,13 @@ async function withHeaders(init: RequestInit, fetchImpl: typeof fetch): Promise<
 export async function routerFetch(pathOrUrl: string, init: RequestInit = {}, options: { paid?: boolean; fetchImpl?: typeof fetch } = {}): Promise<Response> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const url = routerUrl(pathOrUrl);
-  let response = await fetchImpl(url, { ...init, headers: await withHeaders(init, fetchImpl) });
+  let response = await waitFor(fetchImpl(url, { ...init, headers: await withHeaders(init, fetchImpl) }), init.signal);
   if (response.status === 401) {
-    const code = ((await response.clone().json().catch(() => ({}))) as { code?: string }).code;
+    const body = await waitFor(response.clone().json().catch(() => ({})), init.signal) as { code?: string } | null;
+    const code = body?.code;
     if (code === 'device_required') {
       forgetDevice();
-      response = await fetchImpl(url, { ...init, headers: await withHeaders(init, fetchImpl) });
+      response = await waitFor(fetchImpl(url, { ...init, headers: await withHeaders(init, fetchImpl) }), init.signal);
     }
   }
   const soft = parseSoftPrompt(response.headers.get(SOFT_PROMPT_HEADER));

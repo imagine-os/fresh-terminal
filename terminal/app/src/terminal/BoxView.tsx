@@ -16,7 +16,7 @@ import { readOwnKey } from '../settings/ownKey';
 import { store, useStoreSnapshot, type Box } from '../store';
 import type { GlossaryTerm } from '@shared/ui';
 import type { ChipDecision, ChipRecords } from './ChipPopover';
-import { Composer } from './Composer';
+import { Composer, type RunState } from './Composer';
 import { Button } from '../ui/Button';
 import { matchLocalCommand } from './localCommands';
 import { looksLikeSkinRequest } from '@shared/skins';
@@ -116,6 +116,14 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
   const { t, lang } = useI18n();
   const snapshot = useStoreSnapshot();
   const [busy, setBusy] = useState(false);
+  const [runState, setRunState] = useState<RunState>('idle');
+  const running = useRef(false);
+  const mounted = useRef(true);
+  const lastPrompt = useRef('');
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; turnAbort.current?.abort(); };
+  }, []);
   // A line typed while offline waits here and never sends on its own (C-090).
   const queueKey = `fresh-terminal.queue.${box.id}`;
   const [queued, setQueued] = useState<{ text: string; chips: Chip[]; at: number } | null>(() => {
@@ -252,7 +260,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
     store.touchPresence(box.id);
   }, [box.id]);
 
-  const onSend = useCallback(
+  const executeTurn = useCallback(
     async (text: string, chips: Chip[]) => {
       if (!sentOnce.current) {
         sentOnce.current = true;
@@ -266,6 +274,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       if (offline && localNow === null) {
         // No network: hold the line, say so, and let the person decide when it comes back.
         holdOffline(text, chips);
+        setRunState('idle');
         return;
       }
       store.appendLine(box.id, 'user', text, chips);
@@ -273,6 +282,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       // Skins and materials run the refine loop (pass 5).
       if (looksLikeSkinRequest(text)) {
         const line = store.appendLine(box.id, 'assistant', text, []);
+        setRunState('idle'); // Refinement has its own progress and Stop control.
         void startSkinRun({ boxId: box.id, text, lineId: line.id });
         return;
       }
@@ -322,6 +332,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             const applied = store.applyOps(box.id, local.ops, 'local');
             const meta: ReplyMeta = { intent: 'edit_ui', model: '', ms: performance.now() - started, cost_micro: 0, source: 'local' };
             if (!applied.ok) {
+              setRunState('error');
               store.appendLine(box.id, 'assistant', applied.reason, [], { reply: { meta, blocks: [{ kind: 'error', text: applied.reason }] } });
               return;
             }
@@ -378,8 +389,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         }
       }
 
-      setBusy(true);
       let replyLineId: string | null = null;
+      let assembled = '';
       const abort = new AbortController();
       turnAbort.current = abort;
       try {
@@ -387,7 +398,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         const startedAt = Date.now();
         const reply = store.appendLine(box.id, 'assistant', '', []);
         replyLineId = reply.id;
-        let assembled = '';
+
         let modelBlocks: ReplyBlock[] = [];
         let batch: { id: string; summary: string; changes: Change[] } | null = null;
         const extra: ReplyBlock[] = [];
@@ -421,6 +432,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             store.updateLine(reply.id, assembled, true);
           },
           onOps: (payload) => {
+            if (!mounted.current || abort.signal.aborted) return;
             if (payload.ops.length === 0) {
               if (payload.rejected.length > 0) {
                 extra.push({ kind: 'error', text: payload.rejected.join('; ').slice(0, 600) });
@@ -444,15 +456,18 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             modelBlocks = blocks;
           },
           onSkin: () => {
+            if (!mounted.current || abort.signal.aborted) return;
             skinRequested = true;
           },
           onDone: (done) => {
+            if (!done.ok && mounted.current) setRunState('error');
             let ledgerId: string | null = null;
             if (done.entry) {
               const { owner_identity: _ignored, ...draft } = done.entry;
               ledgerId = store.appendEntry(draft).id;
             }
-            if (skinRequested) {
+            if (skinRequested && mounted.current && !abort.signal.aborted) {
+              setRunState('idle');
               store.updateLine(reply.id, promptText, false);
               void startSkinRun({ boxId: box.id, text: promptText, lineId: reply.id });
               return;
@@ -478,6 +493,7 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             }
           },
           onFail: (failure) => {
+            if (mounted.current) setRunState(failure.kind === 'stopped' ? 'stopped' : 'error');
             store.updateLine(reply.id, assembled, false);
             let message: string;
             if (failure.kind === 'no-router') {
@@ -494,6 +510,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             } else {
               message = t('system.error', { message: failure.message });
             }
+            // A stop can arrive after ops: keep the applied batch and its Undo visible.
+            if (batch) store.setLineReply(reply.id, assemble(null, modelBlocks, batch, extra));
             store.appendLine(box.id, 'system', message, []);
           },
         };
@@ -502,13 +520,14 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
           // Bring your own key: browser -> OpenRouter directly; our router never sees the key.
           await streamDirect(
             { boxId: box.id, text, chips, history, snapshot: boxSnapshot },
-            { apiKey: ownKey, referer: window.location.origin },
+            { apiKey: ownKey, referer: window.location.origin, signal: abort.signal },
             handlers,
           );
         } else {
           // Never POST to a static host: a missing router used to surface as "HTTP 405".
           const health = await probeRouter();
           if (health.state !== 'ok') {
+            if (mounted.current) setRunState('error');
             store.updateLine(reply.id, '', false);
             store.appendLine(box.id, 'system', t('system.noRouterDeployed'), [], { reveal: 'none', component: 'no-router' });
             return;
@@ -516,17 +535,35 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
           await streamRoute({ boxId: box.id, text, chips, history, snapshot: boxSnapshot, screen }, handlers, { signal: abort.signal });
         }
       } catch (error) {
+        if (mounted.current) setRunState('error');
         // Nothing may end in silence: a thrown turn leaves a visible line.
-        if (replyLineId) store.updateLine(replyLineId, '', false);
+        if (replyLineId) store.updateLine(replyLineId, assembled, false);
         const message = error instanceof Error ? error.message : String(error);
         store.appendLine(box.id, 'system', t('system.turnFailed', { message: message.slice(0, 200) }), [], { reveal: 'none' });
       } finally {
         turnAbort.current = null;
-        setBusy(false);
+
       }
     },
     [box.id, lines, snapshot.boxes, lang, t, onOpenBox, commands, pageId, onLeavePage],
   );
+
+  const onSend = useCallback((text: string, chips: Chip[]): boolean => {
+    if (running.current || !mounted.current) return false;
+    running.current = true;
+    lastPrompt.current = text;
+    setBusy(true);
+    setRunState('running');
+    void executeTurn(text, chips).then(() => {
+      if (mounted.current) setRunState((state) => state === 'running' ? 'complete' : state);
+    }).catch(() => {
+      if (mounted.current) setRunState('error');
+    }).finally(() => {
+      running.current = false;
+      if (mounted.current) setBusy(false);
+    });
+    return true;
+  }, [executeTurn]);
 
   const cancelTurn = useCallback(() => {
     turnAbort.current?.abort();
@@ -628,6 +665,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
         hasBoxes={snapshot.boxes.length > 1}
         hasLines={!isEmpty}
         busy={busy}
+        runState={runState}
+        onRestore={() => window.dispatchEvent(new CustomEvent('ft:composer-insert', { detail: { text: lastPrompt.current } }))}
         onSend={onSend}
         modelTagger={commands.modelTagger}
         records={records}
@@ -678,7 +717,9 @@ function ComposerSlot(props: {
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
-  onSend: (text: string, chips: Chip[]) => void;
+  onSend: (text: string, chips: Chip[]) => boolean | void;
+  runState: RunState;
+  onRestore: () => void;
   /** Render in the middle of the empty stage instead of the bottom bar. */
   inline?: boolean;
 }) {
@@ -691,6 +732,9 @@ function ComposerSlot(props: {
   }
   return createPortal(
     <Composer
+      key={props.boxId}
+      runState={props.runState}
+      onRestore={props.onRestore}
       boxId={props.boxId}
       cursor={props.theme.cursor}
       themeId={props.theme.id}

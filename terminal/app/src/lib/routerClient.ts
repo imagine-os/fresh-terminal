@@ -94,136 +94,169 @@ export interface StreamOptions {
 export async function streamRoute(request: RouteRequest, handlers: RouteHandlers, options: StreamOptions = {}): Promise<void> {
   const controller = new AbortController();
   let stoppedBy: 'user' | 'idle' | null = null;
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  let done = false;
+  let failed = false;
+  const fail = (failure: RouteFailure) => {
+    if (done || failed) return;
+    failed = true;
+    handlers.onFail(failure);
+  };
   const stop = (reason: 'user' | 'idle') => {
-    if (stoppedBy === null) {
+    if (stoppedBy === null && !done) {
       stoppedBy = reason;
       controller.abort();
     }
   };
+  const onAbort = () => stop('user');
   if (options.signal?.aborted) {
-    handlers.onFail({ kind: 'stopped', reason: 'user' });
+    fail({ kind: 'stopped', reason: 'user' });
     return;
   }
-  options.signal?.addEventListener('abort', () => stop('user'), { once: true });
+  options.signal?.addEventListener('abort', onAbort, { once: true });
   const idleMs = options.idleMs ?? 60_000;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   const armIdle = () => {
     if (idleTimer !== null) clearTimeout(idleTimer);
     idleTimer = setTimeout(() => stop('idle'), idleMs);
   };
-  const disarm = () => {
-    if (idleTimer !== null) clearTimeout(idleTimer);
-    idleTimer = null;
+
+  // Header preparation can wait on device registration or Clerk before fetch
+  // sees its signal. Race that work (and stream reads) so Esc/idle always settles.
+  const untilStopped = <T,>(work: Promise<T>): Promise<T> => new Promise((resolve, reject) => {
+    const aborted = () => {
+      controller.signal.removeEventListener('abort', aborted);
+      reject(new DOMException('The turn was stopped', 'AbortError'));
+    };
+    if (controller.signal.aborted) {
+      aborted();
+      // Observe a late rejection from work that had already started.
+      void work.catch(() => undefined);
+      return;
+    }
+    controller.signal.addEventListener('abort', aborted, { once: true });
+    work.then(
+      (value) => { controller.signal.removeEventListener('abort', aborted); resolve(value); },
+      (error: unknown) => { controller.signal.removeEventListener('abort', aborted); reject(error); },
+    );
+  });
+  const json = async (response: Response): Promise<Record<string, unknown>> => {
+    try {
+      const value: unknown = await untilStopped(response.json());
+      return value && typeof value === 'object' ? value as Record<string, unknown> : {};
+    } catch (error) {
+      if (controller.signal.aborted) throw error;
+      return {};
+    }
   };
 
-  let response: Response;
   armIdle();
   try {
-    response = await routerFetch(
-      '/route',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request),
-        signal: controller.signal,
-      },
-      { paid: true },
-    );
-  } catch {
-    disarm();
-    handlers.onFail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'no-router' });
-    return;
-  }
-
-  if ([401, 402, 403, 413, 429].includes(response.status)) {
-    const body = (await response.clone().json().catch(() => ({}))) as { code?: CreditsErrorCode; error?: string };
-    if (body.code) {
-      handlers.onFail({ kind: 'credits', code: body.code, message: body.error ?? `HTTP ${response.status}` });
-      return;
-    }
-  }
-  if (response.status === 503) {
-    const body = (await response.json().catch(() => ({}))) as { hint?: string };
-    handlers.onFail({ kind: 'no-key', ...(body.hint ? { hint: body.hint } : {}) });
-    return;
-  }
-  if (response.status === 501) {
-    const body = (await response.json().catch(() => ({}))) as { error?: string };
-    handlers.onFail({ kind: 'pending', note: body.error ?? 'pending tier' });
-    return;
-  }
-  if (!response.ok || response.body === null) {
-    if (response.status === 404 || response.status === 502) {
-      handlers.onFail({ kind: 'no-router' });
-      return;
-    }
-    handlers.onFail({ kind: 'error', message: `HTTP ${response.status}` });
-    return;
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  let done = false;
-
-  const handleEvent = (eventName: string, data: string) => {
-    if (eventName === 'delta') {
-      const parsed = JSON.parse(data) as { text: string };
-      handlers.onDelta(parsed.text);
-    } else if (eventName === 'meta') {
-      handlers.onMeta?.(JSON.parse(data) as RouteMeta);
-    } else if (eventName === 'ops') {
-      handlers.onOps?.(JSON.parse(data) as OpsPayload);
-    } else if (eventName === 'skin') {
-      handlers.onSkin?.(JSON.parse(data) as { text: string });
-    } else if (eventName === 'reply') {
-      handlers.onReply?.((JSON.parse(data) as { blocks: ReplyBlock[] }).blocks);
-    } else if (eventName === 'done') {
-      done = true;
-      handlers.onDone(JSON.parse(data) as RouteDone);
-    } else if (eventName === 'error') {
-      const parsed = JSON.parse(data) as { message: string };
-      handlers.onFail({ kind: 'error', message: parsed.message });
-    }
-  };
-
-  while (true) {
-    let chunk: ReadableStreamReadResult<Uint8Array>;
+    let response: Response;
     try {
-      chunk = await reader.read();
+      response = await untilStopped(routerFetch(
+        '/route',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(request),
+          signal: controller.signal,
+        },
+        { paid: true },
+      ));
     } catch {
-      disarm();
-      handlers.onFail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'error', message: 'stream broke' });
+      fail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'no-router' });
       return;
     }
-    const { value, done: finished } = chunk;
-    if (finished) {
-      break;
+
+    if ([401, 402, 403, 413, 429].includes(response.status)) {
+      const body = await json(response.clone());
+      if (typeof body.code === 'string') {
+        fail({ kind: 'credits', code: body.code as CreditsErrorCode, message: typeof body.error === 'string' ? body.error : `HTTP ${response.status}` });
+        return;
+      }
     }
-    armIdle();
-    buffer += decoder.decode(value, { stream: true });
-    let separator = buffer.indexOf('\n\n');
-    while (separator !== -1) {
-      const block = buffer.slice(0, separator);
-      buffer = buffer.slice(separator + 2);
-      separator = buffer.indexOf('\n\n');
+    if (response.status === 503) {
+      const body = await json(response);
+      fail({ kind: 'no-key', ...(typeof body.hint === 'string' ? { hint: body.hint } : {}) });
+      return;
+    }
+    if (response.status === 501) {
+      const body = await json(response);
+      fail({ kind: 'pending', note: typeof body.error === 'string' ? body.error : 'pending tier' });
+      return;
+    }
+    if (!response.ok || response.body === null) {
+      fail(response.status === 404 || response.status === 502 ? { kind: 'no-router' } : { kind: 'error', message: `HTTP ${response.status}` });
+      return;
+    }
+
+    reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    const handleEvent = (block: string) => {
+      if (done || controller.signal.aborted) return;
       let eventName = 'message';
       const dataLines: string[] = [];
-      for (const line of block.split('\n')) {
-        if (line.startsWith('event:')) {
-          eventName = line.slice(6).trim();
-        } else if (line.startsWith('data:')) {
-          dataLines.push(line.slice(5).trim());
-        }
+      for (const line of block.split(/\r?\n/)) {
+        if (line.startsWith('event:')) eventName = line.slice(6).trim();
+        else if (line.startsWith('data:')) dataLines.push(line.slice(5).replace(/^ /, ''));
       }
-      if (dataLines.length > 0) {
-        handleEvent(eventName, dataLines.join('\n'));
+      if (dataLines.length === 0) return;
+      const data = dataLines.join('\n');
+      if (eventName === 'delta') {
+        handlers.onDelta((JSON.parse(data) as { text: string }).text);
+      } else if (eventName === 'meta') {
+        handlers.onMeta?.(JSON.parse(data) as RouteMeta);
+      } else if (eventName === 'ops') {
+        handlers.onOps?.(JSON.parse(data) as OpsPayload);
+      } else if (eventName === 'skin') {
+        handlers.onSkin?.(JSON.parse(data) as { text: string });
+      } else if (eventName === 'reply') {
+        handlers.onReply?.((JSON.parse(data) as { blocks: ReplyBlock[] }).blocks);
+      } else if (eventName === 'done') {
+        const result = JSON.parse(data) as RouteDone;
+        done = true;
+        handlers.onDone(result);
+      } else if (eventName === 'error') {
+        // The server may still send done with billed usage after an error.
+        // Preserve that ledger event, but never add a second generic failure.
+        fail({ kind: 'error', message: (JSON.parse(data) as { message: string }).message });
+      }
+    };
+
+    while (!done) {
+      const { value, done: finished } = await untilStopped(reader.read());
+      if (finished) {
+        buffer += decoder.decode();
+        if (buffer.trim()) handleEvent(buffer);
+        break;
+      }
+      armIdle();
+      buffer += decoder.decode(value, { stream: true });
+      let separator = /\r?\n\r?\n/.exec(buffer);
+      while (separator && !done) {
+        const block = buffer.slice(0, separator.index);
+        buffer = buffer.slice(separator.index + separator[0].length);
+        handleEvent(block);
+        separator = /\r?\n\r?\n/.exec(buffer);
       }
     }
-  }
-
-  disarm();
-  if (!done) {
-    handlers.onFail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'error', message: 'stream ended without done' });
+    if (!done) {
+      fail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'error', message: 'stream ended without done' });
+    }
+  } catch (error) {
+    if (done) throw error;
+    fail(stoppedBy ? { kind: 'stopped', reason: stoppedBy } : { kind: 'error', message: error instanceof SyntaxError ? 'Invalid router stream' : 'stream broke' });
+  } finally {
+    if (idleTimer !== null) clearTimeout(idleTimer);
+    options.signal?.removeEventListener('abort', onAbort);
+    if (reader) {
+      // A valid done settles the UI immediately, but let the server close its
+      // stream naturally so its final usage/metering flush is not cancelled.
+      if (!done) void reader.cancel().catch(() => undefined);
+      reader.releaseLock();
+    }
   }
 }

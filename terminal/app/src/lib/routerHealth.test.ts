@@ -49,4 +49,34 @@ describe('probeRouter', () => {
       });
     expect(await probeRouter({ url: 'https://slow.test', isDev: false, fetchImpl: hang, timeoutMs: 10 })).toMatchObject({ reason: 'timeout' });
   });
+  it('retries a transient failure on the next attempt without a reload', async () => {
+    let calls = 0;
+    const fakeFetch: typeof fetch = async () => {
+      calls += 1;
+      if (calls === 1) throw new TypeError('offline');
+      return Response.json({ ok: true, keyConfigured: true });
+    };
+    expect(await probeRouter({ url: 'https://r.test', fetchImpl: fakeFetch })).toMatchObject({ state: 'unreachable' });
+    expect(await probeRouter({ url: 'https://r.test', fetchImpl: fakeFetch })).toMatchObject({ state: 'ok' });
+    expect(calls).toBe(2);
+  });
+
+  it('shares a pending probe but never reuses another router URL', async () => {
+    let answer!: (response: Response) => void;
+    let calls = 0;
+    const fakeFetch: typeof fetch = async () => {
+      calls += 1;
+      return new Promise<Response>((resolve) => { answer = resolve; });
+    };
+    const first = probeRouter({ url: 'https://r.test', fetchImpl: fakeFetch });
+    const same = probeRouter({ url: 'https://r.test', fetchImpl: fakeFetch });
+    expect(calls).toBe(1);
+    answer(Response.json({ ok: true, keyConfigured: true }));
+    expect(await first).toEqual(await same);
+    const other = probeRouter({ url: 'https://other.test', fetchImpl: fakeFetch });
+    expect(calls).toBe(2);
+    answer(Response.json({ ok: true, keyConfigured: false }));
+    expect(await other).toMatchObject({ url: 'https://other.test', keyConfigured: false });
+  });
+
 });

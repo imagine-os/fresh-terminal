@@ -131,3 +131,17 @@ As of 2026-09-29:
 | **Logo configuration set** (C-068) | Generated 2026-09-29 02:55 UTC: 43 marks × 6 files (`colour`, `-mono`, `-light`, `-dark`, `-wide`, `-stacked`) by `scripts/brand-variants.mjs`; manifest `app/public/brand/index.json`; `pages/brands.html` has a configuration switcher and a light/dark page toggle. Later layers (raster export, vectorizer, 3D, official wordmarks) are written down with costs, not automated. |
 | **FreshStack nesting** (C-067) | 2026-09-29 02:55 UTC: Jev nests under OpenRouter, Gemini Live and OpenAI Realtime under LiveKit; each card shows its registered mark. |
 | **Brand marks** | 52 SVG marks at `app/public/brand/<slug>/` in six configurations, one registry line each in `docs/brand/registry.md`: 43 from Simple Icons (2026-09-29 02:28 UTC) and 9 from official sites and repos via `scripts/brand-crop.mjs` (06:10 UTC, C-098); OpenAI, Slack and W3C stay text marks by their owners' terms; our own marks (Fresh Terminal, Playset, Between Gigs, Hoy, Company OS) not started. Preview page `pages/brands.html`, canvas card `brand-marks`. Chips can now show a mark for any registered brand (wiring pending). |
+
+## 2026-10-04 — Prompt recovery and local demo repair
+
+Source: Justin's private assistant conversation on 2026-10-04 (no public Slack permalink available). See [changelog 0021](../changelog/0021.md).
+
+- Supersedes the earlier health-cache behavior: a temporary router timeout is retryable without reloading the page.
+- The minimal landing prompt remains primary; an explicit no-cost demo toggle exposes three editable local samples. Existing Starter/Hints preferences stay intact.
+- Drafts are browser-local per stage. Selecting a demo or interpreting a chip is distinct from running a prompt. Existing edit batches still provide Undo.
+- Requests have visible running/complete/error/stopped feedback; cancel and navigation stop active network work. Recovery retains newer draft text.
+- This entry records the implementation. Release evidence is the corresponding checked PR, deploy workflow and live browser verification; paid AI and account sign-in are separately scoped checks.
+
+- 2026-10-04 cancellation review: completed streamed edits retain their Undo receipt when a later part of the turn stops; stop feedback explicitly allows for those completed edits.
+
+- 2026-10-04 phone review: compact branding keeps the sign-in/account controls inside narrow screens; the local page sample shows action and quoted-object chips.
