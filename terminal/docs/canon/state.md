@@ -141,3 +141,5 @@ Source: Justin's private assistant conversation on 2026-10-04 (no public Slack p
 - Drafts are browser-local per stage. Selecting a demo or interpreting a chip is distinct from running a prompt. Existing edit batches still provide Undo.
 - Requests have visible running/complete/error/stopped feedback; cancel and navigation stop active network work. Recovery retains newer draft text.
 - This entry records the implementation. Release evidence is the corresponding checked PR, deploy workflow and live browser verification; paid AI and account sign-in are separately scoped checks.
+
+- 2026-10-04 cancellation review: completed streamed edits retain their Undo receipt when a later part of the turn stops; stop feedback explicitly allows for those completed edits.

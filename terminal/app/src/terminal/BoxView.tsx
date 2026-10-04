@@ -510,6 +510,8 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             } else {
               message = t('system.error', { message: failure.message });
             }
+            // A stop can arrive after ops: keep the applied batch and its Undo visible.
+            if (batch) store.setLineReply(reply.id, assemble(null, modelBlocks, batch, extra));
             store.appendLine(box.id, 'system', message, []);
           },
         };
