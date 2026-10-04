@@ -31,9 +31,14 @@ export interface DirectOptions {
   fetchImpl?: typeof fetch;
   now?: () => number;
   table?: RouteTable;
+  signal?: AbortSignal;
 }
 
 export async function streamDirect(request: DirectRequest, options: DirectOptions, handlers: RouteHandlers): Promise<void> {
+  if (options.signal?.aborted) {
+    handlers.onFail({ kind: 'stopped', reason: 'user' });
+    return;
+  }
   const table = options.table ?? ROUTE_TABLE;
   const now = options.now ?? Date.now;
   const started = now();
@@ -61,12 +66,24 @@ export async function streamDirect(request: DirectRequest, options: DirectOption
     referer: options.referer,
     title: PRODUCT_NAME,
     now,
-    onDelta: handlers.onDelta,
+    onDelta: (text) => { if (!options.signal?.aborted) handlers.onDelta(text); },
   };
   if (route.escalateModel) turnOptions.escalateModel = route.escalateModel;
   if (options.fetchImpl) turnOptions.fetchImpl = options.fetchImpl;
+  if (options.signal) turnOptions.signal = options.signal;
 
-  const result = await runTurn(turnOptions);
+  let result: Awaited<ReturnType<typeof runTurn>>;
+  try {
+    result = await runTurn(turnOptions);
+  } catch (error) {
+    if (!options.signal?.aborted) throw error;
+    handlers.onFail({ kind: 'stopped', reason: 'user' });
+    return;
+  }
+  if (options.signal?.aborted) {
+    handlers.onFail({ kind: 'stopped', reason: 'user' });
+    return;
+  }
   if (result.error && result.rounds.every((round) => round.toolCalls === 0) && !result.text) {
     handlers.onFail({ kind: 'error', message: result.error });
     return;

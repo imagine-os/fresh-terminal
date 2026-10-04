@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OPENROUTER_URL, streamDirect } from './openrouterDirect';
 import type { Snapshot } from '@shared/agent';
 import { defaultBoxUi } from '@shared/ui';
@@ -134,4 +134,47 @@ describe('streamDirect (bring your own key)', () => {
     expect(sink.metas[0]?.route.tier).toBe('fast');
     expect(sink.fails).toEqual([]);
   });
+  it('does not start an already-cancelled own-key request', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchImpl = vi.fn<typeof fetch>();
+    const sink = collect();
+    await streamDirect(
+      { boxId: 'b1', text: 'hello', chips: [], history: [], snapshot },
+      { apiKey: 'k', referer: 'https://example.test', fetchImpl, signal: controller.signal },
+      sink.handlers,
+    );
+    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(sink.fails).toEqual([{ kind: 'stopped', reason: 'user' }]);
+    expect(sink.done).toBeNull();
+  });
+
+  it('propagates Esc to OpenRouter and never applies buffered edits after cancellation', async () => {
+    const controller = new AbortController();
+    const cancel = vi.fn();
+    let receivedSignal: AbortSignal | null | undefined;
+    const fetchImpl: typeof fetch = async (_url, init) => {
+      receivedSignal = init?.signal;
+      return new Response(new ReadableStream({
+        start(stream) {
+          stream.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hi"}}]}\n'));
+        },
+        cancel,
+      }));
+    };
+    const sink = collect();
+    const onOps = vi.fn();
+    await streamDirect(
+      { boxId: 'b1', text: 'hello', chips: [], history: [], snapshot },
+      { apiKey: 'k', referer: 'https://example.test', fetchImpl, signal: controller.signal },
+      { ...sink.handlers, onOps, onDelta: (text) => { sink.handlers.onDelta(text); controller.abort(); } },
+    );
+    expect(receivedSignal).toBe(controller.signal);
+    expect(sink.deltas).toEqual(['Hi']);
+    expect(sink.fails).toEqual([{ kind: 'stopped', reason: 'user' }]);
+    expect(sink.done).toBeNull();
+    expect(onOps).not.toHaveBeenCalled();
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
 });

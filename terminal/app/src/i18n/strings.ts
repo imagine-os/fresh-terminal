@@ -2,6 +2,18 @@ export type Lang = 'en' | 'es';
 
 export const strings = {
   en: {
+    'composer.demo': "Try a no-cost demo",
+    'composer.demoPrompts': "Local demo prompts",
+    'composer.running': "Running… You can keep drafting",
+    'composer.localReady': "Ready to run locally · no AI credits",
+    'composer.draftReady': "Draft · chips describe your words; Send runs the prompt",
+    'composer.complete': "Complete · ready for your next prompt",
+    'composer.failed': "Couldn’t finish · your prompt is in the conversation",
+    'composer.stopped': "Stopped · your prompt is in the conversation",
+    'composer.idle': "Type a prompt or try a local demo",
+    'composer.stop': "Stop",
+    'composer.restore': "Edit last prompt",
+
     'landing.tagline': 'Evolve as we grow.',
     'play.title': 'Replay',
     'play.step': 'Step {n} of {total}',
@@ -455,6 +467,18 @@ export const strings = {
     'skin.pickAny': 'Click any version to use it; Undo goes back.',
   },
   es: {
+    'composer.demo': "Probar una demo sin costo",
+    'composer.demoPrompts': "Instrucciones de demo local",
+    'composer.running': "En curso… Puedes seguir escribiendo",
+    'composer.localReady': "Listo para ejecutar localmente · sin créditos de IA",
+    'composer.draftReady': "Borrador · las etiquetas describen tus palabras; Enviar ejecuta la instrucción",
+    'composer.complete': "Completado · listo para tu próxima instrucción",
+    'composer.failed': "No se pudo terminar · tu instrucción está en la conversación",
+    'composer.stopped': "Detenido · tu instrucción está en la conversación",
+    'composer.idle': "Escribe una instrucción o prueba una demo local",
+    'composer.stop': "Detener",
+    'composer.restore': "Editar última instrucción",
+
     'landing.tagline': 'Evolucionamos mientras crecemos.',
     'play.title': 'Repetición',
     'play.step': 'Paso {n} de {total}',

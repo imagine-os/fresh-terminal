@@ -133,58 +133,69 @@ export async function* streamChat(options: StreamChatOptions): AsyncGenerator<St
   let buffer = '';
   let sentId = false;
   let sentModel = false;
+  const onAbort = () => { void reader.cancel().catch(() => undefined); };
+  options.signal?.addEventListener('abort', onAbort, { once: true });
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
+  try {
+    while (true) {
+      options.signal?.throwIfAborted();
+      const { done, value } = await reader.read();
+      options.signal?.throwIfAborted();
+      if (done) {
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      let newline = buffer.indexOf('\n');
+      while (newline !== -1) {
+        options.signal?.throwIfAborted();
+        const chunk = parseSseLine(buffer.slice(0, newline).trim());
+        buffer = buffer.slice(newline + 1);
+        newline = buffer.indexOf('\n');
+        if (chunk === null) {
+          continue;
+        }
+        if (chunk.error?.message) {
+          yield { type: 'error', message: chunk.error.message };
+          continue;
+        }
+        if (!sentId && chunk.id) {
+          sentId = true;
+          yield { type: 'id', id: chunk.id };
+        }
+        if (!sentModel && chunk.model) {
+          sentModel = true;
+          yield { type: 'model', model: chunk.model };
+        }
+        const choice = chunk.choices?.[0];
+        const content = choice?.delta?.content;
+        if (typeof content === 'string' && content.length > 0) {
+          yield { type: 'delta', text: content };
+        }
+        for (const call of choice?.delta?.tool_calls ?? []) {
+          const event: StreamEvent = { type: 'tool_call', index: call.index ?? 0 };
+          if (call.id) {
+            event.id = call.id;
+          }
+          if (call.function?.name) {
+            event.name = call.function.name;
+          }
+          if (call.function?.arguments) {
+            event.argumentsDelta = call.function.arguments;
+          }
+          yield event;
+        }
+        if (choice?.finish_reason) {
+          yield { type: 'finish', finishReason: choice.finish_reason };
+        }
+        if (chunk.usage) {
+          yield { type: 'usage', usage: chunk.usage };
+        }
+      }
     }
-    buffer += decoder.decode(value, { stream: true });
-    let newline = buffer.indexOf('\n');
-    while (newline !== -1) {
-      const chunk = parseSseLine(buffer.slice(0, newline).trim());
-      buffer = buffer.slice(newline + 1);
-      newline = buffer.indexOf('\n');
-      if (chunk === null) {
-        continue;
-      }
-      if (chunk.error?.message) {
-        yield { type: 'error', message: chunk.error.message };
-        continue;
-      }
-      if (!sentId && chunk.id) {
-        sentId = true;
-        yield { type: 'id', id: chunk.id };
-      }
-      if (!sentModel && chunk.model) {
-        sentModel = true;
-        yield { type: 'model', model: chunk.model };
-      }
-      const choice = chunk.choices?.[0];
-      const content = choice?.delta?.content;
-      if (typeof content === 'string' && content.length > 0) {
-        yield { type: 'delta', text: content };
-      }
-      for (const call of choice?.delta?.tool_calls ?? []) {
-        const event: StreamEvent = { type: 'tool_call', index: call.index ?? 0 };
-        if (call.id) {
-          event.id = call.id;
-        }
-        if (call.function?.name) {
-          event.name = call.function.name;
-        }
-        if (call.function?.arguments) {
-          event.argumentsDelta = call.function.arguments;
-        }
-        yield event;
-      }
-      if (choice?.finish_reason) {
-        yield { type: 'finish', finishReason: choice.finish_reason };
-      }
-      if (chunk.usage) {
-        yield { type: 'usage', usage: chunk.usage };
-      }
-    }
+  } finally {
+    options.signal?.removeEventListener('abort', onAbort);
+    void reader.cancel().catch(() => undefined);
+    reader.releaseLock();
   }
 }
 

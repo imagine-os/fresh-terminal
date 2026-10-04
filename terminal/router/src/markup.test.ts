@@ -39,6 +39,11 @@ describe('markup (C-103)', () => {
     const options: MeterOptions = {
       bindings: () => bindings,
       resources: () => ({ DB: db }),
+      // A billing unit test must not contact Clerk with its synthetic key.
+      fetchImpl: async (input) => {
+        expect(String(input)).toBe('https://api.clerk.com/v1/users/user_m');
+        return new Response(JSON.stringify({ primary_email_address_id: 'email_m', email_addresses: [{ id: 'email_m', email_address: 'markup-test@example.com', verification: { status: 'verified' } }] }), { status: 200 });
+      },
       authorizedParties: () => ['https://freshterminal.ai'],
       verifier: async (token) => ({ sub: token.replace('good-', '') }),
       now: () => (clock += 1000),

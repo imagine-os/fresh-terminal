@@ -8,6 +8,8 @@ Everything about Fresh Terminal is written down in this folder, for people and f
 
 **The rule** (Justin, 2026-09-29 02:11 UTC, [message](https://aluzinaworkspace.slack.com/archives/C0C2YAS5TL5/p1790647881668439?thread_ts=1790634517.611669&cid=C0C2YAS5TL5)): every pass updates this wiki and the Canon in the same commit. Numbered files (`prompts/`, `decisions/`, `changelog/`) are append-only: add the next number, never rewrite an old one. The Canon summarizes across them; superseded lines there are kept and marked, never deleted.
 
+- 2026-10-04: [Prompt recovery and no-cost demo](changelog/0021.md), with isolated responsive browser regression coverage.
+
 ## 1. Canon: what is true now, and how it got there
 
 Read this first.

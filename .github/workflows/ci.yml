@@ -45,3 +45,24 @@ jobs:
             /tmp/sales-shots-*/
           if-no-files-found: ignore
 
+
+  prompt-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C terminal exec playwright install --with-deps chromium
+      - run: pnpm -C terminal build:app
+      - run: node scripts/check-prompt-demo.mjs
+        working-directory: terminal
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-demo-evidence
+          path: /tmp/freshterminal-prompt-demo/
+          if-no-files-found: ignore

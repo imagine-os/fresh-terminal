@@ -4129,3 +4129,17 @@ textarea.field-input {
 .demo-head p { font-size: var(--type-whisper); max-width: 80ch; }
 .demo-head h1 { font-size: 1.25rem; }
 @media (max-width: 40rem) { .demo-head p:not(.demo-meta) { display: none; } }
+
+/* 2026-10-04: quiet local demo, run feedback and touch-safe stop/recovery. */
+.demo-start, .demo-choices, .composer-feedback { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.demo-start { margin-bottom: .75rem; }
+.demo-choices { flex-basis: 100%; }
+.composer-feedback { justify-content: space-between; margin-top: .5rem; font-size: .8rem; color: var(--fg-muted); min-height: 1.5rem; }
+.composer-feedback[data-state='error'] { color: var(--danger); }
+.composer-feedback .suggestion, .demo-start .suggestion { min-height: 44px; white-space: normal; text-align: left; max-width: 100%; }
+.composer-feedback span { overflow-wrap: anywhere; }
+
+/* The mirror must occupy exactly the textarea's glyph widths. Interactive chips live below it. */
+.composer-mirror .chip { display: inline; font: inherit; padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; letter-spacing: inherit; }
+.composer-mirror .chip-icon, .composer-mirror .chip-q, .composer-mirror .chip::before, .composer-mirror .chip::after { display: none; }
+.composer-mirror .chip { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: .18em; }

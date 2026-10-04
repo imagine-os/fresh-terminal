@@ -14,6 +14,10 @@ import { ChipTray } from './ChipTray';
 import { DraftPage } from './DraftPage';
 import { wantsPage } from './format';
 import { SuggestionStrip } from './SuggestionStrip';
+import { readJson, writeJson } from '../lib/storage';
+
+export type RunState = 'idle' | 'running' | 'complete' | 'error' | 'stopped';
+export const LOCAL_DEMOS = ['Make a page called Launch notes', 'Switch theme to Blank Page', 'Show today'];
 
 interface Props {
   boxId: string;
@@ -29,7 +33,9 @@ interface Props {
   hasBoxes: boolean;
   hasLines: boolean;
   busy: boolean;
-  onSend: (text: string, chips: Chip[]) => void;
+  onSend: (text: string, chips: Chip[]) => boolean | void;
+  runState?: RunState;
+  onRestore?: () => void;
   /** Esc while a turn runs stops it (C-079). */
   onCancel?: () => void;
   /** Enter while a turn runs: say so instead of swallowing the key. */
@@ -76,9 +82,24 @@ export function Composer({
   showStarters = false,
   onCancel,
   onBusyEnter,
+  runState = 'idle',
+  onRestore,
 }: Props) {
   const { t } = useI18n();
-  const [text, setText] = useState('');
+  const draftKey = `fresh-terminal.draft.${boxId}`;
+  const [text, updateText] = useState(() => {
+    const saved = readJson<unknown>(draftKey, '');
+    return typeof saved === 'string' ? saved : '';
+  });
+  const setText = useCallback((next: string | ((current: string) => string)) => {
+    updateText((current) => {
+      const value = typeof next === 'function' ? next(current) : next;
+      writeJson(draftKey, value);
+      return value;
+    });
+  }, [draftKey]);
+  const [demoOpen, setDemoOpen] = useState(false);
+  const localDemo = LOCAL_DEMOS.includes(text.trim());
   const [focused, setFocused] = useState(false);
   // The themed block cursor is drawn only while the caret sits at the end of the text;
   // anywhere else the browser's own caret shows, so moving backwards is visible.
@@ -104,12 +125,12 @@ export function Composer({
 
   // Remote chips are only used for the exact text they were computed for.
   const chips = useMemo<Chip[]>(() => {
-    const base = modelTagger && remote && remote.text === text ? remote.chips : localChips;
+    const base = modelTagger && !localDemo && remote && remote.text === text ? remote.chips : localChips;
     return applyOverrides(applyGlossary(text, base, glossary), overrides);
-  }, [modelTagger, remote, text, localChips, glossary, overrides]);
+  }, [modelTagger, localDemo, remote, text, localChips, glossary, overrides]);
 
   useEffect(() => {
-    if (!modelTagger || text.trim().length < 4) {
+    if (!modelTagger || localDemo || text.trim().length < 4) {
       setRemote(null);
       return;
     }
@@ -129,21 +150,21 @@ export function Composer({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [text, modelTagger, localChips, glossary, boxId]);
+  }, [text, modelTagger, localDemo, localChips, glossary, boxId]);
 
   // "next" chips in replies insert a command into the draft.
   useEffect(() => {
     const onInsert = (event: Event) => {
       const detail = (event as CustomEvent<{ text: string }>).detail;
       if (detail?.text) {
-        setText(detail.text);
+        setText((current) => current === detail.text || current.endsWith(`\n${detail.text}`) ? current : current.trim() ? `${current.trimEnd()}\n${detail.text}` : detail.text);
         setOverrides({});
         textareaRef.current?.focus();
       }
     };
     window.addEventListener('ft:composer-insert', onInsert);
     return () => window.removeEventListener('ft:composer-insert', onInsert);
-  }, []);
+  }, [setText]);
 
   const decide = (chip: Chip, decision: ChipDecision) => {
     setOverrides((current) => ({ ...current, [overrideKey(chip)]: decision.override }));
@@ -167,7 +188,6 @@ export function Composer({
   }, [text, resize]);
 
   useEffect(() => {
-    setText('');
     textareaRef.current?.focus();
   }, [boxId]);
 
@@ -182,12 +202,14 @@ export function Composer({
     const sent = chips
       .map((chip) => ({ ...chip, start: chip.start - offset, end: chip.end - offset }))
       .filter((chip) => chip.start >= 0 && chip.end <= trimmed.length && trimmed.slice(chip.start, chip.end) === chip.text);
-    onSend(trimmed, sent);
+    if (onSend(trimmed, sent) === false) return;
+    // Persist the empty draft immediately: the portal moves on the first run.
+    writeJson(draftKey, '');
     setText('');
     setOverrides({});
     setRemote(null);
     textareaRef.current?.focus();
-  }, [text, busy, onSend, chips]);
+  }, [text, busy, onSend, chips, draftKey, setText]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -206,7 +228,7 @@ export function Composer({
     }
   };
 
-  const showSuggestions = showStarters && focused && text.trim().length === 0;
+  const showSuggestions = showStarters && text.trim().length === 0;
   // The blank in "____ turns voice on and off" is the real key on this machine (C-085).
   const voiceKey = `${/Mac|iPhone|iPad/.test(typeof navigator === 'undefined' ? '' : navigator.platform) ? 'Option' : 'Alt'}+V`;
   // Phones have no Alt, Shift+Enter or hover: the placeholder says only what is true there.
@@ -215,6 +237,10 @@ export function Composer({
 
   return (
     <div className="composer" data-testid="composer">
+      {!hasLines && !text.trim() ? <div className="demo-start">
+        <button type="button" className="suggestion" aria-expanded={demoOpen} onClick={() => setDemoOpen(!demoOpen)}>{t('composer.demo')}</button>
+        {demoOpen ? <div className="demo-choices" aria-label={t('composer.demoPrompts')}>{LOCAL_DEMOS.map((prompt) => <button type="button" className="suggestion" key={prompt} onClick={() => { setText(prompt); textareaRef.current?.focus(); }}>{prompt}</button>)}</div> : null}
+      </div> : null}
       {wantsPage(text) ? (
         <DraftPage
           text={text}
@@ -337,6 +363,11 @@ export function Composer({
             </Button>
           </Tooltip>
         </div>
+      </div>
+      <div className="composer-feedback" data-state={busy ? 'running' : runState}>
+        <span role="status" aria-live="polite">{busy ? t('composer.running') : text.trim() ? localDemo ? t('composer.localReady') : t('composer.draftReady') : runState === 'complete' ? t('composer.complete') : runState === 'error' ? t('composer.failed') : runState === 'stopped' ? t('composer.stopped') : t('composer.idle')}</span>
+        {busy && onCancel ? <button type="button" className="suggestion" onClick={onCancel}>{t('composer.stop')}</button> : null}
+        {!busy && (runState === 'error' || runState === 'stopped') && onRestore ? <button type="button" className="suggestion" onClick={onRestore}>{t('composer.restore')}</button> : null}
       </div>
       <ChipTray chips={chips} onOpen={(chip, anchor) => setEditing({ chip, anchor })} />
       {editing ? (

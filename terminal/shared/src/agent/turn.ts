@@ -18,6 +18,7 @@ export interface TurnOptions {
   referer?: string;
   title?: string;
   onDelta?: (text: string) => void;
+  signal?: AbortSignal;
 }
 
 export interface RoundInfo {
@@ -59,6 +60,7 @@ async function runRound(options: TurnOptions, model: string, messages: ChatMessa
   // models (Bedrock: 'tool_choice: type "tool" and "any" are not supported');
   // then the same request goes again with "auto" and the prompt does the work.
   for (const toolChoice of ['required', 'auto'] as const) {
+    options.signal?.throwIfAborted();
     const streamOptions: Parameters<typeof streamChat>[0] = {
       apiKey: options.apiKey,
       model,
@@ -67,6 +69,7 @@ async function runRound(options: TurnOptions, model: string, messages: ChatMessa
       toolChoice,
     };
     if (options.fetchImpl) streamOptions.fetchImpl = options.fetchImpl;
+    if (options.signal) streamOptions.signal = options.signal;
     if (options.referer) streamOptions.referer = options.referer;
     if (options.title) streamOptions.title = options.title;
     error = null;
@@ -91,6 +94,7 @@ async function runRound(options: TurnOptions, model: string, messages: ChatMessa
         error = event.message ?? 'model error';
       }
     }
+    options.signal?.throwIfAborted();
     const refusedChoice = error !== null && /tool_choice/i.test(error) && calls.size === 0 && text === '';
     if (!refusedChoice) break;
   }
@@ -153,7 +157,9 @@ export async function runTurn(options: TurnOptions): Promise<TurnResult> {
 
   for (let round = 1; round <= 2; round += 1) {
     const model = round === 1 ? firstModel : options.escalateModel ?? options.model;
+    options.signal?.throwIfAborted();
     const result = await runRound(options, model, messages);
+    options.signal?.throwIfAborted();
     text += result.text;
     if (result.error && result.calls.length === 0) {
       rounds.push({ round, model, servedModel: result.servedModel, toolCalls: 0, rejected: [], usage: result.usage, generationId: result.generationId });

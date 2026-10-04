@@ -2,7 +2,8 @@ import { ROUTER_URL } from './routerClient';
 
 /**
  * Is a router deployed for this site? Probed once per page load with a 3 s
- * timeout and cached; the composer consults it before any POST so a static
+ * timeout; successful probes are cached, while failed probes can recover on the
+ * next attempt. The composer consults it before any POST so a static
  * host (GitHub Pages) never answers with "HTTP 405".
  */
 export type RouterHealth =
@@ -21,10 +22,14 @@ export function routerConfigured(url: string = ROUTER_URL, isDev: boolean = impo
 
 let cached: RouterHealth = { state: 'unknown' };
 let inflight: Promise<RouterHealth> | null = null;
+let inflightUrl: string | null = null;
+let generation = 0;
 
 export function resetRouterHealthCache(): void {
   cached = { state: 'unknown' };
   inflight = null;
+  inflightUrl = null;
+  generation += 1;
 }
 
 export function cachedRouterHealth(): RouterHealth {
@@ -37,17 +42,19 @@ export async function probeRouter(options: {
   timeoutMs?: number;
   isDev?: boolean;
 } = {}): Promise<RouterHealth> {
-  if (cached.state !== 'unknown') {
+  const url = options.url ?? ROUTER_URL;
+  if (cached.state === 'ok' && cached.url === url) {
     return cached;
   }
-  if (inflight) {
+  if (inflight && inflightUrl === url) {
     return inflight;
   }
-  const url = options.url ?? ROUTER_URL;
   const fetchImpl = options.fetchImpl ?? fetch;
   const isDev = options.isDev ?? import.meta.env.DEV;
 
-  inflight = (async (): Promise<RouterHealth> => {
+  const probeGeneration = ++generation;
+  inflightUrl = url;
+  const pending = (async (): Promise<RouterHealth> => {
     if (!routerConfigured(url, isDev)) {
       return { state: 'unreachable', reason: 'not-configured', url };
     }
@@ -71,7 +78,13 @@ export async function probeRouter(options: {
     }
   })();
 
-  cached = await inflight;
-  inflight = null;
-  return cached;
+  inflight = pending;
+  const result = await pending;
+  // A reset or a newer URL must not be overwritten by an older request.
+  if (probeGeneration === generation) {
+    cached = result;
+    inflight = null;
+    inflightUrl = null;
+  }
+  return result;
 }
