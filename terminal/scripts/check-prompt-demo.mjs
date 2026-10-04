@@ -38,8 +38,8 @@ try {
     const input=page.locator('[data-testid="composer"] textarea');
     await input.waitFor();
     await page.getByRole('button',{name:'Try a no-cost demo',exact:true}).click();
-    await page.getByRole('button',{name:'Make a page called Launch notes',exact:true}).click();
-    assert.equal(await input.inputValue(),'Make a page called Launch notes');
+    await page.getByRole('button',{name:'Make a page called "Launch notes"',exact:true}).click();
+    assert.equal(await input.inputValue(),'Make a page called "Launch notes"');
     await page.locator('[data-testid="chip-tray"]').waitFor();
     await page.screenshot({path:`${out}/draft-${width}.png`,fullPage:true});
     await page.getByRole('button',{name:'Send',exact:true}).click();
@@ -62,6 +62,8 @@ try {
     assert.equal(await input.inputValue(),'A newer draft\nExplain this example');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
     assert.equal(overflow,false,`overflow at ${width}`);
+    const clippedHeader=await page.locator('.region-top button, .region-top a').evaluateAll(els=>els.filter(el=>{const r=el.getBoundingClientRect();return r.width>0 && r.height>0 && (r.x<0 || r.right>innerWidth+1)}).map(el=>el.textContent));
+    assert.deepEqual(clippedHeader,[],`header controls clipped at ${width}`);
     const composer=await page.locator('[data-testid="composer"]').boundingBox();
     assert(composer && composer.x>=0 && composer.x+composer.width<=width+1,`composer width at ${width}`);
     await page.screenshot({path:`${out}/recovery-${width}.png`,fullPage:true});

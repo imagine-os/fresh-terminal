@@ -143,3 +143,5 @@ Source: Justin's private assistant conversation on 2026-10-04 (no public Slack p
 - This entry records the implementation. Release evidence is the corresponding checked PR, deploy workflow and live browser verification; paid AI and account sign-in are separately scoped checks.
 
 - 2026-10-04 cancellation review: completed streamed edits retain their Undo receipt when a later part of the turn stops; stop feedback explicitly allows for those completed edits.
+
+- 2026-10-04 phone review: compact branding keeps the sign-in/account controls inside narrow screens; the local page sample shows action and quoted-object chips.

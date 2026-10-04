@@ -17,7 +17,7 @@ import { SuggestionStrip } from './SuggestionStrip';
 import { readJson, writeJson } from '../lib/storage';
 
 export type RunState = 'idle' | 'running' | 'complete' | 'error' | 'stopped';
-export const LOCAL_DEMOS = ['Make a page called Launch notes', 'Switch theme to Blank Page', 'Show today'];
+export const LOCAL_DEMOS = ['Make a page called "Launch notes"', 'Switch theme to Blank Page', 'Show today'];
 
 interface Props {
   boxId: string;

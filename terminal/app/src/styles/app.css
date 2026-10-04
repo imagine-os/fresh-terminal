@@ -4143,3 +4143,9 @@ textarea.field-input {
 .composer-mirror .chip { display: inline; font: inherit; padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; letter-spacing: inherit; }
 .composer-mirror .chip-icon, .composer-mirror .chip-q, .composer-mirror .chip::before, .composer-mirror .chip::after { display: none; }
 .composer-mirror .chip { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: .18em; }
+
+@media (max-width: 28rem) {
+  .region-top .brand { font-size: .85rem; line-height: 1.15; white-space: normal; gap: .4rem; }
+  .region-top .brand > span:last-child { max-width: 4rem; }
+  .region-top .topbar-group { flex-shrink: 0; }
+}
