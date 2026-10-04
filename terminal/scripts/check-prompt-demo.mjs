@@ -41,15 +41,19 @@ try {
     await page.getByRole('button',{name:'Make a page called "Launch notes"',exact:true}).click();
     assert.equal(await input.inputValue(),'Make a page called "Launch notes"');
     await page.locator('[data-testid="chip-tray"]').waitFor();
+    // An edited quoted title must stay no-cost even after the background-tag delay.
+    await input.fill('Make a page called "Material roadmap"');
+    await page.waitForTimeout(1600);
+    assert.equal(paidCalls,0,'edited local demo must not request paid tagging');
     await page.screenshot({path:`${out}/draft-${width}.png`,fullPage:true});
     await page.getByRole('button',{name:'Send',exact:true}).click();
-    await page.getByRole('heading',{name:'Launch notes',exact:true}).waitFor();
+    await page.getByRole('heading',{name:'Material roadmap',exact:true}).waitFor();
     await input.fill('Show today');await input.press('Enter');
     await page.getByText('Complete · ready for your next prompt',{exact:true}).waitFor();
     const undo=page.getByRole('button',{name:'Undo',exact:true}).first();
     await undo.waitFor();await undo.click();
     // Undo removes the local page; recovery never touches external data.
-    assert.equal(await page.locator('[data-testid="nav-launch-notes"]').count(),0);
+    assert.equal(await page.locator('[data-testid="nav-material-roadmap"]').count(),0);
     await input.fill('My next draft');await page.reload();
     await input.waitFor();assert.equal(await input.inputValue(),'My next draft');
     assert.equal(paidCalls,0,'local demo must not consume model credits');

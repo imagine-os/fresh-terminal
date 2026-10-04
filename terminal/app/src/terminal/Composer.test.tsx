@@ -46,6 +46,14 @@ describe('recoverable prompt demo', () => {
     expect(host.querySelector('textarea')?.value).toBe('');
     expect(JSON.parse(localStorage.getItem('fresh-terminal.draft.a')!)).toBe('');
   });
+  it.each(['Make a page called "Roadmap"', 'make a stage named "Material study"', 'Show today!', 'switch theme to Blank Page.', 'Make a page called ', 'Make a page called "'])('never pays to tag edited local draft %s', async (text) => {
+    vi.useFakeTimers(); draw(); click('Try a no-cost demo'); click(LOCAL_DEMOS[0]!);
+    type(text);
+    await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+    expect(tagRemote).not.toHaveBeenCalled();
+    expect(sent).not.toHaveBeenCalled();
+    expect(host.querySelector('textarea')?.value).toBe(text);
+  });
   it('keeps starter choices reachable after textarea blur', () => {
     draw({showStarters:true}); const first=host.querySelector<HTMLButtonElement>('.suggestions button')!;
     act(() => first.focus()); expect(document.activeElement).toBe(first);

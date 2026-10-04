@@ -145,3 +145,5 @@ Source: Justin's private assistant conversation on 2026-10-04 (no public Slack p
 - 2026-10-04 cancellation review: completed streamed edits retain their Undo receipt when a later part of the turn stops; stop feedback explicitly allows for those completed edits.
 
 - 2026-10-04 phone review: compact branding keeps the sign-in/account controls inside narrow screens; the local page sample shows action and quoted-object chips.
+
+- 2026-10-04 supersedes exact-sample-only local classification: [changelog 0022](../changelog/0022.md) uses the real local parser and protects incomplete title edits. Explicit local commands take precedence over skin keywords in titles.

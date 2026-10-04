@@ -15,6 +15,7 @@ import { DraftPage } from './DraftPage';
 import { wantsPage } from './format';
 import { SuggestionStrip } from './SuggestionStrip';
 import { readJson, writeJson } from '../lib/storage';
+import { matchLocalCommand } from './localCommands';
 
 export type RunState = 'idle' | 'running' | 'complete' | 'error' | 'stopped';
 export const LOCAL_DEMOS = ['Make a page called "Launch notes"', 'Switch theme to Blank Page', 'Show today'];
@@ -99,7 +100,10 @@ export function Composer({
     });
   }, [draftKey]);
   const [demoOpen, setDemoOpen] = useState(false);
-  const localDemo = LOCAL_DEMOS.includes(text.trim());
+  // The same parser as execution: edited names, casing and punctuation remain local.
+  const localDemo = matchLocalCommand(text, [], { boxes: [], lang: 'en', dialectText: '', actionIntents: [] }) !== null;
+  // Pausing with an empty/incomplete local title must not turn typing into a paid call.
+  const localDraft = localDemo || /^\s*make\s+(?:a\s+)?(?:page|box|stage)(?:\s+(?:called|named)(?:\s+.*)?)?\s*$/i.test(text);
   const [focused, setFocused] = useState(false);
   // The themed block cursor is drawn only while the caret sits at the end of the text;
   // anywhere else the browser's own caret shows, so moving backwards is visible.
@@ -130,7 +134,7 @@ export function Composer({
   }, [modelTagger, localDemo, remote, text, localChips, glossary, overrides]);
 
   useEffect(() => {
-    if (!modelTagger || localDemo || text.trim().length < 4) {
+    if (!modelTagger || localDraft || text.trim().length < 4) {
       setRemote(null);
       return;
     }
@@ -150,7 +154,7 @@ export function Composer({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [text, modelTagger, localDemo, localChips, glossary, boxId]);
+  }, [text, modelTagger, localDraft, localChips, glossary, boxId]);
 
   // "next" chips in replies insert a command into the draft.
   useEffect(() => {
