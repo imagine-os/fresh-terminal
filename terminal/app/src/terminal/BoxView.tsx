@@ -279,14 +279,6 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
       }
       store.appendLine(box.id, 'user', text, chips);
 
-      // Skins and materials run the refine loop (pass 5).
-      if (looksLikeSkinRequest(text)) {
-        const line = store.appendLine(box.id, 'assistant', text, []);
-        setRunState('idle'); // Refinement has its own progress and Stop control.
-        void startSkinRun({ boxId: box.id, text, lineId: line.id });
-        return;
-      }
-
       const localStarted = performance.now();
       const local = matchLocalCommand(text, chips, {
         boxes: snapshot.boxes,
@@ -387,6 +379,15 @@ export function BoxView({ box, theme, landing, showNewBoxDoodle, onOpenBox, comm
             return;
           }
         }
+      }
+
+      // Explicit local commands win over material words inside their titles.
+      // Skins and materials run the refine loop (pass 5).
+      if (looksLikeSkinRequest(text)) {
+        const line = store.appendLine(box.id, 'assistant', text, []);
+        setRunState('idle'); // Refinement has its own progress and Stop control.
+        void startSkinRun({ boxId: box.id, text, lineId: line.id });
+        return;
       }
 
       let replyLineId: string | null = null;

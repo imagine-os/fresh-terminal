@@ -10,6 +10,8 @@ Everything about Fresh Terminal is written down in this folder, for people and f
 
 - 2026-10-04: [Prompt recovery and no-cost demo](changelog/0021.md), with isolated responsive browser regression coverage.
 
+- 2026-10-04: [Edited local demos remain free](changelog/0022.md), including paused title edits and skin-keyword titles.
+
 ## 1. Canon: what is true now, and how it got there
 
 Read this first.
